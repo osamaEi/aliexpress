@@ -587,8 +587,35 @@ class AliExpressService
             'first_100_chars' => substr(json_encode($result), 0, 100)
         ]);
 
-        // Check for wrapped response format (this comes first based on debug output)
-        if (isset($result['aliexpress_ds_text_search_response'])) {
+        // Check for direct response format (simplified=true)
+        if (isset($result['code']) && isset($result['data'])) {
+            $debugData['code'] = $result['code'];
+            $debugData['request_id'] = $result['request_id'] ?? null;
+
+            $data = $result['data'];
+            $debugData['total_count'] = $data['totalCount'] ?? 0;
+            $debugData['page_index'] = $data['pageIndex'] ?? 0;
+            $debugData['page_size'] = $data['pageSize'] ?? 0;
+
+            // Products can be direct array or in selection_search_product
+            if (isset($data['products']['selection_search_product']) && is_array($data['products']['selection_search_product'])) {
+                $products = $data['products']['selection_search_product'];
+                $debugData['products_location'] = 'selection_search_product';
+                Log::debug('Found products in selection_search_product', ['count' => count($products)]);
+            } elseif (isset($data['products']) && is_array($data['products']) && !empty($data['products'])) {
+                $products = $data['products'];
+                $debugData['products_location'] = 'direct_products_array';
+                Log::debug('Found products as direct array', ['count' => count($products)]);
+            } else {
+                Log::warning('Products array is empty or not found', [
+                    'has_products' => isset($data['products']),
+                    'products_type' => isset($data['products']) ? gettype($data['products']) : 'not set',
+                    'products_value' => $data['products'] ?? null
+                ]);
+            }
+        }
+        // Check for wrapped response format
+        elseif (isset($result['aliexpress_ds_text_search_response'])) {
             $response = $result['aliexpress_ds_text_search_response'];
 
             $debugData['code'] = $response['code'] ?? null;
@@ -611,11 +638,6 @@ class AliExpressService
                     $products = $data['products'];
                     $debugData['products_location'] = 'direct_products';
                     Log::debug('Found products directly', ['count' => count($products)]);
-                } else {
-                    Log::warning('No products found in expected locations', [
-                        'has_products_key' => isset($data['products']),
-                        'products_type' => isset($data['products']) ? gettype($data['products']) : 'not set'
-                    ]);
                 }
             }
         } elseif (isset($result['error_response'])) {
