@@ -25,6 +25,18 @@
                         >
                     </div>
                     <div class="col-md-2">
+                        <label for="locale" class="form-label">Language</label>
+                        <select name="locale" id="locale" class="form-select">
+                            <option value="en_US" selected>🇬🇧 English</option>
+                            <option value="ar_MA">🇦🇪 العربية</option>
+                            <option value="es_ES">🇪🇸 Español</option>
+                            <option value="fr_FR">🇫🇷 Français</option>
+                            <option value="ru_RU">🇷🇺 Русский</option>
+                            <option value="pt_BR">🇧🇷 Português</option>
+                            <option value="de_DE">🇩🇪 Deutsch</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <label for="country" class="form-label">Country</label>
                         <select name="country" id="country" class="form-select">
                             <option value="AE" selected>UAE</option>
@@ -273,6 +285,29 @@
             document.getElementById('keyword').value = this.dataset.keyword;
             document.getElementById('searchForm').submit();
         });
+    });
+
+    // Auto-change country and currency based on language selection
+    document.getElementById('locale').addEventListener('change', function() {
+        const locale = this.value;
+        const countrySelect = document.getElementById('country');
+        const currencySelect = document.getElementById('currency');
+
+        // Map locales to country and currency
+        const localeMap = {
+            'en_US': { country: 'US', currency: 'USD' },
+            'ar_MA': { country: 'AE', currency: 'AED' },
+            'es_ES': { country: 'ES', currency: 'EUR' },
+            'fr_FR': { country: 'FR', currency: 'EUR' },
+            'ru_RU': { country: 'RU', currency: 'USD' },
+            'pt_BR': { country: 'BR', currency: 'USD' },
+            'de_DE': { country: 'DE', currency: 'EUR' },
+        };
+
+        if (localeMap[locale]) {
+            countrySelect.value = localeMap[locale].country;
+            currencySelect.value = localeMap[locale].currency;
+        }
     });
 
     // Import product function
