@@ -65,7 +65,7 @@ class AliexpressTextService
             'local' => $options['locale'] ?? 'en_US',  // Note: API uses 'local' not 'locale'
             'method' => 'aliexpress.ds.text.search',
             'pageIndex' => $options['page'] ?? 1,
-            'pageSize' => $options['limit'] ?? 50,
+            'pageSize' => $options['limit'] ?? 5,
             'session' => $this->accessToken,
             'sign_method' => 'sha256',
             'timestamp' => (string)$timestamp,

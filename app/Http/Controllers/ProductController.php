@@ -436,7 +436,7 @@ class ProductController extends Controller
                 $request->keyword,
                 [
                     'page' => $request->get('page', 1),
-                    'limit' => $request->get('per_page', 50),
+                    'limit' => $request->get('per_page', 5),
                     'category_id' => $request->get('category_id'),
                     'sort_by' => $request->get('sort_by'),
                     'country' => $request->get('country', 'AE'),
