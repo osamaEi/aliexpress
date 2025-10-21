@@ -80,8 +80,10 @@
                         <div class="col-auto">
                             <label class="text-muted small">Results per page:</label>
                             <select name="per_page" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
                                 <option value="20">20</option>
-                                <option value="50" selected>50</option>
+                                <option value="50">50</option>
                             </select>
                         </div>
                     </div>
