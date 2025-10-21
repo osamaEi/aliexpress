@@ -148,11 +148,19 @@
                                     <!-- Price -->
                                     <div class="mb-2">
                                         <h5 class="text-primary mb-0">
-                                            AED {{ number_format($product['sale_price'], 2) }}
+                                            @if($product['sale_price_format'])
+                                                {{ $product['sale_price_format'] }}
+                                            @else
+                                                AED {{ number_format((float)$product['sale_price'], 2) }}
+                                            @endif
                                         </h5>
                                         @if($product['original_price'] > $product['sale_price'])
                                             <small class="text-muted text-decoration-line-through">
-                                                AED {{ number_format($product['original_price'], 2) }}
+                                                @if($product['original_price_format'])
+                                                    {{ $product['original_price_format'] }}
+                                                @else
+                                                    AED {{ number_format((float)$product['original_price'], 2) }}
+                                                @endif
                                             </small>
                                         @endif
                                     </div>
@@ -166,7 +174,7 @@
                                         @endif
                                         @if($product['orders'])
                                             <small class="text-muted">
-                                                <i class="ri-shopping-cart-line"></i> {{ number_format($product['orders']) }} orders
+                                                <i class="ri-shopping-cart-line"></i> {{ $product['orders'] }} orders
                                             </small>
                                         @endif
                                     </div>
