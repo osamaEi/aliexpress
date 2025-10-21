@@ -116,7 +116,8 @@ class AliExpressService
             'format' => 'json',
             'sign_method' => 'sha256',
             'partner_id' => 'laravel-sdk-1.0',
-            'simplify' => 'true',
+            // Remove simplify to get full response structure
+            // 'simplify' => 'true',
         ], $additionalParams);
 
         // Add session (access token) BEFORE signature if required
@@ -131,7 +132,9 @@ class AliExpressService
         Log::debug('AliExpress API Request', [
             'method' => $method,
             'params_count' => count($params),
-            'has_session' => isset($params['session'])
+            'has_session' => isset($params['session']),
+            'pageSize' => $params['pageSize'] ?? 'not set',
+            'all_params' => $params
         ]);
 
         try {
