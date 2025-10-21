@@ -579,7 +579,24 @@ class AliExpressService
             'http_code' => 200
         ];
 
-        if (isset($result['aliexpress_ds_text_search_response'])) {
+        // Check if response has the simplified format (code, data, request_id)
+        if (isset($result['code']) && isset($result['data'])) {
+            $debugData['code'] = $result['code'];
+            $debugData['request_id'] = $result['request_id'] ?? null;
+
+            $data = $result['data'];
+            $debugData['total_count'] = $data['totalCount'] ?? 0;
+            $debugData['page_index'] = $data['pageIndex'] ?? 0;
+            $debugData['page_size'] = $data['pageSize'] ?? 0;
+
+            // Products can be in different locations
+            if (isset($data['products']) && is_array($data['products']) && !empty($data['products'])) {
+                $products = $data['products'];
+                $debugData['products_location'] = 'direct_products_array';
+            }
+        }
+        // Check for wrapped response format
+        elseif (isset($result['aliexpress_ds_text_search_response'])) {
             $response = $result['aliexpress_ds_text_search_response'];
 
             $debugData['code'] = $response['code'] ?? null;

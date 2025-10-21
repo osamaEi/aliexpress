@@ -68,11 +68,22 @@
 
                 <!-- Advanced Options -->
                 <div class="mt-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="debug" id="debug" value="1">
-                        <label class="form-check-label text-muted small" for="debug">
-                            Show Debug Information
-                        </label>
+                    <div class="row g-2">
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="debug" id="debug" value="1">
+                                <label class="form-check-label text-muted small" for="debug">
+                                    Show Debug Information
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <label class="text-muted small">Results per page:</label>
+                            <select name="per_page" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                <option value="20">20</option>
+                                <option value="50" selected>50</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -188,8 +199,24 @@
             @elseif(isset($keyword))
                 <div class="text-center py-5">
                     <i class="ri-search-line" style="font-size: 4rem; color: #ccc;"></i>
-                    <h5 class="mt-3 text-muted">No products found</h5>
-                    <p class="text-muted">Try a different search term or check Debug mode</p>
+                    <h5 class="mt-3 text-muted">No products found for "{{ $keyword }}"</h5>
+                    <p class="text-muted">Try these suggestions:</p>
+                    <ul class="list-unstyled text-muted">
+                        <li>Use different keywords (try: phone, laptop, dress, shoes)</li>
+                        <li>Use more general terms instead of specific brand names</li>
+                        <li>Try searching in English</li>
+                        <li>Enable Debug mode to see API response</li>
+                    </ul>
+                    <div class="mt-4">
+                        <p class="text-muted small">Popular searches that usually work:</p>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <a href="?keyword=phone" class="btn btn-sm btn-outline-primary">phone</a>
+                            <a href="?keyword=laptop" class="btn btn-sm btn-outline-primary">laptop</a>
+                            <a href="?keyword=dress" class="btn btn-sm btn-outline-primary">dress</a>
+                            <a href="?keyword=shoes" class="btn btn-sm btn-outline-primary">shoes</a>
+                            <a href="?keyword=bag" class="btn btn-sm btn-outline-primary">bag</a>
+                        </div>
+                    </div>
                 </div>
             @else
                 <div class="text-center py-5">
