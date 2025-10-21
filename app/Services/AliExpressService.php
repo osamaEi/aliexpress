@@ -576,27 +576,19 @@ class AliExpressService
         $debugData = [
             'method' => 'aliexpress.ds.text.search',
             'keyword' => $keyword,
-            'http_code' => 200
+            'http_code' => 200,
+            'result_keys' => array_keys($result ?? [])
         ];
 
-        // Check if response has the simplified format (code, data, request_id)
-        if (isset($result['code']) && isset($result['data'])) {
-            $debugData['code'] = $result['code'];
-            $debugData['request_id'] = $result['request_id'] ?? null;
+        // Log the full structure for debugging
+        Log::debug('Search API Result Structure', [
+            'has_wrapped_response' => isset($result['aliexpress_ds_text_search_response']),
+            'result_keys' => array_keys($result ?? []),
+            'first_100_chars' => substr(json_encode($result), 0, 100)
+        ]);
 
-            $data = $result['data'];
-            $debugData['total_count'] = $data['totalCount'] ?? 0;
-            $debugData['page_index'] = $data['pageIndex'] ?? 0;
-            $debugData['page_size'] = $data['pageSize'] ?? 0;
-
-            // Products can be in different locations
-            if (isset($data['products']) && is_array($data['products']) && !empty($data['products'])) {
-                $products = $data['products'];
-                $debugData['products_location'] = 'direct_products_array';
-            }
-        }
-        // Check for wrapped response format
-        elseif (isset($result['aliexpress_ds_text_search_response'])) {
+        // Check for wrapped response format (this comes first based on debug output)
+        if (isset($result['aliexpress_ds_text_search_response'])) {
             $response = $result['aliexpress_ds_text_search_response'];
 
             $debugData['code'] = $response['code'] ?? null;
@@ -608,18 +600,29 @@ class AliExpressService
                 $debugData['total_count'] = $data['totalCount'] ?? 0;
                 $debugData['page_index'] = $data['pageIndex'] ?? 0;
                 $debugData['page_size'] = $data['pageSize'] ?? 0;
+                $debugData['data_keys'] = array_keys($data);
 
                 // Products are in selection_search_product array
                 if (isset($data['products']['selection_search_product']) && is_array($data['products']['selection_search_product'])) {
                     $products = $data['products']['selection_search_product'];
                     $debugData['products_location'] = 'selection_search_product';
+                    Log::debug('Found products in selection_search_product', ['count' => count($products)]);
                 } elseif (isset($data['products']) && is_array($data['products'])) {
                     $products = $data['products'];
                     $debugData['products_location'] = 'direct_products';
+                    Log::debug('Found products directly', ['count' => count($products)]);
+                } else {
+                    Log::warning('No products found in expected locations', [
+                        'has_products_key' => isset($data['products']),
+                        'products_type' => isset($data['products']) ? gettype($data['products']) : 'not set'
+                    ]);
                 }
             }
         } elseif (isset($result['error_response'])) {
             $debugData['error'] = $result['error_response'];
+            Log::error('API returned error response', ['error' => $result['error_response']]);
+        } else {
+            Log::warning('Unexpected response format', ['result' => $result]);
         }
 
         $debugData['products_found'] = count($products);
