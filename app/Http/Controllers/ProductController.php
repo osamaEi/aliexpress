@@ -419,7 +419,11 @@ class ProductController extends Controller
      */
     public function searchPage()
     {
-        return view('products.search');
+        $categories = Category::where('aliexpress_category_id', '!=', null)
+            ->orderBy('order')
+            ->get();
+
+        return view('products.search', compact('categories'));
     }
 
     /**
@@ -436,7 +440,7 @@ class ProductController extends Controller
                 $request->keyword,
                 [
                     'page' => $request->get('page', 1),
-                    'limit' => $request->get('per_page', 5),
+                    'limit' => $request->get('per_page', 10),
                     'category_id' => $request->get('category_id'),
                     'sort_by' => $request->get('sort_by'),
                     'country' => $request->get('country', 'AE'),
@@ -456,10 +460,15 @@ class ProductController extends Controller
                 ]);
             }
 
+            $categories = Category::where('aliexpress_category_id', '!=', null)
+                ->orderBy('order')
+                ->get();
+
             return view('products.search', [
                 'products' => $result['products'],
                 'total_count' => $result['total_count'] ?? 0,
                 'keyword' => $request->keyword,
+                'categories' => $categories,
                 'debug' => $request->get('debug') ? $result : null,
             ]);
 

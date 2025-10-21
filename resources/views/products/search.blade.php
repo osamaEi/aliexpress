@@ -78,23 +78,71 @@
                     </div>
                 </div>
 
-                <!-- Advanced Options -->
-                <div class="mt-3">
-                    <div class="row g-2">
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="debug" id="debug" value="1">
-                                <label class="form-check-label text-muted small" for="debug">
-                                    Show Debug Information
-                                </label>
+                <!-- Categories -->
+                @if(isset($categories) && count($categories) > 0)
+                <div class="mt-4">
+                    <label class="form-label text-muted small">Categories:</label>
+                    <input type="hidden" name="category_id" id="category_id" value="{{ request('category_id') }}">
+                    <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto;">
+                        <!-- All Categories Option -->
+                        <div class="category-item text-center p-2 rounded border {{ !request('category_id') ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary' }}"
+                             style="cursor: pointer; transition: all 0.3s;"
+                             onclick="selectCategory(null, this)">
+                            <div class="category-icon mb-2" style="width: 48px; height: 48px; margin: 0 auto; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 8px;">
+                                <i class="ri-apps-line" style="font-size: 24px; color: #666;"></i>
                             </div>
+                            <div class="category-name small fw-semibold">All</div>
                         </div>
-                        <div class="col-auto">
-                            <label class="text-muted small">Results per page:</label>
-                            <select name="per_page" class="form-select form-select-sm" style="width: auto; display: inline-block;">
-                                <option value="5" selected>5</option>
-                                <option value="10">10</option>
+
+                        @foreach($categories as $category)
+                        <div class="category-item text-center p-2 rounded border {{ request('category_id') == $category->aliexpress_category_id ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary' }}"
+                             style="cursor: pointer; transition: all 0.3s;"
+                             onclick="selectCategory('{{ $category->aliexpress_category_id }}', this)"
+                             onmouseover="this.style.borderColor='#007bff'; this.style.backgroundColor='rgba(0,123,255,0.05)';"
+                             onmouseout="if(!this.classList.contains('border-primary')) { this.style.borderColor='#dee2e6'; this.style.backgroundColor='transparent'; }">
+                            <div class="category-icon mb-2">
+                                @if($category->image)
+                                    <img src="{{ $category->image }}" alt="{{ $category->name }}" style="width: 48px; height: 48px; object-fit: contain;">
+                                @else
+                                    <div style="width: 48px; height: 48px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-shopping-bag-line" style="font-size: 24px; color: #666;"></i>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="category-name small fw-semibold" style="line-height: 1.2; font-size: 11px;">{{ $category->name }}</div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                <!-- Filters -->
+                <div class="mt-3">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="sort_by" class="form-label small">Sort By</label>
+                            <select name="sort_by" id="sort_by" class="form-select form-select-sm">
+                                <option value="">Default</option>
+                                <option value="orders,desc">Most Orders</option>
+                                <option value="min_price,asc">Price: Low to High</option>
+                                <option value="min_price,desc">Price: High to Low</option>
+                                <option value="comments,desc">Most Reviews</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="min_price" class="form-label small">Min Price</label>
+                            <input type="number" name="min_price" id="min_price" class="form-control form-control-sm" placeholder="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="max_price" class="form-label small">Max Price</label>
+                            <input type="number" name="max_price" id="max_price" class="form-control form-control-sm" placeholder="1000">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Per Page</label>
+                            <select name="per_page" class="form-select form-select-sm">
+                                <option value="10" selected>10</option>
                                 <option value="20">20</option>
+                                <option value="30">30</option>
                                 <option value="50">50</option>
                             </select>
                         </div>
@@ -218,6 +266,48 @@
                         </div>
                     @endforeach
                 </div>
+
+                <!-- Pagination -->
+                @if(isset($total_count) && $total_count > 10)
+                    @php
+                        $currentPage = request('page', 1);
+                        $perPage = request('per_page', 10);
+                        $totalPages = ceil($total_count / $perPage);
+                    @endphp
+
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Product pagination">
+                            <ul class="pagination">
+                                {{-- Previous Button --}}
+                                <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
+                                    <a class="page-link" href="?{{ http_build_query(array_merge(request()->except('page'), ['page' => $currentPage - 1])) }}">
+                                        <i class="ri-arrow-left-s-line"></i> Previous
+                                    </a>
+                                </li>
+
+                                {{-- Page Numbers --}}
+                                @for($i = max(1, $currentPage - 2); $i <= min($totalPages, $currentPage + 2); $i++)
+                                    <li class="page-item {{ $i == $currentPage ? 'active' : '' }}">
+                                        <a class="page-link" href="?{{ http_build_query(array_merge(request()->except('page'), ['page' => $i])) }}">
+                                            {{ $i }}
+                                        </a>
+                                    </li>
+                                @endfor
+
+                                {{-- Next Button --}}
+                                <li class="page-item {{ $currentPage >= $totalPages ? 'disabled' : '' }}">
+                                    <a class="page-link" href="?{{ http_build_query(array_merge(request()->except('page'), ['page' => $currentPage + 1])) }}">
+                                        Next <i class="ri-arrow-right-s-line"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <div class="text-center text-muted small mb-4">
+                        Showing page {{ $currentPage }} of {{ $totalPages }} ({{ number_format($total_count) }} total products)
+                    </div>
+                @endif
             @elseif(isset($keyword))
                 <div class="text-center py-5">
                     <i class="ri-search-line" style="font-size: 4rem; color: #ccc;"></i>
@@ -246,31 +336,6 @@
                     <h5 class="mt-3">Welcome to AliExpress Product Search</h5>
                     <p class="text-muted">Search for any product using the search bar above or click on quick links</p>
                     <small class="text-muted">Powered by aliexpress.ds.text.search API</small>
-                </div>
-            @endif
-
-            <!-- Debug Information -->
-            @if(isset($debug) && request('debug'))
-                <div class="mt-4">
-                    <div class="card bg-dark text-light">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 text-warning">Debug Information</h6>
-                            <button class="btn btn-sm btn-outline-warning" onclick="toggleDebug()">Toggle</button>
-                        </div>
-                        <div class="card-body" id="debugInfo" style="display: block;">
-                            <h6 class="text-warning">Request Info</h6>
-                            <pre class="text-success">{{ json_encode($debug['debug'] ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-
-                            <h6 class="text-warning mt-3">HTTP Response</h6>
-                            <p class="text-info">Status Code: {{ $debug['raw']['http_code'] ?? 'N/A' }}</p>
-
-                            <h6 class="text-warning mt-3">Raw Response (first 3000 chars)</h6>
-                            <pre class="text-light">{{ substr($debug['raw']['response'] ?? '', 0, 3000) }}</pre>
-
-                            <h6 class="text-warning mt-3">Full Decoded Response</h6>
-                            <pre class="text-light">{{ json_encode($debug['raw']['decoded'] ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                        </div>
-                    </div>
                 </div>
             @endif
         </div>
@@ -309,6 +374,30 @@
             currencySelect.value = localeMap[locale].currency;
         }
     });
+
+    // Category selection function
+    function selectCategory(categoryId, element) {
+        // Update hidden input
+        document.getElementById('category_id').value = categoryId || '';
+
+        // Remove active state from all categories
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
+            item.classList.add('border-secondary');
+        });
+
+        // Add active state to clicked category
+        if (element) {
+            element.classList.remove('border-secondary');
+            element.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
+        }
+
+        // Submit form if there's a keyword
+        const keyword = document.getElementById('keyword').value;
+        if (keyword && keyword.trim() !== '') {
+            document.getElementById('searchForm').submit();
+        }
+    }
 
     // Import product function
     function importProduct(productId) {

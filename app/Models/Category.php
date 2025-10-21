@@ -12,6 +12,8 @@ class Category extends Model
         'name',
         'slug',
         'description',
+        'aliexpress_category_id',
+        'image',
         'parent_id',
         'order',
         'is_active',
