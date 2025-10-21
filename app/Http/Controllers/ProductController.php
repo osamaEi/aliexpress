@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Services\AliExpressDropshippingService;
-use App\Services\AliExpressService;
+use App\Services\AliexpressTextService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -14,7 +14,7 @@ class ProductController extends Controller
     protected $aliexpressService;
     protected $aliexpressTextService;
 
-    public function __construct(AliExpressDropshippingService $aliexpressService, AliExpressService $aliexpressTextService)
+    public function __construct(AliExpressDropshippingService $aliexpressService, AliexpressTextService $aliexpressTextService)
     {
         $this->aliexpressService = $aliexpressService;
         $this->aliexpressTextService = $aliexpressTextService;
