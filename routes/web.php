@@ -49,17 +49,17 @@ Route::middleware('auth')->group(function () {
     // Category routes
     Route::resource('categories', CategoryController::class);
 
-    // Product routes
-    Route::resource('products', ProductController::class);
-
-    // AliExpress Text Search Routes
+    // AliExpress Text Search Routes (must be before resource routes)
     Route::get('/products/search-aliexpress', [ProductController::class, 'searchPage'])->name('products.search-page');
     Route::get('/products/search-text', [ProductController::class, 'searchByText'])->name('products.search-text');
 
-    // AliExpress integration routes
+    // AliExpress integration routes (must be before resource routes)
     Route::get('/products/aliexpress/import', [ProductController::class, 'import'])->name('products.aliexpress.import');
     Route::post('/products/aliexpress/search', [ProductController::class, 'searchAliexpress'])->name('products.aliexpress.search');
     Route::post('/products/aliexpress/import-product', [ProductController::class, 'importFromAliexpress'])->name('products.aliexpress.import-product');
+
+    // Product routes (must be after specific routes to avoid conflicts)
+    Route::resource('products', ProductController::class);
     Route::post('/products/{product}/sync', [ProductController::class, 'sync'])->name('products.sync');
     Route::post('/products/sync-all', [ProductController::class, 'syncAll'])->name('products.sync-all');
 });
