@@ -78,11 +78,13 @@
                     </div>
                 </div>
 
+                <!-- Hidden input for category filter (always present) -->
+                <input type="hidden" name="category_id" id="category_id" value="{{ request('category_id') }}">
+
                 <!-- Categories -->
                 @if(isset($categories) && count($categories) > 0)
                 <div class="mt-4">
                     <label class="form-label text-muted small">Categories:</label>
-                    <input type="hidden" name="category_id" id="category_id" value="{{ request('category_id') }}">
                     <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto;">
                         <!-- All Categories Option -->
                         <div class="category-item text-center p-2 rounded border {{ !request('category_id') ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary' }}"
@@ -392,9 +394,11 @@
             element.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
         }
 
-        // Submit form if there's a keyword
+        // If there's already products shown (we did a search), submit to filter
+        const hasProducts = document.getElementById('productsGrid') !== null;
         const keyword = document.getElementById('keyword').value;
-        if (keyword && keyword.trim() !== '') {
+
+        if ((keyword && keyword.trim() !== '') || hasProducts) {
             document.getElementById('searchForm').submit();
         }
     }

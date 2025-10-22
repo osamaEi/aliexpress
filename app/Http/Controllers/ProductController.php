@@ -420,6 +420,7 @@ class ProductController extends Controller
     public function searchPage()
     {
         $categories = Category::where('aliexpress_category_id', '!=', null)
+            ->orderBy('order')
             ->get();
 
         return view('products.search', compact('categories'));
