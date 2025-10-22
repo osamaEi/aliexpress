@@ -80,35 +80,66 @@
                     <span class="menu-header-text">Product Management</span>
                 </li>
 
-                <li class="menu-item open {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                <!-- Products -->
+                <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('products.search-*') ? 'open active' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons ri-shopping-bag-3-line"></i>
                         <div data-i18n="Products">Products</div>
                     </a>
                     <ul class="menu-sub">
-                        @can('view-products')
                         <li class="menu-item {{ request()->routeIs('products.index') ? 'active' : '' }}">
                             <a href="{{ route('products.index') }}" class="menu-link">
                                 <div data-i18n="All Products">All Products</div>
                             </a>
                         </li>
-                        @endcan
 
-                        @can('create-products')
                         <li class="menu-item {{ request()->routeIs('products.create') ? 'active' : '' }}">
                             <a href="{{ route('products.create') }}" class="menu-link">
                                 <div data-i18n="Add Product">Add Product</div>
                             </a>
                         </li>
+                    </ul>
+                </li>
+
+                <!-- Categories -->
+                <li class="menu-item {{ request()->routeIs('categories.*') ? 'open active' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons ri-price-tag-3-line"></i>
+                        <div data-i18n="Categories">Categories</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('categories.index') ? 'active' : '' }}">
+                            <a href="{{ route('categories.index') }}" class="menu-link">
+                                <div data-i18n="All Categories">All Categories</div>
+                            </a>
+                        </li>
+
+                        <li class="menu-item {{ request()->routeIs('categories.create') ? 'active' : '' }}">
+                            <a href="{{ route('categories.create') }}" class="menu-link">
+                                <div data-i18n="Add Category">Add Category</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- AliExpress -->
+                <li class="menu-item {{ request()->routeIs('products.search-*') || request()->routeIs('products.aliexpress.*') ? 'open active' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons ri-shopping-cart-line"></i>
+                        <div data-i18n="AliExpress">AliExpress</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('products.search-*') ? 'active' : '' }}">
+                            <a href="{{ route('products.search-page') }}" class="menu-link">
+                                <div data-i18n="Search Products">Search Products</div>
+                            </a>
+                        </li>
 
                         <li class="menu-item {{ request()->routeIs('products.aliexpress.import') ? 'active' : '' }}">
                             <a href="{{ route('products.aliexpress.import') }}" class="menu-link">
-                                <div data-i18n="Import from AliExpress">
-                                    <i class="ri-shopping-cart-line me-1"></i> Import from AliExpress
-                                </div>
+                                <div data-i18n="Import Products">Import Products</div>
                             </a>
                         </li>
-                        @endcan
                     </ul>
                 </li>
 

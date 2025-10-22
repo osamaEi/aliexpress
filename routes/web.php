@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AliExpressTestController;
 use App\Http\Controllers\AliExpressController;
 use Illuminate\Support\Facades\Route;
@@ -40,17 +41,20 @@ Route::post('/aliexpress/search', [AliExpressController::class, 'search'])->name
 Route::get('/aliexpress/product/{productId}', [AliExpressController::class, 'details'])->name('aliexpress.details');
 Route::get('/aliexpress/check-enrollment', [AliExpressController::class, 'checkEnrollment'])->name('aliexpress.enrollment');
 
-// AliExpress Text Search Routes (accessible without auth for testing)
-Route::get('/products/search-aliexpress', [ProductController::class, 'searchPage'])->name('products.search-page');
-Route::get('/products/search-text', [ProductController::class, 'searchByText'])->name('products.search-text');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Category routes
+    Route::resource('categories', CategoryController::class);
+
     // Product routes
     Route::resource('products', ProductController::class);
+
+    // AliExpress Text Search Routes
+    Route::get('/products/search-aliexpress', [ProductController::class, 'searchPage'])->name('products.search-page');
+    Route::get('/products/search-text', [ProductController::class, 'searchByText'])->name('products.search-text');
 
     // AliExpress integration routes
     Route::get('/products/aliexpress/import', [ProductController::class, 'import'])->name('products.aliexpress.import');
