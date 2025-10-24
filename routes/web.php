@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/categories/{category}/save-subcategories', [CategoryController::class, 'saveSubcategories'])->name('categories.save-subcategories');
     Route::get('/categories/fetch-tree', [CategoryController::class, 'fetchCategoryTree'])->name('categories.fetch-tree');
     Route::post('/categories/save-tree', [CategoryController::class, 'saveCategoryTree'])->name('categories.save-tree');
+    Route::post('/categories/import-all', [CategoryController::class, 'importAllCategories'])->name('categories.import-all');
     Route::resource('categories', CategoryController::class);
 
     // AliExpress Text Search Routes (must be before resource routes)

@@ -4,16 +4,27 @@
 <div class="col-12">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">AliExpress Category Tree</h5>
-            <a href="{{ route('categories.index') }}" class="btn btn-secondary">
-                <i class="ri-arrow-left-line me-1"></i> Back to Categories
-            </a>
+            <div>
+                <h5 class="mb-0">AliExpress Category Tree</h5>
+                <small class="text-muted">Total: {{ $rootCount ?? 0 }} root categories, {{ $childCount ?? 0 }} subcategories</small>
+            </div>
+            <div class="d-flex gap-2">
+                <form action="{{ route('categories.import-all') }}" method="POST" class="d-inline" onsubmit="return confirm('Import ALL {{ count($allCategories ?? []) }} categories from AliExpress? This may take a while.');">
+                    @csrf
+                    <button type="submit" class="btn btn-success">
+                        <i class="ri-download-line me-1"></i> Import All ({{ count($allCategories ?? []) }})
+                    </button>
+                </form>
+                <a href="{{ route('categories.index') }}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line me-1"></i> Back
+                </a>
+            </div>
         </div>
 
         <div class="card-body">
             <div class="alert alert-info">
                 <i class="ri-information-line me-2"></i>
-                Select the categories you want to import from AliExpress. These will be saved as root categories in your database.
+                You can either select specific root categories to import manually, OR click "Import All" to import all {{ count($allCategories ?? []) }} categories with their parent-child relationships automatically.
             </div>
 
             <form action="{{ route('categories.save-tree') }}" method="POST" id="categoryTreeForm">

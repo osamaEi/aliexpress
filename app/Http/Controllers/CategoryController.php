@@ -180,17 +180,34 @@ class CategoryController extends Controller
                 return back()->with('error', 'This category does not have an AliExpress category ID.');
             }
 
-            // Fetch child categories from AliExpress
-            $subcategories = $this->aliexpressService->getChildCategories($category->aliexpress_category_id);
+            // Fetch categories from AliExpress
+            $allCategories = $this->aliexpressService->getChildCategories($category->aliexpress_category_id);
 
-            Log::info('Fetched subcategories', [
+            Log::info('Fetched categories from API', [
                 'parent_id' => $category->id,
                 'aliexpress_id' => $category->aliexpress_category_id,
-                'subcategories_count' => count($subcategories ?? [])
+                'total_categories' => count($allCategories ?? [])
             ]);
 
-            if (!$subcategories || empty($subcategories)) {
-                return back()->with('warning', 'No subcategories found for this category.');
+            if (!$allCategories || empty($allCategories)) {
+                return back()->with('warning', 'No categories found.');
+            }
+
+            // Filter only the direct children of this category
+            $subcategories = array_filter($allCategories, function($cat) use ($category) {
+                $parentId = $cat['parent_category_id'] ?? null;
+                return $parentId == $category->aliexpress_category_id;
+            });
+
+            // Re-index array after filtering
+            $subcategories = array_values($subcategories);
+
+            Log::info('Filtered subcategories', [
+                'filtered_count' => count($subcategories)
+            ]);
+
+            if (empty($subcategories)) {
+                return back()->with('warning', 'No direct subcategories found for this category.');
             }
 
             return view('categories.subcategories', [
@@ -270,18 +287,38 @@ class CategoryController extends Controller
     public function fetchCategoryTree()
     {
         try {
-            $categoryTree = $this->aliexpressService->getCategoryTree();
+            $allCategories = $this->aliexpressService->getCategoryTree();
 
-            Log::info('Fetched category tree', [
-                'categories_count' => count($categoryTree ?? [])
+            Log::info('Fetched all categories from API', [
+                'total_categories' => count($allCategories ?? [])
             ]);
 
-            if (!$categoryTree || empty($categoryTree)) {
-                return back()->with('warning', 'No categories found in the tree.');
+            if (!$allCategories || empty($allCategories)) {
+                return back()->with('warning', 'No categories found.');
             }
 
+            // Separate root categories (no parent_category_id) and subcategories
+            $rootCategories = [];
+            $childCategories = [];
+
+            foreach ($allCategories as $category) {
+                if (!isset($category['parent_category_id']) || empty($category['parent_category_id'])) {
+                    $rootCategories[] = $category;
+                } else {
+                    $childCategories[] = $category;
+                }
+            }
+
+            Log::info('Organized categories', [
+                'root_count' => count($rootCategories),
+                'children_count' => count($childCategories)
+            ]);
+
             return view('categories.tree', [
-                'categoryTree' => $categoryTree
+                'categoryTree' => $rootCategories,
+                'allCategories' => $allCategories,
+                'rootCount' => count($rootCategories),
+                'childCount' => count($childCategories)
             ]);
 
         } catch (\Exception $e) {
@@ -345,6 +382,136 @@ class CategoryController extends Controller
             ]);
 
             return back()->with('error', 'Failed to save categories: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Import ALL categories from AliExpress with parent-child relationships
+     */
+    public function importAllCategories()
+    {
+        try {
+            // Fetch all categories from AliExpress
+            $allCategories = $this->aliexpressService->getCategoryTree();
+
+            if (!$allCategories || empty($allCategories)) {
+                return back()->with('warning', 'No categories found to import.');
+            }
+
+            $saved = 0;
+            $skipped = 0;
+            $errors = 0;
+            $categoryMap = []; // Map AliExpress IDs to our database IDs
+
+            // First pass: Create all root categories (no parent)
+            foreach ($allCategories as $category) {
+                if (isset($category['parent_category_id']) && !empty($category['parent_category_id'])) {
+                    continue; // Skip children for now
+                }
+
+                $aliexpressCategoryId = $category['category_id'] ?? null;
+                $categoryName = $category['category_name'] ?? null;
+
+                if (!$aliexpressCategoryId || !$categoryName) {
+                    $errors++;
+                    continue;
+                }
+
+                // Check if already exists
+                $existing = Category::where('aliexpress_category_id', $aliexpressCategoryId)->first();
+
+                if ($existing) {
+                    $categoryMap[$aliexpressCategoryId] = $existing->id;
+                    $skipped++;
+                    continue;
+                }
+
+                // Create root category
+                $newCategory = Category::create([
+                    'name' => $categoryName,
+                    'slug' => Str::slug($categoryName),
+                    'aliexpress_category_id' => $aliexpressCategoryId,
+                    'parent_id' => null,
+                    'order' => $saved,
+                    'is_active' => true,
+                ]);
+
+                $categoryMap[$aliexpressCategoryId] = $newCategory->id;
+                $saved++;
+            }
+
+            // Second pass: Create all child categories
+            foreach ($allCategories as $category) {
+                if (!isset($category['parent_category_id']) || empty($category['parent_category_id'])) {
+                    continue; // Skip roots, already created
+                }
+
+                $aliexpressCategoryId = $category['category_id'] ?? null;
+                $categoryName = $category['category_name'] ?? null;
+                $parentAliexpressId = $category['parent_category_id'];
+
+                if (!$aliexpressCategoryId || !$categoryName) {
+                    $errors++;
+                    continue;
+                }
+
+                // Check if already exists
+                $existing = Category::where('aliexpress_category_id', $aliexpressCategoryId)->first();
+
+                if ($existing) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Find parent category in our database
+                $parentId = $categoryMap[$parentAliexpressId] ?? null;
+
+                // If parent doesn't exist in our DB, create it first
+                if (!$parentId) {
+                    $parentCategory = Category::where('aliexpress_category_id', $parentAliexpressId)->first();
+                    if (!$parentCategory) {
+                        // Parent not in our system, skip this category or create orphan
+                        Log::warning('Parent category not found', [
+                            'child_id' => $aliexpressCategoryId,
+                            'parent_id' => $parentAliexpressId
+                        ]);
+                        $errors++;
+                        continue;
+                    }
+                    $parentId = $parentCategory->id;
+                }
+
+                // Create child category
+                $newCategory = Category::create([
+                    'name' => $categoryName,
+                    'slug' => Str::slug($categoryName),
+                    'aliexpress_category_id' => $aliexpressCategoryId,
+                    'parent_id' => $parentId,
+                    'order' => $saved,
+                    'is_active' => true,
+                ]);
+
+                $saved++;
+            }
+
+            $message = "Successfully imported {$saved} categories.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} already existed.";
+            }
+            if ($errors > 0) {
+                $message .= " {$errors} had errors.";
+            }
+
+            return redirect()->route('categories.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            Log::error('Import all categories error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->with('error', 'Failed to import categories: ' . $e->getMessage());
         }
     }
 }
