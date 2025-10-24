@@ -13,7 +13,7 @@
             <form id="searchForm" method="GET" action="{{ route('products.search-text') }}" class="mb-4">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="keyword" class="form-label">Search Keyword</label>
+                        <label for="keyword" class="form-label">Search Keyword <span class="text-muted small">(optional if category selected)</span></label>
                         <input
                             type="text"
                             id="keyword"
@@ -21,7 +21,6 @@
                             class="form-control form-control-lg"
                             placeholder="Search products... (phone, laptop, watch, etc.)"
                             value="{{ old('keyword', $keyword ?? '') }}"
-                            required
                         >
                     </div>
                     <div class="col-md-2">
@@ -394,11 +393,13 @@
             element.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
         }
 
-        // If there's already products shown (we did a search), submit to filter
-        const hasProducts = document.getElementById('productsGrid') !== null;
+        // Submit the form to search by category
+        // Allow category-only searches or searches with keywords
         const keyword = document.getElementById('keyword').value;
+        const hasProducts = document.getElementById('productsGrid') !== null;
 
-        if ((keyword && keyword.trim() !== '') || hasProducts) {
+        // Submit if: keyword exists, products are shown, or category is selected
+        if ((keyword && keyword.trim() !== '') || hasProducts || categoryId) {
             document.getElementById('searchForm').submit();
         }
     }

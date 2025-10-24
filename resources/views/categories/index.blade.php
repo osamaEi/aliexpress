@@ -5,9 +5,14 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Categories</h5>
-            <a href="{{ route('categories.create') }}" class="btn btn-primary">
-                <i class="ri-add-line me-1"></i> Add Category
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('categories.fetch-tree') }}" class="btn btn-success">
+                    <i class="ri-download-cloud-line me-1"></i> Fetch Category Tree
+                </a>
+                <a href="{{ route('categories.create') }}" class="btn btn-primary">
+                    <i class="ri-add-line me-1"></i> Add Category
+                </a>
+            </div>
         </div>
 
         <div class="card-body">
@@ -33,6 +38,7 @@
                         <tr>
                             <th style="width: 60px;">Image</th>
                             <th>Name</th>
+                            <th>Arabic Name</th>
                             <th>Slug</th>
                             <th>AliExpress ID</th>
                             <th>Products</th>
@@ -45,7 +51,9 @@
                         @forelse($categories as $category)
                             <tr>
                                 <td>
-                                    @if($category->image)
+                                    @if($category->photo)
+                                        <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                    @elseif($category->image)
                                         <img src="{{ $category->image }}" alt="{{ $category->name }}" style="width: 40px; height: 40px; object-fit: contain;">
                                     @else
                                         <div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
@@ -57,6 +65,13 @@
                                     <strong>{{ $category->name }}</strong>
                                     @if($category->parent)
                                         <br><small class="text-muted">Parent: {{ $category->parent->name }}</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($category->name_ar)
+                                        <span dir="rtl">{{ $category->name_ar }}</span>
+                                    @else
+                                        <span class="text-muted">-</span>
                                     @endif
                                 </td>
                                 <td><code>{{ $category->slug }}</code></td>
@@ -80,6 +95,11 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
+                                        @if($category->aliexpress_category_id)
+                                        <a href="{{ route('categories.fetch-subcategories', $category) }}" class="btn btn-sm btn-icon btn-success" title="Fetch Subcategories">
+                                            <i class="ri-download-cloud-line"></i>
+                                        </a>
+                                        @endif
                                         <a href="{{ route('categories.edit', $category) }}" class="btn btn-sm btn-icon btn-primary" title="Edit">
                                             <i class="ri-edit-line"></i>
                                         </a>
@@ -95,7 +115,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-5">
+                                <td colspan="9" class="text-center py-5">
                                     <i class="ri-inbox-line" style="font-size: 3rem; color: #ccc;"></i>
                                     <p class="text-muted mt-2">No categories found</p>
                                     <a href="{{ route('categories.create') }}" class="btn btn-primary">

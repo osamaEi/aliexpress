@@ -431,13 +431,18 @@ class ProductController extends Controller
      */
     public function searchByText(Request $request)
     {
+        // Validate: keyword is required unless category_id is provided
         $request->validate([
-            'keyword' => 'required|string|min:2',
+            'keyword' => 'required_without:category_id|nullable|string|min:2',
+            'category_id' => 'nullable|string',
         ]);
 
         try {
+            // Use keyword or default to empty string if only category is selected
+            $keyword = $request->keyword ?? '';
+
             $result = $this->aliexpressTextService->searchProductsByText(
-                $request->keyword,
+                $keyword,
                 [
                     'page' => $request->get('page', 1),
                     'limit' => $request->get('per_page', 10),
@@ -467,7 +472,7 @@ class ProductController extends Controller
             return view('products.search', [
                 'products' => $result['products'],
                 'total_count' => $result['total_count'] ?? 0,
-                'keyword' => $request->keyword,
+                'keyword' => $keyword,
                 'categories' => $categories,
                 'debug' => $request->get('debug') ? $result : null,
             ]);

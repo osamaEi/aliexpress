@@ -15,6 +15,21 @@
     </div>
 
     <div class="col-md-6">
+        <label for="name_ar" class="form-label">Arabic Name</label>
+        <input
+            type="text"
+            class="form-control @error('name_ar') is-invalid @enderror"
+            id="name_ar"
+            name="name_ar"
+            value="{{ old('name_ar', $category->name_ar ?? '') }}"
+            dir="rtl"
+        >
+        @error('name_ar')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6">
         <label for="slug" class="form-label">Slug</label>
         <input
             type="text"
@@ -60,11 +75,35 @@
         <small class="text-muted">Direct URL to category image</small>
     </div>
 
+    <div class="col-md-6">
+        <label for="photo" class="form-label">Upload Photo</label>
+        <input
+            type="file"
+            class="form-control @error('photo') is-invalid @enderror"
+            id="photo"
+            name="photo"
+            accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+        >
+        @error('photo')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+        <small class="text-muted">Upload category photo (JPEG, PNG, JPG, GIF, WEBP - Max 2MB)</small>
+    </div>
+
     @if(isset($category->image) && $category->image)
     <div class="col-12">
-        <label class="form-label">Current Image</label>
+        <label class="form-label">Current Image URL</label>
         <div>
             <img src="{{ $category->image }}" alt="{{ $category->name ?? 'Category' }}" style="max-width: 100px; height: auto; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+        </div>
+    </div>
+    @endif
+
+    @if(isset($category->photo) && $category->photo)
+    <div class="col-12">
+        <label class="form-label">Current Uploaded Photo</label>
+        <div>
+            <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name ?? 'Category' }}" style="max-width: 100px; height: auto; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
         </div>
     </div>
     @endif

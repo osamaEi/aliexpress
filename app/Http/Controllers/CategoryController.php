@@ -3,12 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Services\AliExpressService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
+    protected $aliexpressService;
+
+    public function __construct(AliExpressService $aliexpressService)
+    {
+        $this->aliexpressService = $aliexpressService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -40,10 +48,12 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
             'slug' => 'nullable|string|max:255|unique:categories,slug',
             'description' => 'nullable|string',
             'aliexpress_category_id' => 'nullable|string|max:255',
             'image' => 'nullable|string|max:500',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'parent_id' => 'nullable|exists:categories,id',
             'order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
@@ -52,6 +62,11 @@ class CategoryController extends Controller
         // Generate slug if not provided
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
+        }
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            $validated['photo'] = $request->file('photo')->store('categories', 'public');
         }
 
         $validated['is_active'] = $request->has('is_active');
@@ -95,10 +110,12 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
             'slug' => 'nullable|string|max:255|unique:categories,slug,' . $category->id,
             'description' => 'nullable|string',
             'aliexpress_category_id' => 'nullable|string|max:255',
             'image' => 'nullable|string|max:500',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'parent_id' => 'nullable|exists:categories,id',
             'order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
@@ -107,6 +124,15 @@ class CategoryController extends Controller
         // Generate slug if not provided
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
+        }
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($category->photo) {
+                Storage::disk('public')->delete($category->photo);
+            }
+            $validated['photo'] = $request->file('photo')->store('categories', 'public');
         }
 
         $validated['is_active'] = $request->has('is_active');
@@ -133,9 +159,192 @@ class CategoryController extends Controller
             return back()->with('error', 'Cannot delete category with subcategories. Please delete subcategories first.');
         }
 
+        // Delete photo if exists
+        if ($category->photo) {
+            Storage::disk('public')->delete($category->photo);
+        }
+
         $category->delete();
 
         return redirect()->route('categories.index')
             ->with('success', 'Category deleted successfully.');
+    }
+
+    /**
+     * Fetch subcategories from AliExpress API
+     */
+    public function fetchSubcategories(Category $category)
+    {
+        try {
+            if (!$category->aliexpress_category_id) {
+                return back()->with('error', 'This category does not have an AliExpress category ID.');
+            }
+
+            // Fetch child categories from AliExpress
+            $subcategories = $this->aliexpressService->getChildCategories($category->aliexpress_category_id);
+
+            Log::info('Fetched subcategories', [
+                'parent_id' => $category->id,
+                'aliexpress_id' => $category->aliexpress_category_id,
+                'subcategories_count' => count($subcategories ?? [])
+            ]);
+
+            if (!$subcategories || empty($subcategories)) {
+                return back()->with('warning', 'No subcategories found for this category.');
+            }
+
+            return view('categories.subcategories', [
+                'category' => $category,
+                'subcategories' => $subcategories
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Fetch subcategories error', [
+                'category_id' => $category->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Failed to fetch subcategories: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Save subcategories to database
+     */
+    public function saveSubcategories(Request $request, Category $category)
+    {
+        $request->validate([
+            'subcategories' => 'required|array',
+            'subcategories.*.id' => 'required|string',
+            'subcategories.*.name' => 'required|string',
+        ]);
+
+        try {
+            $saved = 0;
+            $skipped = 0;
+
+            foreach ($request->subcategories as $subcategoryData) {
+                // Check if already exists
+                $existing = Category::where('aliexpress_category_id', $subcategoryData['id'])->first();
+
+                if ($existing) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Create subcategory
+                Category::create([
+                    'name' => $subcategoryData['name'],
+                    'name_ar' => $subcategoryData['name_ar'] ?? null,
+                    'slug' => Str::slug($subcategoryData['name']),
+                    'aliexpress_category_id' => $subcategoryData['id'],
+                    'parent_id' => $category->id,
+                    'order' => $subcategoryData['order'] ?? 0,
+                    'is_active' => true,
+                ]);
+
+                $saved++;
+            }
+
+            $message = "Successfully saved {$saved} subcategories.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} already existed.";
+            }
+
+            return redirect()->route('categories.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            Log::error('Save subcategories error', [
+                'category_id' => $category->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Failed to save subcategories: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Fetch category tree from AliExpress
+     */
+    public function fetchCategoryTree()
+    {
+        try {
+            $categoryTree = $this->aliexpressService->getCategoryTree();
+
+            Log::info('Fetched category tree', [
+                'categories_count' => count($categoryTree ?? [])
+            ]);
+
+            if (!$categoryTree || empty($categoryTree)) {
+                return back()->with('warning', 'No categories found in the tree.');
+            }
+
+            return view('categories.tree', [
+                'categoryTree' => $categoryTree
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Fetch category tree error', [
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Failed to fetch category tree: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Save multiple categories from tree
+     */
+    public function saveCategoryTree(Request $request)
+    {
+        $request->validate([
+            'categories' => 'required|array',
+            'categories.*.id' => 'required|string',
+            'categories.*.name' => 'required|string',
+        ]);
+
+        try {
+            $saved = 0;
+            $skipped = 0;
+
+            foreach ($request->categories as $categoryData) {
+                // Check if already exists
+                $existing = Category::where('aliexpress_category_id', $categoryData['id'])->first();
+
+                if ($existing) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Create category
+                Category::create([
+                    'name' => $categoryData['name'],
+                    'name_ar' => $categoryData['name_ar'] ?? null,
+                    'slug' => Str::slug($categoryData['name']),
+                    'aliexpress_category_id' => $categoryData['id'],
+                    'parent_id' => $categoryData['parent_id'] ?? null,
+                    'order' => $categoryData['order'] ?? 0,
+                    'is_active' => true,
+                ]);
+
+                $saved++;
+            }
+
+            $message = "Successfully saved {$saved} categories.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} already existed.";
+            }
+
+            return redirect()->route('categories.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            Log::error('Save category tree error', [
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Failed to save categories: ' . $e->getMessage());
+        }
     }
 }

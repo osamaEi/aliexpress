@@ -770,6 +770,98 @@ class AliExpressService
     }
 
     /**
+     * Get category tree with subcategories
+     * API: aliexpress.category.tree.list
+     * This returns the full category tree structure
+     */
+    public function getCategoryTree(?int $parentCategoryId = null): ?array
+    {
+        $params = [];
+
+        // If parent category ID is provided, get only its children
+        if ($parentCategoryId) {
+            $params['parent_category_id'] = $parentCategoryId;
+        }
+
+        try {
+            $data = $this->makeRequest('aliexpress.category.tree.list', $params, false);
+
+            Log::debug('Category Tree API Response', [
+                'params' => $params,
+                'response_keys' => array_keys($data ?? [])
+            ]);
+
+            // Check different possible response structures
+            if (isset($data['aliexpress_category_tree_list_response']['result'])) {
+                return $data['aliexpress_category_tree_list_response']['result'];
+            }
+
+            if (isset($data['result'])) {
+                return $data['result'];
+            }
+
+            if (isset($data['categories'])) {
+                return $data['categories'];
+            }
+
+            return $data;
+
+        } catch (\Exception $e) {
+            Log::error('Category Tree API Error', [
+                'error' => $e->getMessage(),
+                'parent_category_id' => $parentCategoryId
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Get child categories by parent category ID
+     * API: aliexpress.category.redefining.getchildattributesresultbypostcateidandpath
+     */
+    public function getChildCategories(string $categoryId): ?array
+    {
+        $params = [
+            'cate_id' => $categoryId,
+        ];
+
+        try {
+            $data = $this->makeRequest(
+                'aliexpress.category.redefining.getchildattributesresultbypostcateidandpath',
+                $params,
+                false
+            );
+
+            Log::debug('Child Categories API Response', [
+                'category_id' => $categoryId,
+                'response_keys' => array_keys($data ?? [])
+            ]);
+
+            // Parse response structure
+            if (isset($data['aliexpress_category_redefining_getchildattributesresultbypostcateidandpath_response'])) {
+                $response = $data['aliexpress_category_redefining_getchildattributesresultbypostcateidandpath_response'];
+
+                if (isset($response['result']['child_category_list']['category'])) {
+                    return $response['result']['child_category_list']['category'];
+                }
+
+                if (isset($response['result'])) {
+                    return $response['result'];
+                }
+            }
+
+            return $data;
+
+        } catch (\Exception $e) {
+            Log::error('Child Categories API Error', [
+                'error' => $e->getMessage(),
+                'category_id' => $categoryId
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Calculate shipping cost
      * API: aliexpress.ds.order.freight.calculate
      */

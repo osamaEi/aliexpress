@@ -10,10 +10,12 @@ class Category extends Model
 {
     protected $fillable = [
         'name',
+        'name_ar',
         'slug',
         'description',
         'aliexpress_category_id',
         'image',
+        'photo',
         'parent_id',
         'order',
         'is_active',
