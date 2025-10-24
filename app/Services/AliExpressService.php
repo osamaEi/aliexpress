@@ -790,11 +790,11 @@ class AliExpressService
                 'raw_response' => json_encode($data)
             ]);
 
-            // Parse response structure
-            if (isset($data['aliexpress_ds_category_get_response']['result'])) {
-                $result = $data['aliexpress_ds_category_get_response']['result'];
+            // Parse response structure (with resp_result wrapper)
+            if (isset($data['aliexpress_ds_category_get_response']['resp_result']['result'])) {
+                $result = $data['aliexpress_ds_category_get_response']['resp_result']['result'];
 
-                // Check for different possible structures
+                // The result contains category information in categories.category array
                 if (isset($result['categories']['category'])) {
                     return is_array($result['categories']['category'])
                         ? $result['categories']['category']
@@ -811,11 +811,23 @@ class AliExpressService
                     return $result['children'];
                 }
 
-                // Return the full result for inspection
-                return [$result];
+                Log::warning('Unexpected category tree structure', ['result_keys' => array_keys($result)]);
+                return [];
             }
 
-            return $data;
+            // Try without resp_result wrapper (older API format)
+            if (isset($data['aliexpress_ds_category_get_response']['result'])) {
+                $result = $data['aliexpress_ds_category_get_response']['result'];
+
+                if (isset($result['categories']['category'])) {
+                    return is_array($result['categories']['category'])
+                        ? $result['categories']['category']
+                        : [$result['categories']['category']];
+                }
+            }
+
+            Log::warning('Could not parse category tree response', ['data_keys' => array_keys($data)]);
+            return [];
 
         } catch (\Exception $e) {
             Log::error('Category Tree API Error', [
@@ -849,11 +861,10 @@ class AliExpressService
             ]);
 
             // Parse response structure for ds.category.get
-            if (isset($data['aliexpress_ds_category_get_response']['result'])) {
-                $result = $data['aliexpress_ds_category_get_response']['result'];
+            if (isset($data['aliexpress_ds_category_get_response']['resp_result']['result'])) {
+                $result = $data['aliexpress_ds_category_get_response']['resp_result']['result'];
 
-                // The result contains category information
-                // Check for different possible structures
+                // The result contains category information in categories.category array
                 if (isset($result['categories']['category'])) {
                     return is_array($result['categories']['category'])
                         ? $result['categories']['category']
@@ -870,12 +881,24 @@ class AliExpressService
                     return $result['children'];
                 }
 
-                // Return the full result for inspection
-                return [$result];
+                Log::warning('Unexpected category structure', ['result_keys' => array_keys($result)]);
+                return [];
             }
 
-            // If no standard structure, return raw data
-            return $data;
+            // Try without resp_result wrapper (older API format)
+            if (isset($data['aliexpress_ds_category_get_response']['result'])) {
+                $result = $data['aliexpress_ds_category_get_response']['result'];
+
+                if (isset($result['categories']['category'])) {
+                    return is_array($result['categories']['category'])
+                        ? $result['categories']['category']
+                        : [$result['categories']['category']];
+                }
+            }
+
+            // If no standard structure, return empty array
+            Log::warning('Could not parse categories response', ['data_keys' => array_keys($data)]);
+            return [];
 
         } catch (\Exception $e) {
             Log::error('Child Categories API Error', [

@@ -205,16 +205,18 @@ class CategoryController extends Controller
             $subcategories = array_values($subcategories);
 
             Log::info('Filtered subcategories', [
-                'filtered_count' => count($subcategories)
+                'filtered_count' => count($subcategories),
+                'looking_for_parent_id' => $category->aliexpress_category_id,
+                'sample_parent_ids' => array_slice(array_map(function($c) {
+                    return $c['parent_category_id'] ?? 'null';
+                }, $allCategories), 0, 10)
             ]);
 
-            if (empty($subcategories)) {
-                return back()->with('warning', 'No direct subcategories found for this category.');
-            }
-
+            // Show view even if no subcategories found, with all categories for debugging
             return view('categories.subcategories', [
                 'category' => $category,
-                'subcategories' => $subcategories
+                'subcategories' => $subcategories,
+                'allCategories' => $allCategories
             ]);
 
         } catch (\Exception $e) {
