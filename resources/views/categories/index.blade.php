@@ -87,11 +87,16 @@
                                 </td>
                                 <td>{{ $category->order }}</td>
                                 <td>
-                                    @if($category->is_active)
-                                        <span class="badge bg-success">Active</span>
-                                    @else
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    @endif
+                                    <form action="{{ route('categories.toggle-status', $category) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm {{ $category->is_active ? 'btn-success' : 'btn-secondary' }}" title="Click to {{ $category->is_active ? 'Deactivate' : 'Activate' }}">
+                                            @if($category->is_active)
+                                                <i class="ri-checkbox-circle-line me-1"></i> Active
+                                            @else
+                                                <i class="ri-close-circle-line me-1"></i> Inactive
+                                            @endif
+                                        </button>
+                                    </form>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">

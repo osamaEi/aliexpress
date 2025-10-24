@@ -419,11 +419,25 @@ class ProductController extends Controller
      */
     public function searchPage()
     {
-        $categories = Category::where('aliexpress_category_id', '!=', null)
+        // Get only active categories with AliExpress IDs
+        $allCategories = Category::where('aliexpress_category_id', '!=', null)
+            ->where('is_active', true)
             ->orderBy('order')
             ->get();
 
-        return view('products.search', compact('categories'));
+        // Separate main categories (no parent) and subcategories
+        $mainCategories = $allCategories->whereNull('parent_id');
+
+        // Organize subcategories by parent
+        $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
+            $parent->children = $allCategories->where('parent_id', $parent->id)->values();
+            return $parent;
+        });
+
+        return view('products.search', [
+            'categories' => $categoriesWithChildren,
+            'allCategories' => $allCategories
+        ]);
     }
 
     /**

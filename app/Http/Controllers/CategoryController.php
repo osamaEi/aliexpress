@@ -518,4 +518,27 @@ class CategoryController extends Controller
             return back()->with('error', 'Failed to import categories: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Toggle category active status
+     */
+    public function toggleStatus(Category $category)
+    {
+        try {
+            $category->is_active = !$category->is_active;
+            $category->save();
+
+            $status = $category->is_active ? 'activated' : 'deactivated';
+
+            return back()->with('success', "Category '{$category->name}' has been {$status}.");
+
+        } catch (\Exception $e) {
+            Log::error('Toggle category status error', [
+                'category_id' => $category->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Failed to toggle category status: ' . $e->getMessage());
+        }
+    }
 }

@@ -84,33 +84,63 @@
                 @if(isset($categories) && count($categories) > 0)
                 <div class="mt-4">
                     <label class="form-label text-muted small">Categories:</label>
-                    <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto;">
+                    <div style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px;">
                         <!-- All Categories Option -->
-                        <div class="category-item text-center p-2 rounded border {{ !request('category_id') ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary' }}"
+                        <div class="category-item-list p-2 mb-2 rounded border {{ !request('category_id') ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary' }}"
                              style="cursor: pointer; transition: all 0.3s;"
                              onclick="selectCategory(null, this)">
-                            <div class="category-icon mb-2" style="width: 48px; height: 48px; margin: 0 auto; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 8px;">
-                                <i class="ri-apps-line" style="font-size: 24px; color: #666;"></i>
+                            <div class="d-flex align-items-center">
+                                <i class="ri-apps-line me-2" style="font-size: 20px;"></i>
+                                <strong>All Categories</strong>
                             </div>
-                            <div class="category-name small fw-semibold">All</div>
                         </div>
 
-                        @foreach($categories as $category)
-                        <div class="category-item text-center p-2 rounded border {{ request('category_id') == $category->aliexpress_category_id ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary' }}"
-                             style="cursor: pointer; transition: all 0.3s;"
-                             onclick="selectCategory('{{ $category->aliexpress_category_id }}', this)"
-                             onmouseover="this.style.borderColor='#007bff'; this.style.backgroundColor='rgba(0,123,255,0.05)';"
-                             onmouseout="if(!this.classList.contains('border-primary')) { this.style.borderColor='#dee2e6'; this.style.backgroundColor='transparent'; }">
-                            <div class="category-icon mb-2">
-                                @if($category->image)
-                                    <img src="{{ $category->image }}" alt="{{ $category->name }}" style="width: 48px; height: 48px; object-fit: contain;">
-                                @else
-                                    <div style="width: 48px; height: 48px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="ri-shopping-bag-line" style="font-size: 24px; color: #666;"></i>
+                        @foreach($categories as $mainCategory)
+                        <!-- Main Category -->
+                        <div class="main-category-wrapper mb-2">
+                            <div class="main-category-item p-2 rounded border {{ request('category_id') == $mainCategory->aliexpress_category_id ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary' }}"
+                                 style="cursor: pointer; transition: all 0.3s;">
+                                <div class="d-flex align-items-center justify-content-between"
+                                     onclick="selectCategory('{{ $mainCategory->aliexpress_category_id }}', this.parentElement)">
+                                    <div class="d-flex align-items-center flex-grow-1">
+                                        @if($mainCategory->photo)
+                                            <img src="{{ asset('storage/' . $mainCategory->photo) }}" alt="{{ $mainCategory->name }}" style="width: 24px; height: 24px; object-fit: contain; margin-right: 8px;">
+                                        @elseif($mainCategory->image)
+                                            <img src="{{ $mainCategory->image }}" alt="{{ $mainCategory->name }}" style="width: 24px; height: 24px; object-fit: contain; margin-right: 8px;">
+                                        @else
+                                            <i class="ri-folder-line me-2" style="font-size: 20px;"></i>
+                                        @endif
+                                        <strong>{{ $mainCategory->name }}</strong>
+                                        @if($mainCategory->name_ar)
+                                            <span class="text-muted ms-2" dir="rtl">({{ $mainCategory->name_ar }})</span>
+                                        @endif
                                     </div>
-                                @endif
+                                    @if(count($mainCategory->children) > 0)
+                                        <button type="button" class="btn btn-sm btn-link p-0 toggle-subcategories" onclick="event.stopPropagation(); toggleSubcategories(this)">
+                                            <i class="ri-arrow-down-s-line" style="font-size: 20px;"></i>
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="category-name small fw-semibold" style="line-height: 1.2; font-size: 11px;">{{ $category->name }}</div>
+
+                            @if(count($mainCategory->children) > 0)
+                            <!-- Subcategories -->
+                            <div class="subcategories-list ms-4 mt-1" style="display: none;">
+                                @foreach($mainCategory->children as $subCategory)
+                                <div class="subcategory-item p-2 mb-1 rounded border {{ request('category_id') == $subCategory->aliexpress_category_id ? 'border-primary bg-primary bg-opacity-10' : 'border-light' }}"
+                                     style="cursor: pointer; transition: all 0.3s;"
+                                     onclick="selectCategory('{{ $subCategory->aliexpress_category_id }}', this)">
+                                    <div class="d-flex align-items-center small">
+                                        <i class="ri-subtract-line me-2"></i>
+                                        {{ $subCategory->name }}
+                                        @if($subCategory->name_ar)
+                                            <span class="text-muted ms-2" dir="rtl">({{ $subCategory->name_ar }})</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
                         </div>
                         @endforeach
                     </div>
@@ -376,20 +406,41 @@
         }
     });
 
+    // Toggle subcategories visibility
+    function toggleSubcategories(button) {
+        const wrapper = button.closest('.main-category-wrapper');
+        const subcategoriesList = wrapper.querySelector('.subcategories-list');
+        const icon = button.querySelector('i');
+
+        if (subcategoriesList.style.display === 'none') {
+            subcategoriesList.style.display = 'block';
+            icon.classList.remove('ri-arrow-down-s-line');
+            icon.classList.add('ri-arrow-up-s-line');
+        } else {
+            subcategoriesList.style.display = 'none';
+            icon.classList.remove('ri-arrow-up-s-line');
+            icon.classList.add('ri-arrow-down-s-line');
+        }
+    }
+
     // Category selection function
     function selectCategory(categoryId, element) {
         // Update hidden input
         document.getElementById('category_id').value = categoryId || '';
 
         // Remove active state from all categories
-        document.querySelectorAll('.category-item').forEach(item => {
+        document.querySelectorAll('.category-item-list, .main-category-item, .subcategory-item').forEach(item => {
             item.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
-            item.classList.add('border-secondary');
+            if (item.classList.contains('category-item-list') || item.classList.contains('main-category-item')) {
+                item.classList.add('border-secondary');
+            } else {
+                item.classList.add('border-light');
+            }
         });
 
         // Add active state to clicked category
         if (element) {
-            element.classList.remove('border-secondary');
+            element.classList.remove('border-secondary', 'border-light');
             element.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
         }
 
