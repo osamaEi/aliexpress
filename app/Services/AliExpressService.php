@@ -784,7 +784,8 @@ class AliExpressService
         }
 
         try {
-            $data = $this->makeRequest('aliexpress.category.tree.list', $params, false);
+            // This API requires authentication
+            $data = $this->makeRequest('aliexpress.category.tree.list', $params, true);
 
             Log::debug('Category Tree API Response', [
                 'params' => $params,
@@ -826,10 +827,11 @@ class AliExpressService
         ];
 
         try {
+            // This API requires authentication
             $data = $this->makeRequest(
                 'aliexpress.category.redefining.getchildattributesresultbypostcateidandpath',
                 $params,
-                false
+                true
             );
 
             Log::debug('Child Categories API Response', [
