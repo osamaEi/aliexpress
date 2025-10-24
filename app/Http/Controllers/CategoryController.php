@@ -194,9 +194,11 @@ class CategoryController extends Controller
             }
 
             // Filter only the direct children of this category
+            // Convert to string for comparison since API returns integers
             $subcategories = array_filter($allCategories, function($cat) use ($category) {
                 $parentId = $cat['parent_category_id'] ?? null;
-                return $parentId == $category->aliexpress_category_id;
+                // Compare as strings to handle both string and int values
+                return $parentId !== null && (string)$parentId === (string)$category->aliexpress_category_id;
             });
 
             // Re-index array after filtering
