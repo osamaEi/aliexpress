@@ -399,7 +399,7 @@
     </div>
 </div>
 
-@push('scripts')
+
 <script>
     // Quick search buttons
     document.querySelectorAll('.quick-search').forEach(button => {
@@ -539,9 +539,7 @@
         document.getElementById('loadingSpinner').style.display = 'block';
     });
 </script>
-@endpush
 
-@push('styles')
 <style>
     .product-card {
         transition: transform 0.3s, box-shadow 0.3s;
@@ -561,5 +559,5 @@
         background: rgba(0,0,0,0.3);
     }
 </style>
-@endpush
+
 @endsection
