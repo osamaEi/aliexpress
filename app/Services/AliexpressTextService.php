@@ -55,6 +55,12 @@ class AliexpressTextService
     {
         $timestamp = round(microtime(true) * 1000);
 
+        // If only category is provided without keyword, use a generic keyword
+        // This allows category-only filtering
+        if (empty($keyword) && !empty($options['category_id'])) {
+            $keyword = 'products'; // Generic keyword to get all products in category
+        }
+
         // Build API parameters - IMPORTANT: Use exact parameter names from API docs
         $params = [
             'app_key' => $this->appKey,

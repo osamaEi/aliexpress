@@ -232,7 +232,20 @@
                     @if(isset($total_count))
                         (Total: <strong>{{ number_format($total_count) }}</strong>)
                     @endif
-                    for "<strong>{{ $keyword }}</strong>"
+                    @if(!empty($keyword))
+                        for "<strong>{{ $keyword }}</strong>"
+                    @endif
+                    @if(request('category_id'))
+                        @php
+                            $selectedCategory = $allCategories->firstWhere('aliexpress_category_id', request('category_id'));
+                        @endphp
+                        @if($selectedCategory)
+                            in category: <strong>{{ $selectedCategory->name }}</strong>
+                            @if($selectedCategory->name_ar)
+                                <span dir="rtl">({{ $selectedCategory->name_ar }})</span>
+                            @endif
+                        @endif
+                    @endif
                 </div>
             @endif
 
