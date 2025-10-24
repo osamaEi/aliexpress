@@ -771,38 +771,48 @@ class AliExpressService
 
     /**
      * Get category tree with subcategories
-     * API: aliexpress.category.tree.list
-     * This returns the full category tree structure
+     * Uses aliexpress.ds.category.get with category_id=0 to get root categories
      */
     public function getCategoryTree(?int $parentCategoryId = null): ?array
     {
-        $params = [];
-
-        // If parent category ID is provided, get only its children
-        if ($parentCategoryId) {
-            $params['parent_category_id'] = $parentCategoryId;
-        }
+        $params = [
+            'category_id' => $parentCategoryId ?? 0,
+            'app_signature' => 'dropshipping',
+        ];
 
         try {
-            // This API requires authentication
-            $data = $this->makeRequest('aliexpress.category.tree.list', $params, true);
+            // Use dropshipping category API
+            $data = $this->makeRequest('aliexpress.ds.category.get', $params, true);
 
             Log::debug('Category Tree API Response', [
                 'params' => $params,
-                'response_keys' => array_keys($data ?? [])
+                'response_keys' => array_keys($data ?? []),
+                'raw_response' => json_encode($data)
             ]);
 
-            // Check different possible response structures
-            if (isset($data['aliexpress_category_tree_list_response']['result'])) {
-                return $data['aliexpress_category_tree_list_response']['result'];
-            }
+            // Parse response structure
+            if (isset($data['aliexpress_ds_category_get_response']['result'])) {
+                $result = $data['aliexpress_ds_category_get_response']['result'];
 
-            if (isset($data['result'])) {
-                return $data['result'];
-            }
+                // Check for different possible structures
+                if (isset($result['categories']['category'])) {
+                    return is_array($result['categories']['category'])
+                        ? $result['categories']['category']
+                        : [$result['categories']['category']];
+                }
 
-            if (isset($data['categories'])) {
-                return $data['categories'];
+                if (isset($result['child_category_list']['category'])) {
+                    return is_array($result['child_category_list']['category'])
+                        ? $result['child_category_list']['category']
+                        : [$result['child_category_list']['category']];
+                }
+
+                if (isset($result['children'])) {
+                    return $result['children'];
+                }
+
+                // Return the full result for inspection
+                return [$result];
             }
 
             return $data;
@@ -810,7 +820,8 @@ class AliExpressService
         } catch (\Exception $e) {
             Log::error('Category Tree API Error', [
                 'error' => $e->getMessage(),
-                'parent_category_id' => $parentCategoryId
+                'parent_category_id' => $parentCategoryId,
+                'trace' => $e->getTraceAsString()
             ]);
             throw $e;
         }
@@ -818,46 +829,59 @@ class AliExpressService
 
     /**
      * Get child categories by parent category ID
-     * API: aliexpress.category.redefining.getchildattributesresultbypostcateidandpath
+     * Uses aliexpress.ds.category.get API (available for dropshipping apps)
      */
     public function getChildCategories(string $categoryId): ?array
     {
         $params = [
-            'cate_id' => $categoryId,
+            'category_id' => $categoryId,
+            'app_signature' => 'dropshipping',
         ];
 
         try {
-            // This API requires authentication
-            $data = $this->makeRequest(
-                'aliexpress.category.redefining.getchildattributesresultbypostcateidandpath',
-                $params,
-                true
-            );
+            // Use dropshipping category API which is more widely available
+            $data = $this->makeRequest('aliexpress.ds.category.get', $params, true);
 
             Log::debug('Child Categories API Response', [
                 'category_id' => $categoryId,
-                'response_keys' => array_keys($data ?? [])
+                'response_keys' => array_keys($data ?? []),
+                'raw_response' => json_encode($data)
             ]);
 
-            // Parse response structure
-            if (isset($data['aliexpress_category_redefining_getchildattributesresultbypostcateidandpath_response'])) {
-                $response = $data['aliexpress_category_redefining_getchildattributesresultbypostcateidandpath_response'];
+            // Parse response structure for ds.category.get
+            if (isset($data['aliexpress_ds_category_get_response']['result'])) {
+                $result = $data['aliexpress_ds_category_get_response']['result'];
 
-                if (isset($response['result']['child_category_list']['category'])) {
-                    return $response['result']['child_category_list']['category'];
+                // The result contains category information
+                // Check for different possible structures
+                if (isset($result['categories']['category'])) {
+                    return is_array($result['categories']['category'])
+                        ? $result['categories']['category']
+                        : [$result['categories']['category']];
                 }
 
-                if (isset($response['result'])) {
-                    return $response['result'];
+                if (isset($result['child_category_list']['category'])) {
+                    return is_array($result['child_category_list']['category'])
+                        ? $result['child_category_list']['category']
+                        : [$result['child_category_list']['category']];
                 }
+
+                if (isset($result['children'])) {
+                    return $result['children'];
+                }
+
+                // Return the full result for inspection
+                return [$result];
             }
 
+            // If no standard structure, return raw data
             return $data;
 
         } catch (\Exception $e) {
             Log::error('Child Categories API Error', [
                 'error' => $e->getMessage(),
-                'category_id' => $categoryId
+                'category_id' => $categoryId,
+                'trace' => $e->getTraceAsString()
             ]);
             throw $e;
         }

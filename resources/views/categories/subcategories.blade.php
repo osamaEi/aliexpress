@@ -44,9 +44,12 @@
                             @forelse($subcategories as $index => $subcategory)
                                 @php
                                     // Handle different possible response structures
-                                    $catId = $subcategory['id'] ?? $subcategory['category_id'] ?? $subcategory['cate_id'] ?? '';
-                                    $catName = $subcategory['name'] ?? $subcategory['category_name'] ?? $subcategory['title'] ?? 'Unknown';
-                                    $isLeaf = $subcategory['is_leaf_category'] ?? $subcategory['isLeaf'] ?? false;
+                                    $catId = $subcategory['id'] ?? $subcategory['category_id'] ?? $subcategory['cate_id'] ?? $subcategory['category_id'] ?? '';
+                                    $catName = $subcategory['name'] ?? $subcategory['category_name'] ?? $subcategory['title'] ?? $subcategory['category_name'] ?? 'Unknown';
+                                    $isLeaf = $subcategory['is_leaf_category'] ?? $subcategory['isLeaf'] ?? $subcategory['leaf'] ?? false;
+
+                                    // Skip if no valid ID
+                                    if (empty($catId)) continue;
                                 @endphp
                                 <tr>
                                     <td>
