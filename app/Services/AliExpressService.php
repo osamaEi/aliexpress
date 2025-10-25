@@ -1135,4 +1135,90 @@ class AliExpressService
 
         return null;
     }
+
+    /**
+     * Get products by category ID using recommended feed
+     * API: aliexpress.ds.recommend.feed.get
+     */
+    public function getProductsByCategory(int $categoryId, array $options = [])
+    {
+        $accessToken = $this->getAccessToken();
+
+        $params = [
+            'app_signature' => 'dropshipping',
+            'category_id' => $categoryId,
+            'country' => $options['country'] ?? 'AE',
+            'feed_name' => 'DS_bestselling', // or 'DS_featured', 'DS_newarrival'
+            'page_no' => $options['page'] ?? 1,
+            'page_size' => $options['limit'] ?? 10,
+            'sort' => $options['sort'] ?? 'SALE_PRICE_ASC',
+            'target_currency' => $options['currency'] ?? 'AED',
+            'target_language' => $options['locale'] ?? 'EN',
+        ];
+
+        Log::debug('AliExpress Category Products Request', [
+            'method' => 'aliexpress.ds.recommend.feed.get',
+            'category_id' => $categoryId,
+            'params' => $params,
+        ]);
+
+        $data = $this->makeRequest('aliexpress.ds.recommend.feed.get', $params, true);
+
+        Log::debug('AliExpress Category Products Response', [
+            'has_response' => isset($data['aliexpress_ds_recommend_feed_get_response']),
+            'response_keys' => isset($data['aliexpress_ds_recommend_feed_get_response']) ? array_keys($data['aliexpress_ds_recommend_feed_get_response']) : [],
+        ]);
+
+        if (isset($data['aliexpress_ds_recommend_feed_get_response']['resp_result'])) {
+            $result = $data['aliexpress_ds_recommend_feed_get_response']['resp_result'];
+
+            if (isset($result['result']['products']['product'])) {
+                $products = $result['result']['products']['product'];
+
+                // Ensure it's an array
+                if (!is_array($products)) {
+                    $products = [$products];
+                }
+
+                return [
+                    'products' => $this->formatCategoryProducts($products),
+                    'total_count' => $result['result']['total_record_count'] ?? count($products),
+                    'current_page' => $params['page_no'],
+                    'page_size' => $params['page_size'],
+                ];
+            }
+        }
+
+        return [
+            'products' => [],
+            'total_count' => 0,
+            'current_page' => 1,
+            'page_size' => 0,
+        ];
+    }
+
+    /**
+     * Format category products for consistent output
+     */
+    private function formatCategoryProducts(array $products): array
+    {
+        return array_map(function($product) {
+            return [
+                'item_id' => $product['product_id'] ?? $product['productId'] ?? '',
+                'title' => $product['product_title'] ?? $product['subject'] ?? '',
+                'item_main_pic' => $product['product_main_image_url'] ?? $product['productMainImageUrl'] ?? '',
+                'sale_price' => $product['target_sale_price'] ?? $product['targetSalePrice'] ?? 0,
+                'original_price' => $product['target_original_price'] ?? $product['targetOriginalPrice'] ?? 0,
+                'discount' => $product['discount'] ?? '',
+                'sale_price_format' => $product['target_sale_price_format'] ?? '',
+                'original_price_format' => $product['target_original_price_format'] ?? '',
+                'evaluate_rate' => $product['evaluate_rate'] ?? $product['evaluateRate'] ?? '',
+                'score' => '',
+                'orders' => $product['lastest_volume'] ?? $product['volume'] ?? 0,
+                'item_url' => $product['product_detail_url'] ?? $product['productUrl'] ?? '',
+                'product_video_url' => $product['product_video_url'] ?? '',
+                'cate_id' => $product['second_level_category_id'] ?? '',
+            ];
+        }, $products);
+    }
 }

@@ -6,18 +6,26 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Services\AliExpressDropshippingService;
 use App\Services\AliexpressTextService;
+use App\Services\AliExpressService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
     protected $aliexpressService;
     protected $aliexpressTextService;
+    protected $aliexpressCategoryService;
 
-    public function __construct(AliExpressDropshippingService $aliexpressService, AliexpressTextService $aliexpressTextService)
+    public function __construct(
+        AliExpressDropshippingService $aliexpressService,
+        AliexpressTextService $aliexpressTextService,
+        AliExpressService $aliexpressCategoryService
+    )
     {
         $this->aliexpressService = $aliexpressService;
         $this->aliexpressTextService = $aliexpressTextService;
+        $this->aliexpressCategoryService = $aliexpressCategoryService;
     }
 
     /**
@@ -452,21 +460,41 @@ class ProductController extends Controller
         ]);
 
         try {
-            // Use keyword or default to empty string if only category is selected
             $keyword = $request->keyword ?? '';
+            $categoryId = $request->get('category_id');
 
-            $result = $this->aliexpressTextService->searchProductsByText(
-                $keyword,
-                [
-                    'page' => $request->get('page', 1),
-                    'limit' => $request->get('per_page', 10),
-                    'category_id' => $request->get('category_id'),
-                    'sort_by' => $request->get('sort_by'),
-                    'country' => $request->get('country', 'AE'),
-                    'currency' => $request->get('currency', 'AED'),
-                    'locale' => $request->get('locale', 'en_US'),
-                ]
-            );
+            // If only category is selected (no keyword), use category-specific API
+            if (empty($keyword) && !empty($categoryId)) {
+                Log::info('Using category-specific API', ['category_id' => $categoryId]);
+
+                $result = $this->aliexpressCategoryService->getProductsByCategory(
+                    (int)$categoryId,
+                    [
+                        'page' => $request->get('page', 1),
+                        'limit' => $request->get('per_page', 10),
+                        'sort' => $request->get('sort_by'),
+                        'country' => $request->get('country', 'AE'),
+                        'currency' => $request->get('currency', 'AED'),
+                        'locale' => $request->get('locale', 'en_US'),
+                    ]
+                );
+            } else {
+                // Use text search API when keyword is provided
+                Log::info('Using text search API', ['keyword' => $keyword, 'category_id' => $categoryId]);
+
+                $result = $this->aliexpressTextService->searchProductsByText(
+                    $keyword,
+                    [
+                        'page' => $request->get('page', 1),
+                        'limit' => $request->get('per_page', 10),
+                        'category_id' => $categoryId,
+                        'sort_by' => $request->get('sort_by'),
+                        'country' => $request->get('country', 'AE'),
+                        'currency' => $request->get('currency', 'AED'),
+                        'locale' => $request->get('locale', 'en_US'),
+                    ]
+                );
+            }
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
