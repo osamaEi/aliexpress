@@ -16,6 +16,10 @@ class Product extends Model
         'description',
         'short_description',
         'price',
+        'currency',
+        'original_price',
+        'markup_amount',
+        'markup_percentage',
         'compare_price',
         'cost',
         'sku',
@@ -38,6 +42,9 @@ class Product extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'original_price' => 'decimal:2',
+        'markup_amount' => 'decimal:2',
+        'markup_percentage' => 'decimal:2',
         'compare_price' => 'decimal:2',
         'cost' => 'decimal:2',
         'aliexpress_price' => 'decimal:2',

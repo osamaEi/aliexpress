@@ -116,7 +116,8 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load('category');
-        return view('products.show', compact('product'));
+        $categories = Category::active()->get();
+        return view('products.show', compact('product', 'categories'));
     }
 
     /**
@@ -139,6 +140,10 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'short_description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
+            'currency' => 'nullable|string|max:3',
+            'original_price' => 'nullable|numeric|min:0',
+            'markup_amount' => 'nullable|numeric|min:0',
+            'markup_percentage' => 'nullable|numeric|min:0|max:1000',
             'compare_price' => 'nullable|numeric|min:0',
             'cost' => 'nullable|numeric|min:0',
             'sku' => 'nullable|string|max:255|unique:products,sku,' . $product->id,
@@ -633,6 +638,7 @@ class ProductController extends Controller
             'product_title' => 'required|string',
             'product_image' => 'nullable|string',
             'product_price' => 'nullable|numeric',
+            'currency' => 'nullable|string|max:3',
         ]);
 
         $user = auth()->user();
@@ -677,6 +683,8 @@ class ProductController extends Controller
                 'slug' => \Str::slug($request->product_title) . '-' . $aliexpressProductId,
                 'description' => 'Product imported from AliExpress',
                 'price' => $request->product_price ?? 0,
+                'currency' => $request->currency ?? 'AED',
+                'original_price' => $request->product_price ?? 0,
                 'images' => $request->product_image ? [$request->product_image] : [],
                 'aliexpress_id' => $aliexpressProductId,
                 'aliexpress_price' => $request->product_price ?? 0,

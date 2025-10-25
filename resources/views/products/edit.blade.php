@@ -105,22 +105,75 @@
                         </div>
                     </div>
 
-                    <!-- Price -->
-                    <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">Price <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price) }}" step="0.01" min="0" required>
-                            @error('price')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                    <!-- Currency -->
+                    <div class="col-md-3 mb-3">
+                        <label for="currency" class="form-label">Currency</label>
+                        <select class="form-select @error('currency') is-invalid @enderror" id="currency" name="currency">
+                            <option value="AED" {{ old('currency', $product->currency) == 'AED' ? 'selected' : '' }}>AED</option>
+                            <option value="USD" {{ old('currency', $product->currency) == 'USD' ? 'selected' : '' }}>USD</option>
+                            <option value="EUR" {{ old('currency', $product->currency) == 'EUR' ? 'selected' : '' }}>EUR</option>
+                            <option value="GBP" {{ old('currency', $product->currency) == 'GBP' ? 'selected' : '' }}>GBP</option>
+                            <option value="SAR" {{ old('currency', $product->currency) == 'SAR' ? 'selected' : '' }}>SAR</option>
+                            <option value="EGP" {{ old('currency', $product->currency) == 'EGP' ? 'selected' : '' }}>EGP</option>
+                        </select>
+                        @error('currency')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Original Price (from AliExpress) -->
+                    <div class="col-md-3 mb-3">
+                        <label for="original_price" class="form-label">Original Price</label>
+                        <input type="number" class="form-control @error('original_price') is-invalid @enderror" id="original_price" name="original_price" value="{{ old('original_price', $product->original_price) }}" step="0.01" min="0" readonly style="background-color: #f5f5f5;">
+                        @error('original_price')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Price from AliExpress</small>
+                    </div>
+
+                    <!-- Markup Amount -->
+                    <div class="col-md-3 mb-3">
+                        <label for="markup_amount" class="form-label">Add to Price (+)</label>
+                        <input type="number" class="form-control @error('markup_amount') is-invalid @enderror" id="markup_amount" name="markup_amount" value="{{ old('markup_amount', $product->markup_amount) }}" step="0.01" min="0">
+                        @error('markup_amount')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Extra amount to add</small>
+                    </div>
+
+                    <!-- Markup Percentage -->
+                    <div class="col-md-3 mb-3">
+                        <label for="markup_percentage" class="form-label">Markup (%)</label>
+                        <input type="number" class="form-control @error('markup_percentage') is-invalid @enderror" id="markup_percentage" name="markup_percentage" value="{{ old('markup_percentage', $product->markup_percentage) }}" step="0.01" min="0" max="1000">
+                        @error('markup_percentage')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Percentage markup</small>
+                    </div>
+
+                    <!-- Final Price (Auto-calculated) -->
+                    <div class="col-md-12 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-3">
+                                        <label for="price" class="form-label mb-0">Final Selling Price <span class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="currency-symbol">{{ $product->currency ?? 'AED' }}</span>
+                                            <input type="number" class="form-control form-control-lg @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price) }}" step="0.01" min="0" required>
+                                            @error('price')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            <strong>Calculation:</strong> Original Price + Markup Amount + (Original Price × Markup %)
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        @if($product->isAliexpressProduct())
-                            <small class="text-muted">
-                                AliExpress: ${{ number_format($product->aliexpress_price, 2) }}
-                                (Margin: {{ number_format($product->getProfitMargin(), 1) }}%)
-                            </small>
-                        @endif
                     </div>
 
                     <!-- Compare Price -->
@@ -192,4 +245,46 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Auto-calculate final price based on markup
+    document.addEventListener('DOMContentLoaded', function() {
+        const originalPriceInput = document.getElementById('original_price');
+        const markupAmountInput = document.getElementById('markup_amount');
+        const markupPercentageInput = document.getElementById('markup_percentage');
+        const finalPriceInput = document.getElementById('price');
+        const currencySelect = document.getElementById('currency');
+        const currencySymbol = document.getElementById('currency-symbol');
+
+        function calculateFinalPrice() {
+            const originalPrice = parseFloat(originalPriceInput.value) || 0;
+            const markupAmount = parseFloat(markupAmountInput.value) || 0;
+            const markupPercentage = parseFloat(markupPercentageInput.value) || 0;
+
+            // Calculate: Original Price + Markup Amount + (Original Price × Markup %)
+            const percentageAmount = originalPrice * (markupPercentage / 100);
+            const finalPrice = originalPrice + markupAmount + percentageAmount;
+
+            // Update final price field
+            finalPriceInput.value = finalPrice.toFixed(2);
+        }
+
+        // Update currency symbol
+        function updateCurrencySymbol() {
+            currencySymbol.textContent = currencySelect.value;
+        }
+
+        // Add event listeners
+        markupAmountInput.addEventListener('input', calculateFinalPrice);
+        markupPercentageInput.addEventListener('input', calculateFinalPrice);
+        originalPriceInput.addEventListener('input', calculateFinalPrice);
+        currencySelect.addEventListener('change', updateCurrencySymbol);
+
+        // Calculate on page load
+        calculateFinalPrice();
+    });
+</script>
 @endsection
+
+
+

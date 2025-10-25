@@ -318,7 +318,7 @@
                                                 <button
                                                     type="button"
                                                     class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
-                                                    onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['sale_price'] }}, this)"
+                                                    onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['sale_price'] }}, '{{ request('currency', 'AED') }}', this)"
                                                     data-product-id="{{ $product['item_id'] }}"
                                                 >
                                                     <i class="ri-pushpin-line me-1"></i> Assign to Me
@@ -499,7 +499,7 @@
     }
 
     // Assign product to seller function
-    function assignProduct(productId, productTitle, productImage, productPrice, buttonElement) {
+    function assignProduct(productId, productTitle, productImage, productPrice, currency, buttonElement) {
         // Show loading state
         const originalHtml = buttonElement.innerHTML;
         buttonElement.disabled = true;
@@ -520,7 +520,8 @@
                 aliexpress_product_id: productId,
                 product_title: productTitle,
                 product_image: productImage,
-                product_price: productPrice
+                product_price: productPrice,
+                currency: currency
             })
         })
         .then(response => response.json())
