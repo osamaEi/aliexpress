@@ -55,13 +55,12 @@ class AliexpressTextService
     {
         $timestamp = round(microtime(true) * 1000);
 
-        // If only category is provided without keyword, use generic search terms
-        // AliExpress API may not support category-only filtering effectively
-        // We'll try with generic keywords that are likely to match products in any category
+        // If only category is provided without keyword, use very generic search terms
+        // AliExpress requires a keyword - we use very common words that match most products
         if (empty($keyword) && !empty($options['category_id'])) {
-            // Try common generic terms - empty string doesn't work
-            // Using very short common words that appear in many products
-            $keyword = 'new'; // Generic term that works across categories
+            // Use empty space or very common single letter that appears in most product titles
+            // These keywords are generic enough to return many products when filtered by category
+            $keyword = ' '; // Space character - most generic possible
         }
 
         // Build API parameters - IMPORTANT: Use exact parameter names from API docs
