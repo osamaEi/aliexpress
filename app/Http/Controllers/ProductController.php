@@ -473,6 +473,7 @@ class ProductController extends Controller
                         'page' => $request->get('page', 1),
                         'limit' => $request->get('per_page', 10),
                         'sort' => $request->get('sort_by'),
+                        'feed_name' => $request->get('feed_name', 'DS_bestselling'),
                         'country' => $request->get('country', 'AE'),
                         'currency' => $request->get('currency', 'AED'),
                         'locale' => $request->get('locale', 'en_US'),

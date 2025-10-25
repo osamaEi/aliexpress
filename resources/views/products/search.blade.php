@@ -77,11 +77,39 @@
                     </div>
                 </div>
 
-                <!-- Hidden input for category filter (always present) -->
+                <!-- Hidden inputs for filters -->
                 <input type="hidden" name="category_id" id="category_id" value="{{ request('category_id') }}">
+                <input type="hidden" name="feed_name" id="feed_name" value="{{ request('feed_name', 'DS_bestselling') }}">
 
-                <!-- Subcategories as Boxes -->
-                @if(isset($allCategories) && count($allCategories) > 0)
+                <!-- Product Feed Filter Buttons -->
+                <div class="mt-3">
+                    <label class="form-label text-muted small">Product Type:</label>
+                    <div class="btn-group" role="group">
+                        <button type="button"
+                                class="btn btn-sm {{ request('feed_name') == 'DS_bestselling' || !request('feed_name') ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectFeed('DS_bestselling', this)">
+                            <i class="ri-fire-line me-1"></i> Best Seller
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm {{ request('feed_name') == 'DS_newarrival' ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectFeed('DS_newarrival', this)">
+                            <i class="ri-sparkling-line me-1"></i> Newest
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm {{ request('feed_name') == 'DS_featured' ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectFeed('DS_featured', this)">
+                            <i class="ri-star-line me-1"></i> Featured
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm {{ request('feed_name') == 'DS_topselling' ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectFeed('DS_topselling', this)">
+                            <i class="ri-trophy-line me-1"></i> Top Selling
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Categories Only -->
+                @if(isset($categories) && count($categories) > 0)
                 <div class="mt-4">
                     <label class="form-label text-muted small">Select Category:</label>
 
@@ -95,41 +123,36 @@
                         </div>
                     </div>
 
-                    <!-- Display all subcategories as boxes -->
-                    <div class="subcategories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px;">
-                        @foreach($allCategories as $category)
-                        <div class="subcategory-card text-center p-3 rounded border {{ request('category_id') == $category->aliexpress_category_id ? 'border-primary bg-primary bg-opacity-10' : 'bg-white border-light' }}"
+                    <!-- Display only main categories as boxes -->
+                    <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
+                        @foreach($categories as $category)
+                        <div class="category-card text-center p-3 rounded border {{ request('category_id') == $category->aliexpress_category_id ? 'border-primary bg-primary bg-opacity-10' : 'bg-white border-light' }}"
                              style="cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"
                              onclick="selectCategory('{{ $category->aliexpress_category_id }}', this)"
                              onmouseover="this.style.borderColor='#007bff'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.15)';"
                              onmouseout="if(!this.classList.contains('border-primary')) { this.style.borderColor='#dee2e6'; } this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)';">
 
-                            <div class="subcategory-icon mb-2" style="width: 50px; height: 50px; margin: 0 auto; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <div class="category-icon mb-2" style="width: 60px; height: 60px; margin: 0 auto; background: #f8f9fa; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                                 @if($category->photo)
-                                    <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                    <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name }}" style="width: 48px; height: 48px; object-fit: contain;">
                                 @elseif($category->image)
-                                    <img src="{{ $category->image }}" alt="{{ $category->name }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                    <img src="{{ $category->image }}" alt="{{ $category->name }}" style="width: 48px; height: 48px; object-fit: contain;">
                                 @else
-                                    <i class="ri-folder-2-line" style="font-size: 24px; color: #6c757d;"></i>
+                                    <i class="ri-folder-line" style="font-size: 28px; color: #6c757d;"></i>
                                 @endif
                             </div>
 
-                            <div class="subcategory-name" style="font-size: 11px; line-height: 1.3; font-weight: 500; min-height: 32px;">
+                            <div class="category-name" style="font-size: 12px; line-height: 1.3; font-weight: 600;">
                                 {{ $category->name }}
                                 @if($category->name_ar)
-                                    <div class="text-muted mt-1" dir="rtl" style="font-size: 10px;">{{ $category->name_ar }}</div>
+                                    <div class="text-muted mt-1" dir="rtl" style="font-size: 11px; font-weight: 500;">{{ $category->name_ar }}</div>
                                 @endif
                             </div>
 
-                            @if($category->parent_id)
-                                @php
-                                    $parent = $allCategories->firstWhere('id', $category->parent_id);
-                                @endphp
-                                @if($parent)
-                                    <div class="mt-1">
-                                        <span class="badge bg-light text-muted" style="font-size: 8px;">{{ $parent->name }}</span>
-                                    </div>
-                                @endif
+                            @if(isset($category->children) && count($category->children) > 0)
+                                <div class="mt-2">
+                                    <span class="badge bg-info" style="font-size: 9px;">{{ count($category->children) }} subcategories</span>
+                                </div>
                             @endif
                         </div>
                         @endforeach
@@ -408,6 +431,27 @@
             currencySelect.value = localeMap[locale].currency;
         }
     });
+
+    // Feed selection function - filter by bestseller, newest, featured, etc.
+    function selectFeed(feedName, element) {
+        // Update hidden input with selected feed name
+        document.getElementById('feed_name').value = feedName;
+
+        // Remove active state from all feed buttons
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        });
+
+        // Add active state to clicked button
+        if (element) {
+            element.classList.remove('btn-outline-primary');
+            element.classList.add('btn-primary');
+        }
+
+        // Submit the form to fetch products
+        document.getElementById('searchForm').submit();
+    }
 
     // Category selection function - displays products from AliExpress for selected category
     function selectCategory(categoryId, element) {

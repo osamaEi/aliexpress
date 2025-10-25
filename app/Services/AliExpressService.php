@@ -1148,7 +1148,7 @@ class AliExpressService
             'app_signature' => 'dropshipping',
             'category_id' => $categoryId,
             'country' => $options['country'] ?? 'AE',
-            'feed_name' => 'DS_bestselling', // or 'DS_featured', 'DS_newarrival'
+            'feed_name' => $options['feed_name'] ?? 'DS_bestselling', // DS_bestselling, DS_featured, DS_newarrival, DS_topselling
             'page_no' => $options['page'] ?? 1,
             'page_size' => $options['limit'] ?? 10,
             'sort' => $options['sort'] ?? 'SALE_PRICE_ASC',
@@ -1159,6 +1159,7 @@ class AliExpressService
         Log::debug('AliExpress Category Products Request', [
             'method' => 'aliexpress.ds.recommend.feed.get',
             'category_id' => $categoryId,
+            'feed_name' => $params['feed_name'],
             'params' => $params,
         ]);
 
