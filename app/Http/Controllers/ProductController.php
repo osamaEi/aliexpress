@@ -468,12 +468,17 @@ class ProductController extends Controller
                 // Category selected - get products from category immediately
                 Log::info('Getting products by category', ['category_id' => $categoryId]);
 
-                // Try multiple generic keywords until we find products
-                $genericKeywords = ['new', 'best', 'top', 'hot', 'sale', 'quality', 'popular', 'fashion'];
+                // Try multiple generic keywords and find the one with most products
+                $genericKeywords = [
+                    'new', 'best', 'top', 'hot', 'sale', 'fashion', 'quality', 'style',
+                    'a', 's', 't', 'e', 'i', 'o', 'n', 'r' // Single letters are very generic
+                ];
                 $result = null;
+                $bestResult = null;
+                $maxProducts = 0;
 
                 foreach ($genericKeywords as $testKeyword) {
-                    $result = $this->aliexpressTextService->searchProductsByText(
+                    $tempResult = $this->aliexpressTextService->searchProductsByText(
                         $testKeyword,
                         [
                             'page' => $request->get('page', 1),
@@ -486,28 +491,36 @@ class ProductController extends Controller
                         ]
                     );
 
-                    // If we got products, use this result
-                    if (!empty($result['products']) && count($result['products']) > 0) {
-                        Log::info('Found products', [
+                    $productCount = $tempResult['total_count'] ?? 0;
+
+                    // Keep the result with most products
+                    if ($productCount > $maxProducts) {
+                        $maxProducts = $productCount;
+                        $bestResult = $tempResult;
+
+                        Log::info('Better result found', [
                             'keyword' => $testKeyword,
-                            'count' => count($result['products']),
-                            'total' => $result['total_count']
+                            'count' => count($tempResult['products'] ?? []),
+                            'total' => $productCount
                         ]);
+                    }
+
+                    // If we found 100+ products, that's excellent - stop searching
+                    if ($productCount >= 100) {
                         break;
                     }
                 }
 
-                // If still no products after trying all keywords
-                if (empty($result) || empty($result['products'])) {
-                    Log::warning('No products found for category after trying all keywords', [
-                        'category_id' => $categoryId
-                    ]);
-                    $result = [
-                        'products' => [],
-                        'total_count' => 0,
-                        'current_page' => 1,
-                        'page_size' => 0,
-                    ];
+                // Use the best result we found
+                $result = $bestResult ?? [
+                    'products' => [],
+                    'total_count' => 0,
+                    'current_page' => 1,
+                    'page_size' => 0,
+                ];
+
+                if (empty($result['products'])) {
+                    Log::warning('No products found for category', ['category_id' => $categoryId]);
                 }
             } elseif (!empty($keyword)) {
                 // Keyword search - search products by keyword only
