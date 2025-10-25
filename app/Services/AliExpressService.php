@@ -1137,6 +1137,32 @@ class AliExpressService
     }
 
     /**
+     * Get available feed names
+     * API: aliexpress.ds.feedname.get
+     */
+    public function getAvailableFeedNames()
+    {
+        $accessToken = $this->getAccessToken();
+
+        $params = [
+            'app_signature' => 'dropshipping',
+        ];
+
+        $data = $this->makeRequest('aliexpress.ds.feedname.get', $params, true);
+
+        Log::debug('AliExpress Feed Names Response', [
+            'has_response' => isset($data['aliexpress_ds_feedname_get_response']),
+            'data' => $data,
+        ]);
+
+        if (isset($data['aliexpress_ds_feedname_get_response']['resp_result']['result'])) {
+            return $data['aliexpress_ds_feedname_get_response']['resp_result']['result'];
+        }
+
+        return [];
+    }
+
+    /**
      * Get products by category ID using recommended feed
      * API: aliexpress.ds.recommend.feed.get
      */
@@ -1144,14 +1170,43 @@ class AliExpressService
     {
         $accessToken = $this->getAccessToken();
 
+        // First, get available feed names to use a valid one
+        $feedNames = $this->getAvailableFeedNames();
+        $defaultFeedName = 'DS Best Seller';  // Default feed name
+
+        // If we have feed names from API, use the first one or match the requested type
+        if (!empty($feedNames['promos'])) {
+            $requestedType = $options['feed_name'] ?? 'bestselling';
+
+            // Try to find a matching feed
+            foreach ($feedNames['promos'] as $promo) {
+                $promoName = strtolower($promo['promo_name'] ?? '');
+                if (strpos($promoName, 'best') !== false && strpos($requestedType, 'best') !== false) {
+                    $defaultFeedName = $promo['promo_name'];
+                    break;
+                } elseif (strpos($promoName, 'new') !== false && strpos($requestedType, 'new') !== false) {
+                    $defaultFeedName = $promo['promo_name'];
+                    break;
+                } elseif (strpos($promoName, 'featured') !== false && strpos($requestedType, 'featured') !== false) {
+                    $defaultFeedName = $promo['promo_name'];
+                    break;
+                }
+            }
+
+            // If no match, use first available feed
+            if (isset($feedNames['promos'][0]['promo_name'])) {
+                $defaultFeedName = $feedNames['promos'][0]['promo_name'];
+            }
+        }
+
         $params = [
             'app_signature' => 'dropshipping',
-            'category_id' => $categoryId,
+            'category_id' => (string)$categoryId,
             'country' => $options['country'] ?? 'AE',
-            'feed_name' => $options['feed_name'] ?? 'DS_bestselling', // DS_bestselling, DS_featured, DS_newarrival, DS_topselling
+            'feed_name' => $defaultFeedName,
             'page_no' => $options['page'] ?? 1,
             'page_size' => $options['limit'] ?? 10,
-            'sort' => $options['sort'] ?? 'SALE_PRICE_ASC',
+            'sort' => $options['sort'] ?? 'priceAsc',
             'target_currency' => $options['currency'] ?? 'AED',
             'target_language' => $options['locale'] ?? 'EN',
         ];
