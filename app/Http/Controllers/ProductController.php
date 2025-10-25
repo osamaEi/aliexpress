@@ -622,4 +622,94 @@ class ProductController extends Controller
             return back()->with('error', 'Failed to search products: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Assign AliExpress product to current seller
+     */
+    public function assignProduct(Request $request)
+    {
+        $request->validate([
+            'aliexpress_product_id' => 'required|string',
+            'product_title' => 'required|string',
+            'product_image' => 'nullable|string',
+            'product_price' => 'nullable|numeric',
+        ]);
+
+        $user = auth()->user();
+
+        // Check if user is a seller
+        if ($user->user_type !== 'seller') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only sellers can assign products.'
+            ], 403);
+        }
+
+        $aliexpressProductId = $request->aliexpress_product_id;
+
+        // Check if already assigned to this user (check both through relationship and direct DB)
+        $alreadyAssigned = $user->assignedProducts()
+            ->wherePivot('aliexpress_product_id', $aliexpressProductId)
+            ->exists();
+
+        // Also check direct assignment without product_id
+        if (!$alreadyAssigned) {
+            $alreadyAssigned = \DB::table('product_user')
+                ->where('user_id', $user->id)
+                ->where('aliexpress_product_id', $aliexpressProductId)
+                ->exists();
+        }
+
+        if ($alreadyAssigned) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This product is already assigned to you.'
+            ], 400);
+        }
+
+        // Check if product already exists in products table
+        $product = Product::where('aliexpress_product_id', $aliexpressProductId)->first();
+
+        if ($product) {
+            // Product exists, just assign it
+            $user->assignedProducts()->attach($product->id, [
+                'aliexpress_product_id' => $aliexpressProductId,
+                'status' => 'assigned'
+            ]);
+        } else {
+            // Product doesn't exist yet, save to pivot table directly
+            \DB::table('product_user')->insert([
+                'user_id' => $user->id,
+                'product_id' => null,
+                'aliexpress_product_id' => $aliexpressProductId,
+                'status' => 'assigned',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product assigned successfully! You can now import it to your store.'
+        ]);
+    }
+
+    /**
+     * Get assigned products for current seller
+     */
+    public function myAssignedProducts()
+    {
+        $user = auth()->user();
+
+        if ($user->user_type !== 'seller') {
+            return redirect()->back()->with('error', 'Only sellers can view assigned products.');
+        }
+
+        $assignedProducts = $user->assignedProducts()
+            ->withPivot('aliexpress_product_id', 'status')
+            ->orderBy('product_user.created_at', 'desc')
+            ->paginate(20);
+
+        return view('products.assigned', compact('assignedProducts'));
+    }
 }

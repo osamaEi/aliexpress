@@ -66,6 +66,16 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
+    /**
+     * Products assigned to this user/seller
+     */
+    public function assignedProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_user')
+            ->withPivot('aliexpress_product_id', 'status')
+            ->withTimestamps();
+    }
+
     public function hasRole(string|array $roles): bool
     {
         if (is_string($roles)) {

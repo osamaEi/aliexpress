@@ -312,6 +312,20 @@
                                         >
                                             <i class="ri-external-link-line me-1"></i> View on AliExpress
                                         </a>
+
+                                        @auth
+                                            @if(auth()->user()->user_type === 'seller')
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
+                                                    onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['sale_price'] }}, this)"
+                                                    data-product-id="{{ $product['item_id'] }}"
+                                                >
+                                                    <i class="ri-pushpin-line me-1"></i> Assign to Me
+                                                </button>
+                                            @endif
+                                        @endauth
+
                                         <button
                                             type="button"
                                             class="btn btn-sm btn-success w-100"
@@ -482,6 +496,89 @@
         // Submit the form to fetch products from AliExpress
         // Works with or without keyword - category alone is enough
         document.getElementById('searchForm').submit();
+    }
+
+    // Assign product to seller function
+    function assignProduct(productId, productTitle, productImage, productPrice, buttonElement) {
+        // Show loading state
+        const originalHtml = buttonElement.innerHTML;
+        buttonElement.disabled = true;
+        buttonElement.innerHTML = '<i class="ri-loader-4-line me-1"></i> Assigning...';
+
+        // CSRF token for Laravel
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        // Make AJAX request
+        fetch('{{ route("products.assign") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                aliexpress_product_id: productId,
+                product_title: productTitle,
+                product_image: productImage,
+                product_price: productPrice
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Change button to "Assigned" state
+                buttonElement.classList.remove('btn-warning');
+                buttonElement.classList.add('btn-secondary');
+                buttonElement.innerHTML = '<i class="ri-check-line me-1"></i> Assigned';
+                buttonElement.disabled = true;
+
+                // Show success message
+                showToast('success', data.message || 'Product assigned successfully!');
+            } else {
+                // Restore button
+                buttonElement.disabled = false;
+                buttonElement.innerHTML = originalHtml;
+
+                // Show error message
+                showToast('error', data.message || 'Failed to assign product');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = originalHtml;
+            showToast('error', 'An error occurred. Please try again.');
+        });
+    }
+
+    // Toast notification function
+    function showToast(type, message) {
+        // Create toast container if it doesn't exist
+        let toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toastContainer';
+            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+            document.body.appendChild(toastContainer);
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+        toast.style.cssText = 'min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+        toast.innerHTML = `
+            <i class="ri-${type === 'success' ? 'checkbox-circle' : 'error-warning'}-line me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
     }
 
     // Import product function

@@ -123,7 +123,7 @@
                 </li>
 
                 <!-- AliExpress -->
-                <li class="menu-item {{ request()->routeIs('products.search-*') || request()->routeIs('products.aliexpress.*') ? 'open active' : '' }}">
+                <li class="menu-item {{ request()->routeIs('products.search-*') || request()->routeIs('products.aliexpress.*') || request()->routeIs('products.my-assigned') ? 'open active' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons ri-shopping-cart-line"></i>
                         <div data-i18n="AliExpress">AliExpress</div>
@@ -134,6 +134,16 @@
                                 <div data-i18n="Search Products">Search Products</div>
                             </a>
                         </li>
+
+                        @auth
+                            @if(auth()->user()->user_type === 'seller')
+                                <li class="menu-item {{ request()->routeIs('products.my-assigned') ? 'active' : '' }}">
+                                    <a href="{{ route('products.my-assigned') }}" class="menu-link">
+                                        <div data-i18n="My Assigned Products">My Assigned Products</div>
+                                    </a>
+                                </li>
+                            @endif
+                        @endauth
 
                         <li class="menu-item {{ request()->routeIs('products.aliexpress.import') ? 'active' : '' }}">
                             <a href="{{ route('products.aliexpress.import') }}" class="menu-link">

@@ -76,6 +76,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/aliexpress/search', [ProductController::class, 'searchAliexpress'])->name('products.aliexpress.search');
     Route::post('/products/aliexpress/import-product', [ProductController::class, 'importFromAliexpress'])->name('products.aliexpress.import-product');
 
+    // Product assignment routes (for sellers)
+    Route::post('/products/assign', [ProductController::class, 'assignProduct'])->name('products.assign');
+    Route::get('/my-assigned-products', [ProductController::class, 'myAssignedProducts'])->name('products.my-assigned');
+
     // Product routes (must be after specific routes to avoid conflicts)
     Route::resource('products', ProductController::class);
     Route::post('/products/{product}/sync', [ProductController::class, 'sync'])->name('products.sync');
