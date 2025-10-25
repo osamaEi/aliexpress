@@ -217,7 +217,7 @@ class ProductController extends Controller
             ], 400);
 
         } catch (\Exception $e) {
-            \Log::error('AliExpress Search Error', [
+            Log::error('AliExpress Search Error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -293,7 +293,7 @@ class ProductController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('AliExpress Import Error', [
+            Log::error('AliExpress Import Error', [
                 'message' => $e->getMessage(),
                 'product_id' => $request->aliexpress_id,
                 'trace' => $e->getTraceAsString()
@@ -354,7 +354,7 @@ class ProductController extends Controller
                 ->with('success', 'Product synced successfully.');
 
         } catch (\Exception $e) {
-            \Log::error('AliExpress Sync Error', [
+            Log::error('AliExpress Sync Error', [
                 'message' => $e->getMessage(),
                 'product_id' => $product->id,
                 'aliexpress_id' => $product->aliexpress_id,
@@ -409,7 +409,7 @@ class ProductController extends Controller
                     $failed++;
                 }
             } catch (\Exception $e) {
-                \Log::error('AliExpress Bulk Sync Error', [
+                Log::error('AliExpress Bulk Sync Error', [
                     'message' => $e->getMessage(),
                     'product_id' => $product->id,
                     'aliexpress_id' => $product->aliexpress_id,
@@ -463,28 +463,13 @@ class ProductController extends Controller
             $keyword = $request->keyword ?? '';
             $categoryId = $request->get('category_id');
 
-            // If only category is selected (no keyword), use category-specific API
-            if (empty($keyword) && !empty($categoryId)) {
-                Log::info('Using category-specific API', ['category_id' => $categoryId]);
-
-                $result = $this->aliexpressCategoryService->getProductsByCategory(
-                    (int)$categoryId,
-                    [
-                        'page' => $request->get('page', 1),
-                        'limit' => $request->get('per_page', 10),
-                        'sort' => $request->get('sort_by'),
-                        'feed_name' => $request->get('feed_name', 'DS_bestselling'),
-                        'country' => $request->get('country', 'AE'),
-                        'currency' => $request->get('currency', 'AED'),
-                        'locale' => $request->get('locale', 'en_US'),
-                    ]
-                );
-            } else {
-                // Use text search API when keyword is provided
-                Log::info('Using text search API', ['keyword' => $keyword, 'category_id' => $categoryId]);
+            // Separate: Category selection vs Keyword search
+            if (!empty($categoryId)) {
+                // Category selected - get products from category immediately
+                Log::info('Getting products by category', ['category_id' => $categoryId]);
 
                 $result = $this->aliexpressTextService->searchProductsByText(
-                    $keyword,
+                    'product', // Generic keyword to get all products in category
                     [
                         'page' => $request->get('page', 1),
                         'limit' => $request->get('per_page', 10),
@@ -495,6 +480,29 @@ class ProductController extends Controller
                         'locale' => $request->get('locale', 'en_US'),
                     ]
                 );
+            } elseif (!empty($keyword)) {
+                // Keyword search - search products by keyword only
+                Log::info('Searching products by keyword', ['keyword' => $keyword]);
+
+                $result = $this->aliexpressTextService->searchProductsByText(
+                    $keyword,
+                    [
+                        'page' => $request->get('page', 1),
+                        'limit' => $request->get('per_page', 10),
+                        'sort_by' => $request->get('sort_by'),
+                        'country' => $request->get('country', 'AE'),
+                        'currency' => $request->get('currency', 'AED'),
+                        'locale' => $request->get('locale', 'en_US'),
+                    ]
+                );
+            } else {
+                // No category and no keyword selected
+                $result = [
+                    'products' => [],
+                    'total_count' => 0,
+                    'current_page' => 1,
+                    'page_size' => 0,
+                ];
             }
 
             if ($request->ajax() || $request->wantsJson()) {
@@ -533,7 +541,7 @@ class ProductController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('AliExpress Text Search Error', [
+            Log::error('AliExpress Text Search Error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
