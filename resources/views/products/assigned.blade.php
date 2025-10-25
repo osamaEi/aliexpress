@@ -91,29 +91,29 @@
                                 @endphp
                                 <tr>
                                     <td>
-                                        @if($assignedProduct->id)
-                                            <img src="{{ $assignedProduct->image ?? 'https://via.placeholder.com/80?text=No+Image' }}"
+                                        @php
+                                            $productImage = null;
+                                            if($assignedProduct->images && is_array($assignedProduct->images) && count($assignedProduct->images) > 0) {
+                                                $productImage = $assignedProduct->images[0];
+                                            }
+                                        @endphp
+                                        @if($productImage)
+                                            <img src="{{ $productImage }}"
                                                  alt="Product"
                                                  class="img-thumbnail"
                                                  style="width: 60px; height: 60px; object-fit: cover;">
                                         @else
                                             <div class="bg-light d-flex align-items-center justify-content-center"
                                                  style="width: 60px; height: 60px; border-radius: 8px;">
-                                                <i class="ri-question-line text-muted" style="font-size: 24px;"></i>
+                                                <i class="ri-image-line text-muted" style="font-size: 24px;"></i>
                                             </div>
                                         @endif
                                     </td>
                                     <td>
-                                        @if($assignedProduct->id)
-                                            <strong>{{ $assignedProduct->name }}</strong>
-                                            <br>
-                                            @if($assignedProduct->price)
-                                                <span class="text-primary fw-bold">AED {{ number_format($assignedProduct->price, 2) }}</span>
-                                            @endif
-                                        @else
-                                            <span class="text-muted">Product not imported yet</span>
-                                            <br>
-                                            <small class="text-muted">Import to see details</small>
+                                        <strong>{{ $assignedProduct->name }}</strong>
+                                        <br>
+                                        @if($assignedProduct->price)
+                                            <span class="text-primary fw-bold">AED {{ number_format($assignedProduct->price, 2) }}</span>
                                         @endif
                                     </td>
                                     <td>
@@ -142,32 +142,19 @@
                                         </small>
                                     </td>
                                     <td>
-                                        @if($assignedProduct->id)
-                                            <!-- Product exists in database -->
-                                            <a href="{{ route('products.show', $assignedProduct->id) }}"
-                                               class="btn btn-sm btn-outline-primary mb-1">
-                                                <i class="ri-eye-line me-1"></i> View
-                                            </a>
-                                            @if($status === 'assigned' || $status === 'imported')
-                                                <a href="{{ route('products.edit', $assignedProduct->id) }}"
-                                                   class="btn btn-sm btn-outline-secondary mb-1">
-                                                    <i class="ri-edit-line me-1"></i> Edit
-                                                </a>
-                                            @endif
-                                        @else
-                                            <!-- Product not imported yet -->
-                                            <a href="https://www.aliexpress.com/item/{{ $aliexpressProductId }}.html"
-                                               target="_blank"
-                                               class="btn btn-sm btn-outline-primary mb-1">
-                                                <i class="ri-external-link-line me-1"></i> View on AliExpress
-                                            </a>
-                                            <button
-                                                type="button"
-                                                class="btn btn-sm btn-success mb-1"
-                                                onclick="importAssignedProduct('{{ $aliexpressProductId }}')">
-                                                <i class="ri-download-line me-1"></i> Import Now
-                                            </button>
-                                        @endif
+                                        <a href="{{ route('products.show', $assignedProduct->id) }}"
+                                           class="btn btn-sm btn-outline-primary mb-1">
+                                            <i class="ri-eye-line me-1"></i> View
+                                        </a>
+                                        <a href="{{ route('products.edit', $assignedProduct->id) }}"
+                                           class="btn btn-sm btn-outline-secondary mb-1">
+                                            <i class="ri-edit-line me-1"></i> Edit
+                                        </a>
+                                        <a href="https://www.aliexpress.com/item/{{ $aliexpressProductId }}.html"
+                                           target="_blank"
+                                           class="btn btn-sm btn-outline-info mb-1">
+                                            <i class="ri-external-link-line me-1"></i> AliExpress
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -194,27 +181,6 @@
     </div>
 </div>
 
-<script>
-    function importAssignedProduct(aliexpressProductId) {
-        if (!confirm('Import this product to your store?')) {
-            return;
-        }
-
-        // Show loading state
-        const button = event.target;
-        const originalHtml = button.innerHTML;
-        button.disabled = true;
-        button.innerHTML = '<i class="ri-loader-4-line me-1"></i> Importing...';
-
-        // You can implement AJAX import here or redirect to import page
-        // For now, show a message
-        alert('Import functionality will be implemented. Product ID: ' + aliexpressProductId);
-
-        // Restore button
-        button.disabled = false;
-        button.innerHTML = originalHtml;
-    }
-</script>
 
 <style>
     .card-body h3 {

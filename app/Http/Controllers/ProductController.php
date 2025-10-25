@@ -668,29 +668,32 @@ class ProductController extends Controller
         }
 
         // Check if product already exists in products table
-        $product = Product::where('aliexpress_product_id', $aliexpressProductId)->first();
+        $product = Product::where('aliexpress_id', $aliexpressProductId)->first();
 
-        if ($product) {
-            // Product exists, just assign it
-            $user->assignedProducts()->attach($product->id, [
-                'aliexpress_product_id' => $aliexpressProductId,
-                'status' => 'assigned'
-            ]);
-        } else {
-            // Product doesn't exist yet, save to pivot table directly
-            \DB::table('product_user')->insert([
-                'user_id' => $user->id,
-                'product_id' => null,
-                'aliexpress_product_id' => $aliexpressProductId,
-                'status' => 'assigned',
-                'created_at' => now(),
-                'updated_at' => now(),
+        if (!$product) {
+            // Create the product in products table
+            $product = Product::create([
+                'name' => $request->product_title,
+                'slug' => \Str::slug($request->product_title) . '-' . $aliexpressProductId,
+                'description' => 'Product imported from AliExpress',
+                'price' => $request->product_price ?? 0,
+                'images' => $request->product_image ? [$request->product_image] : [],
+                'aliexpress_id' => $aliexpressProductId,
+                'aliexpress_price' => $request->product_price ?? 0,
+                'stock_quantity' => 0,
+                'is_active' => false, // Set as inactive until seller publishes
             ]);
         }
 
+        // Assign product to user via pivot table
+        $user->assignedProducts()->attach($product->id, [
+            'aliexpress_product_id' => $aliexpressProductId,
+            'status' => 'assigned'
+        ]);
+
         return response()->json([
             'success' => true,
-            'message' => 'Product assigned successfully! You can now import it to your store.'
+            'message' => 'Product assigned successfully! You can now view it in "My Assigned Products".'
         ]);
     }
 
