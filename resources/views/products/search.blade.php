@@ -79,31 +79,36 @@
 
                 <!-- Hidden inputs for filters -->
                 <input type="hidden" name="category_id" id="category_id" value="{{ request('category_id') }}">
-                <input type="hidden" name="feed_name" id="feed_name" value="{{ request('feed_name', 'DS_bestselling') }}">
+                <input type="hidden" name="sort_filter" id="sort_filter" value="{{ request('sort_filter', 'orders') }}">
 
-                <!-- Product Feed Filter Buttons -->
+                <!-- Product Sort Filter Buttons -->
                 <div class="mt-3">
-                    <label class="form-label text-muted small">Product Type:</label>
+                    <label class="form-label text-muted small">Sort By:</label>
                     <div class="btn-group" role="group">
                         <button type="button"
-                                class="btn btn-sm {{ request('feed_name') == 'DS_bestselling' || !request('feed_name') ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectFeed('DS_bestselling', this)">
+                                class="btn btn-sm {{ request('sort_filter') == 'orders' || !request('sort_filter') ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectSortFilter('orders', this)">
                             <i class="ri-fire-line me-1"></i> Best Seller
                         </button>
                         <button type="button"
-                                class="btn btn-sm {{ request('feed_name') == 'DS_newarrival' ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectFeed('DS_newarrival', this)">
+                                class="btn btn-sm {{ request('sort_filter') == 'newest' ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectSortFilter('newest', this)">
                             <i class="ri-sparkling-line me-1"></i> Newest
                         </button>
                         <button type="button"
-                                class="btn btn-sm {{ request('feed_name') == 'DS_featured' ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectFeed('DS_featured', this)">
-                            <i class="ri-star-line me-1"></i> Featured
+                                class="btn btn-sm {{ request('sort_filter') == 'price_low' ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectSortFilter('price_low', this)">
+                            <i class="ri-arrow-down-line me-1"></i> Price: Low to High
                         </button>
                         <button type="button"
-                                class="btn btn-sm {{ request('feed_name') == 'DS_topselling' ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectFeed('DS_topselling', this)">
-                            <i class="ri-trophy-line me-1"></i> Top Selling
+                                class="btn btn-sm {{ request('sort_filter') == 'price_high' ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectSortFilter('price_high', this)">
+                            <i class="ri-arrow-up-line me-1"></i> Price: High to Low
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm {{ request('sort_filter') == 'rating' ? 'btn-primary' : 'btn-outline-primary' }}"
+                                onclick="selectSortFilter('rating', this)">
+                            <i class="ri-star-line me-1"></i> Top Rated
                         </button>
                     </div>
                 </div>
@@ -432,12 +437,12 @@
         }
     });
 
-    // Feed selection function - filter by bestseller, newest, featured, etc.
-    function selectFeed(feedName, element) {
-        // Update hidden input with selected feed name
-        document.getElementById('feed_name').value = feedName;
+    // Sort filter selection function
+    function selectSortFilter(sortType, element) {
+        // Update hidden input with selected sort filter
+        document.getElementById('sort_filter').value = sortType;
 
-        // Remove active state from all feed buttons
+        // Remove active state from all sort buttons
         document.querySelectorAll('.btn-group .btn').forEach(btn => {
             btn.classList.remove('btn-primary');
             btn.classList.add('btn-outline-primary');
@@ -449,7 +454,7 @@
             element.classList.add('btn-primary');
         }
 
-        // Submit the form to fetch products
+        // Submit the form to fetch products with new sort
         document.getElementById('searchForm').submit();
     }
 

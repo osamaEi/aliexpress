@@ -462,17 +462,37 @@ class ProductController extends Controller
         try {
             $keyword = $request->keyword ?? '';
             $categoryId = $request->get('category_id');
+            $sortFilter = $request->get('sort_filter', 'orders');
+
+            // Map sort filter to API sort_by parameter
+            $sortByMap = [
+                'orders' => 'orders,desc',        // Best Seller
+                'newest' => null,                 // Will use generic keyword 'new'
+                'price_low' => 'min_price,asc',   // Price: Low to High
+                'price_high' => 'min_price,desc', // Price: High to Low
+                'rating' => 'comments,desc',      // Top Rated
+            ];
+
+            $sortBy = $sortByMap[$sortFilter] ?? null;
 
             // Separate: Category selection vs Keyword search
             if (!empty($categoryId)) {
                 // Category selected - get products from category immediately
-                Log::info('Getting products by category', ['category_id' => $categoryId]);
+                Log::info('Getting products by category', [
+                    'category_id' => $categoryId,
+                    'sort_filter' => $sortFilter
+                ]);
 
-                // Try multiple generic keywords and find the one with most products
-                $genericKeywords = [
-                    'new', 'best', 'top', 'hot', 'sale', 'fashion', 'quality', 'style',
-                    'a', 's', 't', 'e', 'i', 'o', 'n', 'r' // Single letters are very generic
-                ];
+                // Adjust keywords based on sort filter
+                $genericKeywords = ['new', 'best', 'top', 'hot', 'sale', 'fashion', 'quality', 'style'];
+
+                // For 'newest' filter, prioritize 'new' keyword
+                if ($sortFilter === 'newest') {
+                    $genericKeywords = ['new', '2025', 'latest', 'fresh', 'recent', 'best', 'top', 'hot'];
+                }
+                // Add single letters for broader search
+                $genericKeywords = array_merge($genericKeywords, ['a', 's', 't', 'e', 'i', 'o', 'n', 'r']);
+
                 $result = null;
                 $bestResult = null;
                 $maxProducts = 0;
@@ -484,7 +504,7 @@ class ProductController extends Controller
                             'page' => $request->get('page', 1),
                             'limit' => $request->get('per_page', 10),
                             'category_id' => $categoryId,
-                            'sort_by' => $request->get('sort_by'),
+                            'sort_by' => $sortBy, // Use mapped sort parameter
                             'country' => $request->get('country', 'AE'),
                             'currency' => $request->get('currency', 'AED'),
                             'locale' => $request->get('locale', 'en_US'),
@@ -524,14 +544,17 @@ class ProductController extends Controller
                 }
             } elseif (!empty($keyword)) {
                 // Keyword search - search products by keyword only
-                Log::info('Searching products by keyword', ['keyword' => $keyword]);
+                Log::info('Searching products by keyword', [
+                    'keyword' => $keyword,
+                    'sort_filter' => $sortFilter
+                ]);
 
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $keyword,
                     [
                         'page' => $request->get('page', 1),
                         'limit' => $request->get('per_page', 10),
-                        'sort_by' => $request->get('sort_by'),
+                        'sort_by' => $sortBy, // Use mapped sort parameter
                         'country' => $request->get('country', 'AE'),
                         'currency' => $request->get('currency', 'AED'),
                         'locale' => $request->get('locale', 'en_US'),
