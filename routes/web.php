@@ -5,10 +5,22 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AliExpressTestController;
 use App\Http\Controllers\AliExpressController;
+use App\Http\Controllers\SellerRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+// Seller Registration Routes (Public - No Auth Required)
+Route::prefix('seller/register')->name('seller.register.')->group(function () {
+    Route::get('step-1', [SellerRegistrationController::class, 'showStep1'])->name('step1');
+    Route::post('step-1', [SellerRegistrationController::class, 'processStep1'])->name('step1.process');
+    Route::get('step-2', [SellerRegistrationController::class, 'showStep2'])->name('step2');
+    Route::post('step-2', [SellerRegistrationController::class, 'processStep2'])->name('step2.process');
+    Route::get('step-3', [SellerRegistrationController::class, 'showStep3'])->name('step3');
+    Route::post('verify-otp', [SellerRegistrationController::class, 'verifyOTP'])->name('verify-otp');
+    Route::post('resend-otp', [SellerRegistrationController::class, 'resendOTP'])->name('resend-otp');
 });
 
 // AliExpress API Test Routes (Public - No Auth Required)
