@@ -2,493 +2,401 @@
 
 @section('content')
 <div class="col-12">
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="ri-checkbox-circle-line me-2"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    <!-- Hero Section with Product Images -->
+    <div class="card mb-4" style="border-radius: 16px; overflow: hidden;">
+        <div class="card-body p-0">
+            <div class="row g-0">
+                <!-- Product Images Gallery -->
+                <div class="col-md-6 bg-light p-4">
+                    @if($product->images && count($product->images) > 0)
+                        <div id="productGallery" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                @foreach($product->images as $index => $image)
+                                    <button type="button" data-bs-target="#productGallery" data-bs-slide-to="{{ $index }}" class="{{ $index === 0 ? 'active' : '' }}"></button>
+                                @endforeach
+                            </div>
+                            <div class="carousel-inner" style="border-radius: 12px;">
+                                @foreach($product->images as $index => $image)
+                                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                        <img src="{{ $image }}" class="d-block w-100" alt="{{ $product->name }}" style="height: 500px; object-fit: contain; background: white;">
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if(count($product->images) > 1)
+                                <button class="carousel-control-prev" type="button" data-bs-target="#productGallery" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#productGallery" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            @endif
+                        </div>
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="ri-error-warning-line me-2"></i>
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    <form action="{{ route('products.update', $product) }}" method="POST" id="productForm">
-        @csrf
-        @method('PUT')
-
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <span id="viewModeTitle">Product Details</span>
-                    <span id="editModeTitle" style="display: none;">Edit Product</span>
-                    @if($product->isAliexpressProduct())
-                        <span class="badge bg-info ms-2">
-                            <i class="ri-shopping-cart-line"></i> AliExpress
-                        </span>
-                    @endif
-                    <span class="badge {{ $product->is_active ? 'bg-success' : 'bg-secondary' }} ms-2">
-                        {{ $product->is_active ? 'Active' : 'Inactive' }}
-                    </span>
-                </h5>
-                <div>
-                    <button type="button" id="toggleEditBtn" class="btn btn-primary btn-sm me-2" onclick="toggleEditMode()">
-                        <i class="ri-pencil-line me-1"></i> <span id="toggleBtnText">Edit</span>
-                    </button>
-                    <button type="submit" id="saveBtn" class="btn btn-success btn-sm me-2" style="display: none;">
-                        <i class="ri-save-line me-1"></i> Save Changes
-                    </button>
-                    <button type="button" id="cancelBtn" class="btn btn-secondary btn-sm me-2" style="display: none;" onclick="toggleEditMode()">
-                        <i class="ri-close-line me-1"></i> Cancel
-                    </button>
-                    @if($product->isAliexpressProduct())
-                        <a href="{{ $product->aliexpress_url }}" target="_blank" class="btn btn-outline-info btn-sm me-2">
-                            <i class="ri-external-link-line me-1"></i> AliExpress
-                        </a>
-                    @endif
-                    <a href="{{ route('products.index') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="ri-arrow-left-line me-1"></i> Back
-                    </a>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <div class="row">
-                    <!-- Product Images -->
-                    <div class="col-md-5">
-                        @if($product->images && count($product->images) > 0)
-                            <div id="productCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
-                                <div class="carousel-inner rounded">
-                                    @foreach($product->images as $index => $image)
-                                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                            <img src="{{ $image }}" class="d-block w-100" alt="{{ $product->name }}" style="height: 400px; object-fit: contain; background: #f8f9fa;">
-                                        </div>
-                                    @endforeach
-                                </div>
-                                @if(count($product->images) > 1)
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Previous</span>
-                                    </button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Next</span>
-                                    </button>
+                        <!-- Thumbnail Gallery -->
+                        <div class="row mt-3 g-2">
+                            @foreach($product->images as $index => $image)
+                                @if($index < 6)
+                                    <div class="col-2">
+                                        <img src="{{ $image }}" class="img-thumbnail" style="cursor: pointer; height: 70px; object-fit: cover;" onclick="document.querySelector('[data-bs-slide-to=\\\'{{ $index }}\\\']').click()">
+                                    </div>
                                 @endif
-                            </div>
-                            <div class="text-center">
-                                <small class="text-muted">{{ count($product->images) }} image(s)</small>
-                            </div>
-                        @else
-                            <div class="bg-light rounded d-flex align-items-center justify-content-center mb-3" style="height: 400px;">
-                                <i class="ri-image-line" style="font-size: 64px; color: #ccc;"></i>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 500px;">
+                            <i class="ri-image-line" style="font-size: 64px; color: #ccc;"></i>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Product Info -->
+                <div class="col-md-6 p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            @if($product->isAliexpressProduct())
+                                <span class="badge bg-info mb-2">
+                                    <i class="ri-shopping-cart-line me-1"></i> AliExpress
+                                </span>
+                            @endif
+                            <span class="badge {{ $product->is_active ? 'bg-success' : 'bg-secondary' }} mb-2">
+                                {{ $product->is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+                        <div class="btn-group">
+                            <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-primary">
+                                <i class="ri-edit-line me-1"></i> Edit
+                            </a>
+                            <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="ri-arrow-left-line me-1"></i> Back
+                            </a>
+                        </div>
+                    </div>
+
+                    <h2 class="mb-3">{{ $product->name }}</h2>
+
+                    @if($product->short_description)
+                        <p class="text-muted mb-4">{{ $product->short_description }}</p>
+                    @endif
+
+                    <!-- Pricing -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-baseline mb-2">
+                            <h3 class="text-primary mb-0 me-3">{{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}</h3>
+                            @if($product->compare_price && $product->compare_price > $product->price)
+                                <span class="text-muted text-decoration-line-through me-2">{{ $product->currency }} {{ number_format($product->compare_price, 2) }}</span>
+                                <span class="badge bg-danger">
+                                    {{ round((($product->compare_price - $product->price) / $product->compare_price) * 100) }}% OFF
+                                </span>
+                            @endif
+                        </div>
+
+                        @if($product->original_price && $product->original_price > 0)
+                            <div class="card bg-light border-0">
+                                <div class="card-body py-2 px-3">
+                                    <small class="text-muted d-block mb-2"><strong>💰 Price Breakdown</strong></small>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small>AliExpress Price:</small>
+                                        <small><strong>{{ $product->currency }} {{ number_format($product->original_price, 2) }}</strong></small>
+                                    </div>
+                                    @if($product->seller_amount > 0)
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small>+ Seller Profit:</small>
+                                            <small class="text-success"><strong>+{{ $product->currency }} {{ number_format($product->seller_amount, 2) }}</strong></small>
+                                        </div>
+                                    @endif
+                                    @if($product->admin_amount > 0)
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small>+ Platform Fee:</small>
+                                            <small class="text-info"><strong>+{{ $product->currency }} {{ number_format($product->admin_amount, 2) }}</strong></small>
+                                        </div>
+                                    @endif
+                                    <hr class="my-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small><strong>Your Profit:</strong></small>
+                                        <small class="text-success"><strong>{{ $product->currency }} {{ number_format($product->price - $product->original_price, 2) }}</strong></small>
+                                    </div>
+                                </div>
                             </div>
                         @endif
                     </div>
 
-                    <!-- Product Info -->
-                    <div class="col-md-7">
-                        <!-- Product Name -->
-                        <div class="mb-3">
-                            <h3 class="mb-2 view-mode">{{ $product->name }}</h3>
-                            <div class="edit-mode" style="display: none;">
-                                <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $product->name) }}" required>
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                    <!-- Quick Stats -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center py-3">
+                                    <div class="fs-4 fw-bold text-primary">{{ $product->stock_quantity }}</div>
+                                    <small class="text-muted">Stock</small>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Short Description -->
-                        @if($product->short_description)
-                            <div class="mb-3">
-                                <p class="text-muted view-mode">{{ $product->short_description }}</p>
-                                <div class="edit-mode" style="display: none;">
-                                    <label for="short_description" class="form-label">Short Description</label>
-                                    <textarea class="form-control @error('short_description') is-invalid @enderror" id="short_description" name="short_description" rows="2">{{ old('short_description', $product->short_description) }}</textarea>
-                                    @error('short_description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                        <div class="col-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center py-3">
+                                    <div class="fs-4 fw-bold text-success">
+                                        @if($aliexpressData && isset($aliexpressData['ae_item_base_info_dto']['sales_count']))
+                                            {{ $aliexpressData['ae_item_base_info_dto']['sales_count'] }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </div>
+                                    <small class="text-muted">Sales</small>
+                                </div>
+                            </div>
+                        </div>
+                        @if($aliexpressData && isset($aliexpressData['ae_item_base_info_dto']['avg_evaluation_rating']))
+                            <div class="col-12">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body text-center py-3">
+                                        <div class="fs-4 fw-bold text-warning">
+                                            ⭐ {{ $aliexpressData['ae_item_base_info_dto']['avg_evaluation_rating'] }}/5
+                                        </div>
+                                        <small class="text-muted">{{ $aliexpressData['ae_item_base_info_dto']['evaluation_count'] ?? 0 }} Reviews</small>
+                                    </div>
                                 </div>
                             </div>
                         @endif
+                    </div>
 
-                        <!-- Pricing Section -->
-                        <div class="mb-4">
-                            <!-- View Mode Pricing -->
-                            <div class="view-mode">
-                                <h4 class="text-primary mb-2">{{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}</h4>
-                                @if($product->compare_price && $product->compare_price > $product->price)
-                                    <p class="text-muted mb-0">
-                                        <s>{{ $product->currency ?? 'AED' }} {{ number_format($product->compare_price, 2) }}</s>
-                                        <span class="badge bg-danger ms-2">
-                                            {{ round((($product->compare_price - $product->price) / $product->compare_price) * 100) }}% OFF
-                                        </span>
-                                    </p>
-                                @endif
-
-                                @if($product->original_price && $product->original_price > 0)
-                                    <div class="mt-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body py-2">
-                                                <small class="text-muted d-block mb-1"><strong>Price Breakdown:</strong></small>
-                                                <div class="d-flex justify-content-between mb-1">
-                                                    <small>Original Price (AliExpress):</small>
-                                                    <small><strong>{{ $product->currency }} {{ number_format($product->original_price, 2) }}</strong></small>
-                                                </div>
-                                                @if($product->seller_amount > 0)
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <small>+ Seller Amount:</small>
-                                                        <small class="text-success"><strong>+{{ $product->currency }} {{ number_format($product->seller_amount, 2) }}</strong></small>
-                                                    </div>
-                                                @endif
-                                                @if($product->admin_amount > 0)
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <small>+ Admin Amount:</small>
-                                                        <small class="text-info"><strong>+{{ $product->currency }} {{ number_format($product->admin_amount, 2) }}</strong></small>
-                                                    </div>
-                                                @endif
-                                                <hr class="my-2">
-                                                <div class="d-flex justify-content-between">
-                                                    <small><strong>Final Selling Price:</strong></small>
-                                                    <small class="text-primary"><strong>{{ $product->currency }} {{ number_format($product->price, 2) }}</strong></small>
-                                                </div>
-                                                @if($product->original_price > 0)
-                                                    <div class="d-flex justify-content-between mt-1">
-                                                        <small>Your Profit:</small>
-                                                        <small class="text-success"><strong>{{ $product->currency }} {{ number_format($product->price - $product->original_price, 2) }} ({{ number_format((($product->price - $product->original_price) / $product->original_price) * 100, 1) }}%)</strong></small>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Edit Mode Pricing -->
-                            <div class="edit-mode" style="display: none;">
-                                <div class="row">
-                                    <!-- Currency -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="currency" class="form-label">Currency</label>
-                                        <select class="form-select @error('currency') is-invalid @enderror" id="currency" name="currency">
-                                            <option value="AED" {{ old('currency', $product->currency) == 'AED' ? 'selected' : '' }}>AED</option>
-                                            <option value="USD" {{ old('currency', $product->currency) == 'USD' ? 'selected' : '' }}>USD</option>
-                                            <option value="EUR" {{ old('currency', $product->currency) == 'EUR' ? 'selected' : '' }}>EUR</option>
-                                            <option value="GBP" {{ old('currency', $product->currency) == 'GBP' ? 'selected' : '' }}>GBP</option>
-                                            <option value="SAR" {{ old('currency', $product->currency) == 'SAR' ? 'selected' : '' }}>SAR</option>
-                                            <option value="EGP" {{ old('currency', $product->currency) == 'EGP' ? 'selected' : '' }}>EGP</option>
-                                        </select>
-                                        @error('currency')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Original Price -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="original_price" class="form-label">Original Price (AliExpress)</label>
-                                        <input type="number" class="form-control" id="original_price" value="{{ $product->original_price }}" step="0.01" min="0" readonly disabled style="background-color: #e9ecef; cursor: not-allowed;">
-                                        <small class="text-muted"><i class="ri-lock-line me-1"></i> Cannot be changed (from AliExpress)</small>
-                                    </div>
-
-                                    <!-- Seller Amount -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="seller_amount" class="form-label">Seller Amount (+)</label>
-                                        <input type="number" class="form-control @error('seller_amount') is-invalid @enderror" id="seller_amount" name="seller_amount" value="{{ old('seller_amount', $product->seller_amount) }}" step="0.01" min="0">
-                                        @error('seller_amount')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <small class="text-muted">Amount added by seller</small>
-                                    </div>
-
-                                    <!-- Admin Amount -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="admin_amount" class="form-label">Admin Amount (+)</label>
-                                        <input type="number" class="form-control @error('admin_amount') is-invalid @enderror" id="admin_amount" name="admin_amount" value="{{ old('admin_amount', $product->admin_amount) }}" step="0.01" min="0">
-                                        @error('admin_amount')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <small class="text-muted">Amount added by admin</small>
-                                    </div>
-
-                                    <!-- Final Price -->
-                                    <div class="col-12 mb-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body">
-                                                <label for="price" class="form-label">Final Selling Price <span class="text-danger">*</span></label>
-                                                <div class="input-group input-group-lg">
-                                                    <span class="input-group-text" id="currency-symbol">{{ $product->currency ?? 'AED' }}</span>
-                                                    <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price) }}" step="0.01" min="0" required>
-                                                    @error('price')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <small class="text-muted d-block mt-1">
-                                                    <strong>Auto-calculated:</strong> Original Price + Seller Amount + Admin Amount
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Compare Price -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="compare_price" class="form-label">Compare at Price</label>
-                                        <input type="number" class="form-control @error('compare_price') is-invalid @enderror" id="compare_price" name="compare_price" value="{{ old('compare_price', $product->compare_price) }}" step="0.01" min="0">
-                                        @error('compare_price')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <small class="text-muted">For showing discount</small>
-                                    </div>
-
-                                    <!-- Cost -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="cost" class="form-label">Cost per Item</label>
-                                        <input type="number" class="form-control @error('cost') is-invalid @enderror" id="cost" name="cost" value="{{ old('cost', $product->cost) }}" step="0.01" min="0">
-                                        @error('cost')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Product Details Table -->
-                        <div class="table-responsive view-mode">
-                            <table class="table table-sm table-bordered">
-                                <tbody>
+                    <!-- Product Info Table -->
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 140px;">SKU:</th>
+                                    <td>{{ $product->sku ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Category:</th>
+                                    <td>{{ $product->category->name ?? 'Uncategorized' }}</td>
+                                </tr>
+                                @if($product->isAliexpressProduct())
                                     <tr>
-                                        <th style="width: 150px;" class="bg-light">SKU:</th>
-                                        <td>{{ $product->sku ?? 'N/A' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="bg-light">Category:</th>
-                                        <td>{{ $product->category->name ?? 'Uncategorized' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="bg-light">Stock:</th>
+                                        <th>AliExpress ID:</th>
                                         <td>
-                                            @if($product->track_inventory)
-                                                <span class="badge {{ $product->stock_quantity > 10 ? 'bg-success' : ($product->stock_quantity > 0 ? 'bg-warning' : 'bg-danger') }}">
-                                                    {{ $product->stock_quantity }} units
-                                                </span>
-                                            @else
-                                                <span class="badge bg-secondary">Unlimited (Dropshipping)</span>
-                                            @endif
+                                            <code>{{ $product->aliexpress_id }}</code>
+                                            <a href="{{ $product->aliexpress_url }}" target="_blank" class="ms-2">
+                                                <i class="ri-external-link-line"></i>
+                                            </a>
                                         </td>
                                     </tr>
-                                    @if($product->isAliexpressProduct())
-                                        <tr>
-                                            <th class="bg-light">AliExpress ID:</th>
-                                            <td>{{ $product->aliexpress_id }}</td>
-                                        </tr>
-                                    @endif
-                                    <tr>
-                                        <th class="bg-light">Created:</th>
-                                        <td>{{ $product->created_at->format('Y-m-d H:i') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="bg-light">Updated:</th>
-                                        <td>{{ $product->updated_at->format('Y-m-d H:i') }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Edit Mode Additional Fields -->
-                        <div class="edit-mode" style="display: none;">
-                            <div class="row">
-                                <!-- Category -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="category_id" class="form-label">Category</label>
-                                    <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id">
-                                        <option value="">Select Category</option>
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('category_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- SKU -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="sku" class="form-label">SKU</label>
-                                    <input type="text" class="form-control @error('sku') is-invalid @enderror" id="sku" name="sku" value="{{ old('sku', $product->sku) }}">
-                                    @error('sku')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Stock Quantity -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="stock_quantity" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control @error('stock_quantity') is-invalid @enderror" id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity) }}" min="0" required>
-                                    @error('stock_quantity')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Track Inventory -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Inventory Tracking</label>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="track_inventory" name="track_inventory" value="1" {{ old('track_inventory', $product->track_inventory) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="track_inventory">Track inventory</label>
-                                    </div>
-                                    <small class="text-muted">Uncheck for unlimited stock</small>
-                                </div>
-
-                                <!-- Status -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $product->is_active) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="is_active">Active</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                @endif
+                                <tr>
+                                    <th>Created:</th>
+                                    <td>{{ $product->created_at->format('M d, Y') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Updated:</th>
+                                    <td>{{ $product->updated_at->diffForHumans() }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
-                <!-- Description -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <h5 class="mb-3">Description</h5>
-                        <div class="view-mode">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    {!! nl2br(e($product->description ?? 'No description available.')) !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="edit-mode" style="display: none;">
-                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="6">{{ old('description', $product->description) }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Specifications (View Only) -->
-                @if($product->specifications && count($product->specifications) > 0)
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <h5 class="mb-3">Specifications</h5>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="row">
-                                        @foreach($product->specifications as $spec)
-                                            <div class="col-md-6 mb-2">
-                                                <strong>{{ $spec['name'] ?? 'Spec' }}:</strong> {{ $spec['value'] ?? 'N/A' }}
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
             </div>
         </div>
-    </form>
+    </div>
+
+    <!-- SKU Variants Section -->
+    @if($aliexpressData && isset($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']))
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="ri-list-check me-2"></i> Product Variants</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    @foreach($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'] as $sku)
+                        <div class="col-md-4">
+                            <div class="card border h-100 hover-shadow" style="transition: all 0.3s;">
+                                <div class="card-body">
+                                    @if(isset($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'][0]['sku_image']))
+                                        <img src="{{ $sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'][0]['sku_image'] }}"
+                                             class="img-fluid rounded mb-3"
+                                             style="height: 150px; object-fit: cover; width: 100%;">
+                                    @endif
+
+                                    <div class="mb-2">
+                                        @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
+                                            <span class="badge bg-secondary mb-1">
+                                                {{ $property['sku_property_name'] ?? 'Property' }}:
+                                                <strong>{{ $property['sku_property_value'] ?? 'N/A' }}</strong>
+                                            </span>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            @if(isset($sku['offer_sale_price']) && $sku['offer_sale_price'] < $sku['sku_price'])
+                                                <div class="text-primary fw-bold">${{ $sku['offer_sale_price'] }}</div>
+                                                <small class="text-muted text-decoration-line-through">${{ $sku['sku_price'] }}</small>
+                                            @else
+                                                <div class="text-primary fw-bold">${{ $sku['sku_price'] ?? 'N/A' }}</div>
+                                            @endif
+                                        </div>
+                                        <span class="badge {{ $sku['sku_available_stock'] > 0 ? 'bg-success' : 'bg-danger' }}">
+                                            {{ $sku['sku_available_stock'] > 0 ? 'In Stock' : 'Out of Stock' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Product Description -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="ri-file-text-line me-2"></i> Description</h5>
+        </div>
+        <div class="card-body">
+            @if($product->description)
+                <div class="product-description">
+                    {!! $product->description !!}
+                </div>
+            @else
+                <p class="text-muted">No description available.</p>
+            @endif
+        </div>
+    </div>
+
+    <!-- Product Specifications -->
+    @if($aliexpressData && isset($aliexpressData['ae_item_properties']['ae_item_property']))
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="ri-settings-3-line me-2"></i> Specifications</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach($aliexpressData['ae_item_properties']['ae_item_property'] as $property)
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="fw-bold me-2" style="min-width: 150px;">{{ $property['attr_name'] }}:</div>
+                                <div class="text-muted">{{ $property['attr_value'] }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Store Information -->
+    @if($aliexpressData && isset($aliexpressData['ae_store_info']))
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="ri-store-2-line me-2"></i> Store Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <h6 class="mb-1">{{ $aliexpressData['ae_store_info']['store_name'] }}</h6>
+                        <small class="text-muted">
+                            <i class="ri-map-pin-line me-1"></i>
+                            {{ $aliexpressData['ae_store_info']['store_country_code'] }}
+                        </small>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="rating-badge">
+                                    <div class="fs-5 fw-bold text-success">{{ $aliexpressData['ae_store_info']['item_as_described_rating'] }}</div>
+                                    <small class="text-muted">Item as Described</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="rating-badge">
+                                    <div class="fs-5 fw-bold text-info">{{ $aliexpressData['ae_store_info']['communication_rating'] }}</div>
+                                    <small class="text-muted">Communication</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="rating-badge">
+                                    <div class="fs-5 fw-bold text-warning">{{ $aliexpressData['ae_store_info']['shipping_speed_rating'] }}</div>
+                                    <small class="text-muted">Shipping Speed</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Package Information -->
+    @if($aliexpressData && isset($aliexpressData['package_info_dto']))
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="ri-box-3-line me-2"></i> Package & Shipping</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Package Dimensions</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Length:</span>
+                            <strong>{{ $aliexpressData['package_info_dto']['package_length'] ?? 'N/A' }} cm</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Width:</span>
+                            <strong>{{ $aliexpressData['package_info_dto']['package_width'] ?? 'N/A' }} cm</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Height:</span>
+                            <strong>{{ $aliexpressData['package_info_dto']['package_height'] ?? 'N/A' }} cm</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Weight:</span>
+                            <strong>{{ $aliexpressData['package_info_dto']['gross_weight'] ?? 'N/A' }} kg</strong>
+                        </div>
+                    </div>
+                    @if(isset($aliexpressData['logistics_info_dto']))
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Shipping Information</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Delivery Time:</span>
+                                <strong>{{ $aliexpressData['logistics_info_dto']['delivery_time'] ?? 'N/A' }} days</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Ships To:</span>
+                                <strong>{{ $aliexpressData['logistics_info_dto']['ship_to_country'] ?? 'N/A' }}</strong>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
-<script>
-    let isEditMode = false;
-
-    function toggleEditMode() {
-        isEditMode = !isEditMode;
-
-        // Toggle visibility
-        document.querySelectorAll('.view-mode').forEach(el => {
-            el.style.display = isEditMode ? 'none' : '';
-        });
-        document.querySelectorAll('.edit-mode').forEach(el => {
-            el.style.display = isEditMode ? '' : 'none';
-        });
-
-        // Toggle buttons
-        document.getElementById('toggleEditBtn').style.display = isEditMode ? 'none' : '';
-        document.getElementById('saveBtn').style.display = isEditMode ? '' : 'none';
-        document.getElementById('cancelBtn').style.display = isEditMode ? '' : 'none';
-
-        // Toggle titles
-        document.getElementById('viewModeTitle').style.display = isEditMode ? 'none' : '';
-        document.getElementById('editModeTitle').style.display = isEditMode ? '' : 'none';
-
-        // If entering edit mode, calculate price
-        if (isEditMode) {
-            calculateFinalPrice();
-        }
+<style>
+    .hover-shadow:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        transform: translateY(-2px);
     }
 
-    // Auto-calculate final price
-    document.addEventListener('DOMContentLoaded', function() {
-        const originalPriceInput = document.getElementById('original_price');
-        const sellerAmountInput = document.getElementById('seller_amount');
-        const adminAmountInput = document.getElementById('admin_amount');
-        const finalPriceInput = document.getElementById('price');
-        const currencySelect = document.getElementById('currency');
-        const currencySymbol = document.getElementById('currency-symbol');
+    .product-description img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 10px 0;
+    }
 
-        function calculateFinalPrice() {
-            const originalPrice = parseFloat(originalPriceInput?.value) || 0;
-            const sellerAmount = parseFloat(sellerAmountInput?.value) || 0;
-            const adminAmount = parseFloat(adminAmountInput?.value) || 0;
-
-            // Final Price = Original Price + Seller Amount + Admin Amount
-            const finalPrice = originalPrice + sellerAmount + adminAmount;
-
-            if (finalPriceInput) {
-                finalPriceInput.value = finalPrice.toFixed(2);
-            }
-        }
-
-        function updateCurrencySymbol() {
-            if (currencySymbol && currencySelect) {
-                currencySymbol.textContent = currencySelect.value;
-            }
-        }
-
-        // Add event listeners
-        if (sellerAmountInput) sellerAmountInput.addEventListener('input', calculateFinalPrice);
-        if (adminAmountInput) adminAmountInput.addEventListener('input', calculateFinalPrice);
-        if (originalPriceInput) originalPriceInput.addEventListener('input', calculateFinalPrice);
-        if (currencySelect) currencySelect.addEventListener('change', updateCurrencySymbol);
-
-        // Make calculateFinalPrice globally accessible
-        window.calculateFinalPrice = calculateFinalPrice;
-    });
-</script>
-
-<style>
-    .table th {
-        font-weight: 600;
+    .rating-badge {
+        padding: 10px;
+        border-radius: 8px;
+        background: #f8f9fa;
     }
 
     .carousel-item img {
-        border-radius: 8px;
-    }
-
-    .card {
         border-radius: 12px;
     }
 
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    .table th {
+        font-weight: 600;
+        color: #666;
     }
 
     .badge {

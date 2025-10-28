@@ -117,7 +117,32 @@ class ProductController extends Controller
     {
         $product->load('category');
         $categories = Category::active()->get();
-        return view('products.show', compact('product', 'categories'));
+
+        // Fetch AliExpress details if it's an AliExpress product
+        $aliexpressData = null;
+        if ($product->isAliexpressProduct()) {
+            try {
+                $result = $this->aliexpressService->getProductDetails(
+                    $product->aliexpress_id,
+                    [
+                        'country' => 'US',
+                        'currency' => 'USD',
+                        'language' => 'EN',
+                    ]
+                );
+
+                if ($result['success']) {
+                    $aliexpressData = $result['product'];
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to fetch AliExpress details for product view', [
+                    'product_id' => $product->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return view('products.show', compact('product', 'categories', 'aliexpressData'));
     }
 
     /**
@@ -382,8 +407,22 @@ class ProductController extends Controller
 
             $profitMargin = $product->supplier_profit_margin ?? 30.0;
 
-            // Calculate pricing
+            // Calculate pricing - extract from SKU data if target prices not available
             $aliexpressPrice = $productData['target_sale_price'] ?? $productData['target_original_price'] ?? 0;
+
+            // If no target price, try to get from first SKU
+            if ($aliexpressPrice == 0 && isset($productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'][0])) {
+                $firstSku = $productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'][0];
+                $aliexpressPrice = $firstSku['offer_sale_price'] ?? $firstSku['sku_price'] ?? 0;
+
+                Log::info('Extracted price from SKU data', [
+                    'product_id' => $product->id,
+                    'sku_offer_sale_price' => $firstSku['offer_sale_price'] ?? 'not set',
+                    'sku_price' => $firstSku['sku_price'] ?? 'not set',
+                    'extracted_price' => $aliexpressPrice,
+                ]);
+            }
+
             $cost = $aliexpressPrice;
             $price = $cost * (1 + ($profitMargin / 100));
 
