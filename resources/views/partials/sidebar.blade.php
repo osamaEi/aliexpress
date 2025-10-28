@@ -81,24 +81,11 @@
                 </li>
 
                 <!-- Products -->
-                <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('products.search-*') ? 'open active' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('products.search-*') ? 'active' : '' }}">
+                    <a href="{{ route('products.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons ri-shopping-bag-3-line"></i>
                         <div data-i18n="Products">Products</div>
                     </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('products.index') ? 'active' : '' }}">
-                            <a href="{{ route('products.index') }}" class="menu-link">
-                                <div data-i18n="All Products">All Products</div>
-                            </a>
-                        </li>
-
-                        <li class="menu-item {{ request()->routeIs('products.create') ? 'active' : '' }}">
-                            <a href="{{ route('products.create') }}" class="menu-link">
-                                <div data-i18n="Add Product">Add Product</div>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
                 <!-- Categories -->
@@ -148,6 +135,50 @@
                         <li class="menu-item {{ request()->routeIs('products.aliexpress.import') ? 'active' : '' }}">
                             <a href="{{ route('products.aliexpress.import') }}" class="menu-link">
                                 <div data-i18n="Import Products">Import Products</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Orders Section -->
+                <li class="menu-header mt-5">
+                    <span class="menu-header-text">Order Management</span>
+                </li>
+
+                <!-- Orders -->
+                <li class="menu-item {{ request()->routeIs('orders.*') ? 'open active' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons ri-file-list-3-line"></i>
+                        <div data-i18n="Orders">Orders</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
+                            <a href="{{ route('orders.index') }}" class="menu-link">
+                                <div data-i18n="All Orders">All Orders</div>
+                            </a>
+                        </li>
+
+                        <li class="menu-item {{ request()->routeIs('orders.create') ? 'active' : '' }}">
+                            <a href="{{ route('orders.create') }}" class="menu-link">
+                                <div data-i18n="Create Order">Create Order</div>
+                            </a>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="{{ route('orders.index', ['status' => 'pending']) }}" class="menu-link">
+                                <div data-i18n="Pending Orders">Pending Orders</div>
+                            </a>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="{{ route('orders.index', ['status' => 'placed']) }}" class="menu-link">
+                                <div data-i18n="Placed Orders">Placed Orders</div>
+                            </a>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="{{ route('orders.index', ['status' => 'shipped']) }}" class="menu-link">
+                                <div data-i18n="Shipped Orders">Shipped Orders</div>
                             </a>
                         </li>
                     </ul>

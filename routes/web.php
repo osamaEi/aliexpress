@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AliExpressTestController;
 use App\Http\Controllers\AliExpressController;
 use App\Http\Controllers\SellerRegistrationController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -84,6 +85,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('products', ProductController::class);
     Route::post('/products/{product}/sync', [ProductController::class, 'sync'])->name('products.sync');
     Route::post('/products/sync-all', [ProductController::class, 'syncAll'])->name('products.sync-all');
+
+    // Order routes
+    Route::resource('orders', OrderController::class);
+    Route::post('/orders/{order}/place-on-aliexpress', [OrderController::class, 'placeOnAliexpress'])->name('orders.place-on-aliexpress');
+    Route::post('/orders/{order}/update-tracking', [OrderController::class, 'updateTracking'])->name('orders.update-tracking');
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 });
 
 require __DIR__.'/auth.php';

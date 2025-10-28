@@ -63,6 +63,9 @@
                             </span>
                         </div>
                         <div class="btn-group">
+                            <a href="{{ route('orders.create', ['product_id' => $product->id]) }}" class="btn btn-sm btn-success">
+                                <i class="ri-shopping-bag-line me-1"></i> Create Order
+                            </a>
                             <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-primary">
                                 <i class="ri-edit-line me-1"></i> Edit
                             </a>
