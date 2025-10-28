@@ -447,9 +447,19 @@ class ProductController extends Controller
             return $parent;
         });
 
+        // Get assigned products for current user (if seller)
+        $assignedProductIds = [];
+        if (auth()->check() && auth()->user()->user_type === 'seller') {
+            $assignedProductIds = \DB::table('product_user')
+                ->where('user_id', auth()->id())
+                ->pluck('aliexpress_product_id')
+                ->toArray();
+        }
+
         return view('products.search', [
             'categories' => $categoriesWithChildren,
-            'allCategories' => $allCategories
+            'allCategories' => $allCategories,
+            'assignedProductIds' => $assignedProductIds,
         ]);
     }
 
@@ -601,12 +611,22 @@ class ProductController extends Controller
                 return $parent;
             });
 
+            // Get assigned products for current user (if seller)
+            $assignedProductIds = [];
+            if (auth()->check() && auth()->user()->user_type === 'seller') {
+                $assignedProductIds = \DB::table('product_user')
+                    ->where('user_id', auth()->id())
+                    ->pluck('aliexpress_product_id')
+                    ->toArray();
+            }
+
             return view('products.search', [
                 'products' => $result['products'],
                 'total_count' => $result['total_count'] ?? 0,
                 'keyword' => $keyword,
                 'categories' => $categoriesWithChildren,
                 'allCategories' => $allCategories,
+                'assignedProductIds' => $assignedProductIds,
                 'debug' => $request->get('debug') ? $result : null,
             ]);
 

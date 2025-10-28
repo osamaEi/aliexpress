@@ -313,18 +313,32 @@
                                             <i class="ri-external-link-line me-1"></i> View on AliExpress
                                         </a>
 
-                                        @auth
-                                            @if(auth()->user()->user_type === 'seller')
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
-                                                    onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['sale_price'] }}, '{{ request('currency', 'AED') }}', this)"
-                                                    data-product-id="{{ $product['item_id'] }}"
-                                                >
-                                                    <i class="ri-pushpin-line me-1"></i> Assign to Me
-                                                </button>
-                                            @endif
-                                        @endauth
+                                        {{-- @auth
+                                            @if(auth()->user()->user_type === 'seller') --}}
+                                                @php
+                                                    $isAssigned = in_array($product['item_id'], $assignedProductIds ?? []);
+                                                @endphp
+
+                                                @if($isAssigned)
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-secondary w-100 mb-2"
+                                                        disabled
+                                                    >
+                                                        <i class="ri-check-line me-1"></i> Already Assigned
+                                                    </button>
+                                                @else
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
+                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['sale_price'] }}, '{{ request('currency', 'AED') }}', this)"
+                                                        data-product-id="{{ $product['item_id'] }}"
+                                                    >
+                                                        <i class="ri-pushpin-line me-1"></i> Assign to Me
+                                                    </button>
+                                                @endif
+                                            {{-- @endif
+                                        @endauth --}}
 
                                         <button
                                             type="button"
