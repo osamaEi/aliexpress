@@ -139,6 +139,12 @@ class ProductController extends Controller
                     'product_id' => $product->id,
                     'error' => $e->getMessage(),
                 ]);
+
+                // Fallback to stored data if API call fails
+                if ($product->aliexpress_data) {
+                    $aliexpressData = $product->aliexpress_data;
+                    Log::info('Using stored AliExpress data as fallback');
+                }
             }
         }
 
@@ -334,6 +340,7 @@ class ProductController extends Controller
                 'aliexpress_url' => $productData['product_detail_url'] ?? "https://www.aliexpress.com/item/{$request->aliexpress_id}.html",
                 'aliexpress_price' => $aliexpressPrice,
                 'supplier_profit_margin' => $profitMargin,
+                'aliexpress_data' => $productData, // Store complete API response
                 'images' => $images,
             ]);
 
@@ -442,6 +449,7 @@ class ProductController extends Controller
                 'price' => round($price, 2),
                 'cost' => round($cost, 2),
                 'aliexpress_price' => $aliexpressPrice,
+                'aliexpress_data' => $productData, // Store complete API response
                 'last_synced_at' => now(),
             ];
 

@@ -36,22 +36,17 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="country" class="form-label">Country</label>
+                        <label for="country" class="form-label">Ship To Country</label>
                         <select name="country" id="country" class="form-select">
-                            <option value="AE" selected>UAE</option>
-                            <option value="US">United States</option>
-                            <option value="GB">United Kingdom</option>
-                            <option value="EG">Egypt</option>
-                            <option value="SA">Saudi Arabia</option>
+                            <option value="AE" selected>🇦🇪 UAE</option>
+                            <option value="SA">🇸🇦 Saudi Arabia</option>
                         </select>
+                        <small class="text-muted d-block mt-1">Only products shipping to this country</small>
                     </div>
                     <div class="col-md-2">
                         <label for="currency" class="form-label">Currency</label>
                         <select name="currency" id="currency" class="form-select">
                             <option value="AED" selected>AED</option>
-                            <option value="USD">USD</option>
-                            <option value="GBP">GBP</option>
-                            <option value="EGP">EGP</option>
                             <option value="SAR">SAR</option>
                         </select>
                     </div>
@@ -218,6 +213,21 @@
 
             <!-- Results Count -->
             @if(isset($products) && count($products) > 0)
+                <!-- Shipping Filter Notice -->
+                <div class="alert alert-success mb-3 d-flex align-items-center">
+                    <i class="ri-ship-line me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Shipping Filter Active:</strong> All products shown ship to
+                        @if(request('country') == 'SA')
+                            <strong>🇸🇦 Saudi Arabia</strong>
+                        @else
+                            <strong>🇦🇪 United Arab Emirates</strong>
+                        @endif
+                        <br>
+                        <small class="text-muted">Only showing products available for delivery to your selected country</small>
+                    </div>
+                </div>
+
                 <div class="alert alert-info mb-4">
                     <i class="ri-information-line me-2"></i>
                     Found <strong>{{ count($products) }}</strong> products
@@ -442,21 +452,37 @@
         });
     });
 
+    // Auto-change currency based on country selection
+    document.getElementById('country').addEventListener('change', function() {
+        const country = this.value;
+        const currencySelect = document.getElementById('currency');
+
+        // Map country to currency
+        const countryToCurrency = {
+            'AE': 'AED',  // UAE -> AED
+            'SA': 'SAR',  // Saudi Arabia -> SAR
+        };
+
+        if (countryToCurrency[country]) {
+            currencySelect.value = countryToCurrency[country];
+        }
+    });
+
     // Auto-change country and currency based on language selection
     document.getElementById('locale').addEventListener('change', function() {
         const locale = this.value;
         const countrySelect = document.getElementById('country');
         const currencySelect = document.getElementById('currency');
 
-        // Map locales to country and currency
+        // Map locales to country and currency (only for SA/AE)
         const localeMap = {
-            'en_US': { country: 'US', currency: 'USD' },
+            'en_US': { country: 'AE', currency: 'AED' },
             'ar_MA': { country: 'AE', currency: 'AED' },
-            'es_ES': { country: 'ES', currency: 'EUR' },
-            'fr_FR': { country: 'FR', currency: 'EUR' },
-            'ru_RU': { country: 'RU', currency: 'USD' },
-            'pt_BR': { country: 'BR', currency: 'USD' },
-            'de_DE': { country: 'DE', currency: 'EUR' },
+            'es_ES': { country: 'AE', currency: 'AED' },
+            'fr_FR': { country: 'AE', currency: 'AED' },
+            'ru_RU': { country: 'AE', currency: 'AED' },
+            'pt_BR': { country: 'AE', currency: 'AED' },
+            'de_DE': { country: 'AE', currency: 'AED' },
         };
 
         if (localeMap[locale]) {

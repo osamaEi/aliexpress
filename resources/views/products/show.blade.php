@@ -66,6 +66,11 @@
                             <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-primary">
                                 <i class="ri-edit-line me-1"></i> Edit
                             </a>
+                            @if($product->isAliexpressProduct())
+                                <button type="button" class="btn btn-sm btn-info" id="syncProductBtn" onclick="syncProduct()">
+                                    <i class="ri-refresh-line me-1"></i> Sync from AliExpress
+                                </button>
+                            @endif
                             <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-secondary">
                                 <i class="ri-arrow-left-line me-1"></i> Back
                             </a>
@@ -403,4 +408,59 @@
         font-weight: 500;
     }
 </style>
+
+<script>
+function syncProduct() {
+    const btn = document.getElementById('syncProductBtn');
+    const originalContent = btn.innerHTML;
+
+    if (!confirm('Sync this product with latest AliExpress data? This will update prices, description, and images.')) {
+        return;
+    }
+
+    // Disable button and show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ri-loader-4-line me-1"></i> Syncing...';
+
+    // Send sync request
+    fetch('{{ route("products.sync", $product) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        },
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+            return;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.success) {
+            // Show success message
+            btn.innerHTML = '<i class="ri-check-line me-1"></i> Synced!';
+            btn.classList.remove('btn-info');
+            btn.classList.add('btn-success');
+
+            // Reload page after 1.5 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else if (data && data.error) {
+            // Show error
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Sync error:', error);
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+        alert('Failed to sync product. Please try again.');
+    });
+}
+</script>
 @endsection
