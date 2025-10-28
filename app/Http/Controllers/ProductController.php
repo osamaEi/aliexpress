@@ -272,8 +272,20 @@ class ProductController extends Controller
 
             // Calculate pricing
             $aliexpressPrice = $productData['target_sale_price'] ?? $productData['target_original_price'] ?? 0;
+            $currency = $request->get('currency', 'USD');
             $cost = $aliexpressPrice;
-            $price = $cost * (1 + ($profitMargin / 100));
+
+            // Calculate price with profit margin
+            $profitAmount = $cost * ($profitMargin / 100);
+            $price = $cost + $profitAmount;
+
+            // Get product images
+            $images = [];
+            if (isset($productData['images']) && is_array($productData['images'])) {
+                $images = $productData['images'];
+            } elseif (isset($productData['image_url'])) {
+                $images = [$productData['image_url']];
+            }
 
             // Create product
             $product = Product::create([
@@ -282,17 +294,22 @@ class ProductController extends Controller
                 'description' => $productData['detail'] ?? '',
                 'short_description' => isset($productData['subject']) ? substr($productData['subject'], 0, 500) : '',
                 'price' => round($price, 2),
+                'currency' => $currency,
+                'original_price' => round($aliexpressPrice, 2),
+                'seller_amount' => null,
+                'admin_amount' => round($profitAmount, 2), // Admin sets default profit
                 'compare_price' => round($price * 1.2, 2),
                 'cost' => round($cost, 2),
                 'sku' => 'AE-' . $request->aliexpress_id,
                 'stock_quantity' => 100,
-                'track_inventory' => true,
+                'track_inventory' => false, // Dropshipping - no inventory tracking
                 'is_active' => false,
                 'category_id' => $request->category_id,
                 'aliexpress_id' => $request->aliexpress_id,
                 'aliexpress_url' => $productData['product_detail_url'] ?? "https://www.aliexpress.com/item/{$request->aliexpress_id}.html",
                 'aliexpress_price' => $aliexpressPrice,
                 'supplier_profit_margin' => $profitMargin,
+                'images' => $images,
             ]);
 
             return response()->json([
