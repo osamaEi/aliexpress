@@ -143,16 +143,16 @@
                                                     <small>Original Price (AliExpress):</small>
                                                     <small><strong>{{ $product->currency }} {{ number_format($product->original_price, 2) }}</strong></small>
                                                 </div>
-                                                @if($product->markup_amount > 0)
+                                                @if($product->seller_amount > 0)
                                                     <div class="d-flex justify-content-between mb-1">
-                                                        <small>+ Markup Amount:</small>
-                                                        <small class="text-success"><strong>+{{ $product->currency }} {{ number_format($product->markup_amount, 2) }}</strong></small>
+                                                        <small>+ Seller Amount:</small>
+                                                        <small class="text-success"><strong>+{{ $product->currency }} {{ number_format($product->seller_amount, 2) }}</strong></small>
                                                     </div>
                                                 @endif
-                                                @if($product->markup_percentage > 0)
+                                                @if($product->admin_amount > 0)
                                                     <div class="d-flex justify-content-between mb-1">
-                                                        <small>+ Markup ({{ $product->markup_percentage }}%):</small>
-                                                        <small class="text-success"><strong>+{{ $product->currency }} {{ number_format($product->original_price * ($product->markup_percentage / 100), 2) }}</strong></small>
+                                                        <small>+ Admin Amount:</small>
+                                                        <small class="text-info"><strong>+{{ $product->currency }} {{ number_format($product->admin_amount, 2) }}</strong></small>
                                                     </div>
                                                 @endif
                                                 <hr class="my-2">
@@ -194,28 +194,28 @@
                                     <!-- Original Price -->
                                     <div class="col-md-6 mb-3">
                                         <label for="original_price" class="form-label">Original Price (AliExpress)</label>
-                                        <input type="number" class="form-control" id="original_price" name="original_price" value="{{ old('original_price', $product->original_price) }}" step="0.01" min="0" readonly style="background-color: #f5f5f5;">
-                                        <small class="text-muted">From AliExpress</small>
+                                        <input type="number" class="form-control" id="original_price" value="{{ $product->original_price }}" step="0.01" min="0" readonly disabled style="background-color: #e9ecef; cursor: not-allowed;">
+                                        <small class="text-muted"><i class="ri-lock-line me-1"></i> Cannot be changed (from AliExpress)</small>
                                     </div>
 
-                                    <!-- Markup Amount -->
+                                    <!-- Seller Amount -->
                                     <div class="col-md-6 mb-3">
-                                        <label for="markup_amount" class="form-label">Add to Price (+)</label>
-                                        <input type="number" class="form-control @error('markup_amount') is-invalid @enderror" id="markup_amount" name="markup_amount" value="{{ old('markup_amount', $product->markup_amount) }}" step="0.01" min="0">
-                                        @error('markup_amount')
+                                        <label for="seller_amount" class="form-label">Seller Amount (+)</label>
+                                        <input type="number" class="form-control @error('seller_amount') is-invalid @enderror" id="seller_amount" name="seller_amount" value="{{ old('seller_amount', $product->seller_amount) }}" step="0.01" min="0">
+                                        @error('seller_amount')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
-                                        <small class="text-muted">Fixed amount to add</small>
+                                        <small class="text-muted">Amount added by seller</small>
                                     </div>
 
-                                    <!-- Markup Percentage -->
+                                    <!-- Admin Amount -->
                                     <div class="col-md-6 mb-3">
-                                        <label for="markup_percentage" class="form-label">Markup (%)</label>
-                                        <input type="number" class="form-control @error('markup_percentage') is-invalid @enderror" id="markup_percentage" name="markup_percentage" value="{{ old('markup_percentage', $product->markup_percentage) }}" step="0.01" min="0" max="1000">
-                                        @error('markup_percentage')
+                                        <label for="admin_amount" class="form-label">Admin Amount (+)</label>
+                                        <input type="number" class="form-control @error('admin_amount') is-invalid @enderror" id="admin_amount" name="admin_amount" value="{{ old('admin_amount', $product->admin_amount) }}" step="0.01" min="0">
+                                        @error('admin_amount')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
-                                        <small class="text-muted">Percentage markup</small>
+                                        <small class="text-muted">Amount added by admin</small>
                                     </div>
 
                                     <!-- Final Price -->
@@ -231,7 +231,7 @@
                                                     @enderror
                                                 </div>
                                                 <small class="text-muted d-block mt-1">
-                                                    <strong>Auto-calculated:</strong> Original Price + Markup Amount + (Original Price × Markup %)
+                                                    <strong>Auto-calculated:</strong> Original Price + Seller Amount + Admin Amount
                                                 </small>
                                             </div>
                                         </div>
@@ -437,19 +437,19 @@
     // Auto-calculate final price
     document.addEventListener('DOMContentLoaded', function() {
         const originalPriceInput = document.getElementById('original_price');
-        const markupAmountInput = document.getElementById('markup_amount');
-        const markupPercentageInput = document.getElementById('markup_percentage');
+        const sellerAmountInput = document.getElementById('seller_amount');
+        const adminAmountInput = document.getElementById('admin_amount');
         const finalPriceInput = document.getElementById('price');
         const currencySelect = document.getElementById('currency');
         const currencySymbol = document.getElementById('currency-symbol');
 
         function calculateFinalPrice() {
             const originalPrice = parseFloat(originalPriceInput?.value) || 0;
-            const markupAmount = parseFloat(markupAmountInput?.value) || 0;
-            const markupPercentage = parseFloat(markupPercentageInput?.value) || 0;
+            const sellerAmount = parseFloat(sellerAmountInput?.value) || 0;
+            const adminAmount = parseFloat(adminAmountInput?.value) || 0;
 
-            const percentageAmount = originalPrice * (markupPercentage / 100);
-            const finalPrice = originalPrice + markupAmount + percentageAmount;
+            // Final Price = Original Price + Seller Amount + Admin Amount
+            const finalPrice = originalPrice + sellerAmount + adminAmount;
 
             if (finalPriceInput) {
                 finalPriceInput.value = finalPrice.toFixed(2);
@@ -463,8 +463,8 @@
         }
 
         // Add event listeners
-        if (markupAmountInput) markupAmountInput.addEventListener('input', calculateFinalPrice);
-        if (markupPercentageInput) markupPercentageInput.addEventListener('input', calculateFinalPrice);
+        if (sellerAmountInput) sellerAmountInput.addEventListener('input', calculateFinalPrice);
+        if (adminAmountInput) adminAmountInput.addEventListener('input', calculateFinalPrice);
         if (originalPriceInput) originalPriceInput.addEventListener('input', calculateFinalPrice);
         if (currencySelect) currencySelect.addEventListener('change', updateCurrencySymbol);
 

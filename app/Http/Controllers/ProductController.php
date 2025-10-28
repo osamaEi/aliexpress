@@ -141,9 +141,9 @@ class ProductController extends Controller
             'short_description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'currency' => 'nullable|string|max:3',
-            'original_price' => 'nullable|numeric|min:0',
-            'markup_amount' => 'nullable|numeric|min:0',
-            'markup_percentage' => 'nullable|numeric|min:0|max:1000',
+            // original_price is NOT validated - it should never be updated
+            'seller_amount' => 'nullable|numeric|min:0',
+            'admin_amount' => 'nullable|numeric|min:0',
             'compare_price' => 'nullable|numeric|min:0',
             'cost' => 'nullable|numeric|min:0',
             'sku' => 'nullable|string|max:255|unique:products,sku,' . $product->id,
@@ -158,6 +158,10 @@ class ProductController extends Controller
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
         }
+
+        // Remove original_price from update if it was sent in the request
+        // This ensures it can never be changed via the edit form
+        unset($validated['original_price']);
 
         $product->update($validated);
 
