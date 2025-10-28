@@ -344,6 +344,15 @@ class ProductController extends Controller
         }
 
         try {
+            Log::info('Starting product sync', [
+                'product_id' => $product->id,
+                'aliexpress_id' => $product->aliexpress_id,
+                'current_price' => $product->price,
+                'current_original_price' => $product->original_price,
+                'current_seller_amount' => $product->seller_amount,
+                'current_admin_amount' => $product->admin_amount,
+            ]);
+
             $result = $this->aliexpressService->getProductDetails(
                 $product->aliexpress_id,
                 [
@@ -354,11 +363,23 @@ class ProductController extends Controller
             );
 
             if (!$result['success']) {
+                Log::error('Sync failed - API error', [
+                    'product_id' => $product->id,
+                    'error' => $result['error'] ?? 'Unknown error',
+                ]);
                 return redirect()->back()
                     ->with('error', 'Failed to sync product: ' . ($result['error'] ?? 'Unknown error'));
             }
 
             $productData = $result['product'];
+
+            Log::info('Product data received from AliExpress', [
+                'product_id' => $product->id,
+                'raw_data' => json_encode($productData, JSON_PRETTY_PRINT),
+                'target_sale_price' => $productData['target_sale_price'] ?? 'NOT SET',
+                'target_original_price' => $productData['target_original_price'] ?? 'NOT SET',
+            ]);
+
             $profitMargin = $product->supplier_profit_margin ?? 30.0;
 
             // Calculate pricing
@@ -366,14 +387,36 @@ class ProductController extends Controller
             $cost = $aliexpressPrice;
             $price = $cost * (1 + ($profitMargin / 100));
 
-            // Update product
-            $product->update([
+            Log::info('Price calculation details', [
+                'product_id' => $product->id,
+                'aliexpress_price' => $aliexpressPrice,
+                'profit_margin' => $profitMargin,
+                'calculated_cost' => $cost,
+                'calculated_price' => $price,
+                'rounded_price' => round($price, 2),
+            ]);
+
+            // Update product - DO NOT update original_price, seller_amount, or admin_amount during sync
+            $updateData = [
                 'name' => $productData['subject'] ?? $product->name,
                 'description' => $productData['detail'] ?? $product->description,
                 'price' => round($price, 2),
                 'cost' => round($cost, 2),
                 'aliexpress_price' => $aliexpressPrice,
                 'last_synced_at' => now(),
+            ];
+
+            Log::info('Updating product with data', [
+                'product_id' => $product->id,
+                'update_data' => $updateData,
+            ]);
+
+            $product->update($updateData);
+
+            Log::info('Product synced successfully', [
+                'product_id' => $product->id,
+                'new_price' => $product->fresh()->price,
+                'new_aliexpress_price' => $product->fresh()->aliexpress_price,
             ]);
 
             return redirect()->back()
@@ -384,6 +427,7 @@ class ProductController extends Controller
                 'message' => $e->getMessage(),
                 'product_id' => $product->id,
                 'aliexpress_id' => $product->aliexpress_id,
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
