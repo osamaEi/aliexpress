@@ -1056,24 +1056,32 @@ class AliExpressService
 
             // Extract SKU information from the response
             $skuData = null;
-            $fullData = null;
+            $skuCount = 0;
 
-            // The response structure varies, check multiple possible locations
-            if (isset($productDetails['aeop_ae_product_s_k_us'])) {
+            // Check for SKU data in multiple possible locations
+            // Modern API format: ae_item_sku_info_dtos
+            if (isset($productDetails['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
+                $skuData = $productDetails['ae_item_sku_info_dtos'];
+                $skuCount = count($productDetails['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']);
+            }
+            // Legacy API format: aeop_ae_product_s_k_us
+            elseif (isset($productDetails['aeop_ae_product_s_k_us'])) {
                 $skuData = $productDetails['aeop_ae_product_s_k_us'];
-                $fullData = $productDetails;
+                $skuCount = isset($productDetails['aeop_ae_product_s_k_us']['aeop_ae_product_sku'])
+                    ? count($productDetails['aeop_ae_product_s_k_us']['aeop_ae_product_sku'])
+                    : 0;
             }
 
             Log::info('Fetched product SKU data', [
                 'product_id' => $productId,
                 'has_sku_data' => !empty($skuData),
-                'sku_count' => is_array($skuData) ? count($skuData) : 0,
+                'sku_count' => $skuCount,
                 'response_keys' => array_keys($productDetails)
             ]);
 
             return [
                 'sku_data' => $skuData,
-                'full_data' => $fullData,
+                'full_data' => $productDetails,  // Return full product details
                 'product_details' => $productDetails
             ];
 
@@ -1092,20 +1100,40 @@ class AliExpressService
      */
     public function getFirstAvailableSku(array $productData): ?string
     {
-        // Check in ae_item_sku_info_dtos structure (from aliexpress_data)
+        Log::debug('Getting first available SKU', [
+            'has_ae_item_sku_info_dtos' => isset($productData['ae_item_sku_info_dtos']),
+            'has_aeop_ae_product_s_k_us' => isset($productData['aeop_ae_product_s_k_us']),
+            'top_level_keys' => array_keys($productData)
+        ]);
+
+        // Check in ae_item_sku_info_dtos structure (from product.get API response)
         if (isset($productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
             $skus = $productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
+
+            Log::debug('Found SKUs in ae_item_sku_info_dtos', [
+                'sku_count' => count($skus),
+                'first_sku_keys' => isset($skus[0]) ? array_keys($skus[0]) : []
+            ]);
 
             foreach ($skus as $sku) {
                 // Check if SKU has stock
                 if (isset($sku['sku_available_stock']) && $sku['sku_available_stock'] > 0) {
-                    return $sku['sku_attr'] ?? $sku['id'] ?? null;
+                    $skuAttr = $sku['sku_attr'] ?? $sku['id'] ?? null;
+                    Log::info('Selected SKU with stock', [
+                        'sku_attr' => $skuAttr,
+                        'stock' => $sku['sku_available_stock']
+                    ]);
+                    return $skuAttr;
                 }
             }
 
             // If no SKU with stock, return first SKU anyway
             if (!empty($skus[0])) {
-                return $skus[0]['sku_attr'] ?? $skus[0]['id'] ?? null;
+                $skuAttr = $skus[0]['sku_attr'] ?? $skus[0]['id'] ?? null;
+                Log::warning('No SKU with stock found, using first SKU', [
+                    'sku_attr' => $skuAttr
+                ]);
+                return $skuAttr;
             }
         }
 
@@ -1117,17 +1145,31 @@ class AliExpressService
                 $skus = [$skus];
             }
 
+            Log::debug('Found SKUs in aeop_ae_product_s_k_us', [
+                'sku_count' => count($skus)
+            ]);
+
             foreach ($skus as $sku) {
                 if (isset($sku['s_k_u_available_stock']) && $sku['s_k_u_available_stock'] > 0) {
-                    return $sku['id'] ?? null;
+                    $skuAttr = $sku['id'] ?? null;
+                    Log::info('Selected SKU with stock (old structure)', [
+                        'sku_attr' => $skuAttr,
+                        'stock' => $sku['s_k_u_available_stock']
+                    ]);
+                    return $skuAttr;
                 }
             }
 
             if (!empty($skus[0])) {
-                return $skus[0]['id'] ?? null;
+                $skuAttr = $skus[0]['id'] ?? null;
+                Log::warning('No SKU with stock found, using first SKU (old structure)', [
+                    'sku_attr' => $skuAttr
+                ]);
+                return $skuAttr;
             }
         }
 
+        Log::warning('No SKU data found in product data');
         return null;
     }
 
