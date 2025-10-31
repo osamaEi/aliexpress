@@ -1226,6 +1226,11 @@ class AliExpressService
             'param_place_order_request4_open_api_d_t_o' => json_encode($orderRequest)
         ];
 
+        Log::info('Creating AliExpress order', [
+            'address' => $orderRequest['logistics_address'],
+            'product_items' => $orderRequest['product_items']
+        ]);
+
         $data = $this->makeRequest('aliexpress.ds.order.create', $params);
 
         if (isset($data['aliexpress_ds_order_create_response']['result'])) {
@@ -1257,6 +1262,7 @@ class AliExpressService
             'INSUFFICIENT_INVENTORY' => 'Insufficient product inventory.',
             'INVALID_ADDRESS' => 'The shipping address is invalid or incomplete.',
             'INVALID_PHONE' => 'The phone number is invalid.',
+            'B_DROPSHIPPER_DELIVERY_ADDRESS_VALIDATE_FAIL' => 'Shipping address validation failed. Please check: phone number format (must match country code), complete address with city/country, and ensure the address is valid for the selected country.',
             'SHIPPING_NOT_SUPPORT' => 'Shipping to this country is not supported.',
             'PRICE_CHANGED' => 'Product price has changed. Please refresh and try again.',
             default => 'An error occurred while creating the order.'

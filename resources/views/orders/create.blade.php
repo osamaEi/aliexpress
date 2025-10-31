@@ -75,17 +75,27 @@
                 <div class="row mb-4">
                     <div class="col-md-3">
                         <label for="phone_country" class="form-label">Phone Country Code *</label>
-                        <input type="text" name="phone_country" id="phone_country" class="form-control @error('phone_country') is-invalid @enderror" value="{{ old('phone_country', '971') }}" required>
+                        <select name="phone_country" id="phone_country" class="form-select @error('phone_country') is-invalid @enderror" required>
+                            <option value="971" {{ old('phone_country', '971') == '971' ? 'selected' : '' }}>+971 (UAE)</option>
+                            <option value="966" {{ old('phone_country') == '966' ? 'selected' : '' }}>+966 (Saudi Arabia)</option>
+                            <option value="20" {{ old('phone_country') == '20' ? 'selected' : '' }}>+20 (Egypt)</option>
+                        </select>
                         @error('phone_country')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-md-5">
-                        <label for="customer_phone" class="form-label">Phone Number *</label>
-                        <input type="text" name="customer_phone" id="customer_phone" class="form-control @error('customer_phone') is-invalid @enderror" value="{{ old('customer_phone') }}" required>
+                        <label for="customer_phone" class="form-label">Phone Number * <small class="text-muted">(without country code or leading zero)</small></label>
+                        <input type="text" name="customer_phone" id="customer_phone" class="form-control @error('customer_phone') is-invalid @enderror" value="{{ old('customer_phone') }}" placeholder="e.g., 501234567" required>
                         @error('customer_phone')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        <div class="form-text">
+                            <strong>Format examples:</strong><br>
+                            • UAE: 501234567 (9 digits starting with 5)<br>
+                            • Saudi Arabia: 501234567 (9 digits starting with 5)<br>
+                            • Egypt: 1001234567 (10 digits)
+                        </div>
                     </div>
                 </div>
 
@@ -160,4 +170,50 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('customer_phone');
+    const phoneCountrySelect = document.getElementById('phone_country');
+    const shippingCountrySelect = document.getElementById('shipping_country');
+
+    // Auto-sync phone country with shipping country
+    shippingCountrySelect.addEventListener('change', function() {
+        const countryMap = {
+            'AE': '971',  // UAE
+            'SA': '966',  // Saudi Arabia
+            'EG': '20'    // Egypt
+        };
+
+        const phoneCode = countryMap[this.value];
+        if (phoneCode && phoneCountrySelect) {
+            phoneCountrySelect.value = phoneCode;
+        }
+    });
+
+    // Clean phone number on input
+    phoneInput.addEventListener('blur', function() {
+        let phone = this.value.trim();
+
+        // Remove any spaces or dashes
+        phone = phone.replace(/[\s\-]/g, '');
+
+        // Remove leading zeros
+        phone = phone.replace(/^0+/, '');
+
+        // Remove country code if accidentally included
+        const countryCode = phoneCountrySelect.value;
+        if (phone.startsWith(countryCode)) {
+            phone = phone.substring(countryCode.length);
+        }
+
+        // Remove plus sign if present
+        phone = phone.replace(/^\+/, '');
+
+        this.value = phone;
+    });
+});
+</script>
+@endpush
 @endsection
