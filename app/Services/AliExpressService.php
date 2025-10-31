@@ -1041,6 +1041,96 @@ class AliExpressService
         return $product;
     }
 
+    /**
+     * Fetch and store product SKU data for ordering
+     * This method specifically fetches SKU information needed for placing orders
+     */
+    public function fetchProductSkuData(string $productId)
+    {
+        try {
+            $productDetails = $this->getProductDetails($productId);
+
+            if (!$productDetails) {
+                throw new \Exception("Product {$productId} not found on AliExpress");
+            }
+
+            // Extract SKU information from the response
+            $skuData = null;
+            $fullData = null;
+
+            // The response structure varies, check multiple possible locations
+            if (isset($productDetails['aeop_ae_product_s_k_us'])) {
+                $skuData = $productDetails['aeop_ae_product_s_k_us'];
+                $fullData = $productDetails;
+            }
+
+            Log::info('Fetched product SKU data', [
+                'product_id' => $productId,
+                'has_sku_data' => !empty($skuData),
+                'sku_count' => is_array($skuData) ? count($skuData) : 0,
+                'response_keys' => array_keys($productDetails)
+            ]);
+
+            return [
+                'sku_data' => $skuData,
+                'full_data' => $fullData,
+                'product_details' => $productDetails
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch product SKU data', [
+                'product_id' => $productId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Get the first available SKU for a product
+     * Useful when customer hasn't selected a specific variant
+     */
+    public function getFirstAvailableSku(array $productData): ?string
+    {
+        // Check in ae_item_sku_info_dtos structure (from aliexpress_data)
+        if (isset($productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
+            $skus = $productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
+
+            foreach ($skus as $sku) {
+                // Check if SKU has stock
+                if (isset($sku['sku_available_stock']) && $sku['sku_available_stock'] > 0) {
+                    return $sku['sku_attr'] ?? $sku['id'] ?? null;
+                }
+            }
+
+            // If no SKU with stock, return first SKU anyway
+            if (!empty($skus[0])) {
+                return $skus[0]['sku_attr'] ?? $skus[0]['id'] ?? null;
+            }
+        }
+
+        // Check in aeop_ae_product_s_k_us structure (from aliexpress_variants)
+        if (isset($productData['aeop_ae_product_s_k_us']['aeop_ae_product_sku'])) {
+            $skus = $productData['aeop_ae_product_s_k_us']['aeop_ae_product_sku'];
+
+            if (!is_array($skus)) {
+                $skus = [$skus];
+            }
+
+            foreach ($skus as $sku) {
+                if (isset($sku['s_k_u_available_stock']) && $sku['s_k_u_available_stock'] > 0) {
+                    return $sku['id'] ?? null;
+                }
+            }
+
+            if (!empty($skus[0])) {
+                return $skus[0]['id'] ?? null;
+            }
+        }
+
+        return null;
+    }
+
     // ===================================================================
     // ORDER APIs (Requires OAuth - User Level)
     // ===================================================================
