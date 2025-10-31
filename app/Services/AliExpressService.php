@@ -1056,6 +1056,22 @@ class AliExpressService
             $accessToken = $this->getAccessToken();
         }
 
+        // Build product items - clean up empty sku_attr
+        $productItems = [];
+        foreach ($orderData['product_items'] as $item) {
+            $productItem = [
+                'product_id' => $item['product_id'],
+                'product_count' => $item['product_count'],
+            ];
+
+            // Only include sku_attr if it's not empty
+            if (!empty($item['sku_attr'])) {
+                $productItem['sku_attr'] = $item['sku_attr'];
+            }
+
+            $productItems[] = $productItem;
+        }
+
         // Build order request
         $orderRequest = [
             'logistics_address' => [
@@ -1070,7 +1086,7 @@ class AliExpressService
                 'zip' => $orderData['zip'],
                 'full_name' => $orderData['full_name'] ?? $orderData['contact_person'],
             ],
-            'product_items' => $orderData['product_items']
+            'product_items' => $productItems
         ];
 
         $params = [
@@ -1081,10 +1097,38 @@ class AliExpressService
         $data = $this->makeRequest('aliexpress.ds.order.create', $params);
 
         if (isset($data['aliexpress_ds_order_create_response']['result'])) {
-            return $data['aliexpress_ds_order_create_response']['result'];
+            $result = $data['aliexpress_ds_order_create_response']['result'];
+
+            // Check if order creation was successful
+            if (isset($result['is_success']) && $result['is_success'] === false) {
+                $errorCode = $result['error_code'] ?? 'UNKNOWN_ERROR';
+                $errorMsg = $this->getOrderErrorMessage($errorCode);
+
+                throw new \Exception("Order creation failed: {$errorMsg} (Code: {$errorCode})");
+            }
+
+            return $result;
         }
 
         return null;
+    }
+
+    /**
+     * Get user-friendly error message for order errors
+     */
+    private function getOrderErrorMessage(string $errorCode): string
+    {
+        return match($errorCode) {
+            'SKU_NOT_EXIST' => 'The product SKU does not exist or the variant is not available. Please ensure the product has no variants or select a valid variant.',
+            'PRODUCT_NOT_EXIST' => 'The product does not exist on AliExpress.',
+            'PRODUCT_OFFLINE' => 'The product is currently offline or unavailable.',
+            'INSUFFICIENT_INVENTORY' => 'Insufficient product inventory.',
+            'INVALID_ADDRESS' => 'The shipping address is invalid or incomplete.',
+            'INVALID_PHONE' => 'The phone number is invalid.',
+            'SHIPPING_NOT_SUPPORT' => 'Shipping to this country is not supported.',
+            'PRICE_CHANGED' => 'Product price has changed. Please refresh and try again.',
+            default => 'An error occurred while creating the order.'
+        };
     }
 
     /**

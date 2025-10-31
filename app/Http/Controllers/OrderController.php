@@ -155,6 +155,16 @@ class OrderController extends Controller
         try {
             $order->update(['status' => 'processing']);
 
+            // Get product variants if available
+            $skuAttr = '';
+            if (!empty($order->product->aliexpress_variants)) {
+                // If product has variants, try to use the first available SKU
+                $variants = $order->product->aliexpress_variants;
+                if (isset($variants[0]['id'])) {
+                    $skuAttr = $variants[0]['id'];
+                }
+            }
+
             // Prepare order data for AliExpress
             $orderData = [
                 'contact_person' => $order->customer_name,
@@ -171,7 +181,7 @@ class OrderController extends Controller
                     [
                         'product_id' => $order->product->aliexpress_id,
                         'product_count' => $order->quantity,
-                        'sku_attr' => '', // SKU attributes if variant selected
+                        'sku_attr' => $skuAttr,
                     ]
                 ]
             ];
