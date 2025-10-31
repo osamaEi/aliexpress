@@ -1075,7 +1075,7 @@ class AliExpressService
 
         $params = [
             'access_token' => $accessToken,
-            'param_aeop_order_create_request' => json_encode($orderRequest)
+            'param_place_order_request4_open_api_d_t_o' => json_encode($orderRequest)
         ];
 
         $data = $this->makeRequest('aliexpress.ds.order.create', $params);
