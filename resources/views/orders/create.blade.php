@@ -127,13 +127,44 @@
 
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <label for="shipping_province" class="form-label">Province/State</label>
-                        <input type="text" name="shipping_province" id="shipping_province" class="form-control @error('shipping_province') is-invalid @enderror" value="{{ old('shipping_province') }}">
+                        <label for="shipping_province" class="form-label">Emirate/Province *</label>
+                        <select name="shipping_province" id="shipping_province" class="form-select @error('shipping_province') is-invalid @enderror" required>
+                            <option value="">Select Emirate/Province</option>
+                            <!-- UAE Emirates -->
+                            <optgroup label="UAE Emirates" id="uae-provinces">
+                                <option value="Abu Dhabi" {{ old('shipping_province') == 'Abu Dhabi' ? 'selected' : '' }}>Abu Dhabi</option>
+                                <option value="Dubai" {{ old('shipping_province') == 'Dubai' ? 'selected' : '' }}>Dubai</option>
+                                <option value="Sharjah" {{ old('shipping_province') == 'Sharjah' ? 'selected' : '' }}>Sharjah</option>
+                                <option value="Ajman" {{ old('shipping_province') == 'Ajman' ? 'selected' : '' }}>Ajman</option>
+                                <option value="Umm Al Quwain" {{ old('shipping_province') == 'Umm Al Quwain' ? 'selected' : '' }}>Umm Al Quwain</option>
+                                <option value="Ras Al Khaimah" {{ old('shipping_province') == 'Ras Al Khaimah' ? 'selected' : '' }}>Ras Al Khaimah</option>
+                                <option value="Fujairah" {{ old('shipping_province') == 'Fujairah' ? 'selected' : '' }}>Fujairah</option>
+                            </optgroup>
+                            <!-- Saudi Arabia Provinces -->
+                            <optgroup label="Saudi Arabia Provinces" id="saudi-provinces" style="display:none;">
+                                <option value="Riyadh" {{ old('shipping_province') == 'Riyadh' ? 'selected' : '' }}>Riyadh</option>
+                                <option value="Makkah" {{ old('shipping_province') == 'Makkah' ? 'selected' : '' }}>Makkah</option>
+                                <option value="Madinah" {{ old('shipping_province') == 'Madinah' ? 'selected' : '' }}>Madinah</option>
+                                <option value="Eastern Province" {{ old('shipping_province') == 'Eastern Province' ? 'selected' : '' }}>Eastern Province</option>
+                                <option value="Asir" {{ old('shipping_province') == 'Asir' ? 'selected' : '' }}>Asir</option>
+                                <option value="Tabuk" {{ old('shipping_province') == 'Tabuk' ? 'selected' : '' }}>Tabuk</option>
+                                <option value="Qassim" {{ old('shipping_province') == 'Qassim' ? 'selected' : '' }}>Qassim</option>
+                                <option value="Ha\'il" {{ old('shipping_province') == 'Ha\'il' ? 'selected' : '' }}>Ha'il</option>
+                                <option value="Northern Borders" {{ old('shipping_province') == 'Northern Borders' ? 'selected' : '' }}>Northern Borders</option>
+                                <option value="Jazan" {{ old('shipping_province') == 'Jazan' ? 'selected' : '' }}>Jazan</option>
+                                <option value="Najran" {{ old('shipping_province') == 'Najran' ? 'selected' : '' }}>Najran</option>
+                                <option value="Al Bahah" {{ old('shipping_province') == 'Al Bahah' ? 'selected' : '' }}>Al Bahah</option>
+                                <option value="Al Jawf" {{ old('shipping_province') == 'Al Jawf' ? 'selected' : '' }}>Al Jawf</option>
+                            </optgroup>
+                        </select>
+                        @error('shipping_province')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
-                        <label for="shipping_country" class="form-label">Country Code *</label>
+                        <label for="shipping_country" class="form-label">Country *</label>
                         <select name="shipping_country" id="shipping_country" class="form-select @error('shipping_country') is-invalid @enderror" required>
-                            <option value="AE" {{ old('shipping_country') == 'AE' ? 'selected' : '' }}>UAE (AE)</option>
+                            <option value="AE" {{ old('shipping_country', 'AE') == 'AE' ? 'selected' : '' }}>UAE (AE)</option>
                             <option value="SA" {{ old('shipping_country') == 'SA' ? 'selected' : '' }}>Saudi Arabia (SA)</option>
                         </select>
                         @error('shipping_country')
@@ -142,7 +173,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="shipping_zip" class="form-label">Postal Code</label>
-                        <input type="text" name="shipping_zip" id="shipping_zip" class="form-control @error('shipping_zip') is-invalid @enderror" value="{{ old('shipping_zip') }}">
+                        <input type="text" name="shipping_zip" id="shipping_zip" class="form-control @error('shipping_zip') is-invalid @enderror" value="{{ old('shipping_zip') }}" placeholder="Optional">
                     </div>
                 </div>
 
@@ -177,8 +208,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const phoneInput = document.getElementById('customer_phone');
     const phoneCountrySelect = document.getElementById('phone_country');
     const shippingCountrySelect = document.getElementById('shipping_country');
+    const shippingProvinceSelect = document.getElementById('shipping_province');
+    const uaeProvinces = document.getElementById('uae-provinces');
+    const saudiProvinces = document.getElementById('saudi-provinces');
 
-    // Auto-sync phone country with shipping country
+    // Function to update province options based on country
+    function updateProvinceOptions(country) {
+        if (country === 'AE') {
+            uaeProvinces.style.display = '';
+            saudiProvinces.style.display = 'none';
+            // Clear selection if it was a Saudi province
+            const currentValue = shippingProvinceSelect.value;
+            const validUAEValues = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
+            if (!validUAEValues.includes(currentValue)) {
+                shippingProvinceSelect.value = '';
+            }
+        } else if (country === 'SA') {
+            uaeProvinces.style.display = 'none';
+            saudiProvinces.style.display = '';
+            // Clear selection if it was a UAE emirate
+            const currentValue = shippingProvinceSelect.value;
+            const validSAValues = ['Riyadh', 'Makkah', 'Madinah', 'Eastern Province', 'Asir', 'Tabuk', 'Qassim', "Ha'il", 'Northern Borders', 'Jazan', 'Najran', 'Al Bahah', 'Al Jawf'];
+            if (!validSAValues.includes(currentValue)) {
+                shippingProvinceSelect.value = '';
+            }
+        }
+    }
+
+    // Initialize province options on page load
+    updateProvinceOptions(shippingCountrySelect.value);
+
+    // Auto-sync phone country with shipping country and update provinces
     shippingCountrySelect.addEventListener('change', function() {
         const countryMap = {
             'AE': '971',  // UAE
@@ -190,6 +250,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (phoneCode && phoneCountrySelect) {
             phoneCountrySelect.value = phoneCode;
         }
+
+        // Update province options
+        updateProvinceOptions(this.value);
     });
 
     // Clean phone number on input

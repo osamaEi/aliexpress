@@ -301,6 +301,17 @@ class ProductController extends Controller
             $productData = $result['product'];
             $profitMargin = $request->get('profit_margin', 30.0);
 
+            // ========== VALIDATE SKU DATA (REQUIRED FOR ORDERING) ==========
+            $hasSKUData = isset($productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])
+                || isset($productData['aeop_ae_product_s_k_us']);
+
+            if (!$hasSKUData) {
+                Log::warning('Product imported without SKU data - orders may fail', [
+                    'product_id' => $request->aliexpress_id,
+                    'data_keys' => array_keys($productData)
+                ]);
+            }
+
             // Calculate pricing
             $aliexpressPrice = $productData['target_sale_price'] ?? $productData['target_original_price'] ?? 0;
             $currency = $request->get('currency', 'USD');
@@ -310,44 +321,89 @@ class ProductController extends Controller
             $profitAmount = $cost * ($profitMargin / 100);
             $price = $cost + $profitAmount;
 
-            // Get product images
+            // ========== GET PRODUCT IMAGES ==========
             $images = [];
             if (isset($productData['images']) && is_array($productData['images'])) {
                 $images = $productData['images'];
             } elseif (isset($productData['image_url'])) {
                 $images = [$productData['image_url']];
+            } elseif (isset($productData['ae_multimedia_info_dto']['image_urls'])) {
+                // Extract from multimedia info (common in ds.product.get)
+                $imageUrls = $productData['ae_multimedia_info_dto']['image_urls'];
+                if (is_string($imageUrls)) {
+                    $images = array_filter(explode(';', $imageUrls));
+                }
             }
 
-            // Create product
+            // ========== EXTRACT SKU VARIANTS FOR QUICK ACCESS ==========
+            $skuVariants = null;
+            if (isset($productData['ae_item_sku_info_dtos'])) {
+                $skuVariants = $productData['ae_item_sku_info_dtos'];
+            } elseif (isset($productData['aeop_ae_product_s_k_us'])) {
+                $skuVariants = $productData['aeop_ae_product_s_k_us'];
+            }
+
+            // ========== GET PRODUCT NAME ==========
+            $productName = $productData['subject']
+                ?? $productData['ae_item_base_info_dto']['subject']
+                ?? 'Imported Product';
+
+            // ========== GET PRODUCT DESCRIPTION ==========
+            $description = $productData['detail']
+                ?? $productData['ae_item_base_info_dto']['detail']
+                ?? 'Product imported from AliExpress';
+
+            // Create product with complete data
             $product = Product::create([
-                'name' => $productData['subject'] ?? 'Imported Product',
-                'slug' => Str::slug($productData['subject'] ?? 'imported-product-' . $request->aliexpress_id),
-                'description' => $productData['detail'] ?? '',
-                'short_description' => isset($productData['subject']) ? substr($productData['subject'], 0, 500) : '',
+                'name' => $productName,
+                'slug' => Str::slug($productName . '-' . $request->aliexpress_id),
+                'description' => $description,
+                'short_description' => substr($productName, 0, 500),
                 'price' => round($price, 2),
                 'currency' => $currency,
                 'original_price' => round($aliexpressPrice, 2),
                 'seller_amount' => null,
-                'admin_amount' => round($profitAmount, 2), // Admin sets default profit
+                'admin_amount' => round($profitAmount, 2),
                 'compare_price' => round($price * 1.2, 2),
                 'cost' => round($cost, 2),
                 'sku' => 'AE-' . $request->aliexpress_id,
                 'stock_quantity' => 100,
                 'track_inventory' => false, // Dropshipping - no inventory tracking
-                'is_active' => false,
+                'is_active' => false, // Set to false until reviewed
                 'category_id' => $request->category_id,
                 'aliexpress_id' => $request->aliexpress_id,
                 'aliexpress_url' => $productData['product_detail_url'] ?? "https://www.aliexpress.com/item/{$request->aliexpress_id}.html",
                 'aliexpress_price' => $aliexpressPrice,
                 'supplier_profit_margin' => $profitMargin,
-                'aliexpress_data' => $productData, // Store complete API response
+                'aliexpress_data' => $productData, // ✅ CRITICAL: Complete API response with SKU data
+                'aliexpress_variants' => $skuVariants, // ✅ Extracted SKU variants for quick access
                 'images' => $images,
+                'last_synced_at' => now(), // Mark as synced
             ]);
+
+            Log::info('Product imported successfully', [
+                'product_id' => $product->id,
+                'aliexpress_id' => $request->aliexpress_id,
+                'has_sku_data' => $hasSKUData,
+                'sku_count' => isset($skuVariants['ae_item_sku_info_d_t_o']) ? count($skuVariants['ae_item_sku_info_d_t_o']) : 0,
+                'image_count' => count($images)
+            ]);
+
+            // Build success message with order readiness info
+            $message = 'Product imported successfully.';
+            if ($hasSKUData) {
+                $skuCount = isset($skuVariants['ae_item_sku_info_d_t_o']) ? count($skuVariants['ae_item_sku_info_d_t_o']) : 0;
+                $message .= " ✅ Ready for ordering ({$skuCount} variants available).";
+            } else {
+                $message .= " ⚠️ Warning: Product may not be ready for ordering (missing SKU data). Run sync command to fix.";
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Product imported successfully.',
+                'message' => $message,
                 'product' => $product,
+                'order_ready' => $hasSKUData,
+                'sku_count' => isset($skuVariants['ae_item_sku_info_d_t_o']) ? count($skuVariants['ae_item_sku_info_d_t_o']) : 0,
             ]);
 
         } catch (\Exception $e) {
