@@ -75,9 +75,9 @@ class OrderController extends Controller
             'shipping_address' => 'required|string',
             'shipping_address2' => 'nullable|string|max:255',
             'shipping_city' => 'required|string|max:100',
-            'shipping_province' => 'nullable|string|max:100',
+            'shipping_province' => 'required|string|max:100', // Required for AliExpress
             'shipping_country' => 'required|string|max:2',
-            'shipping_zip' => 'nullable|string|max:20',
+            'shipping_zip' => 'required|string|max:20', // Required for AliExpress
             'customer_notes' => 'nullable|string',
         ]);
 

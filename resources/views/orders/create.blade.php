@@ -172,8 +172,12 @@
                         @enderror
                     </div>
                     <div class="col-md-4">
-                        <label for="shipping_zip" class="form-label">Postal Code</label>
-                        <input type="text" name="shipping_zip" id="shipping_zip" class="form-control @error('shipping_zip') is-invalid @enderror" value="{{ old('shipping_zip') }}" placeholder="Optional">
+                        <label for="shipping_zip" class="form-label">Postal Code <span class="text-danger">*</span></label>
+                        <input type="text" name="shipping_zip" id="shipping_zip" class="form-control @error('shipping_zip') is-invalid @enderror" value="{{ old('shipping_zip') }}" placeholder="e.g., 00000" required>
+                        @error('shipping_zip')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="form-text text-muted">For UAE, you can use "00000" if no postal code</small>
                     </div>
                 </div>
 
@@ -238,6 +242,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize province options on page load
     updateProvinceOptions(shippingCountrySelect.value);
 
+    // Auto-fill postal code for UAE if empty
+    const zipInput = document.getElementById('shipping_zip');
+    if (shippingCountrySelect.value === 'AE' && !zipInput.value) {
+        zipInput.value = '00000';
+    }
+
     // Auto-sync phone country with shipping country and update provinces
     shippingCountrySelect.addEventListener('change', function() {
         const countryMap = {
@@ -253,6 +263,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update province options
         updateProvinceOptions(this.value);
+
+        // Auto-fill default postal code for UAE
+        if (this.value === 'AE' && !zipInput.value) {
+            zipInput.value = '00000';
+        }
     });
 
     // Clean phone number on input
