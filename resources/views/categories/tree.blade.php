@@ -1,22 +1,22 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0">AliExpress Category Tree</h5>
-                <small class="text-muted">Total: {{ $rootCount ?? 0 }} root categories, {{ $childCount ?? 0 }} subcategories</small>
+                <h5 class="mb-0">{{ __('messages.aliexpress_category_tree') }}</h5>
+                <small class="text-muted">{{ __('messages.total') }}: {{ $rootCount ?? 0 }} {{ __('messages.root_categories') }}, {{ $childCount ?? 0 }} {{ __('messages.subcategories') }}</small>
             </div>
             <div class="d-flex gap-2">
-                <form action="{{ route('categories.import-all') }}" method="POST" class="d-inline" onsubmit="return confirm('Import ALL {{ count($allCategories ?? []) }} categories from AliExpress? This may take a while.');">
+                <form action="{{ route('categories.import-all') }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('messages.import_all_categories_confirm', ['count' => count($allCategories ?? [])]) }}');">
                     @csrf
                     <button type="submit" class="btn btn-success">
-                        <i class="ri-download-line me-1"></i> Import All ({{ count($allCategories ?? []) }})
+                        <i class="ri-download-line me-1"></i> {{ __('messages.import_all') }} ({{ count($allCategories ?? []) }})
                     </button>
                 </form>
                 <a href="{{ route('categories.index') }}" class="btn btn-secondary">
-                    <i class="ri-arrow-left-line me-1"></i> Back
+                    <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
                 </a>
             </div>
         </div>
@@ -24,7 +24,7 @@
         <div class="card-body">
             <div class="alert alert-info">
                 <i class="ri-information-line me-2"></i>
-                You can either select specific root categories to import manually, OR click "Import All" to import all {{ count($allCategories ?? []) }} categories with their parent-child relationships automatically.
+                {{ __('messages.category_tree_import_info', ['count' => count($allCategories ?? [])]) }}
             </div>
 
             <form action="{{ route('categories.save-tree') }}" method="POST" id="categoryTreeForm">
@@ -32,13 +32,13 @@
 
                 <div class="mb-3">
                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">
-                        <i class="ri-checkbox-multiple-line me-1"></i> Select All
+                        <i class="ri-checkbox-multiple-line me-1"></i> {{ __('messages.select_all') }}
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">
-                        <i class="ri-checkbox-blank-line me-1"></i> Deselect All
+                        <i class="ri-checkbox-blank-line me-1"></i> {{ __('messages.deselect_all') }}
                     </button>
                     <span class="ms-3 text-muted">
-                        <strong id="selectedCount">0</strong> categories selected
+                        <strong id="selectedCount">0</strong> {{ __('messages.categories_selected') }}
                     </span>
                 </div>
 
@@ -73,9 +73,9 @@
 
                                     <div class="d-flex gap-1 flex-wrap">
                                         @if($hasChildren)
-                                            <span class="badge bg-info">Has Children</span>
+                                            <span class="badge bg-info">{{ __('messages.has_children') }}</span>
                                         @else
-                                            <span class="badge bg-success">Leaf</span>
+                                            <span class="badge bg-success">{{ __('messages.leaf') }}</span>
                                         @endif
                                     </div>
 
@@ -90,7 +90,7 @@
                         <div class="col-12">
                             <div class="text-center py-5">
                                 <i class="ri-inbox-line" style="font-size: 3rem; color: #ccc;"></i>
-                                <p class="text-muted mt-2">No categories found in the tree</p>
+                                <p class="text-muted mt-2">{{ __('messages.no_categories_found_in_tree') }}</p>
                             </div>
                         </div>
                     @endforelse
@@ -99,10 +99,10 @@
                 @if(count($categoryTree) > 0)
                 <div class="mt-4 d-flex justify-content-end gap-2">
                     <a href="{{ route('categories.index') }}" class="btn btn-secondary">
-                        <i class="ri-close-line me-1"></i> Cancel
+                        <i class="ri-close-line me-1"></i> {{ __('messages.cancel') }}
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        <i class="ri-save-line me-1"></i> Save Selected Categories
+                        <i class="ri-save-line me-1"></i> {{ __('messages.save_selected_categories') }}
                     </button>
                 </div>
                 @endif
@@ -111,7 +111,7 @@
             <!-- Debug Info (collapsible) -->
             <div class="mt-4">
                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo">
-                    <i class="ri-bug-line me-1"></i> Show Raw API Response
+                    <i class="ri-bug-line me-1"></i> {{ __('messages.show_raw_api_response') }}
                 </button>
                 <div class="collapse mt-2" id="debugInfo">
                     <div class="card">
@@ -170,7 +170,7 @@
         const checked = document.querySelectorAll('.category-checkbox:checked').length;
         if (checked === 0) {
             e.preventDefault();
-            alert('Please select at least one category to save.');
+            alert('{{ __('messages.select_at_least_one_category') }}');
             return false;
         }
     });

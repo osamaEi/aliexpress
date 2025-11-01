@@ -203,7 +203,7 @@
                         <a href="{{ route('logout') }}" class="menu-link"
                            onclick="event.preventDefault(); this.closest('form').submit();">
                             <i class="menu-icon tf-icons ri-logout-box-line"></i>
-                            <div data-i18n="Logout">Logout</div>
+                            <div data-i18n="Logout">{{ __('messages.logout') }}</div>
                         </a>
                     </form>
                 </li>

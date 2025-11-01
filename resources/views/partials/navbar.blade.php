@@ -13,7 +13,7 @@
                         <div class="nav-item navbar-search-wrapper mb-0">
                             <a class="nav-item nav-link search-toggler fw-normal px-0" href="javascript:void(0);">
                                 <i class="ri-search-line ri-22px scaleX-n1-rtl me-3"></i>
-                                <span class="d-none d-md-inline-block text-muted">Search (Ctrl+/)</span>
+                                <span class="d-none d-md-inline-block text-muted">{{ __('messages.search') }} (Ctrl+/)</span>
                             </a>
                         </div>
                     </div>
@@ -147,8 +147,8 @@
                     <input
                         type="text"
                         class="form-control search-input container-xxl border-0"
-                        placeholder="Search..."
-                        aria-label="Search..." />
+                        placeholder="{{ __('messages.search') }}..."
+                        aria-label="{{ __('messages.search') }}..." />
                     <i class="ri-close-fill search-toggler cursor-pointer"></i>
                 </div>
             </nav>

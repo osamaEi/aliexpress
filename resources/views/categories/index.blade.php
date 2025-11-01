@@ -1,16 +1,16 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Categories</h5>
+            <h5 class="mb-0">{{ __('messages.categories') }}</h5>
             <div class="d-flex gap-2">
                 <a href="{{ route('categories.fetch-tree') }}" class="btn btn-success">
-                    <i class="ri-download-cloud-line me-1"></i> Fetch Category Tree
+                    <i class="ri-download-cloud-line me-1"></i> {{ __('messages.fetch_category_tree') }}
                 </a>
                 <a href="{{ route('categories.create') }}" class="btn btn-primary">
-                    <i class="ri-add-line me-1"></i> Add Category
+                    <i class="ri-add-line me-1"></i> {{ __('messages.add_category') }}
                 </a>
             </div>
         </div>
@@ -36,15 +36,15 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th style="width: 60px;">Image</th>
-                            <th>Name</th>
-                            <th>Arabic Name</th>
-                            <th>Slug</th>
-                            <th>AliExpress ID</th>
-                            <th>Products</th>
-                            <th>Order</th>
-                            <th>Status</th>
-                            <th style="width: 150px;">Actions</th>
+                            <th style="width: 60px;">{{ __('messages.image') }}</th>
+                            <th>{{ __('messages.name') }}</th>
+                            <th>{{ __('messages.arabic_name') }}</th>
+                            <th>{{ __('messages.slug') }}</th>
+                            <th>{{ __('messages.aliexpress_id') }}</th>
+                            <th>{{ __('messages.products') }}</th>
+                            <th>{{ __('messages.order') }}</th>
+                            <th>{{ __('messages.status') }}</th>
+                            <th style="width: 150px;">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -1,12 +1,12 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Orders Management</h5>
+            <h5 class="mb-0">{{ __('messages.order_management') }}</h5>
             <a href="{{ route('orders.create') }}" class="btn btn-primary">
-                <i class="ri-add-line me-1"></i> Create New Order
+                <i class="ri-add-line me-1"></i> {{ __('messages.create_order') }}
             </a>
         </div>
 
@@ -15,30 +15,30 @@
             <form method="GET" action="{{ route('orders.index') }}" class="mb-4">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <input type="text" name="search" class="form-control" placeholder="Search by order number, customer name..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control" placeholder="{{ __('messages.search_orders_placeholder') }}" value="{{ request('search') }}">
                     </div>
                     <div class="col-md-3">
                         <select name="status" class="form-select">
-                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Processing</option>
-                            <option value="placed" {{ request('status') == 'placed' ? 'selected' : '' }}>Placed</option>
-                            <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                            <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>Shipped</option>
-                            <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Delivered</option>
-                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                            <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>Failed</option>
+                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>{{ __('messages.all_status') }}</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
+                            <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>{{ __('messages.processing') }}</option>
+                            <option value="placed" {{ request('status') == 'placed' ? 'selected' : '' }}>{{ __('messages.placed') }}</option>
+                            <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>{{ __('messages.paid') }}</option>
+                            <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>{{ __('messages.shipped') }}</option>
+                            <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>{{ __('messages.delivered') }}</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('messages.cancelled') }}</option>
+                            <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>{{ __('messages.failed') }}</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="ri-search-line me-1"></i> Search
+                            <i class="ri-search-line me-1"></i> {{ __('messages.search') }}
                         </button>
                     </div>
                     @if(request('search') || request('status') != 'all')
                         <div class="col-md-2">
                             <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary w-100">
-                                <i class="ri-close-line me-1"></i> Clear
+                                <i class="ri-close-line me-1"></i> {{ __('messages.clear') }}
                             </a>
                         </div>
                     @endif
@@ -51,14 +51,14 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Product</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
+                                <th>{{ __('messages.order_number') }}</th>
+                                <th>{{ __('messages.customer') }}</th>
+                                <th>{{ __('messages.product') }}</th>
+                                <th>{{ __('messages.quantity') }}</th>
+                                <th>{{ __('messages.total') }}</th>
+                                <th>{{ __('messages.status') }}</th>
+                                <th>{{ __('messages.date') }}</th>
+                                <th>{{ __('messages.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>

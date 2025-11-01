@@ -1,12 +1,12 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Add New Product</h5>
+            <h5 class="mb-0">{{ __('messages.add_new_product') }}</h5>
             <a href="{{ route('products.index') }}" class="btn btn-secondary btn-sm">
-                <i class="ri-arrow-left-line me-1"></i> Back
+                <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
             </a>
         </div>
 
@@ -17,7 +17,7 @@
                 <div class="row">
                     <!-- Product Name -->
                     <div class="col-md-8 mb-3">
-                        <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
+                        <label for="name" class="form-label">{{ __('messages.product_name') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
                         @error('name')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -26,7 +26,7 @@
 
                     <!-- SKU -->
                     <div class="col-md-4 mb-3">
-                        <label for="sku" class="form-label">SKU</label>
+                        <label for="sku" class="form-label">{{ __('messages.sku') }}</label>
                         <input type="text" class="form-control @error('sku') is-invalid @enderror" id="sku" name="sku" value="{{ old('sku') }}">
                         @error('sku')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -35,7 +35,7 @@
 
                     <!-- Short Description -->
                     <div class="col-12 mb-3">
-                        <label for="short_description" class="form-label">Short Description</label>
+                        <label for="short_description" class="form-label">{{ __('messages.short_description') }}</label>
                         <textarea class="form-control @error('short_description') is-invalid @enderror" id="short_description" name="short_description" rows="2">{{ old('short_description') }}</textarea>
                         @error('short_description')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -44,7 +44,7 @@
 
                     <!-- Description -->
                     <div class="col-12 mb-3">
-                        <label for="description" class="form-label">Description</label>
+                        <label for="description" class="form-label">{{ __('messages.description') }}</label>
                         <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="5">{{ old('description') }}</textarea>
                         @error('description')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -53,9 +53,9 @@
 
                     <!-- Category -->
                     <div class="col-md-6 mb-3">
-                        <label for="category_id" class="form-label">Category</label>
+                        <label for="category_id" class="form-label">{{ __('messages.category') }}</label>
                         <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id">
-                            <option value="">Select Category</option>
+                            <option value="">{{ __('messages.select_category') }}</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                     {{ $category->name }}
@@ -69,16 +69,16 @@
 
                     <!-- Status -->
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ __('messages.status') }}</label>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="is_active">Active</label>
+                            <label class="form-check-label" for="is_active">{{ __('messages.active') }}</label>
                         </div>
                     </div>
 
                     <!-- Price -->
                     <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">Price <span class="text-danger">*</span></label>
+                        <label for="price" class="form-label">{{ __('messages.price') }} <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
                             <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price') }}" step="0.01" min="0" required>
@@ -90,7 +90,7 @@
 
                     <!-- Compare Price -->
                     <div class="col-md-4 mb-3">
-                        <label for="compare_price" class="form-label">Compare at Price</label>
+                        <label for="compare_price" class="form-label">{{ __('messages.compare_at_price') }}</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
                             <input type="number" class="form-control @error('compare_price') is-invalid @enderror" id="compare_price" name="compare_price" value="{{ old('compare_price') }}" step="0.01" min="0">
@@ -98,12 +98,12 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <small class="text-muted">Original price before discount</small>
+                        <small class="text-muted">{{ __('messages.original_price_before_discount') }}</small>
                     </div>
 
                     <!-- Cost -->
                     <div class="col-md-4 mb-3">
-                        <label for="cost" class="form-label">Cost per Item</label>
+                        <label for="cost" class="form-label">{{ __('messages.cost_per_item') }}</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
                             <input type="number" class="form-control @error('cost') is-invalid @enderror" id="cost" name="cost" value="{{ old('cost') }}" step="0.01" min="0">
@@ -111,12 +111,12 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <small class="text-muted">Your cost for this product</small>
+                        <small class="text-muted">{{ __('messages.your_cost_for_product') }}</small>
                     </div>
 
                     <!-- Stock Quantity -->
                     <div class="col-md-6 mb-3">
-                        <label for="stock_quantity" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
+                        <label for="stock_quantity" class="form-label">{{ __('messages.stock_quantity') }} <span class="text-danger">*</span></label>
                         <input type="number" class="form-control @error('stock_quantity') is-invalid @enderror" id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', 0) }}" min="0" required>
                         @error('stock_quantity')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -125,22 +125,22 @@
 
                     <!-- Track Inventory -->
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Inventory</label>
+                        <label class="form-label">{{ __('messages.inventory') }}</label>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="track_inventory" name="track_inventory" value="1" {{ old('track_inventory', 1) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="track_inventory">Track inventory</label>
+                            <label class="form-check-label" for="track_inventory">{{ __('messages.track_inventory') }}</label>
                         </div>
-                        <small class="text-muted">Uncheck for unlimited stock (dropshipping)</small>
+                        <small class="text-muted">{{ __('messages.uncheck_for_unlimited_stock') }}</small>
                     </div>
                 </div>
 
                 <!-- Buttons -->
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">
-                        <i class="ri-save-line me-1"></i> Create Product
+                        <i class="ri-save-line me-1"></i> {{ __('messages.create_product') }}
                     </button>
                     <a href="{{ route('products.index') }}" class="btn btn-secondary">
-                        <i class="ri-close-line me-1"></i> Cancel
+                        <i class="ri-close-line me-1"></i> {{ __('messages.cancel') }}
                     </a>
                 </div>
             </form>

@@ -1,12 +1,12 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Edit Category: {{ $category->name }}</h5>
+            <h5 class="mb-0">{{ __('messages.edit_category') }}: {{ $category->name }}</h5>
             <a href="{{ route('categories.index') }}" class="btn btn-sm btn-secondary">
-                <i class="ri-arrow-left-line me-1"></i> Back to List
+                <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back_to_list') }}
             </a>
         </div>
 

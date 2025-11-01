@@ -1,6 +1,6 @@
 <div class="row g-3">
     <div class="col-md-6">
-        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+        <label for="name" class="form-label">{{ __('messages.name') }} <span class="text-danger">*</span></label>
         <input
             type="text"
             class="form-control @error('name') is-invalid @enderror"
@@ -15,7 +15,7 @@
     </div>
 
     <div class="col-md-6">
-        <label for="name_ar" class="form-label">Arabic Name</label>
+        <label for="name_ar" class="form-label">{{ __('messages.arabic_name') }}</label>
         <input
             type="text"
             class="form-control @error('name_ar') is-invalid @enderror"
@@ -30,23 +30,23 @@
     </div>
 
     <div class="col-md-6">
-        <label for="slug" class="form-label">Slug</label>
+        <label for="slug" class="form-label">{{ __('messages.slug') }}</label>
         <input
             type="text"
             class="form-control @error('slug') is-invalid @enderror"
             id="slug"
             name="slug"
             value="{{ old('slug', $category->slug ?? '') }}"
-            placeholder="Leave empty to auto-generate from name"
+            placeholder="{{ __('messages.slug_placeholder') }}"
         >
         @error('slug')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-        <small class="text-muted">URL-friendly version of the name</small>
+        <small class="text-muted">{{ __('messages.slug_hint') }}</small>
     </div>
 
     <div class="col-md-6">
-        <label for="aliexpress_category_id" class="form-label">AliExpress Category ID</label>
+        <label for="aliexpress_category_id" class="form-label">{{ __('messages.aliexpress_category_id') }}</label>
         <input
             type="text"
             class="form-control @error('aliexpress_category_id') is-invalid @enderror"
@@ -57,11 +57,11 @@
         @error('aliexpress_category_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-        <small class="text-muted">AliExpress category identifier for API filtering</small>
+        <small class="text-muted">{{ __('messages.aliexpress_category_hint') }}</small>
     </div>
 
     <div class="col-md-6">
-        <label for="image" class="form-label">Image URL</label>
+        <label for="image" class="form-label">{{ __('messages.image_url') }}</label>
         <input
             type="url"
             class="form-control @error('image') is-invalid @enderror"
@@ -72,11 +72,11 @@
         @error('image')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-        <small class="text-muted">Direct URL to category image</small>
+        <small class="text-muted">{{ __('messages.image_url_hint') }}</small>
     </div>
 
     <div class="col-md-6">
-        <label for="photo" class="form-label">Upload Photo</label>
+        <label for="photo" class="form-label">{{ __('messages.upload_photo') }}</label>
         <input
             type="file"
             class="form-control @error('photo') is-invalid @enderror"
@@ -87,35 +87,35 @@
         @error('photo')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-        <small class="text-muted">Upload category photo (JPEG, PNG, JPG, GIF, WEBP - Max 2MB)</small>
+        <small class="text-muted">{{ __('messages.upload_photo_hint') }}</small>
     </div>
 
     @if(isset($category->image) && $category->image)
     <div class="col-12">
-        <label class="form-label">Current Image URL</label>
+        <label class="form-label">{{ __('messages.current_image_url') }}</label>
         <div>
-            <img src="{{ $category->image }}" alt="{{ $category->name ?? 'Category' }}" style="max-width: 100px; height: auto; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+            <img src="{{ $category->image }}" alt="{{ $category->name ?? __('messages.category') }}" style="max-width: 100px; height: auto; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
         </div>
     </div>
     @endif
 
     @if(isset($category->photo) && $category->photo)
     <div class="col-12">
-        <label class="form-label">Current Uploaded Photo</label>
+        <label class="form-label">{{ __('messages.current_uploaded_photo') }}</label>
         <div>
-            <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name ?? 'Category' }}" style="max-width: 100px; height: auto; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+            <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name ?? __('messages.category') }}" style="max-width: 100px; height: auto; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
         </div>
     </div>
     @endif
 
     <div class="col-md-6">
-        <label for="parent_id" class="form-label">Parent Category</label>
+        <label for="parent_id" class="form-label">{{ __('messages.parent_category') }}</label>
         <select
             class="form-select @error('parent_id') is-invalid @enderror"
             id="parent_id"
             name="parent_id"
         >
-            <option value="">None (Root Category)</option>
+            <option value="">{{ __('messages.no_parent') }}</option>
             @foreach($parentCategories as $parent)
                 <option value="{{ $parent->id }}" {{ old('parent_id', $category->parent_id ?? '') == $parent->id ? 'selected' : '' }}>
                     {{ $parent->name }}
@@ -128,7 +128,7 @@
     </div>
 
     <div class="col-md-3">
-        <label for="order" class="form-label">Display Order</label>
+        <label for="order" class="form-label">{{ __('messages.display_order') }}</label>
         <input
             type="number"
             class="form-control @error('order') is-invalid @enderror"
@@ -143,7 +143,7 @@
     </div>
 
     <div class="col-md-3">
-        <label class="form-label d-block">Status</label>
+        <label class="form-label d-block">{{ __('messages.status') }}</label>
         <div class="form-check form-switch mt-2">
             <input
                 class="form-check-input"
@@ -154,13 +154,13 @@
                 {{ old('is_active', $category->is_active ?? true) ? 'checked' : '' }}
             >
             <label class="form-check-label" for="is_active">
-                Active
+                {{ __('messages.active') }}
             </label>
         </div>
     </div>
 
     <div class="col-12">
-        <label for="description" class="form-label">Description</label>
+        <label for="description" class="form-label">{{ __('messages.description') }}</label>
         <textarea
             class="form-control @error('description') is-invalid @enderror"
             id="description"
@@ -175,10 +175,10 @@
 
 <div class="mt-4">
     <button type="submit" class="btn btn-primary">
-        <i class="ri-save-line me-1"></i> {{ isset($category) && $category->exists ? 'Update Category' : 'Create Category' }}
+        <i class="ri-save-line me-1"></i> {{ isset($category) && $category->exists ? __('messages.update_category') : __('messages.create_category') }}
     </button>
     <a href="{{ route('categories.index') }}" class="btn btn-secondary">
-        <i class="ri-close-line me-1"></i> Cancel
+        <i class="ri-close-line me-1"></i> {{ __('messages.cancel') }}
     </a>
 </div>
 

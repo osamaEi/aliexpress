@@ -1,16 +1,16 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card mb-6">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Product Management</h5>
+            <h5 class="mb-0">{{ __('messages.product_management') }}</h5>
             <div>
                     <a href="{{ route('products.aliexpress.import') }}" class="btn btn-primary btn-sm me-2">
-                        <i class="ri-shopping-cart-line me-1"></i> Import from AliExpress
+                        <i class="ri-shopping-cart-line me-1"></i> {{ __('messages.import_from_aliexpress') }}
                     </a>
                     <a href="{{ route('products.create') }}" class="btn btn-success btn-sm">
-                        <i class="ri-add-line me-1"></i> Add Product
+                        <i class="ri-add-line me-1"></i> {{ __('messages.add_product') }}
                     </a>
 
             </div>
@@ -21,11 +21,11 @@
             <form method="GET" action="{{ route('products.index') }}" class="mb-4">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control" placeholder="{{ __('messages.search_products_placeholder') }}" value="{{ request('search') }}">
                     </div>
                     <div class="col-md-2">
                         <select name="category" class="form-select">
-                            <option value="">All Categories</option>
+                            <option value="">{{ __('messages.all_categories') }}</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
                                     {{ $category->name }}
@@ -35,24 +35,24 @@
                     </div>
                     <div class="col-md-2">
                         <select name="source" class="form-select">
-                            <option value="">All Sources</option>
+                            <option value="">{{ __('messages.all_sources') }}</option>
                             <option value="aliexpress" {{ request('source') == 'aliexpress' ? 'selected' : '' }}>AliExpress</option>
-                            <option value="manual" {{ request('source') == 'manual' ? 'selected' : '' }}>Manual</option>
+                            <option value="manual" {{ request('source') == 'manual' ? 'selected' : '' }}>{{ __('messages.manual') }}</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <select name="status" class="form-select">
-                            <option value="">All Status</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="">{{ __('messages.all_status') }}</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>{{ __('messages.active') }}</option>
+                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-primary">
-                            <i class="ri-search-line me-1"></i> Filter
+                            <i class="ri-search-line me-1"></i> {{ __('messages.filter') }}
                         </button>
                         <a href="{{ route('products.index') }}" class="btn btn-secondary">
-                            <i class="ri-refresh-line me-1"></i> Reset
+                            <i class="ri-refresh-line me-1"></i> {{ __('messages.reset') }}
                         </a>
                     </div>
                 </div>
@@ -75,13 +75,13 @@
             <!-- AliExpress Actions -->
             <div class="mb-3">
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#aliexpressSearchModal">
-                        <i class="ri-search-line me-1"></i> Search AliExpress
+                        <i class="ri-search-line me-1"></i> {{ __('messages.search_aliexpress') }}
                     </button>
 
                     <form action="{{ route('products.sync-all') }}" method="POST" class="d-inline">
                         @csrf
-                        <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('Sync all AliExpress products? This may take a while.')">
-                            <i class="ri-refresh-line me-1"></i> Sync All
+                        <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('{{ __('messages.sync_all_confirm') }}')">
+                            <i class="ri-refresh-line me-1"></i> {{ __('messages.sync_all') }}
                         </button>
                     </form>
 
@@ -93,15 +93,15 @@
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
-                        <th>Image</th>
-                        <th>Product</th>
-                        <th>SKU</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Source</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>{{ __('messages.image') }}</th>
+                        <th>{{ __('messages.product') }}</th>
+                        <th>{{ __('messages.sku') }}</th>
+                        <th>{{ __('messages.category') }}</th>
+                        <th>{{ __('messages.price') }}</th>
+                        <th>{{ __('messages.stock') }}</th>
+                        <th>{{ __('messages.source') }}</th>
+                        <th>{{ __('messages.status') }}</th>
+                        <th>{{ __('messages.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,7 +136,7 @@
                                         {{ $product->stock_quantity }}
                                     </span>
                                 @else
-                                    <span class="badge bg-secondary">Unlimited</span>
+                                    <span class="badge bg-secondary">{{ __('messages.unlimited') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -145,12 +145,12 @@
                                         <i class="ri-shopping-cart-line"></i> AliExpress
                                     </span>
                                 @else
-                                    <span class="badge bg-secondary">Manual</span>
+                                    <span class="badge bg-secondary">{{ __('messages.manual') }}</span>
                                 @endif
                             </td>
                             <td>
                                 <span class="badge {{ $product->is_active ? 'bg-success' : 'bg-secondary' }}">
-                                    {{ $product->is_active ? 'Active' : 'Inactive' }}
+                                    {{ $product->is_active ? __('messages.active') : __('messages.inactive') }}
                                 </span>
                             </td>
                             <td>
@@ -160,17 +160,17 @@
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-end">
                                             <a class="dropdown-item" href="{{ route('products.show', $product) }}">
-                                                <i class="ri-eye-line me-2"></i> View
+                                                <i class="ri-eye-line me-2"></i> {{ __('messages.view') }}
                                             </a>
 
                                             <a class="dropdown-item" href="{{ route('products.edit', $product) }}">
-                                                <i class="ri-pencil-line me-2"></i> Edit
+                                                <i class="ri-pencil-line me-2"></i> {{ __('messages.edit') }}
                                             </a>
                                             @if($product->isAliexpressProduct())
                                                 <form action="{{ route('products.sync', $product) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="dropdown-item">
-                                                        <i class="ri-refresh-line me-2"></i> Sync
+                                                        <i class="ri-refresh-line me-2"></i> {{ __('messages.sync') }}
                                                     </button>
                                                 </form>
                                             @endif
@@ -179,8 +179,8 @@
                                             <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure you want to delete this product?')">
-                                                    <i class="ri-delete-bin-line me-2"></i> Delete
+                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('{{ __('messages.confirm_delete_product') }}')">
+                                                    <i class="ri-delete-bin-line me-2"></i> {{ __('messages.delete') }}
                                                 </button>
                                             </form>
 
@@ -192,8 +192,8 @@
                         <tr>
                             <td colspan="9" class="text-center py-4">
                                 <i class="ri-inbox-line" style="font-size: 48px; color: #ccc;"></i>
-                                <p class="text-muted mt-2">No products found</p>
-                                    <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm mt-2">Add Your First Product</a>
+                                <p class="text-muted mt-2">{{ __('messages.no_products_found') }}</p>
+                                    <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm mt-2">{{ __('messages.add_your_first_product') }}</a>
 
                             </td>
                         </tr>
@@ -217,7 +217,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="aliexpressSearchModalLabel">
-                    <i class="ri-shopping-cart-line me-2"></i>Search AliExpress Products
+                    <i class="ri-shopping-cart-line me-2"></i>{{ __('messages.search_aliexpress_products') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -225,30 +225,30 @@
                 <!-- Search Form -->
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <label for="searchKeyword" class="form-label">Search Keyword</label>
-                        <input type="text" class="form-control" id="searchKeyword" placeholder="Enter product name or keywords...">
+                        <label for="searchKeyword" class="form-label">{{ __('messages.search_keyword') }}</label>
+                        <input type="text" class="form-control" id="searchKeyword" placeholder="{{ __('messages.enter_product_keywords') }}">
                     </div>
                     <div class="col-md-3">
-                        <label for="searchCategory" class="form-label">Category</label>
+                        <label for="searchCategory" class="form-label">{{ __('messages.category') }}</label>
                         <select class="form-select" id="searchCategory">
-                            <option value="">Select category (optional)</option>
+                            <option value="">{{ __('messages.select_category_optional') }}</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="profitMargin" class="form-label">Profit Margin (%)</label>
+                        <label for="profitMargin" class="form-label">{{ __('messages.profit_margin') }} (%)</label>
                         <input type="number" class="form-control" id="profitMargin" value="30" min="0" max="100">
                     </div>
                 </div>
                 <div class="row mb-4">
                     <div class="col-12">
                         <button type="button" class="btn btn-primary" id="searchBtn">
-                            <i class="ri-search-line me-1"></i> Search
+                            <i class="ri-search-line me-1"></i> {{ __('messages.search') }}
                         </button>
                         <button type="button" class="btn btn-secondary" id="clearSearchBtn">
-                            <i class="ri-refresh-line me-1"></i> Clear
+                            <i class="ri-refresh-line me-1"></i> {{ __('messages.clear') }}
                         </button>
                     </div>
                 </div>
@@ -256,9 +256,9 @@
                 <!-- Loading Spinner -->
                 <div id="loadingSpinner" class="text-center py-5" style="display: none;">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{{ __('messages.loading') }}</span>
                     </div>
-                    <p class="mt-2 text-muted">Searching AliExpress...</p>
+                    <p class="mt-2 text-muted">{{ __('messages.searching_aliexpress') }}</p>
                 </div>
 
                 <!-- Alert Messages -->
@@ -268,7 +268,7 @@
                 <div id="searchResults"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('messages.close') }}</button>
             </div>
         </div>
     </div>

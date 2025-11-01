@@ -1,19 +1,19 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Subcategories for: {{ $category->name }}</h5>
+            <h5 class="mb-0">{{ __('messages.subcategories_for') }}: {{ $category->name }}</h5>
             <a href="{{ route('categories.index') }}" class="btn btn-secondary">
-                <i class="ri-arrow-left-line me-1"></i> Back to Categories
+                <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back_to_categories') }}
             </a>
         </div>
 
         <div class="card-body">
             <div class="alert alert-info">
                 <i class="ri-information-line me-2"></i>
-                Select the subcategories you want to save to your database. Subcategories will be created as children of "<strong>{{ $category->name }}</strong>".
+                {{ __('messages.subcategories_select_info', ['category' => $category->name]) }}
             </div>
 
             <form action="{{ route('categories.save-subcategories', $category) }}" method="POST" id="subcategoriesForm">
@@ -21,10 +21,10 @@
 
                 <div class="mb-3">
                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">
-                        <i class="ri-checkbox-multiple-line me-1"></i> Select All
+                        <i class="ri-checkbox-multiple-line me-1"></i> {{ __('messages.select_all') }}
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">
-                        <i class="ri-checkbox-blank-line me-1"></i> Deselect All
+                        <i class="ri-checkbox-blank-line me-1"></i> {{ __('messages.deselect_all') }}
                     </button>
                 </div>
 
@@ -35,9 +35,9 @@
                                 <th style="width: 50px;">
                                     <input type="checkbox" id="selectAllCheckbox" onchange="toggleAll(this)">
                                 </th>
-                                <th>Category ID</th>
-                                <th>Name</th>
-                                <th>Actions</th>
+                                <th>{{ __('messages.category_id') }}</th>
+                                <th>{{ __('messages.name') }}</th>
+                                <th>{{ __('messages.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,7 +62,7 @@
                                     <td>
                                         <code>{{ $catId }}</code>
                                         @if($isLeaf)
-                                            <span class="badge bg-success ms-2">Leaf</span>
+                                            <span class="badge bg-success ms-2">{{ __('messages.leaf') }}</span>
                                         @endif
                                     </td>
                                     <td>
@@ -75,7 +75,7 @@
                                     </td>
                                     <td>
                                         @if(!$isLeaf)
-                                            <span class="badge bg-info">Has Children</span>
+                                            <span class="badge bg-info">{{ __('messages.has_children') }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -83,7 +83,7 @@
                                 <tr>
                                     <td colspan="4" class="text-center py-5">
                                         <i class="ri-inbox-line" style="font-size: 3rem; color: #ccc;"></i>
-                                        <p class="text-muted mt-2">No subcategories found</p>
+                                        <p class="text-muted mt-2">{{ __('messages.no_subcategories_found') }}</p>
                                     </td>
                                 </tr>
                             @endforelse
@@ -94,14 +94,14 @@
                 @if(count($subcategories) > 0)
                 <div class="mt-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="text-muted">Total: <strong id="selectedCount">{{ count($subcategories) }}</strong> / {{ count($subcategories) }} selected</span>
+                        <span class="text-muted">{{ __('messages.total') }}: <strong id="selectedCount">{{ count($subcategories) }}</strong> / {{ count($subcategories) }} {{ __('messages.selected') }}</span>
                     </div>
                     <div>
                         <a href="{{ route('categories.index') }}" class="btn btn-secondary">
-                            <i class="ri-close-line me-1"></i> Cancel
+                            <i class="ri-close-line me-1"></i> {{ __('messages.cancel') }}
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="ri-save-line me-1"></i> Save Selected Subcategories
+                            <i class="ri-save-line me-1"></i> {{ __('messages.save_selected_subcategories') }}
                         </button>
                     </div>
                 </div>
@@ -111,7 +111,7 @@
             <!-- Debug Info (collapsible) -->
             <div class="mt-4">
                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo">
-                    <i class="ri-bug-line me-1"></i> Show Raw API Response
+                    <i class="ri-bug-line me-1"></i> {{ __('messages.show_raw_api_response') }}
                 </button>
                 <div class="collapse mt-2" id="debugInfo">
                     <div class="card">
@@ -162,7 +162,7 @@
         const checked = document.querySelectorAll('.subcategory-checkbox:checked').length;
         if (checked === 0) {
             e.preventDefault();
-            alert('Please select at least one subcategory to save.');
+            alert('{{ __('messages.select_at_least_one_subcategory') }}');
             return false;
         }
     });
