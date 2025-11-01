@@ -70,6 +70,17 @@ return [
     'close' => 'Close',
     'yes' => 'Yes',
     'no' => 'No',
+    'account' => 'Account',
+
+    // Sidebar
+    'product_management' => 'Product Management',
+    'order_management' => 'Order Management',
+    'all_categories' => 'All Categories',
+    'my_assigned_products' => 'My Assigned Products',
+    'all_orders' => 'All Orders',
+    'pending_orders' => 'Pending Orders',
+    'placed_orders' => 'Placed Orders',
+    'shipped_orders' => 'Shipped Orders',
 
     // Theme
     'light' => 'Light',

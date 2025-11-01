@@ -71,20 +71,20 @@
                 <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <a href="{{ route('dashboard') }}" class="menu-link">
                         <i class="menu-icon tf-icons ri-home-smile-line"></i>
-                        <div data-i18n="Dashboard">Dashboard</div>
+                        <div data-i18n="Dashboard">{{ __('messages.dashboard') }}</div>
                     </a>
                 </li>
 
                 <!-- Products Section -->
                 <li class="menu-header mt-5">
-                    <span class="menu-header-text">Product Management</span>
+                    <span class="menu-header-text">{{ __('messages.product_management') }}</span>
                 </li>
 
                 <!-- Products -->
                 <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('products.search-*') ? 'active' : '' }}">
                     <a href="{{ route('products.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons ri-shopping-bag-3-line"></i>
-                        <div data-i18n="Products">Products</div>
+                        <div data-i18n="Products">{{ __('messages.products') }}</div>
                     </a>
                 </li>
 
@@ -92,18 +92,18 @@
                 <li class="menu-item {{ request()->routeIs('categories.*') ? 'open active' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons ri-price-tag-3-line"></i>
-                        <div data-i18n="Categories">Categories</div>
+                        <div data-i18n="Categories">{{ __('messages.categories') }}</div>
                     </a>
                     <ul class="menu-sub">
                         <li class="menu-item {{ request()->routeIs('categories.index') ? 'active' : '' }}">
                             <a href="{{ route('categories.index') }}" class="menu-link">
-                                <div data-i18n="All Categories">All Categories</div>
+                                <div data-i18n="All Categories">{{ __('messages.all_categories') }}</div>
                             </a>
                         </li>
 
                         <li class="menu-item {{ request()->routeIs('categories.create') ? 'active' : '' }}">
                             <a href="{{ route('categories.create') }}" class="menu-link">
-                                <div data-i18n="Add Category">Add Category</div>
+                                <div data-i18n="Add Category">{{ __('messages.add_category') }}</div>
                             </a>
                         </li>
                     </ul>
@@ -118,7 +118,7 @@
                     <ul class="menu-sub">
                         <li class="menu-item {{ request()->routeIs('products.search-*') ? 'active' : '' }}">
                             <a href="{{ route('products.search-page') }}" class="menu-link">
-                                <div data-i18n="Search Products">Search Products</div>
+                                <div data-i18n="Search Products">{{ __('messages.search_products') }}</div>
                             </a>
                         </li>
 
@@ -126,7 +126,7 @@
                             @if(auth()->user()->user_type === 'seller')
                                 <li class="menu-item {{ request()->routeIs('products.my-assigned') ? 'active' : '' }}">
                                     <a href="{{ route('products.my-assigned') }}" class="menu-link">
-                                        <div data-i18n="My Assigned Products">My Assigned Products</div>
+                                        <div data-i18n="My Assigned Products">{{ __('messages.my_assigned_products') }}</div>
                                     </a>
                                 </li>
                             @endif
@@ -134,7 +134,7 @@
 
                         <li class="menu-item {{ request()->routeIs('products.aliexpress.import') ? 'active' : '' }}">
                             <a href="{{ route('products.aliexpress.import') }}" class="menu-link">
-                                <div data-i18n="Import Products">Import Products</div>
+                                <div data-i18n="Import Products">{{ __('messages.import_product') }}</div>
                             </a>
                         </li>
                     </ul>
@@ -142,43 +142,43 @@
 
                 <!-- Orders Section -->
                 <li class="menu-header mt-5">
-                    <span class="menu-header-text">Order Management</span>
+                    <span class="menu-header-text">{{ __('messages.order_management') }}</span>
                 </li>
 
                 <!-- Orders -->
                 <li class="menu-item {{ request()->routeIs('orders.*') ? 'open active' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons ri-file-list-3-line"></i>
-                        <div data-i18n="Orders">Orders</div>
+                        <div data-i18n="Orders">{{ __('messages.orders') }}</div>
                     </a>
                     <ul class="menu-sub">
                         <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
                             <a href="{{ route('orders.index') }}" class="menu-link">
-                                <div data-i18n="All Orders">All Orders</div>
+                                <div data-i18n="All Orders">{{ __('messages.all_orders') }}</div>
                             </a>
                         </li>
 
                         <li class="menu-item {{ request()->routeIs('orders.create') ? 'active' : '' }}">
                             <a href="{{ route('orders.create') }}" class="menu-link">
-                                <div data-i18n="Create Order">Create Order</div>
+                                <div data-i18n="Create Order">{{ __('messages.create_order') }}</div>
                             </a>
                         </li>
 
                         <li class="menu-item">
                             <a href="{{ route('orders.index', ['status' => 'pending']) }}" class="menu-link">
-                                <div data-i18n="Pending Orders">Pending Orders</div>
+                                <div data-i18n="Pending Orders">{{ __('messages.pending_orders') }}</div>
                             </a>
                         </li>
 
                         <li class="menu-item">
                             <a href="{{ route('orders.index', ['status' => 'placed']) }}" class="menu-link">
-                                <div data-i18n="Placed Orders">Placed Orders</div>
+                                <div data-i18n="Placed Orders">{{ __('messages.placed_orders') }}</div>
                             </a>
                         </li>
 
                         <li class="menu-item">
                             <a href="{{ route('orders.index', ['status' => 'shipped']) }}" class="menu-link">
-                                <div data-i18n="Shipped Orders">Shipped Orders</div>
+                                <div data-i18n="Shipped Orders">{{ __('messages.shipped_orders') }}</div>
                             </a>
                         </li>
                     </ul>
@@ -186,13 +186,13 @@
 
                 <!-- User Profile -->
                 <li class="menu-header mt-5">
-                    <span class="menu-header-text">Account</span>
+                    <span class="menu-header-text">{{ __('messages.account') }}</span>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                     <a href="{{ route('profile.edit') }}" class="menu-link">
                         <i class="menu-icon tf-icons ri-user-line"></i>
-                        <div data-i18n="Profile">Profile</div>
+                        <div data-i18n="Profile">{{ __('messages.profile') }}</div>
                     </a>
                 </li>
 
