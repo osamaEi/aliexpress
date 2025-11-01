@@ -28,6 +28,7 @@ class User extends Authenticatable
         'user_type',
         'main_activity',
         'sub_activity',
+        'avatar',
         'otp_code',
         'otp_expires_at',
         'is_verified',

@@ -2,194 +2,180 @@
 
 @section('content')
 <div class="col-12">
-    <div class="card mb-6">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">AliExpress Product Search</h5>
-            <div class="badge bg-success">aliexpress.ds.text.search</div>
+    <div class="card mb-6 shadow-sm border-0">
+        <div class="card-header bg-gradient d-flex justify-content-between align-items-center py-3"
+             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="d-flex align-items-center">
+                <div class="bg-white rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                    <i class="ri-search-2-line" style="font-size: 24px; color: #667eea;"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 text-white fw-bold">AliExpress Product Search</h5>
+                    <small class="text-white-50">Search millions of products from AliExpress</small>
+                </div>
+            </div>
+            <div class="badge bg-white text-primary px-3 py-2">
+                <i class="ri-code-s-slash-line me-1"></i>aliexpress.ds.text.search
+            </div>
         </div>
 
         <div class="card-body">
             <!-- Search Form -->
             <form id="searchForm" method="GET" action="{{ route('products.search-text') }}" class="mb-4">
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="keyword" class="form-label">Search Keyword <span class="text-muted small">(optional if category selected)</span></label>
+                    <div class="col-md-4">
+                        <label for="keyword" class="form-label fw-semibold">
+                            <i class="ri-search-line me-1"></i>Search Keyword
+                        </label>
                         <input
                             type="text"
                             id="keyword"
                             name="keyword"
-                            class="form-control form-control-lg"
-                            placeholder="Search products... (phone, laptop, watch, etc.)"
+                            class="form-control form-control-lg shadow-sm"
+                            placeholder="e.g., phone, laptop, watch..."
                             value="{{ old('keyword', $keyword ?? '') }}"
                         >
                     </div>
-                    <div class="col-md-2">
-                        <label for="locale" class="form-label">Language</label>
-                        <select name="locale" id="locale" class="form-select">
-                            <option value="en_US" selected>🇬🇧 English</option>
-                            <option value="ar_MA">🇦🇪 العربية</option>
-                            <option value="es_ES">🇪🇸 Español</option>
-                            <option value="fr_FR">🇫🇷 Français</option>
-                            <option value="ru_RU">🇷🇺 Русский</option>
-                            <option value="pt_BR">🇧🇷 Português</option>
-                            <option value="de_DE">🇩🇪 Deutsch</option>
+
+                    <div class="col-md-4">
+                        <label for="category_dropdown" class="form-label fw-semibold">
+                            <i class="ri-folder-line me-1"></i>Category
+                        </label>
+                        <select name="category_id" id="category_dropdown" class="form-select form-select-lg shadow-sm">
+                            <option value="">All Categories</option>
+                            @if(isset($categories) && count($categories) > 0)
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->aliexpress_category_id }}"
+                                            {{ request('category_id') == $category->aliexpress_category_id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                        @if($category->name_ar)
+                                            - {{ $category->name_ar }}
+                                        @endif
+                                    </option>
+                                    @if(isset($category->children) && count($category->children) > 0)
+                                        @foreach($category->children as $child)
+                                            <option value="{{ $child->aliexpress_category_id }}"
+                                                    {{ request('category_id') == $child->aliexpress_category_id ? 'selected' : '' }}>
+                                                &nbsp;&nbsp;&nbsp;↳ {{ $child->name }}
+                                                @if($child->name_ar)
+                                                    - {{ $child->name_ar }}
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                @endforeach
+                            @endif
                         </select>
                     </div>
+
                     <div class="col-md-2">
-                        <label for="country" class="form-label">Ship To Country</label>
-                        <select name="country" id="country" class="form-select">
-                            <option value="AE" selected>🇦🇪 UAE</option>
-                            <option value="SA">🇸🇦 Saudi Arabia</option>
-                        </select>
-                        <small class="text-muted d-block mt-1">Only products shipping to this country</small>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="currency" class="form-label">Currency</label>
-                        <select name="currency" id="currency" class="form-select">
-                            <option value="AED" selected>AED</option>
-                            <option value="SAR">SAR</option>
+                        <label for="country" class="form-label fw-semibold">
+                            <i class="ri-ship-line me-1"></i>Ship To
+                        </label>
+                        <select name="country" id="country" class="form-select form-select-lg shadow-sm">
+                            <option value="AE" {{ request('country') == 'AE' ? 'selected' : '' }}>🇦🇪 UAE</option>
+                            <option value="SA" {{ request('country') == 'SA' ? 'selected' : '' }}>🇸🇦 Saudi</option>
                         </select>
                     </div>
+
                     <div class="col-md-2">
-                        <label class="form-label">&nbsp;</label>
-                        <button type="submit" class="btn btn-primary w-100">
+                        <label class="form-label fw-semibold d-block">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow">
                             <i class="ri-search-line me-1"></i> Search
                         </button>
                     </div>
                 </div>
 
-                <!-- Quick Links -->
+                <!-- Advanced Filters - Collapsible -->
                 <div class="mt-3">
-                    <label class="form-label text-muted small">Quick Search:</label>
+                    <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+                        <i class="ri-filter-3-line me-1"></i> Advanced Filters
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                </div>
+
+                <div class="collapse mt-3" id="advancedFilters">
+                    <div class="card card-body bg-light">
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <label for="locale" class="form-label small">Language</label>
+                                <select name="locale" id="locale" class="form-select form-select-sm">
+                                    <option value="en_US" {{ request('locale', 'en_US') == 'en_US' ? 'selected' : '' }}>🇬🇧 English</option>
+                                    <option value="ar_MA" {{ request('locale') == 'ar_MA' ? 'selected' : '' }}>🇦🇪 العربية</option>
+                                    <option value="es_ES" {{ request('locale') == 'es_ES' ? 'selected' : '' }}>🇪🇸 Español</option>
+                                    <option value="fr_FR" {{ request('locale') == 'fr_FR' ? 'selected' : '' }}>🇫🇷 Français</option>
+                                    <option value="ru_RU" {{ request('locale') == 'ru_RU' ? 'selected' : '' }}>🇷🇺 Русский</option>
+                                    <option value="pt_BR" {{ request('locale') == 'pt_BR' ? 'selected' : '' }}>🇧🇷 Português</option>
+                                    <option value="de_DE" {{ request('locale') == 'de_DE' ? 'selected' : '' }}>🇩🇪 Deutsch</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="currency" class="form-label small">Currency</label>
+                                <select name="currency" id="currency" class="form-select form-select-sm">
+                                    <option value="AED" {{ request('currency', 'AED') == 'AED' ? 'selected' : '' }}>AED</option>
+                                    <option value="SAR" {{ request('currency') == 'SAR' ? 'selected' : '' }}>SAR</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="min_price" class="form-label small">Min Price</label>
+                                <input type="number" name="min_price" id="min_price" class="form-control form-control-sm"
+                                       placeholder="0" value="{{ request('min_price') }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="max_price" class="form-label small">Max Price</label>
+                                <input type="number" name="max_price" id="max_price" class="form-control form-control-sm"
+                                       placeholder="1000" value="{{ request('max_price') }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sort_by" class="form-label small">Sort By</label>
+                                <select name="sort_by" id="sort_by" class="form-select form-select-sm">
+                                    <option value="">Default</option>
+                                    <option value="orders,desc" {{ request('sort_by') == 'orders,desc' ? 'selected' : '' }}>Most Orders</option>
+                                    <option value="min_price,asc" {{ request('sort_by') == 'min_price,asc' ? 'selected' : '' }}>Price: Low to High</option>
+                                    <option value="min_price,desc" {{ request('sort_by') == 'min_price,desc' ? 'selected' : '' }}>Price: High to Low</option>
+                                    <option value="comments,desc" {{ request('sort_by') == 'comments,desc' ? 'selected' : '' }}>Most Reviews</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Per Page</label>
+                                <select name="per_page" class="form-select form-select-sm">
+                                    <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>20</option>
+                                    <option value="30" {{ request('per_page') == 30 ? 'selected' : '' }}>30</option>
+                                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Search -->
+                <div class="mt-3">
+                    <label class="form-label fw-semibold small">
+                        <i class="ri-flashlight-line me-1"></i>Quick Search:
+                    </label>
                     <div class="d-flex flex-wrap gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-search" data-keyword="phone">Phones</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-search" data-keyword="laptop">Laptops</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-search" data-keyword="watch">Watches</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-search" data-keyword="headphone">Headphones</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-search" data-keyword="bag">Bags</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-search" data-keyword="shoes">Shoes</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-search" data-keyword="camera">Cameras</button>
-                    </div>
-                </div>
-
-                <!-- Hidden inputs for filters -->
-                <input type="hidden" name="category_id" id="category_id" value="{{ request('category_id') }}">
-                <input type="hidden" name="sort_filter" id="sort_filter" value="{{ request('sort_filter', 'orders') }}">
-
-                <!-- Product Sort Filter Buttons -->
-                <div class="mt-3">
-                    <label class="form-label text-muted small">Sort By:</label>
-                    <div class="btn-group" role="group">
-                        <button type="button"
-                                class="btn btn-sm {{ request('sort_filter') == 'orders' || !request('sort_filter') ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectSortFilter('orders', this)">
-                            <i class="ri-fire-line me-1"></i> Best Seller
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-search" data-keyword="phone">
+                            <i class="ri-smartphone-line me-1"></i>Phones
                         </button>
-                        <button type="button"
-                                class="btn btn-sm {{ request('sort_filter') == 'newest' ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectSortFilter('newest', this)">
-                            <i class="ri-sparkling-line me-1"></i> Newest
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-search" data-keyword="laptop">
+                            <i class="ri-macbook-line me-1"></i>Laptops
                         </button>
-                        <button type="button"
-                                class="btn btn-sm {{ request('sort_filter') == 'price_low' ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectSortFilter('price_low', this)">
-                            <i class="ri-arrow-down-line me-1"></i> Price: Low to High
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-search" data-keyword="watch">
+                            <i class="ri-time-line me-1"></i>Watches
                         </button>
-                        <button type="button"
-                                class="btn btn-sm {{ request('sort_filter') == 'price_high' ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectSortFilter('price_high', this)">
-                            <i class="ri-arrow-up-line me-1"></i> Price: High to Low
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-search" data-keyword="headphone">
+                            <i class="ri-headphone-line me-1"></i>Headphones
                         </button>
-                        <button type="button"
-                                class="btn btn-sm {{ request('sort_filter') == 'rating' ? 'btn-primary' : 'btn-outline-primary' }}"
-                                onclick="selectSortFilter('rating', this)">
-                            <i class="ri-star-line me-1"></i> Top Rated
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-search" data-keyword="bag">
+                            <i class="ri-handbag-line me-1"></i>Bags
                         </button>
-                    </div>
-                </div>
-
-                <!-- Main Categories Only -->
-                @if(isset($categories) && count($categories) > 0)
-                <div class="mt-4">
-                    <label class="form-label text-muted small">Select Category:</label>
-
-                    <!-- All Categories Option -->
-                    <div class="mb-3">
-                        <div class="category-card text-center p-2 rounded border d-inline-block {{ !request('category_id') ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary' }}"
-                             style="cursor: pointer; transition: all 0.3s; min-width: 100px;"
-                             onclick="selectCategory(null, this);">
-                            <i class="ri-apps-line me-1" style="font-size: 18px;"></i>
-                            <span class="small fw-semibold">All Categories</span>
-                        </div>
-                    </div>
-
-                    <!-- Display only main categories as boxes -->
-                    <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
-                        @foreach($categories as $category)
-                        <div class="category-card text-center p-3 rounded border {{ request('category_id') == $category->aliexpress_category_id ? 'border-primary bg-primary bg-opacity-10' : 'bg-white border-light' }}"
-                             style="cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"
-                             onclick="selectCategory('{{ $category->aliexpress_category_id }}', this)"
-                             onmouseover="this.style.borderColor='#007bff'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.15)';"
-                             onmouseout="if(!this.classList.contains('border-primary')) { this.style.borderColor='#dee2e6'; } this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)';">
-
-                            <div class="category-icon mb-2" style="width: 60px; height: 60px; margin: 0 auto; background: #f8f9fa; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                @if($category->photo)
-                                    <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name }}" style="width: 48px; height: 48px; object-fit: contain;">
-                                @elseif($category->image)
-                                    <img src="{{ $category->image }}" alt="{{ $category->name }}" style="width: 48px; height: 48px; object-fit: contain;">
-                                @else
-                                    <i class="ri-folder-line" style="font-size: 28px; color: #6c757d;"></i>
-                                @endif
-                            </div>
-
-                            <div class="category-name" style="font-size: 12px; line-height: 1.3; font-weight: 600;">
-                                {{ $category->name }}
-                                @if($category->name_ar)
-                                    <div class="text-muted mt-1" dir="rtl" style="font-size: 11px; font-weight: 500;">{{ $category->name_ar }}</div>
-                                @endif
-                            </div>
-
-                            @if(isset($category->children) && count($category->children) > 0)
-                                <div class="mt-2">
-                                    <span class="badge bg-info" style="font-size: 9px;">{{ count($category->children) }} subcategories</span>
-                                </div>
-                            @endif
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
-                <!-- Filters -->
-                <div class="mt-3">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label for="sort_by" class="form-label small">Sort By</label>
-                            <select name="sort_by" id="sort_by" class="form-select form-select-sm">
-                                <option value="">Default</option>
-                                <option value="orders,desc">Most Orders</option>
-                                <option value="min_price,asc">Price: Low to High</option>
-                                <option value="min_price,desc">Price: High to Low</option>
-                                <option value="comments,desc">Most Reviews</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="min_price" class="form-label small">Min Price</label>
-                            <input type="number" name="min_price" id="min_price" class="form-control form-control-sm" placeholder="0">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="max_price" class="form-label small">Max Price</label>
-                            <input type="number" name="max_price" id="max_price" class="form-control form-control-sm" placeholder="1000">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small">Per Page</label>
-                            <select name="per_page" class="form-select form-select-sm">
-                                <option value="10" selected>10</option>
-                                <option value="20">20</option>
-                                <option value="30">30</option>
-                                <option value="50">50</option>
-                            </select>
-                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-search" data-keyword="shoes">
+                            <i class="ri-contrast-drop-line me-1"></i>Shoes
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-search" data-keyword="camera">
+                            <i class="ri-camera-line me-1"></i>Cameras
+                        </button>
                     </div>
                 </div>
             </form>
@@ -256,19 +242,20 @@
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="productsGrid">
                     @foreach($products as $product)
                         <div class="col">
-                            <div class="card h-100 product-card">
+                            <div class="card h-100 product-card shadow-sm">
                                 <!-- Product Image -->
-                                <div class="position-relative">
+                                <div class="position-relative overflow-hidden" style="background: #f8f9fa;">
                                     <img
                                         src="{{ $product['item_main_pic'] }}"
                                         class="card-img-top"
                                         alt="{{ $product['title'] }}"
-                                        style="height: 250px; object-fit: cover;"
-                                        onerror="this.src='https://via.placeholder.com/250x250?text=No+Image'"
+                                        style="height: 280px; object-fit: contain; padding: 15px;"
+                                        onerror="this.src='https://via.placeholder.com/280x280?text=No+Image'"
                                     >
                                     @if($product['discount'])
-                                        <span class="badge bg-danger position-absolute top-0 end-0 m-2">
-                                            {{ $product['discount'] }} OFF
+                                        <span class="badge bg-danger position-absolute top-0 end-0 m-3 px-3 py-2 shadow-sm"
+                                              style="font-size: 0.85rem; border-radius: 8px;">
+                                            <i class="ri-percent-line me-1"></i>{{ $product['discount'] }} OFF
                                         </span>
                                     @endif
                                 </div>
@@ -300,16 +287,16 @@
                                     </div>
 
                                     <!-- Stats -->
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                                         @if($product['evaluate_rate'])
-                                            <small class="text-muted">
-                                                <i class="ri-star-fill text-warning"></i> {{ $product['evaluate_rate'] }}
-                                            </small>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">
+                                                <i class="ri-star-fill"></i> {{ $product['evaluate_rate'] }}
+                                            </span>
                                         @endif
                                         @if($product['orders'])
-                                            <small class="text-muted">
-                                                <i class="ri-shopping-cart-line"></i> {{ $product['orders'] }} orders
-                                            </small>
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                                <i class="ri-fire-line"></i> {{ $product['orders'] }}+ sold
+                                            </span>
                                         @endif
                                     </div>
 
@@ -491,52 +478,11 @@
         }
     });
 
-    // Sort filter selection function
-    function selectSortFilter(sortType, element) {
-        // Update hidden input with selected sort filter
-        document.getElementById('sort_filter').value = sortType;
-
-        // Remove active state from all sort buttons
-        document.querySelectorAll('.btn-group .btn').forEach(btn => {
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-outline-primary');
-        });
-
-        // Add active state to clicked button
-        if (element) {
-            element.classList.remove('btn-outline-primary');
-            element.classList.add('btn-primary');
-        }
-
-        // Submit the form to fetch products with new sort
-        document.getElementById('searchForm').submit();
-    }
-
-    // Category selection function - displays products from AliExpress for selected category
-    function selectCategory(categoryId, element) {
-        // Update hidden input with selected category ID
-        document.getElementById('category_id').value = categoryId || '';
-
-        // Remove active state from all category cards
-        document.querySelectorAll('.category-card, .subcategory-card').forEach(item => {
-            item.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
-            if (item.classList.contains('category-card')) {
-                item.classList.add('border-secondary');
-            } else {
-                item.classList.add('border-light', 'bg-white');
-            }
-        });
-
-        // Add active state to clicked category
-        if (element) {
-            element.classList.remove('border-secondary', 'border-light');
-            element.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
-        }
-
-        // Submit the form to fetch products from AliExpress
-        // Works with or without keyword - category alone is enough
-        document.getElementById('searchForm').submit();
-    }
+    // Category dropdown change handler
+    document.getElementById('category_dropdown')?.addEventListener('change', function() {
+        // Optionally auto-submit when category changes
+        // document.getElementById('searchForm').submit();
+    });
 
     // Assign product to seller function
     function assignProduct(productId, productTitle, productImage, productPrice, currency, buttonElement) {
@@ -699,13 +645,93 @@
 </script>
 
 <style>
+    .bg-gradient {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bg-gradient::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-30%, -30%); }
+    }
+
     .product-card {
-        transition: transform 0.3s, box-shadow 0.3s;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        overflow: hidden;
     }
 
     .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        border-color: #667eea;
+    }
+
+    .product-card img {
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-outline-primary {
+        border-color: #667eea;
+        color: #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background: #667eea;
+        border-color: #667eea;
+        transform: translateY(-2px);
+    }
+
+    .quick-search {
+        transition: all 0.2s ease;
+    }
+
+    .quick-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .shadow-sm {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    }
+
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.3px;
     }
 
     pre {
@@ -715,6 +741,15 @@
         padding: 1rem;
         border-radius: 0.5rem;
         background: rgba(0,0,0,0.3);
+    }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+
+    .card {
+        border-radius: 15px;
     }
 </style>
 
