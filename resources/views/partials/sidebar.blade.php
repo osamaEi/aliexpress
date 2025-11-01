@@ -206,6 +206,65 @@
                 </li>
                 @endif
 
+                <!-- Admin Section -->
+                @if(auth()->user()->user_type === 'admin')
+                <li class="menu-header mt-5">
+                    <span class="menu-header-text">{{ __('messages.admin_dashboard') }}</span>
+                </li>
+
+                <!-- Admin Dashboard -->
+                <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('admin.dashboard') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-dashboard-line"></i>
+                        <div data-i18n="Dashboard">{{ __('messages.dashboard') }}</div>
+                    </a>
+                </li>
+
+                <!-- Token Management -->
+                <li class="menu-item {{ request()->routeIs('admin.tokens') ? 'active' : '' }}">
+                    <a href="{{ route('admin.tokens') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-key-2-line"></i>
+                        <div data-i18n="Token Management">{{ __('messages.token_management') }}</div>
+                    </a>
+                </li>
+
+                <!-- Subscription Management -->
+                <li class="menu-item {{ request()->routeIs('admin.subscriptions.*') ? 'open active' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons ri-vip-crown-line"></i>
+                        <div data-i18n="Subscriptions">{{ __('messages.subscription_management') }}</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('admin.subscriptions.index') ? 'active' : '' }}">
+                            <a href="{{ route('admin.subscriptions.index') }}" class="menu-link">
+                                <div data-i18n="Subscription Plans">{{ __('messages.subscription_plans') }}</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.subscriptions.users') ? 'active' : '' }}">
+                            <a href="{{ route('admin.subscriptions.users') }}" class="menu-link">
+                                <div data-i18n="User Subscriptions">{{ __('messages.user_subscriptions') }}</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Order Management -->
+                <li class="menu-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.orders.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-file-list-3-line"></i>
+                        <div data-i18n="Order Management">{{ __('messages.order_management') }}</div>
+                    </a>
+                </li>
+
+                <!-- Category Management -->
+                <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.categories.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-price-tag-3-line"></i>
+                        <div data-i18n="Category Management">{{ __('messages.manage_categories') }}</div>
+                    </a>
+                </li>
+                @endif
+
                 <!-- Logout -->
                 <li class="menu-item">
                     <form method="POST" action="{{ route('logout') }}">

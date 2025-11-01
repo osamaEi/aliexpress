@@ -9,6 +9,9 @@ use App\Http\Controllers\SellerRegistrationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\SubscriptionManagementController;
+use App\Http\Controllers\Admin\OrderManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -103,6 +106,31 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{order}/place-on-aliexpress', [OrderController::class, 'placeOnAliexpress'])->name('orders.place-on-aliexpress');
     Route::post('/orders/{order}/update-tracking', [OrderController::class, 'updateTracking'])->name('orders.update-tracking');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+    // Admin Routes
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        // Admin Dashboard
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // Token Management
+        Route::get('/tokens', [AdminController::class, 'tokens'])->name('tokens');
+        Route::post('/tokens', [AdminController::class, 'updateTokens'])->name('tokens.update');
+
+        // Subscription Management
+        Route::get('/subscriptions', [SubscriptionManagementController::class, 'index'])->name('subscriptions.index');
+        Route::get('/subscriptions/{subscription}/edit', [SubscriptionManagementController::class, 'edit'])->name('subscriptions.edit');
+        Route::put('/subscriptions/{subscription}', [SubscriptionManagementController::class, 'update'])->name('subscriptions.update');
+        Route::get('/subscriptions/users/list', [SubscriptionManagementController::class, 'userSubscriptions'])->name('subscriptions.users');
+
+        // Order Management
+        Route::get('/orders', [OrderManagementController::class, 'index'])->name('orders.index');
+        Route::post('/orders/{order}/sync', [OrderManagementController::class, 'sync'])->name('orders.sync');
+        Route::post('/orders/bulk-sync', [OrderManagementController::class, 'bulkSync'])->name('orders.bulk-sync');
+        Route::post('/orders/{order}/update-status', [OrderManagementController::class, 'updateStatus'])->name('orders.update-status');
+
+        // Categories Management (use existing CategoryController)
+        Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    });
 });
 
 require __DIR__.'/auth.php';
