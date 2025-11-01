@@ -20,6 +20,31 @@
                     <!-- /Search -->
 
                     <ul class="navbar-nav flex-row align-items-center ms-auto">
+                        <!-- Language Switcher -->
+                        <li class="nav-item dropdown me-2 me-xl-0">
+                            <a
+                                class="nav-link btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow"
+                                href="javascript:void(0);"
+                                data-bs-toggle="dropdown">
+                                <i class="ri-translate-2 ri-22px"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item {{ app()->getLocale() == 'en' ? 'active' : '' }}"
+                                       href="{{ route('lang.switch', 'en') }}">
+                                        <span class="align-middle">🇬🇧 English</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ app()->getLocale() == 'ar' ? 'active' : '' }}"
+                                       href="{{ route('lang.switch', 'ar') }}">
+                                        <span class="align-middle">🇸🇦 العربية</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <!--/ Language Switcher -->
+
                         <!-- Style Switcher -->
                         <li class="nav-item dropdown-style-switcher dropdown me-2 me-xl-0">
                             <a
@@ -31,17 +56,17 @@
                             <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
                                 <li>
                                     <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
-                                        <span class="align-middle"><i class="ri-sun-line ri-22px me-3"></i>Light</span>
+                                        <span class="align-middle"><i class="ri-sun-line ri-22px me-3"></i>{{ __('messages.light') }}</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
-                                        <span class="align-middle"><i class="ri-moon-clear-line ri-22px me-3"></i>Dark</span>
+                                        <span class="align-middle"><i class="ri-moon-clear-line ri-22px me-3"></i>{{ __('messages.dark') }}</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
-                                        <span class="align-middle"><i class="ri-computer-line ri-22px me-3"></i>System</span>
+                                        <span class="align-middle"><i class="ri-computer-line ri-22px me-3"></i>{{ __('messages.system') }}</span>
                                     </a>
                                 </li>
                             </ul>
@@ -89,12 +114,12 @@
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                        <i class="ri-user-3-line ri-22px me-3"></i><span class="align-middle">My Profile</span>
+                                        <i class="ri-user-3-line ri-22px me-3"></i><span class="align-middle">{{ __('messages.my_profile') }}</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ route('orders.index') }}">
-                                        <i class="ri-shopping-bag-line ri-22px me-3"></i><span class="align-middle">My Orders</span>
+                                        <i class="ri-shopping-bag-line ri-22px me-3"></i><span class="align-middle">{{ __('messages.my_orders') }}</span>
                                     </a>
                                 </li>
                                 <li>
@@ -105,7 +130,7 @@
                                         <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-danger d-flex w-100 align-items-center justify-content-center">
-                                                <small class="align-middle">Logout</small>
+                                                <small class="align-middle">{{ __('messages.logout') }}</small>
                                                 <i class="ri-logout-box-r-line ms-2 ri-16px"></i>
                                             </button>
                                         </form>

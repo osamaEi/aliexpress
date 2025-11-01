@@ -7,11 +7,15 @@ use App\Http\Controllers\AliExpressTestController;
 use App\Http\Controllers\AliExpressController;
 use App\Http\Controllers\SellerRegistrationController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Language Routes
+Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
 // Seller Registration Routes (Public - No Auth Required)
 Route::prefix('seller/register')->name('seller.register.')->group(function () {
