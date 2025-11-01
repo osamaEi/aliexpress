@@ -200,6 +200,14 @@
             </a>
         </li>
 
+        <!-- Wallet -->
+        <li class="menu-item {{ request()->routeIs('wallet.*') ? 'active' : '' }}">
+            <a href="{{ route('wallet.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-wallet-3-line"></i>
+                <div data-i18n="Wallet">{{ __('messages.my_wallet') }}</div>
+            </a>
+        </li>
+
         <!-- Logout -->
         <li class="menu-item">
             <form method="POST" action="{{ route('logout') }}">

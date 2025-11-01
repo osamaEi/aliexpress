@@ -88,6 +88,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Get user's wallet
+     */
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    /**
+     * Get or create user's wallet
+     */
+    public function getOrCreateWallet(): Wallet
+    {
+        return $this->wallet()->firstOrCreate(
+            ['user_id' => $this->id],
+            [
+                'balance' => 0.00,
+                'pending_balance' => 0.00,
+                'currency' => 'AED',
+                'is_active' => true,
+            ]
+        );
+    }
+
+    /**
      * Get current active subscription
      */
     public function activeSubscription(): HasOne
