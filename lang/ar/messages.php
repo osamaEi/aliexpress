@@ -426,4 +426,13 @@ return [
     'verified' => 'موثق',
     'unverified' => 'غير موثق',
     'no_users_found' => 'لم يتم العثور على مستخدمين',
+
+    // Payment
+    'payment_initiation_failed' => 'فشل بدء الدفع. يرجى المحاولة مرة أخرى.',
+    'order_already_paid' => 'تم دفع هذا الطلب بالفعل.',
+    'transaction_not_found' => 'لم يتم العثور على المعاملة.',
+    'payment_successful' => 'تم الدفع بنجاح!',
+    'payment_failed' => 'فشل الدفع. يرجى المحاولة مرة أخرى.',
+    'proceed_to_payment' => 'المتابعة للدفع',
+    'pay_now' => 'ادفع الآن',
 ];

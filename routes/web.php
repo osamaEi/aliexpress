@@ -21,6 +21,9 @@ Route::get('/', function () {
 // Language Routes
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
+// Payment Callback (Public - No Auth Required, No CSRF)
+Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->name('payment.callback');
+
 // Seller Registration Routes (Public - No Auth Required)
 Route::prefix('seller/register')->name('seller.register.')->group(function () {
     Route::get('step-1', [SellerRegistrationController::class, 'showStep1'])->name('step1');
@@ -106,6 +109,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{order}/place-on-aliexpress', [OrderController::class, 'placeOnAliexpress'])->name('orders.place-on-aliexpress');
     Route::post('/orders/{order}/update-tracking', [OrderController::class, 'updateTracking'])->name('orders.update-tracking');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+    // Payment routes
+    Route::post('/payment/subscription/{subscription}', [App\Http\Controllers\PaymentController::class, 'initiateSubscriptionPayment'])->name('payment.subscription');
+    Route::post('/payment/order/{order}', [App\Http\Controllers\PaymentController::class, 'initiateOrderPayment'])->name('payment.order');
+    Route::get('/payment/success', [App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/error', [App\Http\Controllers\PaymentController::class, 'error'])->name('payment.error');
 
     // Admin Routes
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {

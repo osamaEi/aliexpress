@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&ampdisplay=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
 
     <!-- Icons -->
@@ -35,6 +35,22 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/typeahead-js/typeahead.css') }}" />
 
     <!-- Page CSS -->
+
+    <!-- Custom CSS -->
+    <style>
+        /* Apply Cairo font for Arabic content */
+        [dir="rtl"],
+        [dir="rtl"] body,
+        [dir="rtl"] .menu-inner,
+        [lang="ar"] {
+            font-family: 'Cairo', 'Inter', sans-serif !important;
+        }
+
+        /* English content keeps Inter font */
+        [dir="ltr"] {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 
     <!-- Helpers -->
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>

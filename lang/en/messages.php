@@ -426,4 +426,13 @@ return [
     'verified' => 'Verified',
     'unverified' => 'Unverified',
     'no_users_found' => 'No users found',
+
+    // Payment
+    'payment_initiation_failed' => 'Failed to initiate payment. Please try again.',
+    'order_already_paid' => 'This order has already been paid.',
+    'transaction_not_found' => 'Transaction not found.',
+    'payment_successful' => 'Payment completed successfully!',
+    'payment_failed' => 'Payment failed. Please try again.',
+    'proceed_to_payment' => 'Proceed to Payment',
+    'pay_now' => 'Pay Now',
 ];
