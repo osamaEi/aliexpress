@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -75,6 +77,41 @@ class User extends Authenticatable
         return $this->belongsToMany(Product::class, 'product_user')
             ->withPivot('aliexpress_product_id', 'status')
             ->withTimestamps();
+    }
+
+    /**
+     * Get all user subscriptions
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
+
+    /**
+     * Get current active subscription
+     */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(UserSubscription::class)
+            ->where('status', 'active')
+            ->where('end_date', '>=', now()->toDateString())
+            ->latest();
+    }
+
+    /**
+     * Check if user has active subscription
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->activeSubscription()->exists();
+    }
+
+    /**
+     * Get user's current subscription plan
+     */
+    public function getCurrentSubscription()
+    {
+        return $this->activeSubscription;
     }
 
     public function hasRole(string|array $roles): bool

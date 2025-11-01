@@ -1,4 +1,4 @@
-        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
             <div class="app-brand demo">
                 <a href="{{ route('dashboard') }}" class="app-brand-link">
               <span class="app-brand-logo demo">
@@ -195,6 +195,16 @@
                         <div data-i18n="Profile">{{ __('messages.profile') }}</div>
                     </a>
                 </li>
+
+                <!-- Subscriptions -->
+                @if(auth()->user()->user_type === 'seller')
+                <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'active' : '' }}">
+                    <a href="{{ route('subscriptions.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-vip-crown-line"></i>
+                        <div data-i18n="Subscriptions">{{ __('messages.subscriptions') }}</div>
+                    </a>
+                </li>
+                @endif
 
                 <!-- Logout -->
                 <li class="menu-item">
