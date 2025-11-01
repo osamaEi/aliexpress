@@ -42,6 +42,62 @@
                     </div>
                 </div>
 
+                <!-- Product Variant Selection (if available) -->
+                @if(isset($product) && !empty($product->aliexpress_data))
+                    @php
+                        $skus = [];
+                        if (isset($product->aliexpress_data['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
+                            $skus = $product->aliexpress_data['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
+                        }
+                    @endphp
+
+                    @if(count($skus) > 1)
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label for="selected_sku_attr" class="form-label">Product Variant * <small class="text-muted">(Color/Size/Type)</small></label>
+                                <select name="selected_sku_attr" id="selected_sku_attr" class="form-select @error('selected_sku_attr') is-invalid @enderror" required>
+                                    <option value="">Select a variant</option>
+                                    @foreach($skus as $sku)
+                                        @php
+                                            $skuAttr = $sku['sku_attr'] ?? $sku['id'];
+                                            $stock = $sku['sku_available_stock'] ?? 0;
+                                            $price = $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 0;
+
+                                            // Extract display name from sku_attr (e.g., "14:496#Green 116Plus" -> "Green 116Plus")
+                                            $displayName = $skuAttr;
+                                            if (strpos($skuAttr, '#') !== false) {
+                                                $displayName = explode('#', $skuAttr)[1];
+                                            }
+
+                                            // Get image if available
+                                            $skuImage = null;
+                                            if (isset($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'][0]['sku_image'])) {
+                                                $skuImage = $sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'][0]['sku_image'];
+                                            }
+                                        @endphp
+                                        <option value="{{ $skuAttr }}"
+                                                data-stock="{{ $stock }}"
+                                                data-price="{{ $price }}"
+                                                data-image="{{ $skuImage }}"
+                                                data-details="{{ json_encode($sku) }}"
+                                                {{ $stock <= 0 ? 'disabled' : '' }}>
+                                            {{ $displayName }}
+                                            - ${{ number_format($price, 2) }}
+                                            ({{ $stock > 0 ? $stock . ' in stock' : 'Out of stock' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('selected_sku_attr')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div id="variant-preview" class="mt-2" style="display: none;">
+                                    <img id="variant-image" src="" alt="Variant" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endif
+
                 <!-- Quantity -->
                 <div class="row mb-4">
                     <div class="col-md-3">
@@ -215,6 +271,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const shippingProvinceSelect = document.getElementById('shipping_province');
     const uaeProvinces = document.getElementById('uae-provinces');
     const saudiProvinces = document.getElementById('saudi-provinces');
+
+    // Variant selection handling
+    const variantSelect = document.getElementById('selected_sku_attr');
+    const variantPreview = document.getElementById('variant-preview');
+    const variantImage = document.getElementById('variant-image');
+
+    if (variantSelect) {
+        variantSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const imageUrl = selectedOption.getAttribute('data-image');
+
+            if (imageUrl && imageUrl !== 'null') {
+                variantImage.src = imageUrl;
+                variantPreview.style.display = 'block';
+            } else {
+                variantPreview.style.display = 'none';
+            }
+        });
+    }
 
     // Function to update province options based on country
     function updateProvinceOptions(country) {

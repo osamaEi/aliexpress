@@ -68,6 +68,7 @@ class OrderController extends Controller
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+            'selected_sku_attr' => 'nullable|string', // Product variant/SKU
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'nullable|email|max:255',
             'customer_phone' => 'required|string|max:20',
@@ -95,6 +96,7 @@ class OrderController extends Controller
                 'order_number' => Order::generateOrderNumber(),
                 'product_id' => $product->id,
                 'quantity' => $quantity,
+                'selected_sku_attr' => $validated['selected_sku_attr'] ?? null,
                 'unit_price' => $unitPrice,
                 'total_price' => $totalPrice,
                 'currency' => $product->currency ?? 'AED',
@@ -155,58 +157,70 @@ class OrderController extends Controller
         try {
             $order->update(['status' => 'processing']);
 
-            // Get product variants if available
-            $skuAttr = '';
+            // Use the SKU that was selected during order creation
+            $skuAttr = $order->selected_sku_attr ?? '';
 
-            // First, check if we have SKU data stored in aliexpress_data
-            if (!empty($order->product->aliexpress_data)) {
-                $skuAttr = $this->aliexpressService->getFirstAvailableSku($order->product->aliexpress_data);
+            Log::info('Using user-selected SKU', [
+                'order_id' => $order->id,
+                'selected_sku_attr' => $skuAttr
+            ]);
 
-                Log::info('Using SKU from stored aliexpress_data', [
-                    'product_id' => $order->product->id,
-                    'sku_attr' => $skuAttr
-                ]);
-            }
-
-            // If no SKU found, try to fetch from AliExpress API
+            // Only auto-select if no SKU was chosen
             if (empty($skuAttr)) {
-                Log::info('No SKU data found locally, fetching from AliExpress', [
-                    'product_id' => $order->product->id,
-                    'aliexpress_id' => $order->product->aliexpress_id
+                Log::info('No SKU selected by user, auto-selecting', [
+                    'order_id' => $order->id
                 ]);
 
-                try {
-                    $skuData = $this->aliexpressService->fetchProductSkuData($order->product->aliexpress_id);
+                // First, check if we have SKU data stored in aliexpress_data
+                if (!empty($order->product->aliexpress_data)) {
+                    $skuAttr = $this->aliexpressService->getFirstAvailableSku($order->product->aliexpress_data);
 
-                    if (!empty($skuData['full_data'])) {
-                        // Store the fetched data for future use
-                        $order->product->update([
-                            'aliexpress_data' => $skuData['full_data'],
-                            'aliexpress_variants' => $skuData['sku_data'],
-                            'last_synced_at' => now()
-                        ]);
-
-                        // Get the first available SKU
-                        $skuAttr = $this->aliexpressService->getFirstAvailableSku($skuData['full_data']);
-
-                        Log::info('Fetched and stored SKU data', [
-                            'product_id' => $order->product->id,
-                            'sku_attr' => $skuAttr
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    Log::warning('Failed to fetch SKU data from AliExpress', [
+                    Log::info('Using SKU from stored aliexpress_data', [
                         'product_id' => $order->product->id,
-                        'error' => $e->getMessage()
+                        'sku_attr' => $skuAttr
                     ]);
                 }
-            }
 
-            // Fallback: check old variants structure
-            if (empty($skuAttr) && !empty($order->product->aliexpress_variants)) {
-                $variants = $order->product->aliexpress_variants;
-                if (isset($variants[0]['id'])) {
-                    $skuAttr = $variants[0]['id'];
+                // If no SKU found, try to fetch from AliExpress API
+                if (empty($skuAttr)) {
+                    Log::info('No SKU data found locally, fetching from AliExpress', [
+                        'product_id' => $order->product->id,
+                        'aliexpress_id' => $order->product->aliexpress_id
+                    ]);
+
+                    try {
+                        $skuData = $this->aliexpressService->fetchProductSkuData($order->product->aliexpress_id);
+
+                        if (!empty($skuData['full_data'])) {
+                            // Store the fetched data for future use
+                            $order->product->update([
+                                'aliexpress_data' => $skuData['full_data'],
+                                'aliexpress_variants' => $skuData['sku_data'],
+                                'last_synced_at' => now()
+                            ]);
+
+                            // Get the first available SKU
+                            $skuAttr = $this->aliexpressService->getFirstAvailableSku($skuData['full_data']);
+
+                            Log::info('Fetched and stored SKU data', [
+                                'product_id' => $order->product->id,
+                                'sku_attr' => $skuAttr
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning('Failed to fetch SKU data from AliExpress', [
+                            'product_id' => $order->product->id,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
+
+                // Fallback: check old variants structure
+                if (empty($skuAttr) && !empty($order->product->aliexpress_variants)) {
+                    $variants = $order->product->aliexpress_variants;
+                    if (isset($variants[0]['id'])) {
+                        $skuAttr = $variants[0]['id'];
+                    }
                 }
             }
 

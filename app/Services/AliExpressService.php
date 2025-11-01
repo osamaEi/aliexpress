@@ -1236,12 +1236,36 @@ class AliExpressService
         if (isset($data['aliexpress_ds_order_create_response']['result'])) {
             $result = $data['aliexpress_ds_order_create_response']['result'];
 
-            // Check if order creation was successful
+            // Check if order creation failed
             if (isset($result['is_success']) && $result['is_success'] === false) {
                 $errorCode = $result['error_code'] ?? 'UNKNOWN_ERROR';
                 $errorMsg = $this->getOrderErrorMessage($errorCode);
 
                 throw new \Exception("Order creation failed: {$errorMsg} (Code: {$errorCode})");
+            }
+
+            // Check if order creation was successful
+            if (isset($result['is_success']) && $result['is_success'] === true) {
+                // Extract order ID from response
+                $orderId = null;
+
+                // Check multiple possible locations for order ID
+                if (isset($result['order_list']['number'][0])) {
+                    $orderId = $result['order_list']['number'][0];
+                } elseif (isset($result['order_id'])) {
+                    $orderId = $result['order_id'];
+                }
+
+                Log::info('AliExpress order created successfully', [
+                    'order_id' => $orderId,
+                    'full_result' => $result
+                ]);
+
+                return [
+                    'order_id' => $orderId,
+                    'is_success' => true,
+                    'full_response' => $result
+                ];
             }
 
             return $result;
