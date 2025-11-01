@@ -414,4 +414,16 @@ return [
     'synced' => 'Synced',
     'not_synced' => 'Not Synced',
     'sync_status' => 'Sync Status',
+
+    // Additional Admin Keys
+    'system_management' => 'System Management',
+    'business_management' => 'Business Management',
+    'users' => 'Users',
+    'all_users' => 'All Users',
+    'user_type' => 'User Type',
+    'all' => 'All',
+    'registered' => 'Registered',
+    'verified' => 'Verified',
+    'unverified' => 'Unverified',
+    'no_users_found' => 'No users found',
 ];

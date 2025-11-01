@@ -130,6 +130,9 @@ Route::middleware('auth')->group(function () {
 
         // Categories Management (use existing CategoryController)
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
+        // User Management
+        Route::get('/users', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
     });
 });
 

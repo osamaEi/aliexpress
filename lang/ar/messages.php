@@ -414,4 +414,16 @@ return [
     'synced' => 'متزامن',
     'not_synced' => 'غير متزامن',
     'sync_status' => 'حالة المزامنة',
+
+    // Additional Admin Keys
+    'system_management' => 'إدارة النظام',
+    'business_management' => 'إدارة الأعمال',
+    'users' => 'المستخدمون',
+    'all_users' => 'جميع المستخدمين',
+    'user_type' => 'نوع المستخدم',
+    'all' => 'الكل',
+    'registered' => 'مسجل',
+    'verified' => 'موثق',
+    'unverified' => 'غير موثق',
+    'no_users_found' => 'لم يتم العثور على مستخدمين',
 ];

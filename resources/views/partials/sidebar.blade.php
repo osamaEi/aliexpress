@@ -1,3 +1,8 @@
+@if(auth()->check() && auth()->user()->user_type === 'admin')
+    @include('partials.sidebar-admin')
+@elseif(auth()->check() && auth()->user()->user_type === 'seller')
+    @include('partials.sidebar-seller')
+@else
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
             <div class="app-brand demo">
                 <a href="{{ route('dashboard') }}" class="app-brand-link">
@@ -278,3 +283,4 @@
                 </li>
             </ul>
         </aside>
+@endif
