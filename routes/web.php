@@ -159,6 +159,21 @@ Route::middleware('auth')->group(function () {
 
         // User Management
         Route::get('/users', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
+
+        // Wallet Management
+        Route::prefix('wallets')->name('wallets.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminWalletController::class, 'index'])->name('index');
+            Route::get('/{wallet}', [App\Http\Controllers\Admin\AdminWalletController::class, 'show'])->name('show');
+            Route::post('/{wallet}/credit', [App\Http\Controllers\Admin\AdminWalletController::class, 'creditWallet'])->name('credit');
+            Route::post('/{wallet}/debit', [App\Http\Controllers\Admin\AdminWalletController::class, 'debitWallet'])->name('debit');
+            Route::get('/transactions/all', [App\Http\Controllers\Admin\AdminWalletController::class, 'transactions'])->name('transactions');
+
+            // Withdrawal requests
+            Route::get('/withdrawals/requests', [App\Http\Controllers\Admin\AdminWalletController::class, 'withdrawalRequests'])->name('withdrawals');
+            Route::post('/withdrawals/{withdrawalRequest}/approve', [App\Http\Controllers\Admin\AdminWalletController::class, 'approveWithdrawal'])->name('withdrawals.approve');
+            Route::post('/withdrawals/{withdrawalRequest}/reject', [App\Http\Controllers\Admin\AdminWalletController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
+            Route::post('/withdrawals/{withdrawalRequest}/complete', [App\Http\Controllers\Admin\AdminWalletController::class, 'completeWithdrawal'])->name('withdrawals.complete');
+        });
     });
 });
 

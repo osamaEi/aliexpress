@@ -150,6 +150,31 @@
             </a>
         </li>
 
+        <!-- Wallet Management -->
+        <li class="menu-item {{ request()->routeIs('admin.wallets.*') ? 'open active' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ri-wallet-3-line"></i>
+                <div data-i18n="Wallet Management">{{ __('messages.wallet_management') }}</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.wallets.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.wallets.index') }}" class="menu-link">
+                        <div data-i18n="All Wallets">{{ __('messages.all_wallets') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.wallets.withdrawals') ? 'active' : '' }}">
+                    <a href="{{ route('admin.wallets.withdrawals') }}" class="menu-link">
+                        <div data-i18n="Withdrawal Requests">{{ __('messages.withdrawal_requests') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.wallets.transactions') ? 'active' : '' }}">
+                    <a href="{{ route('admin.wallets.transactions') }}" class="menu-link">
+                        <div data-i18n="All Transactions">{{ __('messages.all_transactions') }}</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Account -->
         <li class="menu-header mt-5">
             <span class="menu-header-text">{{ __('messages.account') }}</span>

@@ -96,11 +96,25 @@ class WalletController extends Controller
         }
 
         try {
+            $wallet = $this->walletService->getOrCreateWallet($user);
+
             // Hold the amount
             $this->walletService->hold($user, $amount);
 
             // Create withdrawal request (pending admin approval)
-            // You can create a WithdrawalRequest model for this
+            \App\Models\WithdrawalRequest::create([
+                'user_id' => $user->id,
+                'wallet_id' => $wallet->id,
+                'amount' => $amount,
+                'currency' => 'AED',
+                'status' => 'pending',
+                'bank_name' => $request->bank_name,
+                'account_number' => $request->account_number,
+                'account_name' => $request->account_name,
+                'iban' => $request->iban,
+                'swift_code' => $request->swift_code,
+                'notes' => $request->notes,
+            ]);
 
             return redirect()->route('wallet.index')
                 ->with('success', __('messages.withdrawal_request_submitted'));
