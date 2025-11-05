@@ -666,26 +666,42 @@ class ProductController extends Controller
                     'sort_filter' => $sortFilter
                 ]);
 
-                // Adjust keywords based on sort filter
-                $genericKeywords = ['new', 'best', 'top', 'hot', 'sale', 'fashion', 'quality', 'style'];
+                // Use more aggressive keywords and broader search terms for categories
+                $genericKeywords = [
+                    // Common generic terms
+                    'a', 'e', 'i', 'o', 'new', 'best', 'top', 'hot', 'sale',
+                    'fashion', 'quality', 'style', 'popular', 'latest', 'trending',
+                    // Single letters for maximum coverage
+                    's', 't', 'n', 'r', 'l', 'c', 'd', 'm', 'p', 'h',
+                    // Numbers and years
+                    '2025', '2024', 'pro', 'plus', 'max'
+                ];
 
                 // For 'newest' filter, prioritize 'new' keyword
                 if ($sortFilter === 'newest') {
-                    $genericKeywords = ['new', '2025', 'latest', 'fresh', 'recent', 'best', 'top', 'hot'];
+                    $genericKeywords = array_merge(
+                        ['new', '2025', 'latest', 'fresh', 'recent'],
+                        $genericKeywords
+                    );
                 }
-                // Add single letters for broader search
-                $genericKeywords = array_merge($genericKeywords, ['a', 's', 't', 'e', 'i', 'o', 'n', 'r']);
 
                 $result = null;
                 $bestResult = null;
                 $maxProducts = 0;
+                $maxAttempts = 15; // Increase attempts to find products
+                $attemptCount = 0;
 
                 foreach ($genericKeywords as $testKeyword) {
+                    if ($attemptCount >= $maxAttempts) {
+                        break;
+                    }
+                    $attemptCount++;
+
                     $tempResult = $this->aliexpressTextService->searchProductsByText(
                         $testKeyword,
                         [
                             'page' => $request->get('page', 1),
-                            'limit' => $request->get('per_page', 10),
+                            'limit' => $request->get('per_page', 50), // Increased from 10 to 50
                             'category_id' => $categoryId,
                             'sort_by' => $sortBy, // Use mapped sort parameter
                             'country' => $request->get('country', 'AE'),
@@ -695,6 +711,14 @@ class ProductController extends Controller
                     );
 
                     $productCount = $tempResult['total_count'] ?? 0;
+                    $returnedProducts = count($tempResult['products'] ?? []);
+
+                    Log::info('Category search attempt', [
+                        'keyword' => $testKeyword,
+                        'attempt' => $attemptCount,
+                        'returned_products' => $returnedProducts,
+                        'total_count' => $productCount
+                    ]);
 
                     // Keep the result with most products
                     if ($productCount > $maxProducts) {
@@ -703,13 +727,27 @@ class ProductController extends Controller
 
                         Log::info('Better result found', [
                             'keyword' => $testKeyword,
-                            'count' => count($tempResult['products'] ?? []),
+                            'count' => $returnedProducts,
                             'total' => $productCount
                         ]);
                     }
 
-                    // If we found 100+ products, that's excellent - stop searching
-                    if ($productCount >= 100) {
+                    // If we found 500+ products total, that's excellent - stop searching
+                    if ($productCount >= 500) {
+                        Log::info('Found excellent category result', [
+                            'keyword' => $testKeyword,
+                            'total_count' => $productCount
+                        ]);
+                        break;
+                    }
+
+                    // If we got 30+ actual products returned, that's good enough
+                    if ($returnedProducts >= 30 && $productCount >= 100) {
+                        Log::info('Found good category result', [
+                            'keyword' => $testKeyword,
+                            'returned' => $returnedProducts,
+                            'total' => $productCount
+                        ]);
                         break;
                     }
                 }
@@ -723,7 +761,17 @@ class ProductController extends Controller
                 ];
 
                 if (empty($result['products'])) {
-                    Log::warning('No products found for category', ['category_id' => $categoryId]);
+                    Log::warning('No products found for category', [
+                        'category_id' => $categoryId,
+                        'attempts' => $attemptCount
+                    ]);
+                } else {
+                    Log::info('Final category search result', [
+                        'category_id' => $categoryId,
+                        'products_returned' => count($result['products']),
+                        'total_count' => $result['total_count'] ?? 0,
+                        'attempts_made' => $attemptCount
+                    ]);
                 }
             } elseif (!empty($keyword)) {
                 // Keyword search - search products by keyword only
