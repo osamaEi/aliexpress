@@ -80,6 +80,14 @@
             <span class="menu-header-text">{{ __('messages.system_management') }}</span>
         </li>
 
+        <!-- Settings -->
+        <li class="menu-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.settings.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-settings-3-line"></i>
+                <div data-i18n="Settings">{{ __('messages.settings') }}</div>
+            </a>
+        </li>
+
         <!-- Token Management -->
         <li class="menu-item {{ request()->routeIs('admin.tokens') ? 'active' : '' }}">
             <a href="{{ route('admin.tokens') }}" class="menu-link">
