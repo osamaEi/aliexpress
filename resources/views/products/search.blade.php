@@ -37,34 +37,50 @@
                         >
                     </div>
 
-                    <div class="col-md-4">
-                        <label for="category_dropdown" class="form-label fw-semibold">
-                            <i class="ri-folder-line me-1"></i>Category
+                    <div class="col-md-2">
+                        <label for="main_category" class="form-label fw-semibold">
+                            <i class="ri-folder-line me-1"></i>Main Category
                         </label>
-                        <select name="category_id" id="category_dropdown" class="form-select form-select-lg shadow-sm">
+                        <select id="main_category" class="form-select form-select-lg shadow-sm">
                             <option value="">All Categories</option>
                             @if(isset($categories) && count($categories) > 0)
                                 @foreach($categories as $category)
+                                    @php
+                                        $isSelected = false;
+                                        $selectedChild = null;
+                                        // Check if this main category or any of its children is selected
+                                        if (request('category_id') == $category->aliexpress_category_id) {
+                                            $isSelected = true;
+                                        } elseif (isset($category->children) && count($category->children) > 0) {
+                                            foreach ($category->children as $child) {
+                                                if (request('category_id') == $child->aliexpress_category_id) {
+                                                    $isSelected = true;
+                                                    $selectedChild = $child->aliexpress_category_id;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    @endphp
                                     <option value="{{ $category->aliexpress_category_id }}"
-                                            {{ request('category_id') == $category->aliexpress_category_id ? 'selected' : '' }}>
+                                            data-has-children="{{ isset($category->children) && count($category->children) > 0 ? 'true' : 'false' }}"
+                                            data-selected-child="{{ $selectedChild }}"
+                                            {{ $isSelected ? 'selected' : '' }}>
                                         {{ $category->name }}
                                         @if($category->name_ar)
-                                            - {{ $category->name_ar }}
+                                            ({{ $category->name_ar }})
                                         @endif
                                     </option>
-                                    @if(isset($category->children) && count($category->children) > 0)
-                                        @foreach($category->children as $child)
-                                            <option value="{{ $child->aliexpress_category_id }}"
-                                                    {{ request('category_id') == $child->aliexpress_category_id ? 'selected' : '' }}>
-                                                &nbsp;&nbsp;&nbsp;↳ {{ $child->name }}
-                                                @if($child->name_ar)
-                                                    - {{ $child->name_ar }}
-                                                @endif
-                                            </option>
-                                        @endforeach
-                                    @endif
                                 @endforeach
                             @endif
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="sub_category" class="form-label fw-semibold">
+                            <i class="ri-folder-open-line me-1"></i>Sub Category
+                        </label>
+                        <select name="category_id" id="sub_category" class="form-select form-select-lg shadow-sm" disabled>
+                            <option value="">Select main category first</option>
                         </select>
                     </div>
 
@@ -502,10 +518,88 @@
         }
     });
 
-    // Category dropdown change handler
-    document.getElementById('category_dropdown')?.addEventListener('change', function() {
-        // Optionally auto-submit when category changes
-        // document.getElementById('searchForm').submit();
+    // Category hierarchy data
+    const categoryHierarchy = {
+        @if(isset($categories) && count($categories) > 0)
+            @foreach($categories as $category)
+                '{{ $category->aliexpress_category_id }}': [
+                    @if(isset($category->children) && count($category->children) > 0)
+                        @foreach($category->children as $child)
+                            {
+                                id: '{{ $child->aliexpress_category_id }}',
+                                name: '{{ $child->name }}',
+                                name_ar: '{{ $child->name_ar ?? '' }}'
+                            },
+                        @endforeach
+                    @endif
+                ],
+            @endforeach
+        @endif
+    };
+
+    // Main category change handler
+    document.getElementById('main_category').addEventListener('change', function() {
+        const mainCategoryId = this.value;
+        const subCategorySelect = document.getElementById('sub_category');
+        const selectedChildId = this.options[this.selectedIndex].getAttribute('data-selected-child');
+
+        // Clear subcategory dropdown
+        subCategorySelect.innerHTML = '';
+
+        if (!mainCategoryId) {
+            // No main category selected
+            subCategorySelect.disabled = true;
+            subCategorySelect.innerHTML = '<option value="">Select main category first</option>';
+            return;
+        }
+
+        const children = categoryHierarchy[mainCategoryId] || [];
+
+        if (children.length === 0) {
+            // No subcategories available - use main category ID directly
+            subCategorySelect.disabled = true;
+            subCategorySelect.innerHTML = '<option value="' + mainCategoryId + '">No subcategories (using main category)</option>';
+            const option = document.createElement('option');
+            option.value = mainCategoryId;
+            option.textContent = 'No subcategories (using main category)';
+            option.selected = true;
+            subCategorySelect.innerHTML = '';
+            subCategorySelect.appendChild(option);
+        } else {
+            // Has subcategories
+            subCategorySelect.disabled = false;
+
+            // Add "All" option
+            const allOption = document.createElement('option');
+            allOption.value = mainCategoryId;
+            allOption.textContent = 'All Subcategories';
+            subCategorySelect.appendChild(allOption);
+
+            // Add subcategory options
+            children.forEach(child => {
+                const option = document.createElement('option');
+                option.value = child.id;
+                option.textContent = child.name;
+                if (child.name_ar) {
+                    option.textContent += ' (' + child.name_ar + ')';
+                }
+
+                // Check if this child should be selected
+                if (selectedChildId && selectedChildId === child.id) {
+                    option.selected = true;
+                }
+
+                subCategorySelect.appendChild(option);
+            });
+        }
+    });
+
+    // Trigger change on page load to populate subcategories if main category is selected
+    document.addEventListener('DOMContentLoaded', function() {
+        const mainCategorySelect = document.getElementById('main_category');
+        if (mainCategorySelect.value) {
+            mainCategorySelect.dispatchEvent(new Event('change'));
+        }
     });
 
     // Assign product to seller function
