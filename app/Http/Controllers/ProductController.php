@@ -644,8 +644,25 @@ class ProductController extends Controller
 
         try {
             $keyword = $request->keyword ?? '';
-            $categoryId = $request->get('category_id');
+            $localCategoryId = $request->get('category_id');
             $sortFilter = $request->get('sort_filter', 'orders');
+
+            // Get AliExpress category ID from our local category
+            $aliexpressCategoryId = null;
+            if (!empty($localCategoryId)) {
+                $category = \App\Models\Category::find($localCategoryId);
+                if ($category && $category->aliexpress_category_id) {
+                    $aliexpressCategoryId = $category->aliexpress_category_id;
+                    Log::info('Mapped local category to AliExpress category', [
+                        'local_category_id' => $localCategoryId,
+                        'aliexpress_category_id' => $aliexpressCategoryId
+                    ]);
+                } else {
+                    Log::warning('Category not found or missing AliExpress ID', [
+                        'local_category_id' => $localCategoryId
+                    ]);
+                }
+            }
 
             // Map sort filter to API sort_by parameter
             $sortByMap = [
@@ -659,10 +676,11 @@ class ProductController extends Controller
             $sortBy = $sortByMap[$sortFilter] ?? null;
 
             // Separate: Category selection vs Keyword search
-            if (!empty($categoryId)) {
+            if (!empty($aliexpressCategoryId)) {
                 // Category selected - get products from category immediately
                 Log::info('Getting products by category', [
-                    'category_id' => $categoryId,
+                    'local_category_id' => $localCategoryId,
+                    'aliexpress_category_id' => $aliexpressCategoryId,
                     'sort_filter' => $sortFilter
                 ]);
 
@@ -702,7 +720,7 @@ class ProductController extends Controller
                         [
                             'page' => $request->get('page', 1),
                             'limit' => $request->get('per_page', 50), // Increased from 10 to 50
-                            'category_id' => $categoryId,
+                            'category_id' => $aliexpressCategoryId,
                             'sort_by' => $sortBy, // Use mapped sort parameter
                             'country' => $request->get('country', 'AE'),
                             'currency' => $request->get('currency', 'AED'),
@@ -762,12 +780,14 @@ class ProductController extends Controller
 
                 if (empty($result['products'])) {
                     Log::warning('No products found for category', [
-                        'category_id' => $categoryId,
+                        'local_category_id' => $localCategoryId,
+                        'aliexpress_category_id' => $aliexpressCategoryId,
                         'attempts' => $attemptCount
                     ]);
                 } else {
                     Log::info('Final category search result', [
-                        'category_id' => $categoryId,
+                        'local_category_id' => $localCategoryId,
+                        'aliexpress_category_id' => $aliexpressCategoryId,
                         'products_returned' => count($result['products']),
                         'total_count' => $result['total_count'] ?? 0,
                         'attempts_made' => $attemptCount
