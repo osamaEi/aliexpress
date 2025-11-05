@@ -505,4 +505,21 @@ return [
     'balance_deducted_successfully' => 'Balance deducted successfully',
     'approved' => 'Approved',
     'rejected' => 'Rejected',
+
+    // Settings
+    'site_settings' => 'Site Settings',
+    'manage_site_settings' => 'Manage site configuration and preferences',
+    'general_settings' => 'General Settings',
+    'email_settings' => 'Email Settings',
+    'image_settings' => 'Image Settings',
+    'admin_profit_settings' => 'Admin Profit Settings',
+    'other_numeric_settings' => 'Other Numeric Settings',
+    'save_settings' => 'Save Settings',
+    'confirm_delete_image' => 'Are you sure you want to delete this image?',
+    'error_deleting_image' => 'Error deleting image',
+    'profit_type' => 'Profit Type',
+    'percentage' => 'Percentage',
+    'fixed_amount' => 'Fixed Amount',
+    'profit_percentage' => 'Profit Percentage',
+    'fixed_profit_amount' => 'Fixed Profit Amount',
 ];

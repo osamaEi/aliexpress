@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AliExpressTestController;
 use App\Http\Controllers\AliExpressController;
+use App\Http\Controllers\AliExpressWebhookController;
 use App\Http\Controllers\SellerRegistrationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\LanguageController;
@@ -23,6 +24,12 @@ Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.
 
 // Payment Callback (Public - No Auth Required, No CSRF)
 Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->name('payment.callback');
+// AliExpress Webhook Routes (Public - No Auth Required, No CSRF)
+Route::prefix('webhooks/aliexpress')->name('webhook.aliexpress.')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->group(function () {
+    Route::post('/order-status', [AliExpressWebhookController::class, 'handleOrderStatus'])->name('order-status');
+    Route::post('/tracking-update', [AliExpressWebhookController::class, 'handleTrackingUpdate'])->name('tracking-update');
+    Route::get('/test', [AliExpressWebhookController::class, 'test'])->name('test');
+});
 
 // Seller Registration Routes (Public - No Auth Required)
 Route::prefix('seller/register')->name('seller.register.')->group(function () {
@@ -174,6 +181,11 @@ Route::middleware('auth')->group(function () {
             Route::post('/withdrawals/{withdrawalRequest}/reject', [App\Http\Controllers\Admin\AdminWalletController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
             Route::post('/withdrawals/{withdrawalRequest}/complete', [App\Http\Controllers\Admin\AdminWalletController::class, 'completeWithdrawal'])->name('withdrawals.complete');
         });
+
+        // Settings Management
+        Route::get('/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/delete-image', [App\Http\Controllers\Admin\SettingController::class, 'deleteImage'])->name('settings.delete-image');
     });
 });
 

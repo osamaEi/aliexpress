@@ -788,6 +788,48 @@ class ProductController extends Controller
                     ->toArray();
             }
 
+            // Add admin profit to each product price
+            if (!empty($result['products'])) {
+                foreach ($result['products'] as &$product) {
+                    // Get the base price (sale price)
+                    $basePrice = (float)($product['sale_price'] ?? 0);
+
+                    // Calculate admin profit
+                    $adminProfit = admin_profit($basePrice);
+
+                    // Calculate final price (base price + admin profit)
+                    $finalPrice = $basePrice + $adminProfit;
+
+                    // Store original price for reference
+                    $product['original_sale_price'] = $basePrice;
+                    $product['admin_profit'] = $adminProfit;
+
+                    // Update sale price to include admin profit
+                    $product['sale_price'] = $finalPrice;
+
+                    // Update formatted price if it exists
+                    if (isset($product['sale_price_format'])) {
+                        $currency = $request->get('currency', 'AED');
+                        $product['original_sale_price_format'] = $product['sale_price_format'];
+                        $product['sale_price_format'] = $currency . ' ' . number_format($finalPrice, 2);
+                    }
+
+                    // Also update original price if needed
+                    if (isset($product['original_price'])) {
+                        $originalBasePrice = (float)$product['original_price'];
+                        $originalAdminProfit = admin_profit($originalBasePrice);
+                        $product['original_aliexpress_price'] = $originalBasePrice;
+                        $product['original_price'] = $originalBasePrice + $originalAdminProfit;
+
+                        if (isset($product['original_price_format'])) {
+                            $currency = $request->get('currency', 'AED');
+                            $product['original_price_format'] = $currency . ' ' . number_format($product['original_price'], 2);
+                        }
+                    }
+                }
+                unset($product); // Break reference
+            }
+
             return view('products.search', [
                 'products' => $result['products'],
                 'total_count' => $result['total_count'] ?? 0,

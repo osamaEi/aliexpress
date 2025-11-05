@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
-class sSellerRegistrationController extends Controller
+class SellerRegistrationController extends Controller
 {
     /**
      * Show Step 1: Basic Information

@@ -199,6 +199,24 @@
 
             <!-- Results Count -->
             @if(isset($products) && count($products) > 0)
+                <!-- Admin Profit Notice -->
+                <div class="alert alert-warning mb-3 d-flex align-items-center">
+                    <i class="ri-money-dollar-circle-line me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Price Notice:</strong> All displayed prices include
+                        @php
+                            $profitType = setting('admin_profit_type', 'percentage');
+                            if ($profitType === 'percentage') {
+                                echo '<strong>' . setting('admin_profit_percentage', '10') . '%</strong> admin profit';
+                            } else {
+                                echo '<strong>' . setting('currency', 'AED') . ' ' . number_format((float)setting('admin_profit_fixed', 0), 2) . '</strong> fixed admin profit';
+                            }
+                        @endphp
+                        <br>
+                        <small class="text-muted">Final customer price = AliExpress price + admin profit</small>
+                    </div>
+                </div>
+
                 <!-- Shipping Filter Notice -->
                 <div class="alert alert-success mb-3 d-flex align-items-center">
                     <i class="ri-ship-line me-2" style="font-size: 1.5rem;"></i>
@@ -275,6 +293,12 @@
                                                 AED {{ number_format((float)$product['sale_price'], 2) }}
                                             @endif
                                         </h5>
+                                        @if(isset($product['admin_profit']) && $product['admin_profit'] > 0)
+                                            <small class="text-success d-block">
+                                                <i class="ri-money-dollar-circle-line"></i>
+                                                Includes {{ setting('currency', 'AED') }} {{ number_format($product['admin_profit'], 2) }} profit
+                                            </small>
+                                        @endif
                                         @if($product['original_price'] > $product['sale_price'])
                                             <small class="text-muted text-decoration-line-through">
                                                 @if($product['original_price_format'])
@@ -328,7 +352,7 @@
                                                     <button
                                                         type="button"
                                                         class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
-                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['sale_price'] }}, '{{ request('currency', 'AED') }}', this)"
+                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', 'AED') }}', this)"
                                                         data-product-id="{{ $product['item_id'] }}"
                                                     >
                                                         <i class="ri-pushpin-line me-1"></i> Assign to Me

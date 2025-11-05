@@ -41,6 +41,7 @@ return [
         'tracking_id' => env('ALIEXPRESS_TRACKING_ID'),
         'access_token' => env('ALIEXPRESS_ACCESS_TOKEN'),
         'api_url' => env('ALIEXPRESS_API_URL', 'https://api-sg.aliexpress.com/sync'),
+        'webhook_secret' => env('ALIEXPRESS_WEBHOOK_SECRET'),
     ],
 
 ];
