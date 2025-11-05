@@ -96,6 +96,14 @@
             </a>
         </li>
 
+        <!-- Logs -->
+        <li class="menu-item {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.logs.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-file-list-3-line"></i>
+                <div data-i18n="System Logs">{{ __('messages.system_logs') }}</div>
+            </a>
+        </li>
+
         <!-- Subscription Management -->
         <li class="menu-item {{ request()->routeIs('admin.subscriptions.*') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">

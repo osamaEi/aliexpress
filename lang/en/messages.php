@@ -417,6 +417,7 @@ return [
 
     // Additional Admin Keys
     'system_management' => 'System Management',
+    'system_logs' => 'System Logs',
     'business_management' => 'Business Management',
     'users' => 'Users',
     'all_users' => 'All Users',

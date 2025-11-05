@@ -186,6 +186,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
         Route::post('/settings/delete-image', [App\Http\Controllers\Admin\SettingController::class, 'deleteImage'])->name('settings.delete-image');
+
+        // Logs Management
+        Route::get('/logs', [App\Http\Controllers\Admin\LogController::class, 'index'])->name('logs.index');
+        Route::get('/logs/download', [App\Http\Controllers\Admin\LogController::class, 'download'])->name('logs.download');
+        Route::delete('/logs/delete', [App\Http\Controllers\Admin\LogController::class, 'delete'])->name('logs.delete');
+        Route::delete('/logs/clear', [App\Http\Controllers\Admin\LogController::class, 'clear'])->name('logs.clear');
     });
 });
 
