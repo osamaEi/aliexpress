@@ -118,8 +118,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
     // Payment routes
-    Route::post('/payment/subscription/{subscription}', [App\Http\Controllers\PaymentController::class, 'initiateSubscriptionPayment'])->name('payment.subscription');
-    Route::post('/payment/order/{order}', [App\Http\Controllers\PaymentController::class, 'initiateOrderPayment'])->name('payment.order');
+    Route::get('/payment/subscription/{subscription}', [App\Http\Controllers\PaymentController::class, 'initiateSubscriptionPayment'])->name('payment.subscription');
+    Route::get('/payment/order/{order}', [App\Http\Controllers\PaymentController::class, 'initiateOrderPayment'])->name('payment.order');
     Route::get('/payment/success', [App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/error', [App\Http\Controllers\PaymentController::class, 'error'])->name('payment.error');
 

@@ -23,7 +23,7 @@ This document explains the complete flow for sellers to subscribe to a plan usin
    └─► Redirects to: /payment/subscription/{subscription}
 
 3. PAYMENT INITIATION
-   ├─► POST /payment/subscription/{subscription}
+   ├─► GET /payment/subscription/{subscription}
    ├─► PaymentController::initiateSubscriptionPayment()
    ├─► Creates PaymentTransaction (status: pending)
    ├─► Calls PayPalService::createOrder()
@@ -104,7 +104,7 @@ public function subscribe(Request $request, Subscription $subscription)
 
 ### 2. Payment Initiation
 
-**Route**: `POST /payment/subscription/{subscription}`
+**Route**: `GET /payment/subscription/{subscription}`
 
 **Controller**: `PaymentController::initiateSubscriptionPayment()`
 
@@ -252,7 +252,7 @@ id | name     | price | duration_days | max_products | is_active
 |--------|-----|--------|-------------|
 | GET | `/subscriptions` | `index()` | View plans |
 | POST | `/subscriptions/{id}/subscribe` | `subscribe()` | Choose plan |
-| POST | `/payment/subscription/{id}` | `initiateSubscriptionPayment()` | Create PayPal order |
+| GET | `/payment/subscription/{id}` | `initiateSubscriptionPayment()` | Create PayPal order |
 | GET | `/payment/callback` | `callback()` | PayPal return URL |
 | GET | `/payment/success` | `success()` | Success redirect |
 | GET | `/payment/error` | `error()` | Error redirect |
