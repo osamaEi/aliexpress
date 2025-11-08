@@ -60,7 +60,6 @@ return [
     */
     'currency' => env('PAYPAL_CURRENCY', 'USD'),
     'notify_url' => env('PAYPAL_NOTIFY_URL', ''),
-    'locale' => env('PAYPAL_LOCALE', 'en_US'),
 
     /*
     |--------------------------------------------------------------------------

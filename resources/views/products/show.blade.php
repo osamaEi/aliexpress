@@ -63,9 +63,9 @@
                             </span>
                         </div>
                         <div class="btn-group">
-                            <a href="{{ route('orders.create', ['product_id' => $product->id]) }}" class="btn btn-sm btn-success">
+                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createOrderModal">
                                 <i class="ri-shopping-bag-line me-1"></i> Create Order
-                            </a>
+                            </button>
                             <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-primary">
                                 <i class="ri-edit-line me-1"></i> Edit
                             </a>
@@ -379,6 +379,104 @@
     @endif
 </div>
 
+<!-- Create Order Modal -->
+<div class="modal fade" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createOrderModalLabel">
+                    <i class="ri-shopping-bag-line me-2"></i> Create Order for {{ $product->name }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="createOrderForm" method="GET" action="{{ route('orders.create') }}">
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                <div class="modal-body">
+                    <!-- Product Variants Selection -->
+                    @if($aliexpressData && isset($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']))
+                        <div class="mb-4">
+                            <h6 class="mb-3">
+                                <i class="ri-palette-line me-2"></i> Select Variant
+                            </h6>
+                            <div class="row g-3" id="variantsList">
+                                @foreach($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'] as $index => $sku)
+                                    <div class="col-md-6">
+                                        <div class="variant-card card border h-100" onclick="selectVariant('{{ $index }}')">
+                                            <div class="card-body p-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="selected_variant" id="variant{{ $index }}" value="{{ $index }}">
+                                                    <label class="form-check-label w-100" for="variant{{ $index }}">
+                                                        <div class="d-flex align-items-center">
+                                                            @if(isset($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'][0]['sku_image']))
+                                                                <img src="{{ $sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'][0]['sku_image'] }}"
+                                                                     class="rounded me-3"
+                                                                     style="width: 60px; height: 60px; object-fit: cover;">
+                                                            @endif
+                                                            <div class="flex-grow-1">
+                                                                <div class="mb-1">
+                                                                    @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
+                                                                        <span class="badge bg-secondary me-1">
+                                                                            {{ $property['sku_property_name'] }}: {{ $property['sku_property_value'] }}
+                                                                        </span>
+                                                                    @endforeach
+                                                                </div>
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <div class="text-primary fw-bold">
+                                                                        ${{ $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 'N/A' }}
+                                                                    </div>
+                                                                    <span class="badge {{ $sku['sku_available_stock'] > 0 ? 'bg-success' : 'bg-danger' }}">
+                                                                        {{ $sku['sku_available_stock'] > 0 ? 'In Stock' : 'Out of Stock' }}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <input type="hidden" name="selected_variant_index" id="selected_variant_index">
+                            <input type="hidden" name="selected_sku_attr" id="selected_sku_attr">
+                        </div>
+                    @endif
+
+                    <!-- Quantity Selection -->
+                    <div class="mb-4">
+                        <label for="quantity" class="form-label">
+                            <i class="ri-shopping-cart-line me-2"></i> Quantity
+                        </label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="999" required>
+                    </div>
+
+                    <!-- Customer Notes -->
+                    <div class="mb-3">
+                        <label for="customer_notes" class="form-label">
+                            <i class="ri-message-3-line me-2"></i> Additional Notes (Optional)
+                        </label>
+                        <textarea class="form-control" id="customer_notes" name="customer_notes" rows="3" placeholder="Any special instructions or preferences..."></textarea>
+                    </div>
+
+                    <!-- Selected Variant Details Display -->
+                    <div id="selectedVariantDetails" class="alert alert-info d-none">
+                        <h6 class="alert-heading mb-2">Selected Variant:</h6>
+                        <div id="selectedVariantContent"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success" id="proceedToOrderBtn">
+                        <i class="ri-arrow-right-line me-1"></i> Proceed to Order Details
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
     .hover-shadow:hover {
         box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
@@ -409,6 +507,29 @@
 
     .badge {
         font-weight: 500;
+    }
+
+    /* Variant Card Styles */
+    .variant-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .variant-card:hover {
+        border-color: #28a745 !important;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .variant-card.selected {
+        border-color: #28a745 !important;
+        background-color: #f0fff4;
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+    }
+
+    .variant-card .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
     }
 </style>
 
@@ -465,5 +586,85 @@ function syncProduct() {
         alert('Failed to sync product. Please try again.');
     });
 }
+
+// Variant selection and order creation
+const variantsData = @json($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'] ?? []);
+
+function selectVariant(index) {
+    // Remove previous selection
+    document.querySelectorAll('.variant-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    // Add selection to clicked card
+    const selectedCard = document.querySelector(`#variant${index}`).closest('.variant-card');
+    selectedCard.classList.add('selected');
+
+    // Check the radio button
+    document.getElementById(`variant${index}`).checked = true;
+
+    // Get variant data
+    const variant = variantsData[index];
+
+    // Store variant index
+    document.getElementById('selected_variant_index').value = index;
+
+    // Build SKU attributes string
+    if (variant && variant.ae_sku_property_dtos && variant.ae_sku_property_dtos.ae_sku_property_d_t_o) {
+        const skuAttrs = variant.ae_sku_property_dtos.ae_sku_property_d_t_o.map(prop => {
+            return `${prop.sku_property_id}:${prop.property_value_id}`;
+        }).join(';');
+
+        document.getElementById('selected_sku_attr').value = skuAttrs;
+
+        // Show selected variant details
+        const detailsDiv = document.getElementById('selectedVariantDetails');
+        const contentDiv = document.getElementById('selectedVariantContent');
+
+        let detailsHtml = '<div class="row align-items-center">';
+
+        // Add image if available
+        if (variant.ae_sku_property_dtos.ae_sku_property_d_t_o[0].sku_image) {
+            detailsHtml += `
+                <div class="col-auto">
+                    <img src="${variant.ae_sku_property_dtos.ae_sku_property_d_t_o[0].sku_image}"
+                         class="rounded"
+                         style="width: 50px; height: 50px; object-fit: cover;">
+                </div>
+            `;
+        }
+
+        detailsHtml += '<div class="col">';
+
+        // Add properties
+        variant.ae_sku_property_dtos.ae_sku_property_d_t_o.forEach(prop => {
+            detailsHtml += `<span class="badge bg-secondary me-1">${prop.sku_property_name}: ${prop.sku_property_value}</span>`;
+        });
+
+        detailsHtml += `<div class="mt-2"><strong>Price:</strong> $${variant.offer_sale_price || variant.sku_price}</div>`;
+        detailsHtml += '</div></div>';
+
+        contentDiv.innerHTML = detailsHtml;
+        detailsDiv.classList.remove('d-none');
+    }
+}
+
+// Reset modal on close
+document.getElementById('createOrderModal').addEventListener('hidden.bs.modal', function () {
+    // Reset form
+    document.getElementById('createOrderForm').reset();
+
+    // Remove selections
+    document.querySelectorAll('.variant-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    // Hide details
+    document.getElementById('selectedVariantDetails').classList.add('d-none');
+
+    // Clear hidden fields
+    document.getElementById('selected_variant_index').value = '';
+    document.getElementById('selected_sku_attr').value = '';
+});
 </script>
 @endsection

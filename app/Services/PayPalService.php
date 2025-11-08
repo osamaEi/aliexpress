@@ -79,7 +79,6 @@ class PayPalService
                     'return_url' => config('paypal.return_url'),
                     'cancel_url' => config('paypal.cancel_url'),
                     'brand_name' => config('app.name'),
-                    'locale' => config('paypal.locale'),
                     'landing_page' => 'BILLING',
                     'user_action' => 'PAY_NOW',
                 ],
