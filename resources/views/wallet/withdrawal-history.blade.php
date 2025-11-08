@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('dashboard')
 
 @section('title', __('messages.withdrawal_history'))
 
