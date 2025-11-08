@@ -143,11 +143,12 @@ This document summarizes all the changes made to integrate PayPal payment gatewa
 
 ### Payment Routes
 ```php
-// Changed from POST to GET
-Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+// Payment initiation routes (GET to support redirect)
+Route::get('/payment/subscription/{subscription}', [PaymentController::class, 'initiateSubscriptionPayment'])->name('payment.subscription');
+Route::get('/payment/order/{order}', [PaymentController::class, 'initiateOrderPayment'])->name('payment.order');
 
-// New order payment route
-Route::post('/payment/order/{order}', [PaymentController::class, 'initiateOrderPayment'])->name('payment.order');
+// PayPal callback route
+Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 ```
 
 ### Profit Management Routes

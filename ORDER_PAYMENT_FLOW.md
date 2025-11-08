@@ -24,7 +24,7 @@ This document explains the complete flow for sellers to create orders and comple
    └─► Redirects to: /payment/order/{order}
 
 3. PAYMENT INITIATION
-   ├─► POST /payment/order/{order}
+   ├─► GET /payment/order/{order}
    ├─► PaymentController::initiateOrderPayment()
    ├─► Creates PaymentTransaction (status: pending)
    ├─► Calls PayPalService::createOrder()
@@ -119,7 +119,7 @@ public function store(Request $request)
 
 ### 2. Payment Initiation
 
-**Route**: `POST /payment/order/{order}`
+**Route**: `GET /payment/order/{order}`
 
 **Controller**: `PaymentController::initiateOrderPayment()`
 
@@ -283,7 +283,7 @@ delivered
 |--------|-----|--------|-------------|
 | GET | `/orders/create` | `create()` | Show order form |
 | POST | `/orders` | `store()` | Create order and redirect to payment |
-| POST | `/payment/order/{id}` | `initiateOrderPayment()` | Create PayPal order |
+| GET | `/payment/order/{id}` | `initiateOrderPayment()` | Create PayPal order |
 | GET | `/payment/callback` | `callback()` | PayPal return URL |
 | GET | `/payment/success` | `success()` | Success redirect |
 | GET | `/payment/error` | `error()` | Error redirect |

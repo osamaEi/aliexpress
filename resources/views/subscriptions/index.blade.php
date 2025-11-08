@@ -104,7 +104,7 @@
                                     {{ __('messages.upgrade_plan') }}
                                 </a>
                             @else
-                                <form method="POST" action="{{ route('payment.subscription', $subscription) }}">
+                                <form method="POST" action="{{ route('subscriptions.subscribe', $subscription) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-primary w-100">
                                         <i class="ri-secure-payment-line me-1"></i>
