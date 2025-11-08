@@ -12,24 +12,23 @@ class WithdrawalRequest extends Model
 
     protected $fillable = [
         'user_id',
-        'wallet_id',
+        'paypal_email',
         'amount',
         'currency',
         'status',
-        'bank_name',
-        'account_number',
-        'account_name',
-        'iban',
-        'swift_code',
-        'notes',
-        'admin_notes',
-        'processed_by',
-        'processed_at',
+        'seller_note',
+        'admin_note',
+        'approved_at',
+        'rejected_at',
+        'completed_at',
+        'approved_by',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
-        'processed_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     /**
@@ -41,19 +40,11 @@ class WithdrawalRequest extends Model
     }
 
     /**
-     * Get the wallet
+     * Get the admin who approved the request
      */
-    public function wallet(): BelongsTo
+    public function approver(): BelongsTo
     {
-        return $this->belongsTo(Wallet::class);
-    }
-
-    /**
-     * Get the admin who processed the request
-     */
-    public function processor(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'processed_by');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     /**

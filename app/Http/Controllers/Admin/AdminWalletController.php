@@ -73,7 +73,7 @@ class AdminWalletController extends Controller
      */
     public function withdrawalRequests(Request $request)
     {
-        $query = WithdrawalRequest::with(['user', 'wallet', 'processor']);
+        $query = WithdrawalRequest::with(['user', 'approver']);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -89,8 +89,8 @@ class AdminWalletController extends Controller
         $stats = [
             'pending_count' => WithdrawalRequest::pending()->count(),
             'pending_amount' => WithdrawalRequest::pending()->sum('amount'),
-            'approved_today' => WithdrawalRequest::approved()->whereDate('processed_at', today())->count(),
-            'completed_today' => WithdrawalRequest::completed()->whereDate('processed_at', today())->count(),
+            'approved_today' => WithdrawalRequest::approved()->whereDate('approved_at', today())->count(),
+            'completed_today' => WithdrawalRequest::completed()->whereDate('completed_at', today())->count(),
         ];
 
         return view('admin.wallets.withdrawals', compact('requests', 'stats'));
@@ -105,34 +105,19 @@ class AdminWalletController extends Controller
             return back()->with('error', __('messages.request_already_processed'));
         }
 
+        $request->validate([
+            'admin_note' => 'nullable|string|max:500',
+        ]);
+
         try {
             DB::transaction(function () use ($withdrawalRequest, $request) {
                 // Update request status
                 $withdrawalRequest->update([
                     'status' => 'approved',
-                    'admin_notes' => $request->admin_notes,
-                    'processed_by' => Auth::id(),
-                    'processed_at' => now(),
+                    'admin_note' => $request->admin_note,
+                    'approved_by' => Auth::id(),
+                    'approved_at' => now(),
                 ]);
-
-                // Process withdrawal (debit wallet and release hold)
-                $wallet = $withdrawalRequest->wallet;
-                $user = $withdrawalRequest->user;
-
-                // Release hold
-                $this->walletService->releaseHold($user, $withdrawalRequest->amount);
-
-                // Debit wallet
-                $wallet->debit(
-                    $withdrawalRequest->amount,
-                    'withdrawal',
-                    "Withdrawal approved - {$withdrawalRequest->bank_name}",
-                    [
-                        'withdrawal_request_id' => $withdrawalRequest->id,
-                        'bank_name' => $withdrawalRequest->bank_name,
-                        'account_number' => $withdrawalRequest->account_number,
-                    ]
-                );
             });
 
             return back()->with('success', __('messages.withdrawal_approved'));
@@ -151,21 +136,22 @@ class AdminWalletController extends Controller
         }
 
         $request->validate([
-            'admin_notes' => 'required|string|max:500',
+            'admin_note' => 'required|string|max:500',
         ]);
 
         try {
             DB::transaction(function () use ($withdrawalRequest, $request) {
+                // Return amount to wallet
+                $wallet = $withdrawalRequest->user->wallet;
+                $wallet->increment('balance', $withdrawalRequest->amount);
+
                 // Update request status
                 $withdrawalRequest->update([
                     'status' => 'rejected',
-                    'admin_notes' => $request->admin_notes,
-                    'processed_by' => Auth::id(),
-                    'processed_at' => now(),
+                    'admin_note' => $request->admin_note,
+                    'approved_by' => Auth::id(),
+                    'rejected_at' => now(),
                 ]);
-
-                // Release hold
-                $this->walletService->releaseHold($withdrawalRequest->user, $withdrawalRequest->amount);
             });
 
             return back()->with('success', __('messages.withdrawal_rejected'));
@@ -185,6 +171,7 @@ class AdminWalletController extends Controller
 
         $withdrawalRequest->update([
             'status' => 'completed',
+            'completed_at' => now(),
         ]);
 
         return back()->with('success', __('messages.withdrawal_completed'));

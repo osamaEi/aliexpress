@@ -128,11 +128,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [App\Http\Controllers\WalletController::class, 'index'])->name('index');
         Route::get('/deposit', [App\Http\Controllers\WalletController::class, 'depositForm'])->name('deposit');
         Route::post('/deposit', [App\Http\Controllers\WalletController::class, 'deposit'])->name('deposit.process');
-        Route::get('/withdrawal', [App\Http\Controllers\WalletController::class, 'withdrawalForm'])->name('withdrawal');
-        Route::post('/withdrawal', [App\Http\Controllers\WalletController::class, 'withdrawal'])->name('withdrawal.process');
         Route::get('/transactions', [App\Http\Controllers\WalletController::class, 'transactions'])->name('transactions');
         Route::get('/transfer', [App\Http\Controllers\WalletController::class, 'transferForm'])->name('transfer');
         Route::post('/transfer', [App\Http\Controllers\WalletController::class, 'transfer'])->name('transfer.process');
+
+        // Withdrawal routes (PayPal)
+        Route::get('/withdrawal/create', [App\Http\Controllers\WithdrawalController::class, 'create'])->name('withdrawal.create');
+        Route::post('/withdrawal', [App\Http\Controllers\WithdrawalController::class, 'store'])->name('withdrawal.store');
+        Route::get('/withdrawal/history', [App\Http\Controllers\WithdrawalController::class, 'history'])->name('withdrawal.history');
+        Route::delete('/withdrawal/{withdrawal}', [App\Http\Controllers\WithdrawalController::class, 'cancel'])->name('withdrawal.cancel');
     });
 
     // Subscription routes

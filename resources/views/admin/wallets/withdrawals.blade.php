@@ -105,7 +105,7 @@
                             <th>{{ __('messages.request_id') }}</th>
                             <th>{{ __('messages.user') }}</th>
                             <th>{{ __('messages.amount') }}</th>
-                            <th>{{ __('messages.bank_details') }}</th>
+                            <th>{{ __('messages.paypal_email') }}</th>
                             <th>{{ __('messages.date') }}</th>
                             <th>{{ __('messages.status') }}</th>
                             <th>{{ __('messages.actions') }}</th>
@@ -125,14 +125,11 @@
                                 <strong class="text-danger">AED {{ number_format($request->amount, 2) }}</strong>
                             </td>
                             <td>
-                                <div>
-                                    <strong>{{ $request->bank_name }}</strong>
-                                    <div class="text-muted small">{{ $request->account_number }}</div>
-                                    <div class="text-muted small">{{ $request->account_name }}</div>
-                                    @if($request->iban)
-                                    <div class="text-muted small">IBAN: {{ $request->iban }}</div>
-                                    @endif
-                                </div>
+                                <i class="ri-paypal-line text-primary"></i>
+                                {{ $request->paypal_email }}
+                                @if($request->seller_note)
+                                <div class="text-muted small mt-1">{{ __('messages.note') }}: {{ Str::limit($request->seller_note, 30) }}</div>
+                                @endif
                             </td>
                             <td>
                                 <small>{{ $request->created_at->format('Y-m-d H:i') }}</small>
@@ -149,9 +146,9 @@
                                     <span class="badge bg-info">{{ __('messages.completed') }}</span>
                                 @endif
 
-                                @if($request->processed_at)
+                                @if($request->approver)
                                 <div class="text-muted small mt-1">
-                                    {{ __('messages.by') }}: {{ $request->processor->name ?? 'N/A' }}
+                                    {{ __('messages.by') }}: {{ $request->approver->name }}
                                 </div>
                                 @endif
                             </td>
@@ -178,9 +175,22 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <p>{{ __('messages.approve_withdrawal_confirm') }} <strong>AED {{ number_format($request->amount, 2) }}</strong> {{ __('messages.to') }} <strong>{{ $request->user->name }}</strong>?</p>
+
+                                                    <div class="alert alert-info mb-3">
+                                                        <strong>{{ __('messages.paypal_email') }}:</strong>
+                                                        <br><i class="ri-paypal-line"></i> {{ $request->paypal_email }}
+                                                    </div>
+
+                                                    @if($request->seller_note)
+                                                    <div class="alert alert-secondary mb-3">
+                                                        <strong>{{ __('messages.seller_note') }}:</strong>
+                                                        <br>{{ $request->seller_note }}
+                                                    </div>
+                                                    @endif
+
                                                     <div class="mb-3">
-                                                        <label class="form-label">{{ __('messages.admin_notes') }}</label>
-                                                        <textarea class="form-control" name="admin_notes" rows="3"></textarea>
+                                                        <label class="form-label">{{ __('messages.admin_note') }} <small class="text-muted">({{ __('messages.optional') }})</small></label>
+                                                        <textarea class="form-control" name="admin_note" rows="3"></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
@@ -204,9 +214,17 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <p>{{ __('messages.reject_withdrawal_confirm') }} <strong>{{ $request->user->name }}</strong>?</p>
+
+                                                    @if($request->seller_note)
+                                                    <div class="alert alert-secondary mb-3">
+                                                        <strong>{{ __('messages.seller_note') }}:</strong>
+                                                        <br>{{ $request->seller_note }}
+                                                    </div>
+                                                    @endif
+
                                                     <div class="mb-3">
                                                         <label class="form-label">{{ __('messages.rejection_reason') }} <span class="text-danger">*</span></label>
-                                                        <textarea class="form-control" name="admin_notes" rows="3" required></textarea>
+                                                        <textarea class="form-control" name="admin_note" rows="3" required></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
@@ -229,8 +247,8 @@
                                 <span class="text-muted">-</span>
                                 @endif
 
-                                @if($request->admin_notes)
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $request->admin_notes }}">
+                                @if($request->admin_note)
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $request->admin_note }}">
                                     <i class="ri-information-line"></i>
                                 </button>
                                 @endif
