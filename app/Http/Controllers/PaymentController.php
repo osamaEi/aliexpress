@@ -194,6 +194,8 @@ class PaymentController extends Controller
                     $this->processSubscriptionPayment($transaction);
                 } elseif ($transaction->type === 'order') {
                     $this->processOrderPayment($transaction);
+                } elseif ($transaction->type === 'wallet_deposit') {
+                    $this->processWalletDeposit($transaction);
                 }
 
                 return redirect()->route('payment.success', [
@@ -291,6 +293,37 @@ class PaymentController extends Controller
     }
 
     /**
+     * Process wallet deposit
+     */
+    protected function processWalletDeposit(PaymentTransaction $transaction)
+    {
+        DB::transaction(function () use ($transaction) {
+            $user = $transaction->user;
+            $wallet = $user->wallet;
+
+            if (!$wallet) {
+                throw new \Exception('Wallet not found');
+            }
+
+            // Credit wallet
+            $wallet->credit(
+                $transaction->amount,
+                'paypal_deposit',
+                'Wallet deposit via PayPal',
+                [
+                    'paypal_order_id' => $transaction->paypal_order_id,
+                    'transaction_id' => $transaction->transaction_id,
+                ]
+            );
+
+            Log::info('Wallet Deposit Processed', [
+                'user_id' => $user->id,
+                'amount' => $transaction->amount
+            ]);
+        });
+    }
+
+    /**
      * Payment success page
      */
     public function success(Request $request)
@@ -308,6 +341,9 @@ class PaymentController extends Controller
         if ($transaction->type === 'subscription') {
             return redirect()->route('subscriptions.index')
                 ->with('success', __('messages.subscription_successful'));
+        } elseif ($transaction->type === 'wallet_deposit') {
+            return redirect()->route('wallet.index')
+                ->with('success', __('messages.wallet_deposit_successful'));
         } else {
             return redirect()->route('orders.index')
                 ->with('success', __('messages.payment_successful'));

@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Services\WalletService;
+use App\Services\PayPalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class WalletController extends Controller
 {
     protected $walletService;
+    protected $paypalService;
 
-    public function __construct(WalletService $walletService)
+    public function __construct(WalletService $walletService, PayPalService $paypalService)
     {
         $this->walletService = $walletService;
+        $this->paypalService = $paypalService;
     }
 
     /**
@@ -178,6 +181,58 @@ class WalletController extends Controller
                 ->with('success', __('messages.transfer_successful'));
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Process PayPal deposit - Initiate payment
+     */
+    public function depositPayPal(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:10|max:10000',
+            'note' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $user = Auth::user();
+
+            // Create payment transaction record
+            $merchantOrderId = 'WALLET-' . $user->id . '-' . time();
+            $paymentTransaction = \App\Models\PaymentTransaction::create([
+                'user_id' => $user->id,
+                'merchant_order_id' => $merchantOrderId,
+                'type' => 'wallet_deposit',
+                'amount' => $validated['amount'],
+                'currency' => config('paypal.currency'),
+                'status' => 'pending',
+            ]);
+
+            // Create PayPal order
+            $paypalOrder = $this->paypalService->createOrder(
+                $validated['amount'],
+                config('paypal.currency'),
+                'Wallet Deposit - $' . $validated['amount'],
+                $merchantOrderId
+            );
+
+            // Update transaction with PayPal order ID
+            $paymentTransaction->update([
+                'paypal_order_id' => $paypalOrder['id']
+            ]);
+
+            // Get approval URL and redirect user to PayPal
+            $approvalUrl = $this->paypalService->getApprovalUrl($paypalOrder);
+
+            if (!$approvalUrl) {
+                throw new \Exception('Could not get PayPal approval URL');
+            }
+
+            return redirect($approvalUrl);
+
+        } catch (\Exception $e) {
+            return redirect()->route('wallet.index')
+                ->with('error', 'Failed to initiate PayPal payment: ' . $e->getMessage());
         }
     }
 }

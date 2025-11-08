@@ -128,6 +128,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [App\Http\Controllers\WalletController::class, 'index'])->name('index');
         Route::get('/deposit', [App\Http\Controllers\WalletController::class, 'depositForm'])->name('deposit');
         Route::post('/deposit', [App\Http\Controllers\WalletController::class, 'deposit'])->name('deposit.process');
+        Route::post('/deposit/paypal', [App\Http\Controllers\WalletController::class, 'depositPayPal'])->name('deposit.paypal');
         Route::get('/transactions', [App\Http\Controllers\WalletController::class, 'transactions'])->name('transactions');
         Route::get('/transfer', [App\Http\Controllers\WalletController::class, 'transferForm'])->name('transfer');
         Route::post('/transfer', [App\Http\Controllers\WalletController::class, 'transfer'])->name('transfer.process');

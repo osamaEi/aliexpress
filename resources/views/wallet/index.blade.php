@@ -75,30 +75,118 @@
         </div>
         <div class="card-body">
             <div class="row g-3">
+                <!-- Load Balance with PayPal -->
                 <div class="col-md-3">
-                    <a href="{{ route('wallet.deposit') }}" class="btn btn-primary w-100">
-                        <i class="ri-add-circle-line me-1"></i>
-                        {{ __('messages.deposit') }}
+                    <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#loadBalanceModal">
+                        <i class="ri-paypal-line me-1"></i>
+                        {{ __('messages.load_balance') }}
+                    </button>
+                </div>
+
+                <!-- Withdraw to PayPal -->
+                <div class="col-md-3">
+                    <a href="{{ route('wallet.withdrawal.create') }}" class="btn btn-primary w-100">
+                        <i class="ri-money-dollar-circle-line me-1"></i>
+                        {{ __('messages.withdraw') }}
                     </a>
                 </div>
+
+                <!-- Withdrawal History -->
                 <div class="col-md-3">
-                    <a href="{{ route('wallet.withdrawal') }}" class="btn btn-outline-primary w-100">
-                        <i class="ri-subtract-line me-1"></i>
-                        {{ __('messages.withdrawal') }}
+                    <a href="{{ route('wallet.withdrawal.history') }}" class="btn btn-outline-primary w-100">
+                        <i class="ri-history-line me-1"></i>
+                        {{ __('messages.withdrawal_history') }}
                     </a>
                 </div>
-                <div class="col-md-3">
-                    <a href="{{ route('wallet.transfer') }}" class="btn btn-outline-primary w-100">
-                        <i class="ri-exchange-line me-1"></i>
-                        {{ __('messages.transfer') }}
-                    </a>
-                </div>
+
+                <!-- Transaction History -->
                 <div class="col-md-3">
                     <a href="{{ route('wallet.transactions') }}" class="btn btn-outline-secondary w-100">
-                        <i class="ri-history-line me-1"></i>
-                        {{ __('messages.transaction_history') }}
+                        <i class="ri-file-list-3-line me-1"></i>
+                        {{ __('messages.all_transactions') }}
                     </a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Balance Modal -->
+    <div class="modal fade" id="loadBalanceModal" tabindex="-1" aria-labelledby="loadBalanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="loadBalanceModalLabel">
+                        <i class="ri-paypal-line me-2"></i>
+                        {{ __('messages.load_balance_with_paypal') }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('wallet.deposit.paypal') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="ri-information-line me-2"></i>
+                            {{ __('messages.paypal_deposit_info') }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="deposit_amount" class="form-label">
+                                {{ __('messages.amount_to_deposit') }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number"
+                                       class="form-control"
+                                       id="deposit_amount"
+                                       name="amount"
+                                       min="10"
+                                       max="10000"
+                                       step="0.01"
+                                       required
+                                       placeholder="0.00">
+                                <span class="input-group-text">{{ $wallet->currency }}</span>
+                            </div>
+                            <small class="text-muted">
+                                {{ __('messages.minimum_deposit') }}: $10.00
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="deposit_note" class="form-label">
+                                {{ __('messages.note') }}
+                                <small class="text-muted">({{ __('messages.optional') }})</small>
+                            </label>
+                            <textarea class="form-control"
+                                      id="deposit_note"
+                                      name="note"
+                                      rows="2"
+                                      maxlength="500"
+                                      placeholder="{{ __('messages.add_note_optional') }}"></textarea>
+                        </div>
+
+                        <div class="alert alert-warning mb-0">
+                            <h6 class="alert-heading">
+                                <i class="ri-shield-check-line me-2"></i>
+                                {{ __('messages.secure_payment') }}
+                            </h6>
+                            <ul class="mb-0 ps-3">
+                                <li>{{ __('messages.paypal_secure_note_1') }}</li>
+                                <li>{{ __('messages.paypal_secure_note_2') }}</li>
+                                <li>{{ __('messages.paypal_secure_note_3') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="ri-close-line me-1"></i>
+                            {{ __('messages.cancel') }}
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="ri-paypal-line me-1"></i>
+                            {{ __('messages.proceed_to_paypal') }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
