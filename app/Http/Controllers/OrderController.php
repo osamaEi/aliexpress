@@ -99,6 +99,7 @@ class OrderController extends Controller
                 'selected_sku_attr' => $validated['selected_sku_attr'] ?? null,
                 'unit_price' => $unitPrice,
                 'total_price' => $totalPrice,
+                'total_amount' => $totalPrice, // Ensure total_amount is set for payment
                 'currency' => $product->currency ?? 'AED',
                 'customer_name' => $validated['customer_name'],
                 'customer_email' => $validated['customer_email'],
@@ -112,10 +113,12 @@ class OrderController extends Controller
                 'shipping_zip' => $validated['shipping_zip'],
                 'customer_notes' => $validated['customer_notes'],
                 'status' => 'pending',
+                'payment_status' => 'pending', // Set payment status
             ]);
 
-            return redirect()->route('orders.show', $order)
-                ->with('success', 'Order created successfully! Order Number: ' . $order->order_number);
+            // Redirect to PayPal payment
+            return redirect()->route('payment.order', $order)
+                ->with('info', 'Order created! Please complete payment. Order Number: ' . $order->order_number);
 
         } catch (\Exception $e) {
             Log::error('Order Creation Error', [

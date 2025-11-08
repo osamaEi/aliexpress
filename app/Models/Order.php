@@ -20,6 +20,7 @@ class Order extends Model
         'selected_variant_details',
         'unit_price',
         'total_price',
+        'total_amount',
         'currency',
         'customer_name',
         'customer_email',
@@ -32,6 +33,7 @@ class Order extends Model
         'shipping_country',
         'shipping_zip',
         'status',
+        'payment_status',
         'tracking_number',
         'shipping_method',
         'placed_at',
@@ -45,6 +47,7 @@ class Order extends Model
     protected $casts = [
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'total_amount' => 'decimal:2',
         'quantity' => 'integer',
         'selected_variant_details' => 'array',
         'placed_at' => 'datetime',
@@ -140,11 +143,33 @@ class Order extends Model
     }
 
     /**
+     * Get payment status badge color
+     */
+    public function getPaymentStatusBadgeColor(): string
+    {
+        return match($this->payment_status) {
+            'pending' => 'warning',
+            'paid' => 'success',
+            'failed' => 'danger',
+            'refunded' => 'info',
+            default => 'secondary',
+        };
+    }
+
+    /**
+     * Get payment status display name
+     */
+    public function getPaymentStatusName(): string
+    {
+        return ucfirst($this->payment_status);
+    }
+
+    /**
      * Check if order can be sent to AliExpress
      */
     public function canBePlaced(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === 'pending' && $this->payment_status === 'paid';
     }
 
     /**

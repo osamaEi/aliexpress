@@ -136,6 +136,14 @@
             </ul>
         </li>
 
+        <!-- Profit Settings -->
+        <li class="menu-item {{ request()->routeIs('seller.profits.*') ? 'active' : '' }}">
+            <a href="{{ route('seller.profits.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-percent-line"></i>
+                <div data-i18n="Profit Settings">{{ __('messages.profit_settings') }}</div>
+            </a>
+        </li>
+
         <!-- Orders Section -->
         <li class="menu-header mt-5">
             <span class="menu-header-text">{{ __('messages.order_management') }}</span>

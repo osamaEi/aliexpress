@@ -138,6 +138,7 @@ Route::middleware('auth')->group(function () {
     // Subscription routes
     Route::resource('subscriptions', SubscriptionController::class);
     Route::post('/subscriptions/{subscription}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     Route::get('/subscriptions-history', [SubscriptionController::class, 'history'])->name('subscriptions.history');
 
     // Seller Profit Management Routes

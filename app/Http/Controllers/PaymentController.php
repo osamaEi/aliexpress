@@ -280,7 +280,6 @@ class PaymentController extends Controller
             // Update order payment status
             $order->update([
                 'payment_status' => 'paid',
-                'payment_method' => $transaction->payment_method ?? 'card',
                 'status' => 'processing',
             ]);
 
