@@ -13,7 +13,7 @@ class PaymentTransaction extends Model
     protected $fillable = [
         'user_id',
         'transaction_id',
-        'paymob_order_id',
+        'paypal_order_id',
         'merchant_order_id',
         'type',
         'amount',

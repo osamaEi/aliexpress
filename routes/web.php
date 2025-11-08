@@ -22,8 +22,8 @@ Route::get('/', function () {
 // Language Routes
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
-// Payment Callback (Public - No Auth Required, No CSRF)
-Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->name('payment.callback');
+// PayPal Callback (Public - No Auth Required for return URL)
+Route::get('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');
 // AliExpress Webhook Routes (Public - No Auth Required, No CSRF)
 Route::prefix('webhooks/aliexpress')->name('webhook.aliexpress.')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->group(function () {
     Route::post('/order-status', [AliExpressWebhookController::class, 'handleOrderStatus'])->name('order-status');
@@ -139,6 +139,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('subscriptions', SubscriptionController::class);
     Route::post('/subscriptions/{subscription}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
     Route::get('/subscriptions-history', [SubscriptionController::class, 'history'])->name('subscriptions.history');
+
+    // Seller Profit Management Routes
+    Route::prefix('seller/profits')->name('seller.profits.')->group(function () {
+        Route::get('/', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'index'])->name('index');
+        Route::post('/', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'store'])->name('store');
+        Route::post('/bulk-update', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'bulkUpdate'])->name('bulk-update');
+        Route::post('/{profit}/toggle', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'toggleActive'])->name('toggle');
+        Route::delete('/{profit}', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'destroy'])->name('destroy');
+        Route::get('/api/subcategory/{categoryId}', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'getProfitForSubcategory'])->name('api.get');
+    });
 
     // Admin Routes
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {

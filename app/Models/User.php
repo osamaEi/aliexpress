@@ -138,6 +138,25 @@ class User extends Authenticatable
         return $this->activeSubscription;
     }
 
+    /**
+     * Get seller's subcategory profit settings
+     */
+    public function subcategoryProfits(): HasMany
+    {
+        return $this->hasMany(SellerSubcategoryProfit::class);
+    }
+
+    /**
+     * Get profit setting for a specific subcategory
+     */
+    public function getProfitForSubcategory($categoryId)
+    {
+        return $this->subcategoryProfits()
+            ->where('category_id', $categoryId)
+            ->where('is_active', true)
+            ->first();
+    }
+
     public function hasRole(string|array $roles): bool
     {
         if (is_string($roles)) {

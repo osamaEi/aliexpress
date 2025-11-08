@@ -937,6 +937,7 @@ class ProductController extends Controller
             'product_image' => 'nullable|string',
             'product_price' => 'nullable|numeric',
             'currency' => 'nullable|string|max:3',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         $user = auth()->user();
@@ -974,20 +975,53 @@ class ProductController extends Controller
         // Check if product already exists in products table
         $product = Product::where('aliexpress_id', $aliexpressProductId)->first();
 
+        $basePrice = $request->product_price ?? 0;
+        $sellerAmount = 0;
+        $finalPrice = $basePrice;
+
+        // Apply seller's subcategory profit if category is provided
+        if ($request->category_id) {
+            $profitSetting = $user->getProfitForSubcategory($request->category_id);
+
+            if ($profitSetting) {
+                $sellerAmount = $profitSetting->calculateProfit($basePrice);
+                $finalPrice = $profitSetting->calculateFinalPrice($basePrice);
+
+                \Log::info('Seller Profit Applied', [
+                    'seller_id' => $user->id,
+                    'category_id' => $request->category_id,
+                    'base_price' => $basePrice,
+                    'profit_type' => $profitSetting->profit_type,
+                    'profit_value' => $profitSetting->profit_value,
+                    'seller_amount' => $sellerAmount,
+                    'final_price' => $finalPrice,
+                ]);
+            }
+        }
+
         if (!$product) {
             // Create the product in products table
             $product = Product::create([
                 'name' => $request->product_title,
                 'slug' => \Str::slug($request->product_title) . '-' . $aliexpressProductId,
                 'description' => 'Product imported from AliExpress',
-                'price' => $request->product_price ?? 0,
+                'price' => $finalPrice,
                 'currency' => $request->currency ?? 'AED',
-                'original_price' => $request->product_price ?? 0,
+                'original_price' => $basePrice,
+                'seller_amount' => $sellerAmount,
                 'images' => $request->product_image ? [$request->product_image] : [],
                 'aliexpress_id' => $aliexpressProductId,
-                'aliexpress_price' => $request->product_price ?? 0,
+                'aliexpress_price' => $basePrice,
+                'category_id' => $request->category_id,
                 'stock_quantity' => 0,
                 'is_active' => false, // Set as inactive until seller publishes
+            ]);
+        } else {
+            // Update existing product with seller's profit
+            $product->update([
+                'price' => $finalPrice,
+                'seller_amount' => $sellerAmount,
+                'category_id' => $request->category_id ?? $product->category_id,
             ]);
         }
 
@@ -999,7 +1033,10 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Product assigned successfully! You can now view it in "My Assigned Products".'
+            'message' => 'Product assigned successfully! You can now view it in "My Assigned Products".',
+            'applied_profit' => $sellerAmount > 0,
+            'profit_amount' => $sellerAmount,
+            'final_price' => $finalPrice,
         ]);
     }
 

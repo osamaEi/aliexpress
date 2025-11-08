@@ -65,4 +65,28 @@ class Category extends Model
     {
         return $query->whereNull('parent_id');
     }
+
+    /**
+     * Get seller profit settings for this category
+     */
+    public function sellerProfits(): HasMany
+    {
+        return $this->hasMany(SellerSubcategoryProfit::class);
+    }
+
+    /**
+     * Check if this is a subcategory
+     */
+    public function isSubcategory(): bool
+    {
+        return !is_null($this->parent_id);
+    }
+
+    /**
+     * Get all subcategories (if this is a parent category)
+     */
+    public function getSubcategories()
+    {
+        return $this->children()->active()->get();
+    }
 }

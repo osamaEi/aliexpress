@@ -6,7 +6,7 @@ use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Subscription;
 use App\Models\UserSubscription;
-use App\Services\PaymobService;
+use App\Services\PayPalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    protected $paymobService;
+    protected $paypalService;
 
-    public function __construct(PaymobService $paymobService)
+    public function __construct(PayPalService $paypalService)
     {
-        $this->paymobService = $paymobService;
+        $this->paypalService = $paypalService;
     }
 
     /**
@@ -36,46 +36,37 @@ class PaymentController extends Controller
             }
 
             // Create payment transaction record
+            $merchantOrderId = 'SUB-' . $subscription->id . '-' . time();
             $paymentTransaction = PaymentTransaction::create([
                 'user_id' => $user->id,
-                'merchant_order_id' => 'SUB-' . $subscription->id . '-' . time(),
+                'merchant_order_id' => $merchantOrderId,
                 'type' => 'subscription',
                 'amount' => $subscription->price,
-                'currency' => 'AED',
+                'currency' => config('paypal.currency'),
                 'status' => 'pending',
             ]);
 
-            // Prepare customer data
-            $customerData = [
-                'email' => $user->email,
-                'first_name' => explode(' ', $user->name)[0],
-                'last_name' => explode(' ', $user->name)[1] ?? explode(' ', $user->name)[0],
-                'phone' => $user->phone ?? '0000000000',
-            ];
-
-            // Prepare items
-            $items = [[
-                'name' => $subscription->localized_name,
-                'amount_cents' => (int)($subscription->price * 100),
-                'description' => $subscription->localized_description ?? 'Subscription Plan',
-                'quantity' => 1
-            ]];
-
-            // Initiate payment with Paymob
-            $paymentData = $this->paymobService->initiatePayment(
+            // Create PayPal order
+            $paypalOrder = $this->paypalService->createOrder(
                 $subscription->price,
-                $paymentTransaction->merchant_order_id,
-                $customerData,
-                $items
+                config('paypal.currency'),
+                $subscription->localized_name . ' - Subscription Plan',
+                $merchantOrderId
             );
 
-            // Update transaction with Paymob order ID
+            // Update transaction with PayPal order ID
             $paymentTransaction->update([
-                'paymob_order_id' => $paymentData['paymob_order_id']
+                'paypal_order_id' => $paypalOrder['id']
             ]);
 
-            // Redirect to Paymob payment page
-            return redirect($paymentData['payment_url']);
+            // Get approval URL and redirect user to PayPal
+            $approvalUrl = $this->paypalService->getApprovalUrl($paypalOrder);
+
+            if (!$approvalUrl) {
+                throw new \Exception('Could not get PayPal approval URL');
+            }
+
+            return redirect($approvalUrl);
 
         } catch (\Exception $e) {
             Log::error('Subscription Payment Initiation Error', [
@@ -109,50 +100,37 @@ class PaymentController extends Controller
             }
 
             // Create payment transaction record
+            $merchantOrderId = 'ORD-' . $order->id . '-' . time();
             $paymentTransaction = PaymentTransaction::create([
                 'user_id' => $user->id,
-                'merchant_order_id' => 'ORD-' . $order->id . '-' . time(),
+                'merchant_order_id' => $merchantOrderId,
                 'type' => 'order',
                 'amount' => $order->total_amount,
-                'currency' => 'AED',
+                'currency' => config('paypal.currency'),
                 'status' => 'pending',
             ]);
 
-            // Prepare customer data
-            $customerData = [
-                'email' => $user->email,
-                'first_name' => explode(' ', $user->name)[0],
-                'last_name' => explode(' ', $user->name)[1] ?? explode(' ', $user->name)[0],
-                'phone' => $user->phone ?? '0000000000',
-                'street' => $order->shipping_address ?? 'NA',
-                'city' => $order->shipping_city ?? 'NA',
-            ];
-
-            // Prepare items from order items
-            $items = $order->items->map(function ($item) {
-                return [
-                    'name' => $item->product_name,
-                    'amount_cents' => (int)($item->price * 100),
-                    'description' => $item->product_name,
-                    'quantity' => $item->quantity
-                ];
-            })->toArray();
-
-            // Initiate payment with Paymob
-            $paymentData = $this->paymobService->initiatePayment(
+            // Create PayPal order
+            $paypalOrder = $this->paypalService->createOrder(
                 $order->total_amount,
-                $paymentTransaction->merchant_order_id,
-                $customerData,
-                $items
+                config('paypal.currency'),
+                'Order #' . $order->id,
+                $merchantOrderId
             );
 
-            // Update transaction with Paymob order ID
+            // Update transaction with PayPal order ID
             $paymentTransaction->update([
-                'paymob_order_id' => $paymentData['paymob_order_id']
+                'paypal_order_id' => $paypalOrder['id']
             ]);
 
-            // Redirect to Paymob payment page
-            return redirect($paymentData['payment_url']);
+            // Get approval URL and redirect user to PayPal
+            $approvalUrl = $this->paypalService->getApprovalUrl($paypalOrder);
+
+            if (!$approvalUrl) {
+                throw new \Exception('Could not get PayPal approval URL');
+            }
+
+            return redirect($approvalUrl);
 
         } catch (\Exception $e) {
             Log::error('Order Payment Initiation Error', [
@@ -167,56 +145,77 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle Paymob callback
+     * Handle PayPal callback (Return from PayPal)
      */
     public function callback(Request $request)
     {
         try {
-            $data = $request->all();
+            $token = $request->query('token');
+            $payerId = $request->query('PayerID');
 
-            Log::info('Paymob Callback Received', ['data' => $data]);
+            Log::info('PayPal Callback Received', ['token' => $token, 'payer_id' => $payerId]);
 
-            // Process callback
-            $result = $this->paymobService->processCallback($data);
-
-            if (!$result['success']) {
-                Log::warning('Paymob Callback Failed', ['result' => $result]);
-                return response()->json(['message' => 'Invalid callback'], 400);
+            if (!$token) {
+                Log::warning('PayPal callback missing token');
+                return redirect()->route('payment.error')
+                    ->with('error', __('messages.payment_failed'));
             }
 
-            // Find transaction
-            $merchantOrderId = $result['order_id'];
-            $transaction = PaymentTransaction::where('merchant_order_id', $merchantOrderId)->first();
+            // Find transaction by PayPal order ID
+            $transaction = PaymentTransaction::where('paypal_order_id', $token)->first();
 
             if (!$transaction) {
-                Log::error('Transaction not found', ['merchant_order_id' => $merchantOrderId]);
-                return response()->json(['message' => 'Transaction not found'], 404);
+                Log::error('Transaction not found', ['paypal_order_id' => $token]);
+                return redirect()->route('payment.error')
+                    ->with('error', __('messages.transaction_not_found'));
             }
 
-            // Update transaction
-            $transaction->update([
-                'transaction_id' => $result['transaction_id'],
-                'status' => 'success',
-                'payment_method' => $data['source_data']['type'] ?? 'card',
-                'callback_data' => $data,
-                'paid_at' => now(),
-            ]);
+            // Capture the payment
+            $captureResult = $this->paypalService->captureOrder($token);
 
-            // Process based on type
-            if ($transaction->type === 'subscription') {
-                $this->processSubscriptionPayment($transaction);
-            } elseif ($transaction->type === 'order') {
-                $this->processOrderPayment($transaction);
+            // Check if payment was successful
+            $captureStatus = $captureResult['status'] ?? '';
+
+            if ($captureStatus === 'COMPLETED') {
+                // Extract transaction ID from capture result
+                $transactionId = $captureResult['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+
+                // Update transaction
+                $transaction->update([
+                    'transaction_id' => $transactionId,
+                    'status' => 'success',
+                    'payment_method' => 'paypal',
+                    'callback_data' => $captureResult,
+                    'paid_at' => now(),
+                ]);
+
+                // Process based on type
+                if ($transaction->type === 'subscription') {
+                    $this->processSubscriptionPayment($transaction);
+                } elseif ($transaction->type === 'order') {
+                    $this->processOrderPayment($transaction);
+                }
+
+                return redirect()->route('payment.success', [
+                    'id' => $transactionId,
+                    'merchant_order_id' => $transaction->merchant_order_id
+                ]);
+            } else {
+                Log::warning('PayPal payment not completed', ['status' => $captureStatus]);
+                $transaction->markAsFailed();
+
+                return redirect()->route('payment.error')
+                    ->with('error', __('messages.payment_failed'));
             }
-
-            return response()->json(['message' => 'Payment processed successfully']);
 
         } catch (\Exception $e) {
             Log::error('Payment Callback Error', [
                 'error' => $e->getMessage(),
-                'data' => $request->all()
+                'token' => $request->query('token')
             ]);
-            return response()->json(['message' => 'Callback processing failed'], 500);
+
+            return redirect()->route('payment.error')
+                ->with('error', __('messages.payment_processing_error'));
         }
     }
 
