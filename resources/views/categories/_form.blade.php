@@ -38,6 +38,7 @@
             name="slug"
             value="{{ old('slug', $category->slug ?? '') }}"
             placeholder="{{ __('messages.slug_placeholder') }}"
+            readonly
         >
         @error('slug')
             <div class="invalid-feedback">{{ $message }}</div>
@@ -53,6 +54,7 @@
             id="aliexpress_category_id"
             name="aliexpress_category_id"
             value="{{ old('aliexpress_category_id', $category->aliexpress_category_id ?? '') }}"
+            readonly
         >
         @error('aliexpress_category_id')
             <div class="invalid-feedback">{{ $message }}</div>

@@ -3,16 +3,34 @@
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">{{ __('messages.categories') }}</h5>
-            <div class="d-flex gap-2">
-                <a href="{{ route('categories.fetch-tree') }}" class="btn btn-success">
-                    <i class="ri-download-cloud-line me-1"></i> {{ __('messages.fetch_category_tree') }}
-                </a>
-                <a href="{{ route('categories.create') }}" class="btn btn-primary">
-                    <i class="ri-add-line me-1"></i> {{ __('messages.add_category') }}
-                </a>
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">
+                    @if($parentCategory)
+                        {{ __('messages.subcategories_of') }} "{{ $parentCategory->name }}"
+                    @else
+                        {{ __('messages.main_categories') }}
+                    @endif
+                </h5>
             </div>
+
+            @if($parentCategory)
+                <div class="mb-2">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{{ route('categories.index') }}">{{ __('messages.main_categories') }}</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ $parentCategory->name }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{{ route('categories.index') }}" class="btn btn-secondary btn-sm">
+                        <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back_to_main_categories') }}
+                    </a>
+                </div>
+            @endif
         </div>
 
         <div class="card-body">
@@ -42,6 +60,7 @@
                             <th>{{ __('messages.slug') }}</th>
                             <th>{{ __('messages.aliexpress_id') }}</th>
                             <th>{{ __('messages.products') }}</th>
+                            <th>{{ __('messages.subcategories') }}</th>
                             <th>{{ __('messages.order') }}</th>
                             <th>{{ __('messages.status') }}</th>
                             <th style="width: 150px;">{{ __('messages.actions') }}</th>
@@ -63,9 +82,6 @@
                                 </td>
                                 <td>
                                     <strong>{{ $category->name }}</strong>
-                                    @if($category->parent)
-                                        <br><small class="text-muted">Parent: {{ $category->parent->name }}</small>
-                                    @endif
                                 </td>
                                 <td>
                                     @if($category->name_ar)
@@ -85,6 +101,22 @@
                                 <td>
                                     <span class="badge bg-secondary">{{ $category->products_count }}</span>
                                 </td>
+                                <td>
+                                    @if($category->children_count > 0)
+                                        <a href="{{ route('categories.index', ['parent_id' => $category->id]) }}" class="badge bg-primary">
+                                            {{ $category->children_count }}
+                                        </a>
+                                        @if(!$parentCategory && $category->children->count() > 0)
+                                            <div class="mt-1">
+                                                <small class="text-muted">
+                                                    {{ $category->children->pluck('name')->join(', ') }}
+                                                </small>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <span class="badge bg-light text-dark">0</span>
+                                    @endif
+                                </td>
                                 <td>{{ $category->order }}</td>
                                 <td>
                                     <form action="{{ route('categories.toggle-status', $category) }}" method="POST" class="d-inline">
@@ -100,6 +132,11 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
+                                        @if($category->children_count > 0)
+                                        <a href="{{ route('categories.index', ['parent_id' => $category->id]) }}" class="btn btn-sm btn-icon btn-info" title="View Subcategories">
+                                            <i class="ri-folder-open-line"></i>
+                                        </a>
+                                        @endif
                                         @if($category->aliexpress_category_id)
                                         <a href="{{ route('categories.fetch-subcategories', $category) }}" class="btn btn-sm btn-icon btn-success" title="Fetch Subcategories">
                                             <i class="ri-download-cloud-line"></i>
@@ -120,12 +157,20 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center py-5">
+                                <td colspan="10" class="text-center py-5">
                                     <i class="ri-inbox-line" style="font-size: 3rem; color: #ccc;"></i>
-                                    <p class="text-muted mt-2">No categories found</p>
-                                    <a href="{{ route('categories.create') }}" class="btn btn-primary">
-                                        <i class="ri-add-line me-1"></i> Create First Category
-                                    </a>
+                                    <p class="text-muted mt-2">
+                                        @if($parentCategory)
+                                            {{ __('messages.no_subcategories_found') }}
+                                        @else
+                                            {{ __('messages.no_categories_found') }}
+                                        @endif
+                                    </p>
+                                    @if(!$parentCategory)
+                                        <a href="{{ route('categories.create') }}" class="btn btn-primary">
+                                            <i class="ri-add-line me-1"></i> {{ __('messages.create_first_category') }}
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse

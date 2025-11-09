@@ -20,13 +20,28 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::withCount('products')
-            ->orderBy('order')
-            ->paginate(20);
+        $parentId = $request->query('parent_id');
 
-        return view('categories.index', compact('categories'));
+        $query = Category::withCount('products', 'children');
+
+        if ($parentId) {
+            // Show subcategories of a specific parent
+            $query->where('parent_id', $parentId);
+            $parentCategory = Category::find($parentId);
+        } else {
+            // Show only main categories (no parent)
+            $query->whereNull('parent_id')
+                  ->with(['children' => function($query) {
+                      $query->select('id', 'name', 'parent_id')->orderBy('name');
+                  }]);
+            $parentCategory = null;
+        }
+
+        $categories = $query->orderBy('order')->paginate(20);
+
+        return view('categories.index', compact('categories', 'parentCategory'));
     }
 
     /**
