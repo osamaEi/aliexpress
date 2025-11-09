@@ -4,12 +4,17 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>EcommAli - AliExpress Dropshipping Platform</title>
+    <title>{{ setting('site_name', 'EcommAli') }} - AliExpress Dropshipping Platform</title>
 
-    <meta name="description" content="" />
+    <meta name="description" content="{{ setting('site_description', '') }}" />
+    <meta name="keywords" content="{{ setting('site_keywords', '') }}" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
+    @if(setting('site_favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . setting('site_favicon')) }}" />
+    @else
+        <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
+    @endif
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -49,6 +54,70 @@
         /* English content keeps Inter font */
         [dir="ltr"] {
             font-family: 'Inter', sans-serif;
+        }
+
+        /* Dynamic Primary Color from Settings */
+        @php
+            $primaryColor = setting('primary_color', '#666cff');
+            // Calculate lighter version for backgrounds (add transparency)
+            $primaryColorRgb = sscanf($primaryColor, "#%02x%02x%02x");
+        @endphp
+
+        :root {
+            --bs-primary: {{ $primaryColor }};
+            --bs-primary-rgb: {{ $primaryColorRgb[0] }}, {{ $primaryColorRgb[1] }}, {{ $primaryColorRgb[2] }};
+        }
+
+        /* Override template colors */
+        .btn-primary,
+        .badge.bg-primary,
+        .bg-primary {
+            background-color: {{ $primaryColor }} !important;
+            border-color: {{ $primaryColor }} !important;
+        }
+
+        .text-primary {
+            color: {{ $primaryColor }} !important;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: {{ $primaryColor }}dd !important;
+            border-color: {{ $primaryColor }}dd !important;
+        }
+
+        .badge.bg-label-primary {
+            background-color: {{ $primaryColor }}29 !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        .btn-outline-primary {
+            color: {{ $primaryColor }} !important;
+            border-color: {{ $primaryColor }} !important;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: {{ $primaryColor }} !important;
+            border-color: {{ $primaryColor }} !important;
+            color: #fff !important;
+        }
+
+        .form-check-input:checked {
+            background-color: {{ $primaryColor }} !important;
+            border-color: {{ $primaryColor }} !important;
+        }
+
+        .menu-item.active > .menu-link {
+            background-color: {{ $primaryColor }}29 !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        a {
+            color: {{ $primaryColor }};
+        }
+
+        a:hover {
+            color: {{ $primaryColor }}dd;
         }
     </style>
 

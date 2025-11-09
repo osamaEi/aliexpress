@@ -254,6 +254,66 @@
                 </div>
             </div>
             @endif
+
+            <!-- Theme Settings -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ __('messages.theme_settings') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @php
+                                $primaryColor = $settings->get('color', collect())->firstWhere('key', 'primary_color');
+                                $themeStyle = $settings->get('select', collect())->firstWhere('key', 'theme_style');
+                            @endphp
+
+                            <div class="col-md-6 mb-3">
+                                <label for="primary_color" class="form-label">
+                                    {{ __('messages.primary_color') }}
+                                    @if($primaryColor?->description)
+                                    <i class="ri-question-line" data-bs-toggle="tooltip" title="{{ $primaryColor->description }}"></i>
+                                    @endif
+                                </label>
+                                <div class="d-flex gap-2">
+                                    <input
+                                        type="color"
+                                        name="settings[primary_color]"
+                                        id="primary_color"
+                                        class="form-control form-control-color"
+                                        value="{{ old('settings.primary_color', $primaryColor?->value ?? '#666cff') }}"
+                                        style="width: 60px; height: 38px;">
+                                    <input
+                                        type="text"
+                                        id="primary_color_hex"
+                                        class="form-control"
+                                        value="{{ old('settings.primary_color', $primaryColor?->value ?? '#666cff') }}"
+                                        readonly>
+                                </div>
+                                <small class="text-muted">{{ __('messages.primary_color_hint') }}</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="theme_style" class="form-label">
+                                    {{ __('messages.theme_style') }}
+                                    @if($themeStyle?->description)
+                                    <i class="ri-question-line" data-bs-toggle="tooltip" title="{{ $themeStyle->description }}"></i>
+                                    @endif
+                                </label>
+                                <select name="settings[theme_style]" id="theme_style" class="form-control">
+                                    <option value="light" {{ old('settings.theme_style', $themeStyle?->value) === 'light' ? 'selected' : '' }}>
+                                        {{ __('messages.light') }}
+                                    </option>
+                                    <option value="dark" {{ old('settings.theme_style', $themeStyle?->value) === 'dark' ? 'selected' : '' }}>
+                                        {{ __('messages.dark') }}
+                                    </option>
+                                </select>
+                                <small class="text-muted">{{ __('messages.theme_style_hint') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-4">
@@ -290,6 +350,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     profitTypeSelect.addEventListener('change', toggleProfitFields);
     toggleProfitFields(); // Initial state
+
+    // Handle color picker
+    const colorPicker = document.getElementById('primary_color');
+    const colorHex = document.getElementById('primary_color_hex');
+
+    if (colorPicker && colorHex) {
+        colorPicker.addEventListener('input', function() {
+            colorHex.value = this.value;
+        });
+    }
 
     // Handle image deletion
     document.querySelectorAll('.delete-image').forEach(button => {

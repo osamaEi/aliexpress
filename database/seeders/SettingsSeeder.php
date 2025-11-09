@@ -92,6 +92,18 @@ class SettingsSeeder extends Seeder
                 'type' => 'textarea',
                 'description' => 'Site keywords for SEO',
             ],
+            [
+                'key' => 'primary_color',
+                'value' => '#666cff',
+                'type' => 'color',
+                'description' => 'Primary color for the website theme',
+            ],
+            [
+                'key' => 'theme_style',
+                'value' => 'light',
+                'type' => 'select',
+                'description' => 'Theme style: light or dark',
+            ],
         ];
 
         foreach ($settings as $setting) {
