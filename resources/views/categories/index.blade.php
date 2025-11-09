@@ -106,13 +106,6 @@
                                         <a href="{{ route('categories.index', ['parent_id' => $category->id]) }}" class="badge bg-primary">
                                             {{ $category->children_count }}
                                         </a>
-                                        @if(!$parentCategory && $category->children->count() > 0)
-                                            <div class="mt-1">
-                                                <small class="text-muted">
-                                                    {{ $category->children->pluck('name')->join(', ') }}
-                                                </small>
-                                            </div>
-                                        @endif
                                     @else
                                         <span class="badge bg-light text-dark">0</span>
                                     @endif

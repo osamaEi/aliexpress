@@ -32,10 +32,7 @@ class CategoryController extends Controller
             $parentCategory = Category::find($parentId);
         } else {
             // Show only main categories (no parent)
-            $query->whereNull('parent_id')
-                  ->with(['children' => function($query) {
-                      $query->select('id', 'name', 'parent_id')->orderBy('name');
-                  }]);
+            $query->whereNull('parent_id');
             $parentCategory = null;
         }
 
