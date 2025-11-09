@@ -265,6 +265,7 @@
                         <div class="row">
                             @php
                                 $primaryColor = $settings->get('color', collect())->firstWhere('key', 'primary_color');
+                                $primaryLightColor = $settings->get('color', collect())->firstWhere('key', 'primary_light_color');
                                 $themeStyle = $settings->get('select', collect())->firstWhere('key', 'theme_style');
                             @endphp
 
@@ -275,22 +276,57 @@
                                     <i class="ri-question-line" data-bs-toggle="tooltip" title="{{ $primaryColor->description }}"></i>
                                     @endif
                                 </label>
-                                <div class="d-flex gap-2">
+                                <div class="d-flex gap-2 align-items-center">
                                     <input
                                         type="color"
-                                        name="settings[primary_color]"
-                                        id="primary_color"
+                                        id="primary_color_picker"
                                         class="form-control form-control-color"
                                         value="{{ old('settings.primary_color', $primaryColor?->value ?? '#666cff') }}"
                                         style="width: 60px; height: 38px;">
                                     <input
                                         type="text"
-                                        id="primary_color_hex"
+                                        name="settings[primary_color]"
+                                        id="primary_color"
                                         class="form-control"
                                         value="{{ old('settings.primary_color', $primaryColor?->value ?? '#666cff') }}"
-                                        readonly>
+                                        placeholder="#666cff"
+                                        pattern="^#[0-9A-Fa-f]{6}$"
+                                        maxlength="7">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="reset_primary_color" title="Reset to default">
+                                        <i class="ri-restart-line"></i>
+                                    </button>
                                 </div>
                                 <small class="text-muted">{{ __('messages.primary_color_hint') }}</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="primary_light_color" class="form-label">
+                                    {{ __('messages.primary_light_color') }}
+                                    @if($primaryLightColor?->description)
+                                    <i class="ri-question-line" data-bs-toggle="tooltip" title="{{ $primaryLightColor->description }}"></i>
+                                    @endif
+                                </label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input
+                                        type="color"
+                                        id="primary_light_color_picker"
+                                        class="form-control form-control-color"
+                                        value="{{ old('settings.primary_light_color', $primaryLightColor?->value ?? '#e7e7ff') }}"
+                                        style="width: 60px; height: 38px;">
+                                    <input
+                                        type="text"
+                                        name="settings[primary_light_color]"
+                                        id="primary_light_color"
+                                        class="form-control"
+                                        value="{{ old('settings.primary_light_color', $primaryLightColor?->value ?? '#e7e7ff') }}"
+                                        placeholder="#e7e7ff"
+                                        pattern="^#[0-9A-Fa-f]{6}$"
+                                        maxlength="7">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="auto_generate_light" title="Auto-generate from primary">
+                                        <i class="ri-magic-line"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">{{ __('messages.primary_light_color_hint') }}</small>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -351,13 +387,122 @@ document.addEventListener('DOMContentLoaded', function() {
     profitTypeSelect.addEventListener('change', toggleProfitFields);
     toggleProfitFields(); // Initial state
 
-    // Handle color picker
-    const colorPicker = document.getElementById('primary_color');
-    const colorHex = document.getElementById('primary_color_hex');
+    // Handle color picker and hex input sync
+    const colorPicker = document.getElementById('primary_color_picker');
+    const colorHex = document.getElementById('primary_color');
+    const resetColorBtn = document.getElementById('reset_primary_color');
+    const defaultColor = '#666cff';
 
-    if (colorPicker && colorHex) {
-        colorPicker.addEventListener('input', function() {
-            colorHex.value = this.value;
+    const lightColorPicker = document.getElementById('primary_light_color_picker');
+    const lightColorHex = document.getElementById('primary_light_color');
+    const autoGenerateLightBtn = document.getElementById('auto_generate_light');
+    const defaultLightColor = '#e7e7ff';
+
+    // Validate hex color
+    function isValidHex(hex) {
+        return /^#[0-9A-Fa-f]{6}$/i.test(hex);
+    }
+
+    // Convert hex to RGB
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    // Convert RGB to hex
+    function rgbToHex(r, g, b) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+    }
+
+    // Generate lighter version of a color
+    function lightenColor(hex, percent = 60) {
+        const rgb = hexToRgb(hex);
+        if (!rgb) return hex;
+
+        const r = Math.min(255, Math.round(rgb.r + (255 - rgb.r) * (percent / 100)));
+        const g = Math.min(255, Math.round(rgb.g + (255 - rgb.g) * (percent / 100)));
+        const b = Math.min(255, Math.round(rgb.b + (255 - rgb.b) * (percent / 100)));
+
+        return rgbToHex(r, g, b);
+    }
+
+    // Setup color input sync
+    function setupColorSync(picker, hexInput, resetBtn, defaultVal, autoUpdateLight = false) {
+        if (!picker || !hexInput) return;
+
+        // Sync picker to hex input
+        picker.addEventListener('input', function() {
+            hexInput.value = this.value.toUpperCase();
+            hexInput.classList.remove('is-invalid');
+            hexInput.classList.add('is-valid');
+
+            // Auto-update light color when primary changes
+            if (autoUpdateLight && lightColorPicker && lightColorHex) {
+                const lightColor = lightenColor(this.value);
+                lightColorPicker.value = lightColor;
+                lightColorHex.value = lightColor;
+                lightColorHex.classList.remove('is-invalid');
+                lightColorHex.classList.add('is-valid');
+            }
+        });
+
+        // Sync hex input to color picker
+        hexInput.addEventListener('input', function() {
+            let value = this.value.trim();
+
+            // Auto-add # if missing
+            if (value && !value.startsWith('#')) {
+                value = '#' + value;
+                this.value = value;
+            }
+
+            // Convert to uppercase
+            this.value = value.toUpperCase();
+
+            // Update picker if valid
+            if (isValidHex(value)) {
+                picker.value = value;
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else if (value) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+
+        // Reset to default color
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                picker.value = defaultVal;
+                hexInput.value = defaultVal;
+                hexInput.classList.remove('is-invalid', 'is-valid');
+            });
+        }
+    }
+
+    // Setup primary color sync (with auto light color update)
+    setupColorSync(colorPicker, colorHex, resetColorBtn, defaultColor, true);
+
+    // Setup light color sync
+    setupColorSync(lightColorPicker, lightColorHex, null, defaultLightColor, false);
+
+    // Auto-generate light color from primary
+    if (autoGenerateLightBtn) {
+        autoGenerateLightBtn.addEventListener('click', function() {
+            const primaryValue = colorHex.value;
+            if (isValidHex(primaryValue)) {
+                const lightColor = lightenColor(primaryValue);
+                lightColorPicker.value = lightColor;
+                lightColorHex.value = lightColor;
+                lightColorHex.classList.remove('is-invalid');
+                lightColorHex.classList.add('is-valid');
+            }
         });
     }
 

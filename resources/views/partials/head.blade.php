@@ -59,13 +59,17 @@
         /* Dynamic Primary Color from Settings */
         @php
             $primaryColor = setting('primary_color', '#666cff');
-            // Calculate lighter version for backgrounds (add transparency)
+            $primaryLightColor = setting('primary_light_color', '#e7e7ff');
+            // Calculate RGB values for both colors
             $primaryColorRgb = sscanf($primaryColor, "#%02x%02x%02x");
+            $primaryLightColorRgb = sscanf($primaryLightColor, "#%02x%02x%02x");
         @endphp
 
         :root {
             --bs-primary: {{ $primaryColor }};
             --bs-primary-rgb: {{ $primaryColorRgb[0] }}, {{ $primaryColorRgb[1] }}, {{ $primaryColorRgb[2] }};
+            --bs-primary-light: {{ $primaryLightColor }};
+            --bs-primary-light-rgb: {{ $primaryLightColorRgb[0] }}, {{ $primaryLightColorRgb[1] }}, {{ $primaryLightColorRgb[2] }};
         }
 
         /* Override template colors */
@@ -86,8 +90,9 @@
             border-color: {{ $primaryColor }}dd !important;
         }
 
+        /* Use light primary color for label badges and subtle backgrounds */
         .badge.bg-label-primary {
-            background-color: {{ $primaryColor }}29 !important;
+            background-color: {{ $primaryLightColor }} !important;
             color: {{ $primaryColor }} !important;
         }
 
@@ -107,9 +112,28 @@
             border-color: {{ $primaryColor }} !important;
         }
 
+        /* Use light primary for active menu items background */
         .menu-item.active > .menu-link {
-            background-color: {{ $primaryColor }}29 !important;
+            background-color: {{ $primaryLightColor }} !important;
             color: {{ $primaryColor }} !important;
+        }
+
+        /* Light background utilities */
+        .bg-primary-light {
+            background-color: {{ $primaryLightColor }} !important;
+        }
+
+        /* Alerts and info boxes with light primary */
+        .alert-primary {
+            background-color: {{ $primaryLightColor }} !important;
+            border-color: {{ $primaryColor }}33 !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        /* Card highlights */
+        .card-primary-light {
+            border-left: 3px solid {{ $primaryColor }} !important;
+            background-color: {{ $primaryLightColor }}80 !important;
         }
 
         a {

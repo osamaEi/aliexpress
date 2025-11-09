@@ -625,6 +625,8 @@ return [
     'theme_settings' => 'Theme Settings',
     'primary_color' => 'Primary Color',
     'primary_color_hint' => 'Choose the primary color for buttons, links, and accents',
+    'primary_light_color' => 'Light Primary Color',
+    'primary_light_color_hint' => 'Lighter shade for backgrounds and subtle elements (auto-generated or custom)',
     'theme_style' => 'Theme Style',
     'theme_style_hint' => 'Choose between light or dark theme',
     'site_settings' => 'Site Settings',

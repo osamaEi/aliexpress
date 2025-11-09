@@ -625,6 +625,8 @@ return [
     'theme_settings' => 'إعدادات المظهر',
     'primary_color' => 'اللون الأساسي',
     'primary_color_hint' => 'اختر اللون الأساسي للأزرار والروابط والعناصر البارزة',
+    'primary_light_color' => 'اللون الأساسي الفاتح',
+    'primary_light_color_hint' => 'درجة أفتح للخلفيات والعناصر الخفيفة (تلقائي أو مخصص)',
     'theme_style' => 'نمط المظهر',
     'theme_style_hint' => 'اختر بين المظهر الفاتح أو الداكن',
     'site_settings' => 'إعدادات الموقع',
