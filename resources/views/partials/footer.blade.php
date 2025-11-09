@@ -2,32 +2,21 @@
                     <div class="container-xxl">
                         <div
                             class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
-                            <div class="text-body mb-2 mb-md-0">
+                            <div class="text-body mb-2 mb-md-0 d-flex align-items-center gap-2">
+                                @if(setting('site_logo'))
+                                    <img src="{{ asset('storage/' . setting('site_logo')) }}"
+                                         alt="{{ setting('site_name', 'EcommAli') }}"
+                                         style="max-height: 30px; max-width: 30px;">
+                                @endif
                                 ©
                                 <script>
                                     document.write(new Date().getFullYear());
                                 </script>
-                                , {{ __('messages.made_with') }} <span class="text-danger"><i class="tf-icons ri-heart-fill"></i></span> {{ __('messages.by') }}
-                                <a href="https://pixinvent.com" target="_blank" class="footer-link">Pixinvent</a>
+                                {{ setting('site_name', 'EcommAli') }}
                             </div>
-                            <div class="d-none d-lg-inline-block">
-                                <a href="https://themeforest.net/licenses/standard" class="footer-link me-4" target="_blank"
-                                >{{ __('messages.license') }}</a
-                                >
-                                <a href="https://1.envato.market/pixinvent_portfolio" target="_blank" class="footer-link me-4"
-                                >{{ __('messages.more_themes') }}</a
-                                >
-
-                                <a
-                                    href="https://demos.pixinvent.com/materialize-html-admin-template/documentation/"
-                                    target="_blank"
-                                    class="footer-link me-4"
-                                >{{ __('messages.documentation') }}</a
-                                >
-
-                                <a href="https://pixinvent.ticksy.com/" target="_blank" class="footer-link d-none d-sm-inline-block"
-                                >{{ __('messages.support') }}</a
-                                >
+                            <div class="text-body">
+                                {{ __('messages.made_with') }} <span class="text-danger"><i class="tf-icons ri-heart-fill"></i></span> {{ __('messages.by') }}
+                                <a href="https://coderarab.com" target="_blank" class="footer-link fw-semibold">Coder Arab</a>
                             </div>
                         </div>
                     </div>

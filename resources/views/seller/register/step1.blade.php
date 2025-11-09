@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
     <style>
         :root {
-            --primary-color: #6366f1;
-            --secondary-color: #8b5cf6;
+            --primary-color: #561C04;
+            --secondary-color: #7a2805;
             --success-color: #10b981;
-            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient: linear-gradient(135deg, #561C04 0%, #7a2805 100%);
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -111,7 +111,7 @@
             background: var(--gradient);
             color: white;
             transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(86, 28, 4, 0.4);
         }
 
         .step.completed .step-circle {
@@ -151,7 +151,7 @@
 
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 4px rgba(86, 28, 4, 0.1);
         }
 
         .input-icon {
@@ -186,7 +186,7 @@
 
         .btn-next:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(86, 28, 4, 0.4);
         }
 
         .alert-custom {
@@ -198,7 +198,7 @@
         .icon-box {
             width: 80px;
             height: 80px;
-            background: rgba(99, 102, 241, 0.1);
+            background: rgba(86, 28, 4, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
