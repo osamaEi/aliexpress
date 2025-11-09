@@ -181,6 +181,10 @@ return [
     'category_updated' => 'Category updated successfully!',
     'category_deleted' => 'Category deleted successfully!',
     'no_categories_found' => 'No categories found',
+    'main_categories' => 'Main Categories',
+    'subcategories_of' => 'Subcategories of',
+    'back_to_main_categories' => 'Back to Main Categories',
+    'create_first_category' => 'Create First Category',
     'fetch_category_tree' => 'Fetch Category Tree',
     'name' => 'Name',
     'arabic_name' => 'Arabic Name',
@@ -353,6 +357,16 @@ return [
     // Admin Dashboard
     'admin_dashboard' => 'Admin Dashboard',
     'welcome_admin_panel' => 'Welcome to the admin panel',
+
+    // Seller Dashboard
+    'seller_dashboard' => 'Seller Dashboard',
+    'welcome_seller_panel' => 'Welcome to your seller dashboard',
+    'my_products' => 'My Products',
+    'recent_products' => 'Recent Products',
+    'active_products' => 'Active Products',
+    'completed_orders' => 'Completed Orders',
+    'wallet_balance' => 'Wallet Balance',
+    'no_products_yet' => 'No products yet',
     'total_users' => 'Total Users',
     'total_sellers' => 'Total Sellers',
     'total_products' => 'Total Products',

@@ -181,6 +181,10 @@ return [
     'category_updated' => 'تم تحديث الفئة بنجاح!',
     'category_deleted' => 'تم حذف الفئة بنجاح!',
     'no_categories_found' => 'لا توجد فئات',
+    'main_categories' => 'الفئات الرئيسية',
+    'subcategories_of' => 'الفئات الفرعية لـ',
+    'back_to_main_categories' => 'العودة للفئات الرئيسية',
+    'create_first_category' => 'إنشاء أول فئة',
     'fetch_category_tree' => 'جلب شجرة الفئات',
     'name' => 'الاسم',
     'arabic_name' => 'الاسم بالعربية',
@@ -353,6 +357,16 @@ return [
     // Admin Dashboard
     'admin_dashboard' => 'لوحة تحكم المدير',
     'welcome_admin_panel' => 'مرحباً بك في لوحة تحكم المدير',
+
+    // Seller Dashboard
+    'seller_dashboard' => 'لوحة تحكم البائع',
+    'welcome_seller_panel' => 'مرحباً بك في لوحة تحكم البائع',
+    'my_products' => 'منتجاتي',
+    'recent_products' => 'المنتجات الأخيرة',
+    'active_products' => 'المنتجات النشطة',
+    'completed_orders' => 'الطلبات المكتملة',
+    'wallet_balance' => 'رصيد المحفظة',
+    'no_products_yet' => 'لا توجد منتجات بعد',
     'total_users' => 'إجمالي المستخدمين',
     'total_sellers' => 'إجمالي البائعين',
     'total_products' => 'إجمالي المنتجات',

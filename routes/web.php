@@ -13,6 +13,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SubscriptionManagementController;
 use App\Http\Controllers\Admin\OrderManagementController;
+use App\Http\Controllers\Seller\SellerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -146,8 +147,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     Route::get('/subscriptions-history', [SubscriptionController::class, 'history'])->name('subscriptions.history');
 
+    // Seller Dashboard Route
+    Route::get('/seller/dashboard', [SellerController::class, 'dashboard'])->name('seller.dashboard');
+
     // Seller Profit Management Routes
-    Route::prefix('seller/profits')->name('seller.profits.')->group(function () {
+    Route::prefix('seller/profit-settings')->name('seller.profit-settings.')->group(function () {
         Route::get('/', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'index'])->name('index');
         Route::post('/', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'store'])->name('store');
         Route::post('/bulk-update', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'bulkUpdate'])->name('bulk-update');

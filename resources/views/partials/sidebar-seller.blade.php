@@ -68,8 +68,8 @@
 
     <ul class="menu-inner py-1">
         <!-- Dashboard -->
-        <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-            <a href="{{ route('dashboard') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('seller.dashboard') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-home-smile-line"></i>
                 <div data-i18n="Dashboard">{{ __('messages.dashboard') }}</div>
             </a>
@@ -137,8 +137,8 @@
         </li>
 
         <!-- Profit Settings -->
-        <li class="menu-item {{ request()->routeIs('seller.profits.*') ? 'active' : '' }}">
-            <a href="{{ route('seller.profits.index') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('seller.profit-settings.*') ? 'active' : '' }}">
+            <a href="{{ route('seller.profit-settings.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-percent-line"></i>
                 <div data-i18n="Profit Settings">{{ __('messages.profit_settings') }}</div>
             </a>
