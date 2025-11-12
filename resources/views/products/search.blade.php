@@ -273,12 +273,58 @@
 
             <!-- Products Grid -->
             @if(isset($products) && count($products) > 0)
+                <!-- Bulk Actions Bar -->
+                @auth
+                    @if(auth()->user()->user_type === 'seller')
+                    <div class="card mb-3 border-primary" id="bulkActionsBar" style="display: none;">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-primary me-2"><span id="selectedCount">0</span> selected</span>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllBtn">
+                                        <i class="ri-checkbox-multiple-line me-1"></i> Select All
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="deselectAllBtn">
+                                        <i class="ri-close-line me-1"></i> Deselect All
+                                    </button>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-warning" id="bulkAssignBtn">
+                                    <i class="ri-pushpin-2-line me-1"></i> Assign Selected Products
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                @endauth
+
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="productsGrid">
                     @foreach($products as $product)
                         <div class="col">
-                            <div class="card h-100 product-card shadow-sm">
+                            <div class="card h-100 product-card shadow-sm" data-product-id="{{ $product['item_id'] }}">
                                 <!-- Product Image -->
                                 <div class="position-relative overflow-hidden" style="background: #f8f9fa;">
+                                    @auth
+                                        @if(auth()->user()->user_type === 'seller')
+                                            @php
+                                                $isAssigned = in_array($product['item_id'], $assignedProductIds ?? []);
+                                            @endphp
+                                            @if(!$isAssigned)
+                                            <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
+                                                <div class="form-check">
+                                                    <input
+                                                        class="form-check-input product-checkbox"
+                                                        type="checkbox"
+                                                        value="{{ $product['item_id'] }}"
+                                                        data-title="{{ addslashes($product['title']) }}"
+                                                        data-image="{{ $product['item_main_pic'] }}"
+                                                        data-price="{{ $product['original_sale_price'] ?? $product['sale_price'] }}"
+                                                        data-currency="{{ request('currency', 'AED') }}"
+                                                        style="width: 20px; height: 20px; cursor: pointer; background-color: white; border: 2px solid #667eea;">
+                                                </div>
+                                            </div>
+                                            @endif
+                                        @endif
+                                    @endauth
                                     <img
                                         src="{{ $product['item_main_pic'] }}"
                                         class="card-img-top"
@@ -759,6 +805,146 @@
     // Show loading spinner on form submit
     document.getElementById('searchForm').addEventListener('submit', function() {
         document.getElementById('loadingSpinner').style.display = 'block';
+    });
+
+    // Bulk selection functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        const bulkActionsBar = document.getElementById('bulkActionsBar');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        const deselectAllBtn = document.getElementById('deselectAllBtn');
+        const bulkAssignBtn = document.getElementById('bulkAssignBtn');
+
+        // Update selected count and show/hide bulk actions bar
+        function updateSelectionUI() {
+            const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+            const count = selectedCheckboxes.length;
+
+            if (selectedCountSpan) selectedCountSpan.textContent = count;
+
+            if (bulkActionsBar) {
+                bulkActionsBar.style.display = count > 0 ? 'block' : 'none';
+            }
+
+            // Highlight selected cards
+            document.querySelectorAll('.product-card').forEach(card => {
+                const checkbox = card.querySelector('.product-checkbox');
+                if (checkbox && checkbox.checked) {
+                    card.style.border = '2px solid #667eea';
+                    card.style.backgroundColor = '#f8f9ff';
+                } else {
+                    card.style.border = '1px solid #e9ecef';
+                    card.style.backgroundColor = 'white';
+                }
+            });
+        }
+
+        // Checkbox change event
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectionUI);
+        });
+
+        // Select all button
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function() {
+                checkboxes.forEach(checkbox => {
+                    if (!checkbox.disabled) checkbox.checked = true;
+                });
+                updateSelectionUI();
+            });
+        }
+
+        // Deselect all button
+        if (deselectAllBtn) {
+            deselectAllBtn.addEventListener('click', function() {
+                checkboxes.forEach(checkbox => checkbox.checked = false);
+                updateSelectionUI();
+            });
+        }
+
+        // Bulk assign button
+        if (bulkAssignBtn) {
+            bulkAssignBtn.addEventListener('click', function() {
+                const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+
+                if (selectedCheckboxes.length === 0) {
+                    showToast('error', 'Please select at least one product');
+                    return;
+                }
+
+                if (!confirm(`Assign ${selectedCheckboxes.length} product(s) to your account?`)) {
+                    return;
+                }
+
+                // Disable button and show loading
+                bulkAssignBtn.disabled = true;
+                bulkAssignBtn.innerHTML = '<i class="ri-loader-4-line me-1 spinner-border spinner-border-sm"></i> Assigning...';
+
+                // Prepare products data
+                const products = Array.from(selectedCheckboxes).map(checkbox => ({
+                    aliexpress_product_id: checkbox.value,
+                    product_title: checkbox.dataset.title,
+                    product_image: checkbox.dataset.image,
+                    product_price: checkbox.dataset.price,
+                    currency: checkbox.dataset.currency
+                }));
+
+                // CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+
+                // Make bulk assign request
+                fetch('{{ route("products.assign") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ products: products })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('success', data.message || `${products.length} product(s) assigned successfully!`);
+
+                        // Remove checkboxes and update UI for assigned products
+                        selectedCheckboxes.forEach(checkbox => {
+                            const card = checkbox.closest('.product-card');
+                            const productId = checkbox.value;
+
+                            // Remove checkbox
+                            checkbox.closest('.form-check').remove();
+
+                            // Update assign button if exists
+                            const assignBtn = card.querySelector('.assign-product-btn');
+                            if (assignBtn) {
+                                assignBtn.classList.remove('btn-warning');
+                                assignBtn.classList.add('btn-secondary');
+                                assignBtn.innerHTML = '<i class="ri-check-line me-1"></i> Already Assigned';
+                                assignBtn.disabled = true;
+                            }
+
+                            // Reset card style
+                            card.style.border = '1px solid #e9ecef';
+                            card.style.backgroundColor = 'white';
+                        });
+
+                        updateSelectionUI();
+                    } else {
+                        showToast('error', data.message || 'Failed to assign products');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('error', 'An error occurred. Please try again.');
+                })
+                .finally(() => {
+                    bulkAssignBtn.disabled = false;
+                    bulkAssignBtn.innerHTML = '<i class="ri-pushpin-2-line me-1"></i> Assign Selected Products';
+                });
+            });
+        }
     });
 </script>
 

@@ -18,10 +18,12 @@ class SellerController extends Controller
     {
         $user = Auth::user();
 
-        // Get seller statistics
+        // Get seller statistics using assigned products relationship
+        $assignedProductIds = $user->assignedProducts()->pluck('products.id');
+
         $stats = [
-            'total_products' => Product::where('user_id', $user->id)->count(),
-            'active_products' => Product::where('user_id', $user->id)->where('is_active', true)->count(),
+            'total_products' => $user->assignedProducts()->count(),
+            'active_products' => $user->assignedProducts()->where('is_active', true)->count(),
             'total_orders' => Order::where('seller_id', $user->id)->count(),
             'pending_orders' => Order::where('seller_id', $user->id)->where('status', 'pending')->count(),
             'completed_orders' => Order::where('seller_id', $user->id)->where('status', 'delivered')->count(),
@@ -39,8 +41,8 @@ class SellerController extends Controller
             ->take(10)
             ->get();
 
-        // Get recent products
-        $recentProducts = Product::where('user_id', $user->id)
+        // Get recent products (assigned to this seller)
+        $recentProducts = $user->assignedProducts()
             ->latest()
             ->take(10)
             ->get();

@@ -81,7 +81,8 @@ Route::middleware('auth')->group(function () {
     // Subscription routes
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
-    Route::post('/subscriptions/{subscription}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::get('/subscriptions/{subscription}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::post('/subscriptions/{subscription}/pay-wallet', [SubscriptionController::class, 'payWithWallet'])->name('subscriptions.pay-with-wallet');
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     Route::get('/subscriptions-history', [SubscriptionController::class, 'history'])->name('subscriptions.history');
 
@@ -184,8 +185,28 @@ Route::middleware('auth')->group(function () {
         // Categories Management (use existing CategoryController)
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
-        // User Management
+        // User Management - General
         Route::get('/users', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
+
+        // Admin Users Management
+        Route::get('/admins', [App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('admins.index');
+        Route::get('/admins/create', [App\Http\Controllers\Admin\AdminUserController::class, 'create'])->name('admins.create');
+        Route::post('/admins', [App\Http\Controllers\Admin\AdminUserController::class, 'store'])->name('admins.store');
+        Route::get('/admins/{admin}/edit', [App\Http\Controllers\Admin\AdminUserController::class, 'edit'])->name('admins.edit');
+        Route::put('/admins/{admin}', [App\Http\Controllers\Admin\AdminUserController::class, 'update'])->name('admins.update');
+        Route::delete('/admins/{admin}', [App\Http\Controllers\Admin\AdminUserController::class, 'destroy'])->name('admins.destroy');
+
+        // Seller Users Management
+        Route::get('/sellers', [App\Http\Controllers\Admin\SellerUserController::class, 'index'])->name('sellers.index');
+        Route::get('/sellers/{seller}', [App\Http\Controllers\Admin\SellerUserController::class, 'show'])->name('sellers.show');
+        Route::patch('/sellers/{seller}/verification', [App\Http\Controllers\Admin\SellerUserController::class, 'updateVerification'])->name('sellers.update-verification');
+        Route::patch('/sellers/{seller}/toggle-status', [App\Http\Controllers\Admin\SellerUserController::class, 'toggleStatus'])->name('sellers.toggle-status');
+        Route::delete('/sellers/{seller}', [App\Http\Controllers\Admin\SellerUserController::class, 'destroy'])->name('sellers.destroy');
+
+        // Customer Users Management
+        Route::get('/customers', [App\Http\Controllers\Admin\CustomerUserController::class, 'index'])->name('customers.index');
+        Route::get('/customers/{customer}', [App\Http\Controllers\Admin\CustomerUserController::class, 'show'])->name('customers.show');
+        Route::delete('/customers/{customer}', [App\Http\Controllers\Admin\CustomerUserController::class, 'destroy'])->name('customers.destroy');
 
         // Wallet Management
         Route::prefix('wallets')->name('wallets.')->group(function () {

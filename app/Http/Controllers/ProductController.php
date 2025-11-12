@@ -927,19 +927,11 @@ class ProductController extends Controller
     }
 
     /**
-     * Assign AliExpress product to current seller
+     * Assign AliExpress product(s) to current seller
+     * Supports both single and bulk assignments
      */
     public function assignProduct(Request $request)
     {
-        $request->validate([
-            'aliexpress_product_id' => 'required|string',
-            'product_title' => 'required|string',
-            'product_image' => 'nullable|string',
-            'product_price' => 'nullable|numeric',
-            'currency' => 'nullable|string|max:3',
-            'category_id' => 'nullable|exists:categories,id',
-        ]);
-
         $user = auth()->user();
 
         // Check if user is a seller
@@ -949,6 +941,21 @@ class ProductController extends Controller
                 'message' => 'Only sellers can assign products.'
             ], 403);
         }
+
+        // Check if this is a bulk assignment
+        if ($request->has('products') && is_array($request->products)) {
+            return $this->bulkAssignProducts($request, $user);
+        }
+
+        // Single product assignment
+        $request->validate([
+            'aliexpress_product_id' => 'required|string',
+            'product_title' => 'required|string',
+            'product_image' => 'nullable|string',
+            'product_price' => 'nullable|numeric',
+            'currency' => 'nullable|string|max:3',
+            'category_id' => 'nullable|exists:categories,id',
+        ]);
 
         $aliexpressProductId = $request->aliexpress_product_id;
 
@@ -1037,6 +1044,106 @@ class ProductController extends Controller
             'applied_profit' => $sellerAmount > 0,
             'profit_amount' => $sellerAmount,
             'final_price' => $finalPrice,
+        ]);
+    }
+
+    /**
+     * Bulk assign multiple products to seller
+     */
+    protected function bulkAssignProducts(Request $request, $user)
+    {
+        $request->validate([
+            'products' => 'required|array|min:1',
+            'products.*.aliexpress_product_id' => 'required|string',
+            'products.*.product_title' => 'required|string',
+            'products.*.product_image' => 'nullable|string',
+            'products.*.product_price' => 'nullable|numeric',
+            'products.*.currency' => 'nullable|string|max:3',
+        ]);
+
+        $products = $request->products;
+        $assignedCount = 0;
+        $skippedCount = 0;
+        $errors = [];
+
+        foreach ($products as $productData) {
+            try {
+                $aliexpressProductId = $productData['aliexpress_product_id'];
+
+                // Check if already assigned
+                $alreadyAssigned = $user->assignedProducts()
+                    ->wherePivot('aliexpress_product_id', $aliexpressProductId)
+                    ->exists();
+
+                if (!$alreadyAssigned) {
+                    $alreadyAssigned = \DB::table('product_user')
+                        ->where('user_id', $user->id)
+                        ->where('aliexpress_product_id', $aliexpressProductId)
+                        ->exists();
+                }
+
+                if ($alreadyAssigned) {
+                    $skippedCount++;
+                    continue;
+                }
+
+                // Check if product exists
+                $product = Product::where('aliexpress_id', $aliexpressProductId)->first();
+
+                $basePrice = $productData['product_price'] ?? 0;
+                $sellerAmount = 0;
+                $finalPrice = $basePrice;
+
+                if (!$product) {
+                    // Create new product
+                    $product = Product::create([
+                        'name' => $productData['product_title'],
+                        'slug' => \Str::slug($productData['product_title']) . '-' . $aliexpressProductId,
+                        'description' => 'Product imported from AliExpress',
+                        'price' => $finalPrice,
+                        'currency' => $productData['currency'] ?? 'AED',
+                        'original_price' => $basePrice,
+                        'seller_amount' => $sellerAmount,
+                        'images' => isset($productData['product_image']) ? [$productData['product_image']] : [],
+                        'aliexpress_id' => $aliexpressProductId,
+                        'aliexpress_price' => $basePrice,
+                        'stock_quantity' => 0,
+                        'is_active' => false,
+                    ]);
+                }
+
+                // Assign to user
+                $user->assignedProducts()->attach($product->id, [
+                    'aliexpress_product_id' => $aliexpressProductId,
+                    'status' => 'assigned'
+                ]);
+
+                $assignedCount++;
+
+            } catch (\Exception $e) {
+                \Log::error('Bulk assign error', [
+                    'product_id' => $productData['aliexpress_product_id'] ?? 'unknown',
+                    'error' => $e->getMessage()
+                ]);
+                $errors[] = $e->getMessage();
+            }
+        }
+
+        $message = "Successfully assigned $assignedCount product(s)";
+        if ($skippedCount > 0) {
+            $message .= " ($skippedCount already assigned)";
+        }
+        if (count($errors) > 0) {
+            $message .= ". " . count($errors) . " failed";
+        }
+
+        return response()->json([
+            'success' => $assignedCount > 0,
+            'message' => $message,
+            'assigned_count' => $assignedCount,
+            'skipped_count' => $skippedCount,
+            'error_count' => count($errors),
+            'errors' => $errors
         ]);
     }
 

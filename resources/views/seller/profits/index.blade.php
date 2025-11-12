@@ -29,7 +29,7 @@
                 </div>
             @endif
 
-            <form id="profitForm" method="POST" action="{{ route('seller.profits.bulk-update') }}">
+            <form id="profitForm" method="POST" action="{{ route('seller.profit-settings.bulk-update') }}">
                 @csrf
 
                 <div class="table-responsive">
@@ -127,7 +127,7 @@
                                                 <i class="ri-eye-line"></i>
                                             </button>
                                             @if($existingProfit)
-                                            <form method="POST" action="{{ route('seller.profits.destroy', $existingProfit->id) }}" class="d-inline" onsubmit="return confirm('{{ __('messages.confirm_delete') }}')">
+                                            <form method="POST" action="{{ route('seller.profit-settings.destroy', $existingProfit->id) }}" class="d-inline" onsubmit="return confirm('{{ __('messages.confirm_delete') }}')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-outline-danger btn-sm" title="{{ __('messages.delete') }}">

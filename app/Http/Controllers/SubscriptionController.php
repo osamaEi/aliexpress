@@ -31,7 +31,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Subscribe to a plan - Redirect to payment
+     * Subscribe to a plan - Show payment page
      */
     public function subscribe(Request $request, Subscription $subscription)
     {
@@ -43,8 +43,65 @@ class SubscriptionController extends Controller
                 ->with('error', __('messages.already_have_active_subscription'));
         }
 
-        // Redirect to PayPal payment
-        return redirect()->route('payment.subscription', $subscription);
+        // Show payment page with options
+        return view('subscriptions.payment', compact('subscription'));
+    }
+
+    /**
+     * Pay with wallet
+     */
+    public function payWithWallet(Request $request, Subscription $subscription)
+    {
+        $user = Auth::user();
+
+        // Check if user already has an active subscription
+        if ($user->hasActiveSubscription()) {
+            return redirect()->route('subscriptions.index')
+                ->with('error', __('messages.already_have_active_subscription'));
+        }
+
+        // Check wallet balance
+        $wallet = $user->getOrCreateWallet();
+
+        if ($wallet->balance < $subscription->price) {
+            return redirect()->back()
+                ->with('error', __('messages.insufficient_wallet_balance'));
+        }
+
+        try {
+            \DB::transaction(function () use ($user, $subscription, $wallet) {
+                // Deduct from wallet
+                $wallet->debit(
+                    $subscription->price,
+                    'subscription_payment',
+                    'Subscription payment: ' . $subscription->localized_name
+                );
+
+                // Create user subscription
+                UserSubscription::create([
+                    'user_id' => $user->id,
+                    'subscription_id' => $subscription->id,
+                    'start_date' => now()->toDateString(),
+                    'end_date' => now()->addDays($subscription->duration_days)->toDateString(),
+                    'status' => 'active',
+                    'amount_paid' => $subscription->price,
+                    'payment_method' => 'wallet',
+                ]);
+            });
+
+            return redirect()->route('subscriptions.index')
+                ->with('success', __('messages.subscription_successful'));
+
+        } catch (\Exception $e) {
+            \Log::error('Wallet subscription payment failed', [
+                'user_id' => $user->id,
+                'subscription_id' => $subscription->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->with('error', __('messages.payment_failed'));
+        }
     }
 
     /**
