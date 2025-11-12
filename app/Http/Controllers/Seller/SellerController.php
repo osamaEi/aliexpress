@@ -24,18 +24,18 @@ class SellerController extends Controller
         $stats = [
             'total_products' => $user->assignedProducts()->count(),
             'active_products' => $user->assignedProducts()->where('is_active', true)->count(),
-            'total_orders' => Order::where('seller_id', $user->id)->count(),
-            'pending_orders' => Order::where('seller_id', $user->id)->where('status', 'pending')->count(),
-            'completed_orders' => Order::where('seller_id', $user->id)->where('status', 'delivered')->count(),
+            'total_orders' => Order::whereIn('product_id', $assignedProductIds)->count(),
+            'pending_orders' => Order::whereIn('product_id', $assignedProductIds)->where('status', 'pending')->count(),
+            'completed_orders' => Order::whereIn('product_id', $assignedProductIds)->where('status', 'delivered')->count(),
             'total_categories' => Category::count(),
             'wallet_balance' => $user->wallet ? $user->wallet->balance : 0,
-            'total_revenue' => Order::where('seller_id', $user->id)
+            'total_revenue' => Order::whereIn('product_id', $assignedProductIds)
                 ->where('status', 'delivered')
-                ->sum('total_amount'),
+                ->sum('total_price'),
         ];
 
-        // Get recent orders
-        $recentOrders = Order::where('seller_id', $user->id)
+        // Get recent orders for seller's products
+        $recentOrders = Order::whereIn('product_id', $assignedProductIds)
             ->with('product')
             ->latest()
             ->take(10)

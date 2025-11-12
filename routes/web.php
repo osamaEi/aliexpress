@@ -64,6 +64,13 @@ Route::get('/aliexpress-manual-token', function () {
 })->name('aliexpress.manual.token');
 
 Route::get('/dashboard', function () {
+    $user = Auth::user();
+
+    // Redirect sellers to seller dashboard
+    if ($user && $user->user_type === 'seller') {
+        return redirect()->route('seller.dashboard');
+    }
+
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
