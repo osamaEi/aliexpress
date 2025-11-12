@@ -31,6 +31,80 @@
         @method('PUT')
 
         <div class="row">
+            <!-- Localization & Currency Settings -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ __('messages.localization_settings') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @php
+                                $siteLanguage = $settings->get('select', collect())->firstWhere('key', 'site_language');
+                                $siteCurrency = $settings->get('select', collect())->firstWhere('key', 'site_currency');
+                            @endphp
+
+                            <div class="col-md-6 mb-3">
+                                <label for="site_language" class="form-label">
+                                    {{ __('messages.site_language') }}
+                                    @if($siteLanguage?->description)
+                                    <i class="ri-question-line" data-bs-toggle="tooltip" title="{{ $siteLanguage->description }}"></i>
+                                    @endif
+                                </label>
+                                <select name="settings[site_language]" id="site_language" class="form-control">
+                                    <option value="ar" {{ old('settings.site_language', $siteLanguage?->value ?? 'ar') === 'ar' ? 'selected' : '' }}>
+                                        العربية (Arabic)
+                                    </option>
+                                    <option value="en" {{ old('settings.site_language', $siteLanguage?->value ?? 'ar') === 'en' ? 'selected' : '' }}>
+                                        English
+                                    </option>
+                                </select>
+                                <small class="text-muted">{{ __('messages.site_language_hint') }}</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="site_currency" class="form-label">
+                                    {{ __('messages.site_currency') }}
+                                    @if($siteCurrency?->description)
+                                    <i class="ri-question-line" data-bs-toggle="tooltip" title="{{ $siteCurrency->description }}"></i>
+                                    @endif
+                                </label>
+                                <select name="settings[site_currency]" id="site_currency" class="form-control">
+                                    <option value="AED" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'AED' ? 'selected' : '' }}>
+                                        AED - درهم إماراتي
+                                    </option>
+                                    <option value="SAR" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'SAR' ? 'selected' : '' }}>
+                                        SAR - ريال سعودي
+                                    </option>
+                                    <option value="USD" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'USD' ? 'selected' : '' }}>
+                                        USD - دولار أمريكي
+                                    </option>
+                                    <option value="EUR" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'EUR' ? 'selected' : '' }}>
+                                        EUR - يورو
+                                    </option>
+                                    <option value="EGP" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'EGP' ? 'selected' : '' }}>
+                                        EGP - جنيه مصري
+                                    </option>
+                                    <option value="KWD" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'KWD' ? 'selected' : '' }}>
+                                        KWD - دينار كويتي
+                                    </option>
+                                    <option value="QAR" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'QAR' ? 'selected' : '' }}>
+                                        QAR - ريال قطري
+                                    </option>
+                                    <option value="OMR" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'OMR' ? 'selected' : '' }}>
+                                        OMR - ريال عماني
+                                    </option>
+                                    <option value="BHD" {{ old('settings.site_currency', $siteCurrency?->value ?? 'AED') === 'BHD' ? 'selected' : '' }}>
+                                        BHD - دينار بحريني
+                                    </option>
+                                </select>
+                                <small class="text-muted">{{ __('messages.site_currency_hint') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- General Settings -->
             <div class="col-12 mb-4">
                 <div class="card">

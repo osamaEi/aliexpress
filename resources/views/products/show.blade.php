@@ -55,7 +55,7 @@
                         <div>
                             @if($product->isAliexpressProduct())
                                 <span class="badge bg-info mb-2">
-                                    <i class="ri-shopping-cart-line me-1"></i> AliExpress
+                                    <i class="ri-shopping-cart-line me-1"></i> Dropship
                                 </span>
                             @endif
                             <span class="badge {{ $product->is_active ? 'bg-success' : 'bg-secondary' }} mb-2">
@@ -71,7 +71,7 @@
                             </a>
                             @if($product->isAliexpressProduct())
                                 <button type="button" class="btn btn-sm btn-info" id="syncProductBtn" onclick="syncProduct()">
-                                    <i class="ri-refresh-line me-1"></i> Sync from AliExpress
+                                    <i class="ri-refresh-line me-1"></i> Sync from Supplier
                                 </button>
                             @endif
                             <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-secondary">
@@ -103,7 +103,7 @@
                                 <div class="card-body py-2 px-3">
                                     <small class="text-muted d-block mb-2"><strong>💰 Price Breakdown</strong></small>
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <small>AliExpress Price:</small>
+                                        <small>Supplier Price:</small>
                                         <small><strong>{{ $product->currency }} {{ number_format($product->original_price, 2) }}</strong></small>
                                     </div>
                                     @if($product->seller_amount > 0)
@@ -180,7 +180,7 @@
                                 </tr>
                                 @if($product->isAliexpressProduct())
                                     <tr>
-                                        <th>AliExpress ID:</th>
+                                        <th>Product ID:</th>
                                         <td>
                                             <code>{{ $product->aliexpress_id }}</code>
                                             <a href="{{ $product->aliexpress_url }}" target="_blank" class="ms-2">

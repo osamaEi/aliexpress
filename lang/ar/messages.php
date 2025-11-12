@@ -594,6 +594,11 @@ return [
     // Settings
     'site_settings' => 'إعدادات الموقع',
     'manage_site_settings' => 'إدارة تكوين الموقع والتفضيلات',
+    'localization_settings' => 'إعدادات اللغة والعملة',
+    'site_language' => 'لغة الموقع',
+    'site_language_hint' => 'اللغة الافتراضية لواجهة الموقع',
+    'site_currency' => 'عملة الموقع',
+    'site_currency_hint' => 'العملة المستخدمة في جميع المعاملات',
     'general_settings' => 'الإعدادات العامة',
     'email_settings' => 'إعدادات البريد الإلكتروني',
     'image_settings' => 'إعدادات الصور',

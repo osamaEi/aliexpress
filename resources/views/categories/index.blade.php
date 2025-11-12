@@ -58,7 +58,7 @@
                             <th>{{ __('messages.name') }}</th>
                             <th>{{ __('messages.arabic_name') }}</th>
                             <th>{{ __('messages.slug') }}</th>
-                            <th>{{ __('messages.aliexpress_id') }}</th>
+                            <th>{{ __('messages.supplier_id') }}</th>
                             <th>{{ __('messages.products') }}</th>
                             <th>{{ __('messages.subcategories') }}</th>
                             <th>{{ __('messages.order') }}</th>

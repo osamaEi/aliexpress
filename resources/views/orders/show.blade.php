@@ -10,15 +10,15 @@
                     <h4 class="mb-2">Order {{ $order->order_number }}</h4>
                     <span class="badge bg-{{ $order->getStatusBadgeColor() }} fs-6">{{ $order->getStatusName() }}</span>
                     @if($order->aliexpress_order_id)
-                        <p class="text-muted mt-2 mb-0">AliExpress Order ID: <strong>{{ $order->aliexpress_order_id }}</strong></p>
+                        <p class="text-muted mt-2 mb-0">Supplier Order ID: <strong>{{ $order->aliexpress_order_id }}</strong></p>
                     @endif
                 </div>
                 <div class="btn-group">
                     @if($order->canBePlaced())
                         <form action="{{ route('orders.place-on-aliexpress', $order) }}" method="POST" class="d-inline">
                             @csrf
-                            <button type="submit" class="btn btn-success" onclick="return confirm('Place this order on AliExpress?')">
-                                <i class="ri-shopping-cart-line me-1"></i> Place on AliExpress
+                            <button type="submit" class="btn btn-success" onclick="return confirm('Place this order with supplier?')">
+                                <i class="ri-shopping-cart-line me-1"></i> Place with Supplier
                             </button>
                         </form>
                     @endif
@@ -145,7 +145,7 @@
                             <div class="timeline-item">
                                 <i class="ri-shopping-cart-line text-primary"></i>
                                 <div>
-                                    <strong>Placed on AliExpress</strong>
+                                    <strong>Placed with Supplier</strong>
                                     <p class="text-muted small mb-0">{{ $order->placed_at->format('d M Y, h:i A') }}</p>
                                 </div>
                             </div>

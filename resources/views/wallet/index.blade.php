@@ -112,7 +112,7 @@
 
     <!-- Load Balance Modal -->
     <div class="modal fade" id="loadBalanceModal" tabindex="-1" aria-labelledby="loadBalanceModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="loadBalanceModalLabel">
@@ -121,72 +121,102 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('wallet.deposit.paypal') }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="alert alert-info">
-                            <i class="ri-information-line me-2"></i>
-                            {{ __('messages.paypal_deposit_info') }}
-                        </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="ri-information-line me-2"></i>
+                        {{ __('messages.paypal_deposit_info') }}
+                    </div>
 
-                        <div class="mb-3">
-                            <label for="deposit_amount" class="form-label">
-                                {{ __('messages.amount_to_deposit') }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <input type="number"
-                                       class="form-control"
-                                       id="deposit_amount"
-                                       name="amount"
-                                       min="10"
-                                       max="10000"
-                                       step="0.01"
-                                       required
-                                       placeholder="0.00">
-                                <span class="input-group-text">{{ $wallet->currency }}</span>
+                    <!-- Amount Selection -->
+                    <div class="mb-4">
+                        <label for="deposit_amount" class="form-label">
+                            {{ __('messages.amount_to_deposit') }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text">{{ $wallet->currency }}</span>
+                            <input type="number"
+                                   class="form-control"
+                                   id="deposit_amount"
+                                   name="amount"
+                                   min="10"
+                                   max="10000"
+                                   step="0.01"
+                                   value="50"
+                                   required
+                                   placeholder="0.00">
+                        </div>
+                        <small class="text-muted">
+                            {{ __('messages.minimum_deposit') }}: $10.00
+                        </small>
+                    </div>
+
+                    <!-- Quick Amount Buttons -->
+                    <div class="mb-4">
+                        <label class="form-label">{{ __('messages.quick_amounts') }}</label>
+                        <div class="row g-2">
+                            <div class="col-3">
+                                <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="25">$25</button>
                             </div>
-                            <small class="text-muted">
-                                {{ __('messages.minimum_deposit') }}: $10.00
-                            </small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="deposit_note" class="form-label">
-                                {{ __('messages.note') }}
-                                <small class="text-muted">({{ __('messages.optional') }})</small>
-                            </label>
-                            <textarea class="form-control"
-                                      id="deposit_note"
-                                      name="note"
-                                      rows="2"
-                                      maxlength="500"
-                                      placeholder="{{ __('messages.add_note_optional') }}"></textarea>
-                        </div>
-
-                        <div class="alert alert-warning mb-0">
-                            <h6 class="alert-heading">
-                                <i class="ri-shield-check-line me-2"></i>
-                                {{ __('messages.secure_payment') }}
-                            </h6>
-                            <ul class="mb-0 ps-3">
-                                <li>{{ __('messages.paypal_secure_note_1') }}</li>
-                                <li>{{ __('messages.paypal_secure_note_2') }}</li>
-                                <li>{{ __('messages.paypal_secure_note_3') }}</li>
-                            </ul>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="50">$50</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="100">$100</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="200">$200</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="ri-close-line me-1"></i>
-                            {{ __('messages.cancel') }}
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="ri-paypal-line me-1"></i>
-                            {{ __('messages.proceed_to_paypal') }}
-                        </button>
+
+                    <!-- Note Field -->
+                    <div class="mb-4">
+                        <label for="deposit_note" class="form-label">
+                            {{ __('messages.note') }}
+                            <small class="text-muted">({{ __('messages.optional') }})</small>
+                        </label>
+                        <textarea class="form-control"
+                                  id="deposit_note"
+                                  name="note"
+                                  rows="2"
+                                  maxlength="500"
+                                  placeholder="{{ __('messages.add_note_optional') }}"></textarea>
                     </div>
-                </form>
+
+                    <!-- PayPal Smart Payment Buttons Container -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">{{ __('messages.select_payment_method') }}</h6>
+                        <div id="paypal-button-container" style="min-height: 150px;"></div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="paypal-loading" class="text-center mb-3" style="display: none;">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">{{ __('messages.processing_payment') }}...</p>
+                    </div>
+
+                    <!-- Security Notice -->
+                    <div class="alert alert-warning mb-0">
+                        <h6 class="alert-heading">
+                            <i class="ri-shield-check-line me-2"></i>
+                            {{ __('messages.secure_payment') }}
+                        </h6>
+                        <ul class="mb-0 ps-3">
+                            <li>{{ __('messages.paypal_secure_note_1') }}</li>
+                            <li>{{ __('messages.paypal_secure_note_2') }}</li>
+                            <li>{{ __('messages.paypal_secure_note_3') }}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>
+                        {{ __('messages.cancel') }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -264,4 +294,188 @@
         </div>
     </div>
 </div>
+
+<!-- PayPal SDK -->
+@php
+    $paypalMode = config('paypal.mode', 'sandbox');
+    $paypalClientId = config("paypal.{$paypalMode}.client_id");
+@endphp
+<script src="https://www.paypal.com/sdk/js?client-id={{ $paypalClientId }}&currency={{ config('paypal.currency', 'USD') }}"></script>
+
+<style>
+    .quick-amount.active {
+        background-color: var(--bs-primary);
+        color: white;
+        border-color: var(--bs-primary);
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    #paypal-button-container {
+        min-height: 150px;
+    }
+</style>
+
+<script>
+    // Quick amount buttons functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const quickAmountButtons = document.querySelectorAll('.quick-amount');
+        const amountInput = document.getElementById('deposit_amount');
+
+        quickAmountButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                quickAmountButtons.forEach(btn => btn.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Set the amount in the input field
+                const amount = this.getAttribute('data-amount');
+                amountInput.value = amount;
+            });
+        });
+    });
+
+    // Initialize PayPal Buttons when modal is shown
+    document.getElementById('loadBalanceModal').addEventListener('shown.bs.modal', function () {
+        // Clear any existing PayPal buttons
+        document.getElementById('paypal-button-container').innerHTML = '';
+
+        // Check if PayPal SDK is loaded
+        if (typeof paypal === 'undefined') {
+            console.error('PayPal SDK failed to load. Please check your internet connection and PayPal credentials.');
+            document.getElementById('paypal-button-container').innerHTML = '<div class="alert alert-danger"><i class="ri-error-warning-line me-2"></i>Failed to load PayPal. Please refresh the page and try again.</div>';
+            return;
+        }
+
+        console.log('PayPal SDK loaded successfully');
+
+        // Initialize PayPal Smart Payment Buttons
+        paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                color: 'gold',
+                shape: 'rect',
+                label: 'paypal',
+                height: 55
+            },
+
+            // Create order directly using PayPal SDK
+            createOrder: function(data, actions) {
+                const amount = document.getElementById('deposit_amount').value;
+
+                // Validate amount
+                if (!amount || parseFloat(amount) < 10) {
+                    alert('{{ __('messages.minimum_deposit') }}: $10.00');
+                    return false;
+                }
+
+                if (parseFloat(amount) > 10000) {
+                    alert('{{ __('messages.maximum_deposit') }}: $10,000.00');
+                    return false;
+                }
+
+                console.log('Creating PayPal order for amount:', amount);
+
+                return actions.order.create({
+                    purchase_units: [{
+                        description: 'Wallet Deposit - Balance Top-up',
+                        amount: {
+                            currency_code: '{{ config("paypal.currency", "USD") }}',
+                            value: parseFloat(amount).toFixed(2)
+                        },
+                        custom_id: 'WALLET-{{ auth()->id() }}-' + Date.now()
+                    }],
+                    application_context: {
+                        shipping_preference: 'NO_SHIPPING'
+                    }
+                }).then(function(orderId) {
+                    console.log('PayPal order created:', orderId);
+                    return orderId;
+                });
+            },
+
+            // Approve order - Capture payment
+            onApprove: function(data, actions) {
+                console.log('Payment approved:', data);
+                document.getElementById('paypal-loading').style.display = 'block';
+
+                // Capture the payment
+                return actions.order.capture().then(function(details) {
+                    console.log('Payment captured:', details);
+
+                    // Get the amount and note
+                    const amount = document.getElementById('deposit_amount').value;
+                    const note = document.getElementById('deposit_note').value;
+
+                    // Send payment details to our backend
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                    return fetch('{{ route("wallet.deposit.paypal") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: amount,
+                            note: note,
+                            order_id: data.orderID,
+                            payer_id: data.payerID,
+                            details: details
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        document.getElementById('paypal-loading').style.display = 'none';
+
+                        if (result.success) {
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('loadBalanceModal'));
+                            modal.hide();
+
+                            // Show success message and reload page
+                            alert('{{ __('messages.payment_successful') }}! {{ __('messages.wallet_updated') }}');
+                            window.location.reload();
+                        } else {
+                            throw new Error(result.message || 'Payment processing failed');
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('paypal-loading').style.display = 'none';
+                        console.error('Backend processing error:', error);
+                        alert('Failed to process payment on our server. Please contact support if the amount was debited.');
+                        throw error;
+                    });
+                });
+            },
+
+            // Handle errors
+            onError: function(err) {
+                console.error('PayPal Error:', err);
+                document.getElementById('paypal-loading').style.display = 'none';
+                alert('An error occurred with PayPal. Please try again or contact support.');
+            },
+
+            // Handle cancellation
+            onCancel: function(data) {
+                document.getElementById('paypal-loading').style.display = 'none';
+                console.log('Payment cancelled');
+            }
+        }).render('#paypal-button-container')
+        .then(function() {
+            console.log('PayPal buttons rendered successfully');
+        })
+        .catch(function(error) {
+            console.error('Failed to render PayPal buttons:', error);
+            document.getElementById('paypal-button-container').innerHTML = '<div class="alert alert-danger"><i class="ri-error-warning-line me-2"></i>Failed to load PayPal buttons. Please refresh the page and try again.</div>';
+        });
+    });
+</script>
 @endsection

@@ -6,7 +6,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="mb-0">My Assigned Products</h5>
-                <small class="text-muted">Products you have assigned from AliExpress</small>
+                <small class="text-muted">Products you have assigned for dropshipping</small>
             </div>
             <div>
                 <a href="{{ route('products.search-page') }}" class="btn btn-primary btn-sm">
@@ -76,7 +76,7 @@
                             <tr>
                                 <th style="width: 80px;">Image</th>
                                 <th>Product Info</th>
-                                <th style="width: 200px;">AliExpress ID</th>
+                                <th style="width: 200px;">Product ID</th>
                                 <th style="width: 120px;">Status</th>
                                 <th style="width: 150px;">Assigned Date</th>
                                 <th style="width: 180px;">Actions</th>
@@ -153,7 +153,7 @@
                                         <a href="https://www.aliexpress.com/item/{{ $aliexpressProductId }}.html"
                                            target="_blank"
                                            class="btn btn-sm btn-outline-info mb-1">
-                                            <i class="ri-external-link-line me-1"></i> AliExpress
+                                            <i class="ri-external-link-line me-1"></i> View Source
                                         </a>
                                     </td>
                                 </tr>
@@ -171,9 +171,9 @@
                 <div class="text-center py-5">
                     <i class="ri-inbox-line" style="font-size: 4rem; color: #ccc;"></i>
                     <h5 class="mt-3">No Assigned Products Yet</h5>
-                    <p class="text-muted">Start by searching AliExpress products and assigning them to your account.</p>
+                    <p class="text-muted">Start by searching products and assigning them to your account.</p>
                     <a href="{{ route('products.search-page') }}" class="btn btn-primary mt-3">
-                        <i class="ri-search-line me-1"></i> Search AliExpress Products
+                        <i class="ri-search-line me-1"></i> Search Products
                     </a>
                 </div>
             @endif

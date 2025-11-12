@@ -70,7 +70,7 @@
                                         </a>
                                         @if($order->aliexpress_order_id)
                                             <br>
-                                            <small class="text-muted">AE: {{ $order->aliexpress_order_id }}</small>
+                                            <small class="text-muted">Supplier ID: {{ $order->aliexpress_order_id }}</small>
                                         @endif
                                     </td>
                                     <td>
@@ -104,8 +104,8 @@
                                             @if($order->canBePlaced())
                                                 <form action="{{ route('orders.place-on-aliexpress', $order) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success" title="Place on AliExpress"
-                                                            onclick="return confirm('Place this order on AliExpress?')">
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Place on Supplier"
+                                                            onclick="return confirm('Place this order with supplier?')">
                                                         <i class="ri-shopping-cart-line"></i>
                                                     </button>
                                                 </form>

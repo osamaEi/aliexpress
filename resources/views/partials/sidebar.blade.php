@@ -114,11 +114,11 @@
                     </ul>
                 </li>
 
-                <!-- AliExpress -->
+                <!-- Product Import -->
                 <li class="menu-item {{ request()->routeIs('products.search-*') || request()->routeIs('products.aliexpress.*') || request()->routeIs('products.my-assigned') ? 'open active' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons ri-shopping-cart-line"></i>
-                        <div data-i18n="AliExpress">AliExpress</div>
+                        <div data-i18n="Product Import">{{ __('messages.product_import') }}</div>
                     </a>
                     <ul class="menu-sub">
                         <li class="menu-item {{ request()->routeIs('products.search-*') ? 'active' : '' }}">

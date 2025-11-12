@@ -5,7 +5,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0">{{ __('messages.aliexpress_category_tree') }}</h5>
+                <h5 class="mb-0">{{ __('messages.category_tree') }}</h5>
                 <small class="text-muted">{{ __('messages.total') }}: {{ $rootCount ?? 0 }} {{ __('messages.root_categories') }}, {{ $childCount ?? 0 }} {{ __('messages.subcategories') }}</small>
             </div>
             <div class="d-flex gap-2">

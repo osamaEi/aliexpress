@@ -8,7 +8,7 @@
                 {{ __('messages.edit_product') }}
                 @if($product->isAliexpressProduct())
                     <span class="badge bg-info ms-2">
-                        <i class="ri-shopping-cart-line"></i> AliExpress
+                        <i class="ri-shopping-cart-line"></i> Dropship Product
                     </span>
                 @endif
             </h5>
@@ -201,14 +201,14 @@
                     </div>
 
                     @if($product->isAliexpressProduct())
-                        <!-- Profit Margin for AliExpress Products -->
+                        <!-- Profit Margin for Dropship Products -->
                         <div class="col-md-12 mb-3">
                             <label for="supplier_profit_margin" class="form-label">Profit Margin (%)</label>
                             <input type="number" class="form-control @error('supplier_profit_margin') is-invalid @enderror" id="supplier_profit_margin" name="supplier_profit_margin" value="{{ old('supplier_profit_margin', $product->supplier_profit_margin) }}" step="0.1" min="0" max="100">
                             @error('supplier_profit_margin')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <small class="text-muted">This margin is applied on top of AliExpress price + shipping</small>
+                            <small class="text-muted">This margin is applied on top of supplier price + shipping</small>
                         </div>
                     @endif
 

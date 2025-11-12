@@ -47,7 +47,7 @@
     </div>
 
     <div class="col-md-6">
-        <label for="aliexpress_category_id" class="form-label">{{ __('messages.aliexpress_category_id') }}</label>
+        <label for="aliexpress_category_id" class="form-label">{{ __('messages.supplier_category_id') }}</label>
         <input
             type="text"
             class="form-control @error('aliexpress_category_id') is-invalid @enderror"
@@ -59,7 +59,7 @@
         @error('aliexpress_category_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-        <small class="text-muted">{{ __('messages.aliexpress_category_hint') }}</small>
+        <small class="text-muted">{{ __('messages.supplier_category_hint') }}</small>
     </div>
 
     <div class="col-md-6">
