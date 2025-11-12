@@ -217,61 +217,71 @@
                 height: 55
             },
 
-            // Create order
+            // Create order directly using PayPal SDK
             createOrder: function(data, actions) {
                 console.log('Creating PayPal order...');
-                // Show loading
-                document.getElementById('paypal-loading').style.display = 'block';
 
-                return fetch('{{ route("payment.subscription", $subscription) }}', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                return actions.order.create({
+                    purchase_units: [{
+                        description: '{{ $subscription->localized_name }} - Subscription Plan',
+                        amount: {
+                            currency_code: '{{ config("paypal.currency", "USD") }}',
+                            value: '{{ number_format($subscription->price, 2, ".", "") }}'
+                        },
+                        custom_id: 'SUB-{{ $subscription->id }}-' + Date.now()
+                    }],
+                    application_context: {
+                        shipping_preference: 'NO_SHIPPING'
                     }
-                })
-                .then(function(response) {
-                    if (response.redirected) {
-                        // Extract PayPal order ID from redirect URL
-                        const url = new URL(response.url);
-                        const token = url.searchParams.get('token');
-
-                        if (token) {
-                            console.log('PayPal order created:', token);
-                            return token;
-                        }
-
-                        // If no token, redirect to PayPal
-                        window.location.href = response.url;
-                        throw new Error('Redirecting to PayPal...');
-                    }
-                    return response.json();
-                })
-                .then(function(data) {
-                    document.getElementById('paypal-loading').style.display = 'none';
-
-                    if (data.order_id) {
-                        console.log('PayPal order created:', data.order_id);
-                        return data.order_id;
-                    }
-
-                    throw new Error('Could not create PayPal order');
-                })
-                .catch(function(error) {
-                    console.error('Error creating order:', error);
-                    document.getElementById('paypal-loading').style.display = 'none';
-                    alert('Failed to initiate payment. Please try again.');
-                    throw error;
+                }).then(function(orderId) {
+                    console.log('PayPal order created:', orderId);
+                    return orderId;
                 });
             },
 
-            // Approve order
+            // Approve order - Capture payment
             onApprove: function(data, actions) {
                 console.log('Payment approved:', data);
                 document.getElementById('paypal-loading').style.display = 'block';
 
-                // Redirect to callback URL with token
-                window.location.href = '{{ route("payment.callback") }}?token=' + data.orderID + '&PayerID=' + data.payerID;
+                // Capture the payment
+                return actions.order.capture().then(function(details) {
+                    console.log('Payment captured:', details);
+
+                    // Send payment details to our backend
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                    return fetch('{{ route("subscriptions.process-payment", $subscription) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            order_id: data.orderID,
+                            payer_id: data.payerID,
+                            details: details
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        document.getElementById('paypal-loading').style.display = 'none';
+
+                        if (result.success) {
+                            // Redirect to subscriptions page with success message
+                            window.location.href = '{{ route("subscriptions.index") }}?payment=success';
+                        } else {
+                            throw new Error(result.message || 'Payment processing failed');
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('paypal-loading').style.display = 'none';
+                        console.error('Backend processing error:', error);
+                        alert('Failed to process payment on our server. Please contact support if the amount was debited.');
+                        throw error;
+                    });
+                });
             },
 
             // Handle errors

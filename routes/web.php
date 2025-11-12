@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
     Route::get('/subscriptions/{subscription}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
     Route::post('/subscriptions/{subscription}/pay-wallet', [SubscriptionController::class, 'payWithWallet'])->name('subscriptions.pay-with-wallet');
+    Route::post('/subscriptions/{subscription}/process-payment', [SubscriptionController::class, 'processPayment'])->name('subscriptions.process-payment');
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     Route::get('/subscriptions-history', [SubscriptionController::class, 'history'])->name('subscriptions.history');
 
