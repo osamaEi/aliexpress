@@ -107,24 +107,24 @@
                         <div class="col-12">
                             <h5 class="mb-3">{{ __('messages.select_payment_method') }}</h5>
 
-                            <!-- PayPal Button -->
-                            <form action="{{ route('payment.subscription', $subscription) }}" method="GET">
-                                <button type="submit" class="btn btn-lg w-100 mb-3" style="background-color: #0070ba; color: white; border: none;">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <i class="ri-paypal-line fs-4 me-2"></i>
-                                        <span class="fs-5 fw-bold">{{ __('messages.pay_with_paypal') }}</span>
-                                    </div>
-                                </button>
-                            </form>
+                            <!-- PayPal Smart Payment Buttons Container -->
+                            <div id="paypal-button-container" class="mb-4"></div>
 
-                            <!-- Credit/Debit Card Button (Future Implementation) -->
-                            <button type="button" class="btn btn-lg btn-outline-secondary w-100 mb-3" disabled>
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="ri-bank-card-line fs-4 me-2"></i>
-                                    <span class="fs-5">{{ __('messages.pay_with_card') }}</span>
-                                    <span class="badge bg-secondary ms-2">{{ __('messages.coming_soon') }}</span>
+                            <!-- Loading State -->
+                            <div id="paypal-loading" class="text-center mb-3" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
-                            </button>
+                                <p class="mt-2 text-muted">Processing payment...</p>
+                            </div>
+
+                            <!-- OR Divider -->
+                            <div class="position-relative my-4">
+                                <hr>
+                                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
+                                    {{ __('messages.or') }}
+                                </span>
+                            </div>
 
                             <!-- Alternative: Wallet Payment (if available) -->
                             @if(auth()->user()->wallet && auth()->user()->wallet->balance >= $subscription->price)
@@ -186,5 +186,92 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         transition: all 0.3s ease;
     }
+
+    #paypal-button-container {
+        min-height: 150px;
+    }
 </style>
+
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id={{ config('paypal.client_id') }}&currency={{ config('paypal.currency', 'USD') }}&disable-funding=credit,card"></script>
+
+<script>
+    // Initialize PayPal Smart Payment Buttons
+    paypal.Buttons({
+        style: {
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'rect',
+            label: 'paypal',
+            height: 55
+        },
+
+        // Create order
+        createOrder: function(data, actions) {
+            // Show loading
+            document.getElementById('paypal-loading').style.display = 'block';
+
+            return fetch('{{ route("payment.subscription", $subscription) }}', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(response) {
+                if (response.redirected) {
+                    // Extract PayPal order ID from redirect URL
+                    const url = new URL(response.url);
+                    const token = url.searchParams.get('token');
+
+                    if (token) {
+                        return token;
+                    }
+
+                    // If no token, redirect to PayPal
+                    window.location.href = response.url;
+                    throw new Error('Redirecting to PayPal...');
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                document.getElementById('paypal-loading').style.display = 'none';
+
+                if (data.order_id) {
+                    return data.order_id;
+                }
+
+                throw new Error('Could not create PayPal order');
+            })
+            .catch(function(error) {
+                console.error('Error creating order:', error);
+                document.getElementById('paypal-loading').style.display = 'none';
+                alert('Failed to initiate payment. Please try again.');
+                throw error;
+            });
+        },
+
+        // Approve order
+        onApprove: function(data, actions) {
+            document.getElementById('paypal-loading').style.display = 'block';
+
+            // Redirect to callback URL with token
+            window.location.href = '{{ route("payment.callback") }}?token=' + data.orderID + '&PayerID=' + data.payerID;
+        },
+
+        // Handle errors
+        onError: function(err) {
+            console.error('PayPal Error:', err);
+            document.getElementById('paypal-loading').style.display = 'none';
+            alert('An error occurred with PayPal. Please try again or use an alternative payment method.');
+        },
+
+        // Handle cancellation
+        onCancel: function(data) {
+            document.getElementById('paypal-loading').style.display = 'none';
+            console.log('Payment cancelled');
+            alert('Payment was cancelled. You can try again when ready.');
+        }
+    }).render('#paypal-button-container');
+</script>
 @endsection
