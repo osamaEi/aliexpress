@@ -193,85 +193,108 @@
 </style>
 
 <!-- PayPal SDK -->
-<script src="https://www.paypal.com/sdk/js?client-id={{ config('paypal.client_id') }}&currency={{ config('paypal.currency', 'USD') }}&disable-funding=credit,card"></script>
+@php
+    $paypalMode = config('paypal.mode', 'sandbox');
+    $paypalClientId = config("paypal.{$paypalMode}.client_id");
+@endphp
+<script src="https://www.paypal.com/sdk/js?client-id={{ $paypalClientId }}&currency={{ config('paypal.currency', 'USD') }}"></script>
 
 <script>
-    // Initialize PayPal Smart Payment Buttons
-    paypal.Buttons({
-        style: {
-            layout: 'vertical',
-            color: 'gold',
-            shape: 'rect',
-            label: 'paypal',
-            height: 55
-        },
+    // Check if PayPal SDK is loaded
+    if (typeof paypal === 'undefined') {
+        console.error('PayPal SDK failed to load. Please check your internet connection and PayPal credentials.');
+        document.getElementById('paypal-button-container').innerHTML = '<div class="alert alert-danger">Failed to load PayPal. Please refresh the page or use wallet payment.</div>';
+    } else {
+        console.log('PayPal SDK loaded successfully');
 
-        // Create order
-        createOrder: function(data, actions) {
-            // Show loading
-            document.getElementById('paypal-loading').style.display = 'block';
+        // Initialize PayPal Smart Payment Buttons
+        paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                color: 'gold',
+                shape: 'rect',
+                label: 'paypal',
+                height: 55
+            },
 
-            return fetch('{{ route("payment.subscription", $subscription) }}', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(function(response) {
-                if (response.redirected) {
-                    // Extract PayPal order ID from redirect URL
-                    const url = new URL(response.url);
-                    const token = url.searchParams.get('token');
+            // Create order
+            createOrder: function(data, actions) {
+                console.log('Creating PayPal order...');
+                // Show loading
+                document.getElementById('paypal-loading').style.display = 'block';
 
-                    if (token) {
-                        return token;
+                return fetch('{{ route("payment.subscription", $subscription) }}', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function(response) {
+                    if (response.redirected) {
+                        // Extract PayPal order ID from redirect URL
+                        const url = new URL(response.url);
+                        const token = url.searchParams.get('token');
+
+                        if (token) {
+                            console.log('PayPal order created:', token);
+                            return token;
+                        }
+
+                        // If no token, redirect to PayPal
+                        window.location.href = response.url;
+                        throw new Error('Redirecting to PayPal...');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    document.getElementById('paypal-loading').style.display = 'none';
+
+                    if (data.order_id) {
+                        console.log('PayPal order created:', data.order_id);
+                        return data.order_id;
                     }
 
-                    // If no token, redirect to PayPal
-                    window.location.href = response.url;
-                    throw new Error('Redirecting to PayPal...');
-                }
-                return response.json();
-            })
-            .then(function(data) {
+                    throw new Error('Could not create PayPal order');
+                })
+                .catch(function(error) {
+                    console.error('Error creating order:', error);
+                    document.getElementById('paypal-loading').style.display = 'none';
+                    alert('Failed to initiate payment. Please try again.');
+                    throw error;
+                });
+            },
+
+            // Approve order
+            onApprove: function(data, actions) {
+                console.log('Payment approved:', data);
+                document.getElementById('paypal-loading').style.display = 'block';
+
+                // Redirect to callback URL with token
+                window.location.href = '{{ route("payment.callback") }}?token=' + data.orderID + '&PayerID=' + data.payerID;
+            },
+
+            // Handle errors
+            onError: function(err) {
+                console.error('PayPal Error:', err);
                 document.getElementById('paypal-loading').style.display = 'none';
+                alert('An error occurred with PayPal. Please try again or use an alternative payment method.');
+            },
 
-                if (data.order_id) {
-                    return data.order_id;
-                }
-
-                throw new Error('Could not create PayPal order');
-            })
-            .catch(function(error) {
-                console.error('Error creating order:', error);
+            // Handle cancellation
+            onCancel: function(data) {
                 document.getElementById('paypal-loading').style.display = 'none';
-                alert('Failed to initiate payment. Please try again.');
-                throw error;
-            });
-        },
-
-        // Approve order
-        onApprove: function(data, actions) {
-            document.getElementById('paypal-loading').style.display = 'block';
-
-            // Redirect to callback URL with token
-            window.location.href = '{{ route("payment.callback") }}?token=' + data.orderID + '&PayerID=' + data.payerID;
-        },
-
-        // Handle errors
-        onError: function(err) {
-            console.error('PayPal Error:', err);
-            document.getElementById('paypal-loading').style.display = 'none';
-            alert('An error occurred with PayPal. Please try again or use an alternative payment method.');
-        },
-
-        // Handle cancellation
-        onCancel: function(data) {
-            document.getElementById('paypal-loading').style.display = 'none';
-            console.log('Payment cancelled');
-            alert('Payment was cancelled. You can try again when ready.');
-        }
-    }).render('#paypal-button-container');
+                console.log('Payment cancelled');
+                alert('Payment was cancelled. You can try again when ready.');
+            }
+        }).render('#paypal-button-container')
+        .then(function() {
+            console.log('PayPal buttons rendered successfully');
+        })
+        .catch(function(error) {
+            console.error('Failed to render PayPal buttons:', error);
+            document.getElementById('paypal-button-container').innerHTML = '<div class="alert alert-danger"><i class="ri-error-warning-line me-2"></i>Failed to load PayPal buttons. Please refresh the page or use wallet payment.</div>';
+        });
+    }
 </script>
 @endsection
