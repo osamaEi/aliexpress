@@ -38,7 +38,7 @@ class AdminCategoryProfitController extends Controller
 
         $category = Category::findOrFail($categoryId);
 
-        // Update or create profit
+        // Update or create profit for the main category
         $profit = AdminCategoryProfit::updateOrCreate(
             ['category_id' => $categoryId],
             [
@@ -48,17 +48,41 @@ class AdminCategoryProfitController extends Controller
             ]
         );
 
+        // If this is a parent category (has no parent_id), also save to all its subcategories
+        $subcategoriesUpdated = 0;
+        if (!$category->parent_id) {
+            $subcategories = Category::where('parent_id', $categoryId)->get();
+
+            foreach ($subcategories as $subcategory) {
+                AdminCategoryProfit::updateOrCreate(
+                    ['category_id' => $subcategory->id],
+                    [
+                        'profit_amount' => $request->profit_amount,
+                        'currency' => $request->currency,
+                        'is_active' => $request->has('is_active') ? true : false,
+                    ]
+                );
+                $subcategoriesUpdated++;
+            }
+        }
+
         Log::info('Admin category profit updated', [
             'category_id' => $categoryId,
             'category_name' => $category->name,
             'profit_amount' => $request->profit_amount,
             'is_active' => $profit->is_active,
+            'subcategories_updated' => $subcategoriesUpdated,
         ]);
+
+        $message = $subcategoriesUpdated > 0
+            ? "Profit setting saved for {$category->name} and {$subcategoriesUpdated} subcategories!"
+            : 'Profit setting saved successfully!';
 
         return response()->json([
             'success' => true,
-            'message' => 'Profit setting saved successfully!',
+            'message' => $message,
             'profit' => $profit,
+            'subcategories_updated' => $subcategoriesUpdated,
         ]);
     }
 
