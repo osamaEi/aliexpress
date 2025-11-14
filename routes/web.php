@@ -13,6 +13,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SubscriptionManagementController;
 use App\Http\Controllers\Admin\OrderManagementController;
+use App\Http\Controllers\Admin\AdminCategoryProfitController;
 use App\Http\Controllers\Seller\SellerController;
 use Illuminate\Support\Facades\Route;
 
@@ -88,7 +89,7 @@ Route::middleware('auth')->group(function () {
     // Subscription routes
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
-    Route::get('/subscriptions/{subscription}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::get('/subscriptions/{subscription}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe.show');
     Route::post('/subscriptions/{subscription}/pay-wallet', [SubscriptionController::class, 'payWithWallet'])->name('subscriptions.pay-with-wallet');
     Route::post('/subscriptions/{subscription}/process-payment', [SubscriptionController::class, 'processPayment'])->name('subscriptions.process-payment');
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
@@ -192,6 +193,14 @@ Route::middleware('auth')->group(function () {
 
         // Categories Management (use existing CategoryController)
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
+        // Category Profit Management
+        Route::prefix('category-profits')->name('category-profits.')->group(function () {
+            Route::get('/', [AdminCategoryProfitController::class, 'index'])->name('index');
+            Route::post('/{category}', [AdminCategoryProfitController::class, 'update'])->name('update');
+            Route::delete('/{category}', [AdminCategoryProfitController::class, 'destroy'])->name('destroy');
+            Route::post('/{category}/toggle', [AdminCategoryProfitController::class, 'toggleActive'])->name('toggle');
+        });
 
         // User Management - General
         Route::get('/users', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
