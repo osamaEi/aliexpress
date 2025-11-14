@@ -443,14 +443,6 @@
                                                 @endif
                                             @endif
                                         @endauth
-
-                                        <button
-                                            type="button"
-                                            class="btn btn-sm btn-success w-100"
-                                            onclick="importProduct('{{ $product['item_id'] }}', this)"
-                                        >
-                                            <i class="ri-download-line me-1"></i> Import Product
-                                        </button>
                                     </div>
                                 </div>
 
@@ -759,70 +751,6 @@
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, 5000);
-    }
-
-    // Import product function
-    function importProduct(productId, buttonElement) {
-        if (!confirm('Import this product to your store?')) {
-            return;
-        }
-
-        // Show loading state
-        const originalHtml = buttonElement.innerHTML;
-        buttonElement.disabled = true;
-        buttonElement.innerHTML = '<i class="ri-loader-4-line me-1"></i> Importing...';
-
-        // CSRF token for Laravel
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
-        // Make AJAX request
-        fetch('{{ route("products.aliexpress.import-product") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken || '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                aliexpress_id: productId,
-                currency: '{{ request("currency", "AED") }}',
-                country: '{{ request("country", "AE") }}',
-                profit_margin: 30 // Default 30% profit margin
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Change button to success state
-                buttonElement.classList.remove('btn-success');
-                buttonElement.classList.add('btn-info');
-                buttonElement.innerHTML = '<i class="ri-check-line me-1"></i> Imported';
-                buttonElement.disabled = true;
-
-                // Show success message
-                showToast('success', data.message || 'Product imported successfully!');
-
-                // Optional: redirect to product edit page
-                if (data.product && data.product.id) {
-                    setTimeout(() => {
-                        window.location.href = '/products/' + data.product.id;
-                    }, 1500);
-                }
-            } else {
-                // Restore button
-                buttonElement.disabled = false;
-                buttonElement.innerHTML = originalHtml;
-
-                // Show error message
-                showToast('error', data.message || 'Failed to import product');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            buttonElement.disabled = false;
-            buttonElement.innerHTML = originalHtml;
-            showToast('error', 'An error occurred. Please try again.');
-        });
     }
 
     // Toggle debug info

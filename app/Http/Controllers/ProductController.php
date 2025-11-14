@@ -684,115 +684,46 @@ class ProductController extends Controller
                     'sort_filter' => $sortFilter
                 ]);
 
-                // Use more aggressive keywords and broader search terms for categories
-                $genericKeywords = [
-                    // Common generic terms
-                    'a', 'e', 'i', 'o', 'new', 'best', 'top', 'hot', 'sale',
-                    'fashion', 'quality', 'style', 'popular', 'latest', 'trending',
-                    // Single letters for maximum coverage
-                    's', 't', 'n', 'r', 'l', 'c', 'd', 'm', 'p', 'h',
-                    // Numbers and years
-                    '2025', '2024', 'pro', 'plus', 'max'
-                ];
+                // When category is selected, use a very broad keyword
+                // The category filter will do the heavy lifting
+                // Using common words that appear in most product titles
+                $categoryKeyword = 'new'; // Very common word in product titles
 
-                // For 'newest' filter, prioritize 'new' keyword
+                // For specific sort filters, use relevant keywords
                 if ($sortFilter === 'newest') {
-                    $genericKeywords = array_merge(
-                        ['new', '2025', 'latest', 'fresh', 'recent'],
-                        $genericKeywords
-                    );
-                }
-
-                $result = null;
-                $bestResult = null;
-                $maxProducts = 0;
-                $maxAttempts = 15; // Increase attempts to find products
-                $attemptCount = 0;
-
-                foreach ($genericKeywords as $testKeyword) {
-                    if ($attemptCount >= $maxAttempts) {
-                        break;
-                    }
-                    $attemptCount++;
-
-                    $tempResult = $this->aliexpressTextService->searchProductsByText(
-                        $testKeyword,
-                        [
-                            'page' => $request->get('page', 1),
-                            'limit' => $request->get('per_page', 50), // Increased from 10 to 50
-                            'category_id' => $aliexpressCategoryId,
-                            'sort_by' => $sortBy, // Use mapped sort parameter
-                            'country' => $request->get('country', 'AE'),
-                            'currency' => $request->get('currency', 'AED'),
-                            'locale' => $request->get('locale', 'en_US'),
-                        ]
-                    );
-
-                    $productCount = $tempResult['total_count'] ?? 0;
-                    $returnedProducts = count($tempResult['products'] ?? []);
-
-                    Log::info('Category search attempt', [
-                        'keyword' => $testKeyword,
-                        'attempt' => $attemptCount,
-                        'returned_products' => $returnedProducts,
-                        'total_count' => $productCount
-                    ]);
-
-                    // Keep the result with most products
-                    if ($productCount > $maxProducts) {
-                        $maxProducts = $productCount;
-                        $bestResult = $tempResult;
-
-                        Log::info('Better result found', [
-                            'keyword' => $testKeyword,
-                            'count' => $returnedProducts,
-                            'total' => $productCount
-                        ]);
-                    }
-
-                    // If we found 500+ products total, that's excellent - stop searching
-                    if ($productCount >= 500) {
-                        Log::info('Found excellent category result', [
-                            'keyword' => $testKeyword,
-                            'total_count' => $productCount
-                        ]);
-                        break;
-                    }
-
-                    // If we got 30+ actual products returned, that's good enough
-                    if ($returnedProducts >= 30 && $productCount >= 100) {
-                        Log::info('Found good category result', [
-                            'keyword' => $testKeyword,
-                            'returned' => $returnedProducts,
-                            'total' => $productCount
-                        ]);
-                        break;
-                    }
-                }
-
-                // Use the best result we found
-                $result = $bestResult ?? [
-                    'products' => [],
-                    'total_count' => 0,
-                    'current_page' => 1,
-                    'page_size' => 0,
-                ];
-
-                if (empty($result['products'])) {
-                    Log::warning('No products found for category', [
-                        'requested_category_id' => $requestedCategoryId,
-                        'aliexpress_category_id' => $aliexpressCategoryId,
-                        'attempts' => $attemptCount
-                    ]);
+                    $categoryKeyword = 'new';
+                } elseif (in_array($sortFilter, ['price_low', 'price_high'])) {
+                    $categoryKeyword = 'sale';
                 } else {
-                    Log::info('Final category search result', [
-                        'requested_category_id' => $requestedCategoryId,
-                        'aliexpress_category_id' => $aliexpressCategoryId,
-                        'products_returned' => count($result['products']),
-                        'total_count' => $result['total_count'] ?? 0,
-                        'attempts_made' => $attemptCount
-                    ]);
+                    $categoryKeyword = 'best'; // For orders and ratings
                 }
+
+                Log::info('Searching category with keyword', [
+                    'keyword' => $categoryKeyword,
+                    'category_id' => $aliexpressCategoryId
+                ]);
+
+                // Make a single request with higher page size
+                $result = $this->aliexpressTextService->searchProductsByText(
+                    $categoryKeyword,
+                    [
+                        'page' => $request->get('page', 1),
+                        'limit' => $request->get('per_page', 50), // Get 50 products per page
+                        'category_id' => $aliexpressCategoryId,
+                        'sort_by' => $sortBy,
+                        'country' => $request->get('country', 'AE'),
+                        'currency' => $request->get('currency', 'AED'),
+                        'locale' => $request->get('locale', 'en_US'),
+                    ]
+                );
+
+                Log::info('Category search result', [
+                    'requested_category_id' => $requestedCategoryId,
+                    'aliexpress_category_id' => $aliexpressCategoryId,
+                    'keyword_used' => $categoryKeyword,
+                    'products_returned' => count($result['products'] ?? []),
+                    'total_count' => $result['total_count'] ?? 0
+                ]);
             } elseif (!empty($keyword)) {
                 // Keyword search - search products by keyword only
                 Log::info('Searching products by keyword', [
