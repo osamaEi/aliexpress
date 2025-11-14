@@ -644,24 +644,24 @@ class ProductController extends Controller
 
         try {
             $keyword = $request->keyword ?? '';
-            $localCategoryId = $request->get('category_id');
+            $requestedCategoryId = $request->get('category_id');
             $sortFilter = $request->get('sort_filter', 'orders');
 
-            // Get AliExpress category ID from our local category
+            // The category_id from the request is the AliExpress category ID (from the subcategory dropdown)
+            // We use it directly for the API call
             $aliexpressCategoryId = null;
-            if (!empty($localCategoryId)) {
-                $category = \App\Models\Category::find($localCategoryId);
-                if ($category && $category->aliexpress_category_id) {
-                    $aliexpressCategoryId = $category->aliexpress_category_id;
-                    Log::info('Mapped local category to AliExpress category', [
-                        'local_category_id' => $localCategoryId,
-                        'aliexpress_category_id' => $aliexpressCategoryId
-                    ]);
-                } else {
-                    Log::warning('Category not found or missing AliExpress ID', [
-                        'local_category_id' => $localCategoryId
-                    ]);
-                }
+            if (!empty($requestedCategoryId)) {
+                // The frontend sends the AliExpress category ID directly
+                $aliexpressCategoryId = $requestedCategoryId;
+
+                // Find the local category for logging purposes
+                $category = \App\Models\Category::where('aliexpress_category_id', $requestedCategoryId)->first();
+
+                Log::info('Category search requested', [
+                    'aliexpress_category_id' => $aliexpressCategoryId,
+                    'local_category_found' => $category ? true : false,
+                    'local_category_name' => $category ? $category->name : 'N/A'
+                ]);
             }
 
             // Map sort filter to API sort_by parameter
@@ -690,22 +690,27 @@ class ProductController extends Controller
 
                 // Strategy: Use category name as keyword if available and no keyword provided
                 // This gives more relevant results than generic keywords
-                $categoryKeyword = 'new'; // Default fallback
+                $categoryKeyword = null;
 
-                if ($category && empty($keyword)) {
-                    // Use the category name as the search keyword
-                    // This is brilliant - it finds products that match the category context
-                    $categoryKeyword = $category->name;
-                    Log::info('Using category name as search keyword', [
-                        'category_name' => $categoryKeyword,
-                        'category_id' => $aliexpressCategoryId
-                    ]);
-                } elseif (!empty($keyword)) {
+                // Check if user provided a keyword
+                if (!empty($keyword) && trim($keyword) !== '') {
                     // User provided a keyword, use it with category filter
                     $categoryKeyword = $keyword;
                     Log::info('Using user keyword with category filter', [
                         'user_keyword' => $keyword,
-                        'category_id' => $aliexpressCategoryId
+                        'category_id' => $aliexpressCategoryId,
+                        'category_found' => $category ? true : false,
+                        'category_name' => $category ? $category->name : 'N/A'
+                    ]);
+                } elseif ($category && !empty($category->name)) {
+                    // No keyword provided, use the category/subcategory name as the search keyword
+                    // This is brilliant - it finds products that match the category context
+                    $categoryKeyword = $category->name;
+                    Log::info('Using category/subcategory name as search keyword', [
+                        'category_name' => $categoryKeyword,
+                        'category_id' => $aliexpressCategoryId,
+                        'is_subcategory' => $category->parent_id ? true : false,
+                        'parent_id' => $category->parent_id ?? 'none'
                     ]);
                 } else {
                     // No category name and no keyword, use strategic keywords based on sort filter
@@ -718,7 +723,8 @@ class ProductController extends Controller
                     }
                     Log::info('Using fallback keyword based on sort filter', [
                         'keyword' => $categoryKeyword,
-                        'sort_filter' => $sortFilter
+                        'sort_filter' => $sortFilter,
+                        'reason' => $category ? 'category_name_empty' : 'category_not_found'
                     ]);
                 }
 
