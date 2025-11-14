@@ -1015,6 +1015,7 @@ class ProductController extends Controller
             'products.*.product_image' => 'nullable|string',
             'products.*.product_price' => 'nullable|numeric',
             'products.*.currency' => 'nullable|string|max:3',
+            'products.*.category_id' => 'nullable|exists:categories,id',
         ]);
 
         $products = $request->products;
@@ -1049,6 +1050,27 @@ class ProductController extends Controller
                 $basePrice = $productData['product_price'] ?? 0;
                 $sellerAmount = 0;
                 $finalPrice = $basePrice;
+                $categoryId = $productData['category_id'] ?? null;
+
+                // Apply seller's subcategory profit if category is provided
+                if ($categoryId) {
+                    $profitSetting = $user->getProfitForSubcategory($categoryId);
+
+                    if ($profitSetting) {
+                        $sellerAmount = $profitSetting->calculateProfit($basePrice);
+                        $finalPrice = $profitSetting->calculateFinalPrice($basePrice);
+
+                        \Log::info('Seller Profit Applied (Bulk)', [
+                            'seller_id' => $user->id,
+                            'category_id' => $categoryId,
+                            'base_price' => $basePrice,
+                            'profit_type' => $profitSetting->profit_type,
+                            'profit_value' => $profitSetting->profit_value,
+                            'seller_amount' => $sellerAmount,
+                            'final_price' => $finalPrice,
+                        ]);
+                    }
+                }
 
                 if (!$product) {
                     // Create new product
@@ -1063,8 +1085,16 @@ class ProductController extends Controller
                         'images' => isset($productData['product_image']) ? [$productData['product_image']] : [],
                         'aliexpress_id' => $aliexpressProductId,
                         'aliexpress_price' => $basePrice,
+                        'category_id' => $categoryId,
                         'stock_quantity' => 0,
                         'is_active' => false,
+                    ]);
+                } else {
+                    // Update existing product with seller's profit and category
+                    $product->update([
+                        'price' => $finalPrice,
+                        'seller_amount' => $sellerAmount,
+                        'category_id' => $categoryId ?? $product->category_id,
                     ]);
                 }
 
