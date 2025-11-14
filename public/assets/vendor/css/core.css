@@ -25583,7 +25583,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   }
   .layout-menu-fixed:not(.layout-menu-collapsed).layout-menu-flipped .layout-page,
   .layout-menu-fixed-offcanvas:not(.layout-menu-collapsed).layout-menu-flipped .layout-page {
-    padding-right: 0;
+    padding-right: 16.25rem;
     padding-left: 0;
   }
   .layout-menu-fixed.layout-menu-collapsed .layout-page {

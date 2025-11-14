@@ -8,16 +8,39 @@
                 </div>
 
                 <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-                    <!-- Search -->
-                    <div class="navbar-nav align-items-center">
-                        <div class="nav-item navbar-search-wrapper mb-0">
-                            <a class="nav-item nav-link search-toggler fw-normal px-0" href="javascript:void(0);">
-                                <i class="ri-search-line ri-22px scaleX-n1-rtl me-3"></i>
-                                <span class="d-none d-md-inline-block text-muted">{{ __('messages.search') }} (Ctrl+/)</span>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- /Search -->
+                    <!-- Subscription Expiry Notice for Seller -->
+                    @if(auth()->user()->user_type === 'seller')
+                        @php
+                            $subscription = auth()->user()->subscription;
+                            $daysRemaining = null;
+
+                            if ($subscription && $subscription->ends_at) {
+                                $daysRemaining = now()->diffInDays($subscription->ends_at, false);
+                                $daysRemaining = floor($daysRemaining);
+                            }
+                        @endphp
+
+                        @if($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 20)
+                            <div class="navbar-nav align-items-center me-3">
+                                <div class="nav-item">
+                                    <a class="nav-link fw-medium px-3 py-2 rounded-pill"
+                                       href="{{ route('subscriptions.index') }}"
+                                       style="background: {{ $daysRemaining <= 5 ? '#fee2e2' : '#fef3c7' }};
+                                              color: {{ $daysRemaining <= 5 ? '#991b1b' : '#92400e' }};
+                                              border: 1px solid {{ $daysRemaining <= 5 ? '#fecaca' : '#fde68a' }};">
+                                        <i class="ri-error-warning-line ri-18px me-2"></i>
+                                        <span class="d-none d-md-inline-block">
+                                            {{ app()->getLocale() == 'ar' ? 'باقي ' . $daysRemaining . ' يوم لانتهاء الاشتراك' : $daysRemaining . ' days until subscription expires' }}
+                                        </span>
+                                        <span class="d-inline-block d-md-none">
+                                            {{ $daysRemaining }}{{ app()->getLocale() == 'ar' ? ' يوم' : 'd' }}
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+                    @endif
+                    <!-- /Subscription Expiry Notice -->
 
                     <ul class="navbar-nav flex-row align-items-center ms-auto">
                         <!-- Language Switcher -->
@@ -140,16 +163,6 @@
                         </li>
                         <!--/ User -->
                     </ul>
-                </div>
-
-                <!-- Search Small Screens -->
-                <div class="navbar-search-wrapper search-input-wrapper d-none">
-                    <input
-                        type="text"
-                        class="form-control search-input container-xxl border-0"
-                        placeholder="{{ __('messages.search') }}..."
-                        aria-label="{{ __('messages.search') }}..." />
-                    <i class="ri-close-fill search-toggler cursor-pointer"></i>
                 </div>
             </nav>
 
