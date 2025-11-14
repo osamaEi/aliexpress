@@ -1,9 +1,14 @@
 <!doctype html>
 
+@php
+    $currentLocale = app()->getLocale();
+    $isRtl = $currentLocale === 'ar';
+@endphp
+
 <html
-    lang="en"
-    class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
-    dir="ltr"
+    lang="{{ $currentLocale }}"
+    class="light-style layout-navbar-fixed layout-menu-fixed layout-compact {{ $isRtl ? 'layout-menu-fixed' : '' }}"
+    dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
     data-theme="theme-default"
     data-assets-path="{{ asset('assets') }}/"
     data-template="vertical-menu-template"

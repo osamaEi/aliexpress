@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
+use App\Models\Setting;
 
 class LanguageController extends Controller
 {
@@ -23,6 +24,12 @@ class LanguageController extends Controller
 
         // Set app locale
         App::setLocale($locale);
+
+        // Update site_language setting if user is admin
+        if (auth()->check() && auth()->user()->user_type === 'admin') {
+            Setting::set('site_language', $locale, 'select', 'Default language for the website (ar = Arabic, en = English)');
+            Setting::clearCache();
+        }
 
         // Redirect back
         return redirect()->back();

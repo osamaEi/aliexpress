@@ -143,6 +143,32 @@
         a:hover {
             color: {{ $primaryColor }}dd;
         }
+
+        /* Hide template customizer button */
+        .template-customizer,
+        .template-customizer-open-btn {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* Ensure proper sidebar positioning based on language direction */
+        [dir="rtl"] .layout-menu {
+            right: 0;
+            left: auto;
+        }
+
+        [dir="ltr"] .layout-menu {
+            left: 0;
+            right: auto;
+        }
+
+        /* Smooth transition when switching language/direction */
+        html[dir="rtl"] .layout-menu,
+        html[dir="ltr"] .layout-menu {
+            transition: left 0.3s ease, right 0.3s ease;
+        }
     </style>
 
     <!-- Helpers -->
