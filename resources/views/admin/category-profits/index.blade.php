@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('dashboard')
 
 @section('title', 'Category Profit Management')
 
