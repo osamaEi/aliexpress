@@ -8,6 +8,7 @@
 
     <meta name="description" content="{{ setting('site_description', '') }}" />
     <meta name="keywords" content="{{ setting('site_keywords', '') }}" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <!-- Favicon -->
     @if(setting('site_favicon'))
