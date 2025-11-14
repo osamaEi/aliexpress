@@ -812,14 +812,23 @@ class ProductController extends Controller
                     ->toArray();
             }
 
-            // Add admin profit to each product price
+            // Add admin profit to each product price based on category
             if (!empty($result['products'])) {
+                // Get local category ID for admin profit calculation
+                $localCategory = null;
+                if (!empty($requestedCategoryId)) {
+                    $localCategory = \App\Models\Category::where('aliexpress_category_id', $requestedCategoryId)->first();
+                }
+
                 foreach ($result['products'] as &$product) {
                     // Get the base price (sale price)
                     $basePrice = (float)($product['sale_price'] ?? 0);
 
-                    // Calculate admin profit
-                    $adminProfit = admin_profit($basePrice);
+                    // Calculate admin profit based on category (with parent inheritance)
+                    $adminProfit = 0;
+                    if ($localCategory) {
+                        $adminProfit = \App\Models\AdminCategoryProfit::getProfitForCategory($localCategory->id);
+                    }
 
                     // Calculate final price (base price + admin profit)
                     $finalPrice = $basePrice + $adminProfit;
@@ -841,9 +850,8 @@ class ProductController extends Controller
                     // Also update original price if needed
                     if (isset($product['original_price'])) {
                         $originalBasePrice = (float)$product['original_price'];
-                        $originalAdminProfit = admin_profit($originalBasePrice);
                         $product['original_aliexpress_price'] = $originalBasePrice;
-                        $product['original_price'] = $originalBasePrice + $originalAdminProfit;
+                        $product['original_price'] = $originalBasePrice + $adminProfit;
 
                         if (isset($product['original_price_format'])) {
                             $currency = $request->get('currency', 'AED');
@@ -852,6 +860,13 @@ class ProductController extends Controller
                     }
                 }
                 unset($product); // Break reference
+
+                Log::info('Admin profit applied to search results', [
+                    'category_id' => $localCategory ? $localCategory->id : null,
+                    'category_name' => $localCategory ? $localCategory->name : 'N/A',
+                    'admin_profit_amount' => $adminProfit ?? 0,
+                    'products_count' => count($result['products'])
+                ]);
             }
 
             return view('products.search', [
@@ -940,6 +955,7 @@ class ProductController extends Controller
 
         $basePrice = $request->product_price ?? 0;
         $sellerAmount = 0;
+        $adminAmount = 0;
         $finalPrice = $basePrice;
 
         // Apply seller's subcategory profit if category is provided
@@ -960,6 +976,20 @@ class ProductController extends Controller
                     'final_price' => $finalPrice,
                 ]);
             }
+
+            // Apply admin profit for category (with parent inheritance)
+            $adminAmount = \App\Models\AdminCategoryProfit::getProfitForCategory($request->category_id);
+            if ($adminAmount > 0) {
+                $finalPrice += $adminAmount;
+
+                \Log::info('Admin Profit Applied', [
+                    'category_id' => $request->category_id,
+                    'base_price' => $basePrice,
+                    'seller_amount' => $sellerAmount,
+                    'admin_amount' => $adminAmount,
+                    'final_price' => $finalPrice,
+                ]);
+            }
         }
 
         if (!$product) {
@@ -972,6 +1002,7 @@ class ProductController extends Controller
                 'currency' => $request->currency ?? 'AED',
                 'original_price' => $basePrice,
                 'seller_amount' => $sellerAmount,
+                'admin_amount' => $adminAmount,
                 'images' => $request->product_image ? [$request->product_image] : [],
                 'aliexpress_id' => $aliexpressProductId,
                 'aliexpress_price' => $basePrice,
@@ -980,10 +1011,11 @@ class ProductController extends Controller
                 'is_active' => false, // Set as inactive until seller publishes
             ]);
         } else {
-            // Update existing product with seller's profit
+            // Update existing product with seller's profit and admin profit
             $product->update([
                 'price' => $finalPrice,
                 'seller_amount' => $sellerAmount,
+                'admin_amount' => $adminAmount,
                 'category_id' => $request->category_id ?? $product->category_id,
             ]);
         }
@@ -1049,6 +1081,7 @@ class ProductController extends Controller
 
                 $basePrice = $productData['product_price'] ?? 0;
                 $sellerAmount = 0;
+                $adminAmount = 0;
                 $finalPrice = $basePrice;
                 $categoryId = $productData['category_id'] ?? null;
 
@@ -1070,6 +1103,20 @@ class ProductController extends Controller
                             'final_price' => $finalPrice,
                         ]);
                     }
+
+                    // Apply admin profit for category (with parent inheritance)
+                    $adminAmount = \App\Models\AdminCategoryProfit::getProfitForCategory($categoryId);
+                    if ($adminAmount > 0) {
+                        $finalPrice += $adminAmount;
+
+                        \Log::info('Admin Profit Applied (Bulk)', [
+                            'category_id' => $categoryId,
+                            'base_price' => $basePrice,
+                            'seller_amount' => $sellerAmount,
+                            'admin_amount' => $adminAmount,
+                            'final_price' => $finalPrice,
+                        ]);
+                    }
                 }
 
                 if (!$product) {
@@ -1082,6 +1129,7 @@ class ProductController extends Controller
                         'currency' => $productData['currency'] ?? 'AED',
                         'original_price' => $basePrice,
                         'seller_amount' => $sellerAmount,
+                        'admin_amount' => $adminAmount,
                         'images' => isset($productData['product_image']) ? [$productData['product_image']] : [],
                         'aliexpress_id' => $aliexpressProductId,
                         'aliexpress_price' => $basePrice,
@@ -1090,10 +1138,11 @@ class ProductController extends Controller
                         'is_active' => false,
                     ]);
                 } else {
-                    // Update existing product with seller's profit and category
+                    // Update existing product with seller's profit, admin profit and category
                     $product->update([
                         'price' => $finalPrice,
                         'seller_amount' => $sellerAmount,
+                        'admin_amount' => $adminAmount,
                         'category_id' => $categoryId ?? $product->category_id,
                     ]);
                 }

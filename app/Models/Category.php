@@ -75,6 +75,22 @@ class Category extends Model
     }
 
     /**
+     * Get admin profit setting for this category
+     */
+    public function adminProfit()
+    {
+        return $this->hasOne(AdminCategoryProfit::class);
+    }
+
+    /**
+     * Get the admin profit amount for this category (with parent inheritance)
+     */
+    public function getAdminProfitAmount(): float
+    {
+        return AdminCategoryProfit::getProfitForCategory($this->id);
+    }
+
+    /**
      * Check if this is a subcategory
      */
     public function isSubcategory(): bool
