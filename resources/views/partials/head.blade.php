@@ -154,20 +154,52 @@
         }
 
         /* Ensure proper sidebar positioning based on language direction */
-        [dir="rtl"] .layout-menu {
-            right: 0;
-            left: auto;
+        /* RTL (Arabic) - Sidebar on the RIGHT */
+        html[dir="rtl"] .layout-menu,
+        [dir="rtl"] .layout-menu,
+        body[dir="rtl"] .layout-menu {
+            right: 0 !important;
+            left: auto !important;
         }
 
-        [dir="ltr"] .layout-menu {
-            left: 0;
-            right: auto;
+        html[dir="rtl"] .layout-page,
+        [dir="rtl"] .layout-page,
+        body[dir="rtl"] .layout-page {
+            margin-right: 260px !important;
+            margin-left: 0 !important;
+        }
+
+        /* LTR (English) - Sidebar on the LEFT */
+        html[dir="ltr"] .layout-menu,
+        [dir="ltr"] .layout-menu,
+        body[dir="ltr"] .layout-menu {
+            left: 0 !important;
+            right: auto !important;
+        }
+
+        html[dir="ltr"] .layout-page,
+        [dir="ltr"] .layout-page,
+        body[dir="ltr"] .layout-page {
+            margin-left: 260px !important;
+            margin-right: 0 !important;
         }
 
         /* Smooth transition when switching language/direction */
-        html[dir="rtl"] .layout-menu,
-        html[dir="ltr"] .layout-menu {
-            transition: left 0.3s ease, right 0.3s ease;
+        .layout-menu {
+            transition: left 0.3s ease, right 0.3s ease !important;
+        }
+
+        .layout-page {
+            transition: margin-left 0.3s ease, margin-right 0.3s ease !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1199.98px) {
+            html[dir="rtl"] .layout-page,
+            html[dir="ltr"] .layout-page {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
         }
     </style>
 
