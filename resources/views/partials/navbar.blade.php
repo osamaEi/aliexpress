@@ -11,11 +11,11 @@
                     <!-- Subscription Expiry Notice for Seller -->
                     @if(auth()->user()->user_type === 'seller')
                         @php
-                            $subscription = auth()->user()->subscription;
+                            $activeSubscription = auth()->user()->activeSubscription;
                             $daysRemaining = null;
 
-                            if ($subscription && $subscription->ends_at) {
-                                $daysRemaining = now()->diffInDays($subscription->ends_at, false);
+                            if ($activeSubscription && $activeSubscription->end_date) {
+                                $daysRemaining = now()->diffInDays($activeSubscription->end_date, false);
                                 $daysRemaining = floor($daysRemaining);
                             }
                         @endphp

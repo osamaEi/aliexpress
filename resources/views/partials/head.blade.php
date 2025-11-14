@@ -167,6 +167,8 @@
         body[dir="rtl"] .layout-page {
             margin-right: 260px !important;
             margin-left: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
         }
 
         /* LTR (English) - Sidebar on the LEFT */
@@ -182,6 +184,8 @@
         body[dir="ltr"] .layout-page {
             margin-left: 260px !important;
             margin-right: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
         }
 
         /* Smooth transition when switching language/direction */
