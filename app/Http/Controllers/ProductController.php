@@ -644,24 +644,24 @@ class ProductController extends Controller
 
         try {
             $keyword = $request->keyword ?? '';
-            $requestedCategoryId = $request->get('category_id');
+            $localCategoryId = $request->get('category_id');
             $sortFilter = $request->get('sort_filter', 'orders');
 
-            // The category_id from the request is the AliExpress category ID (from the subcategory dropdown)
-            // We use it directly for the API call
+            // Get AliExpress category ID from our local category
             $aliexpressCategoryId = null;
-            if (!empty($requestedCategoryId)) {
-                // The frontend sends the AliExpress category ID directly
-                $aliexpressCategoryId = $requestedCategoryId;
-
-                // Find the local category for logging purposes
-                $category = \App\Models\Category::where('aliexpress_category_id', $requestedCategoryId)->first();
-
-                Log::info('Category search requested', [
-                    'aliexpress_category_id' => $aliexpressCategoryId,
-                    'local_category_found' => $category ? true : false,
-                    'local_category_name' => $category ? $category->name : 'N/A'
-                ]);
+            if (!empty($localCategoryId)) {
+                $category = \App\Models\Category::find($localCategoryId);
+                if ($category && $category->aliexpress_category_id) {
+                    $aliexpressCategoryId = $category->aliexpress_category_id;
+                    Log::info('Mapped local category to AliExpress category', [
+                        'local_category_id' => $localCategoryId,
+                        'aliexpress_category_id' => $aliexpressCategoryId
+                    ]);
+                } else {
+                    Log::warning('Category not found or missing AliExpress ID', [
+                        'local_category_id' => $localCategoryId
+                    ]);
+                }
             }
 
             // Map sort filter to API sort_by parameter
@@ -681,29 +681,48 @@ class ProductController extends Controller
                 Log::info('Getting products by category', [
                     'requested_category_id' => $requestedCategoryId,
                     'aliexpress_category_id' => $aliexpressCategoryId,
-                    'sort_filter' => $sortFilter
+                    'sort_filter' => $sortFilter,
+                    'has_keyword' => !empty($keyword)
                 ]);
 
-                // When category is selected, use a very broad keyword
-                // The category filter will do the heavy lifting
-                // Using common words that appear in most product titles
-                $categoryKeyword = 'new'; // Very common word in product titles
+                // Find the category to get its name
+                $category = \App\Models\Category::where('aliexpress_category_id', $requestedCategoryId)->first();
 
-                // For specific sort filters, use relevant keywords
-                if ($sortFilter === 'newest') {
-                    $categoryKeyword = 'new';
-                } elseif (in_array($sortFilter, ['price_low', 'price_high'])) {
-                    $categoryKeyword = 'sale';
+                // Strategy: Use category name as keyword if available and no keyword provided
+                // This gives more relevant results than generic keywords
+                $categoryKeyword = 'new'; // Default fallback
+
+                if ($category && empty($keyword)) {
+                    // Use the category name as the search keyword
+                    // This is brilliant - it finds products that match the category context
+                    $categoryKeyword = $category->name;
+                    Log::info('Using category name as search keyword', [
+                        'category_name' => $categoryKeyword,
+                        'category_id' => $aliexpressCategoryId
+                    ]);
+                } elseif (!empty($keyword)) {
+                    // User provided a keyword, use it with category filter
+                    $categoryKeyword = $keyword;
+                    Log::info('Using user keyword with category filter', [
+                        'user_keyword' => $keyword,
+                        'category_id' => $aliexpressCategoryId
+                    ]);
                 } else {
-                    $categoryKeyword = 'best'; // For orders and ratings
+                    // No category name and no keyword, use strategic keywords based on sort filter
+                    if ($sortFilter === 'newest') {
+                        $categoryKeyword = 'new';
+                    } elseif (in_array($sortFilter, ['price_low', 'price_high'])) {
+                        $categoryKeyword = 'sale';
+                    } else {
+                        $categoryKeyword = 'best'; // For orders and ratings
+                    }
+                    Log::info('Using fallback keyword based on sort filter', [
+                        'keyword' => $categoryKeyword,
+                        'sort_filter' => $sortFilter
+                    ]);
                 }
 
-                Log::info('Searching category with keyword', [
-                    'keyword' => $categoryKeyword,
-                    'category_id' => $aliexpressCategoryId
-                ]);
-
-                // Make a single request with higher page size
+                // Make a single API call with the optimized keyword
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $categoryKeyword,
                     [
@@ -990,7 +1009,6 @@ class ProductController extends Controller
             'products.*.product_image' => 'nullable|string',
             'products.*.product_price' => 'nullable|numeric',
             'products.*.currency' => 'nullable|string|max:3',
-            'products.*.category_id' => 'nullable|exists:categories,id',
         ]);
 
         $products = $request->products;
@@ -1025,27 +1043,6 @@ class ProductController extends Controller
                 $basePrice = $productData['product_price'] ?? 0;
                 $sellerAmount = 0;
                 $finalPrice = $basePrice;
-                $categoryId = $productData['category_id'] ?? null;
-
-                // Apply seller's subcategory profit if category is provided
-                if ($categoryId) {
-                    $profitSetting = $user->getProfitForSubcategory($categoryId);
-
-                    if ($profitSetting) {
-                        $sellerAmount = $profitSetting->calculateProfit($basePrice);
-                        $finalPrice = $profitSetting->calculateFinalPrice($basePrice);
-
-                        \Log::info('Seller Profit Applied (Bulk)', [
-                            'seller_id' => $user->id,
-                            'category_id' => $categoryId,
-                            'base_price' => $basePrice,
-                            'profit_type' => $profitSetting->profit_type,
-                            'profit_value' => $profitSetting->profit_value,
-                            'seller_amount' => $sellerAmount,
-                            'final_price' => $finalPrice,
-                        ]);
-                    }
-                }
 
                 if (!$product) {
                     // Create new product
@@ -1060,16 +1057,8 @@ class ProductController extends Controller
                         'images' => isset($productData['product_image']) ? [$productData['product_image']] : [],
                         'aliexpress_id' => $aliexpressProductId,
                         'aliexpress_price' => $basePrice,
-                        'category_id' => $categoryId,
                         'stock_quantity' => 0,
                         'is_active' => false,
-                    ]);
-                } else {
-                    // Update existing product with seller's profit
-                    $product->update([
-                        'price' => $finalPrice,
-                        'seller_amount' => $sellerAmount,
-                        'category_id' => $categoryId ?? $product->category_id,
                     ]);
                 }
 
