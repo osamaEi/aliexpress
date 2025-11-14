@@ -10,12 +10,12 @@
                     <i class="ri-search-2-line" style="font-size: 24px; color: #667eea;"></i>
                 </div>
                 <div>
-                    <h5 class="mb-0 text-white fw-bold">AliExpress Product Search</h5>
-                    <small class="text-white-50">Search millions of products from AliExpress</small>
+                    <h5 class="mb-0 text-white fw-bold">Product Search</h5>
+                    <small class="text-white-50">Search millions of products from suppliers</small>
                 </div>
             </div>
             <div class="badge bg-white text-primary px-3 py-2">
-                <i class="ri-code-s-slash-line me-1"></i>aliexpress.ds.text.search
+                <i class="ri-code-s-slash-line me-1"></i>Product Search API
             </div>
         </div>
 
@@ -229,7 +229,7 @@
                             }
                         @endphp
                         <br>
-                        <small class="text-muted">Final customer price = AliExpress price + admin profit</small>
+                        <small class="text-muted">Final customer price = Supplier price + admin profit</small>
                     </div>
                 </div>
 
@@ -309,6 +309,16 @@
                                                 $isAssigned = in_array($product['item_id'], $assignedProductIds ?? []);
                                             @endphp
                                             @if(!$isAssigned)
+                                            @php
+                                                // Get local category ID for bulk assign
+                                                $bulkLocalCategoryId = null;
+                                                if (request('category_id')) {
+                                                    $bulkSelectedCategory = $allCategories->firstWhere('aliexpress_category_id', request('category_id'));
+                                                    if ($bulkSelectedCategory) {
+                                                        $bulkLocalCategoryId = $bulkSelectedCategory->id;
+                                                    }
+                                                }
+                                            @endphp
                                             <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
                                                 <div class="form-check">
                                                     <input
@@ -319,6 +329,7 @@
                                                         data-image="{{ $product['item_main_pic'] }}"
                                                         data-price="{{ $product['original_sale_price'] ?? $product['sale_price'] }}"
                                                         data-currency="{{ request('currency', 'AED') }}"
+                                                        data-category-id="{{ $bulkLocalCategoryId ?? '' }}"
                                                         style="width: 20px; height: 20px; cursor: pointer; background-color: white; border: 2px solid #667eea;">
                                                 </div>
                                             </div>
@@ -393,7 +404,7 @@
                                             target="_blank"
                                             class="btn btn-sm btn-outline-primary w-100 mb-2"
                                         >
-                                            <i class="ri-external-link-line me-1"></i> View on AliExpress
+                                            <i class="ri-external-link-line me-1"></i> View on Supplier
                                         </a>
 
                                         @auth
@@ -411,10 +422,20 @@
                                                         <i class="ri-check-line me-1"></i> Already Assigned
                                                     </button>
                                                 @else
+                                                    @php
+                                                        // Get local category ID based on the selected AliExpress category ID
+                                                        $localCategoryId = null;
+                                                        if (request('category_id')) {
+                                                            $selectedCategory = $allCategories->firstWhere('aliexpress_category_id', request('category_id'));
+                                                            if ($selectedCategory) {
+                                                                $localCategoryId = $selectedCategory->id;
+                                                            }
+                                                        }
+                                                    @endphp
                                                     <button
                                                         type="button"
                                                         class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
-                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', 'AED') }}', this)"
+                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', 'AED') }}', '{{ $localCategoryId ?? '' }}', this)"
                                                         data-product-id="{{ $product['item_id'] }}"
                                                     >
                                                         <i class="ri-pushpin-line me-1"></i> Assign to Me
@@ -506,9 +527,9 @@
             @else
                 <div class="text-center py-5">
                     <i class="ri-shopping-bag-line" style="font-size: 4rem; color: #ccc;"></i>
-                    <h5 class="mt-3">Welcome to AliExpress Product Search</h5>
+                    <h5 class="mt-3">Welcome to Product Search</h5>
                     <p class="text-muted">Search for any product using the search bar above or click on quick links</p>
-                    <small class="text-muted">Powered by aliexpress.ds.text.search API</small>
+                    <small class="text-muted">Powered by Product Search API</small>
                 </div>
             @endif
         </div>
@@ -649,7 +670,7 @@
     });
 
     // Assign product to seller function
-    function assignProduct(productId, productTitle, productImage, productPrice, currency, buttonElement) {
+    function assignProduct(productId, productTitle, productImage, productPrice, currency, categoryId, buttonElement) {
         // Show loading state
         const originalHtml = buttonElement.innerHTML;
         buttonElement.disabled = true;
@@ -657,6 +678,20 @@
 
         // CSRF token for Laravel
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        // Prepare request body
+        const requestData = {
+            aliexpress_product_id: productId,
+            product_title: productTitle,
+            product_image: productImage,
+            product_price: productPrice,
+            currency: currency
+        };
+
+        // Add category_id only if it's provided and not empty
+        if (categoryId && categoryId.trim() !== '') {
+            requestData.category_id = categoryId;
+        }
 
         // Make AJAX request
         fetch('{{ route("products.assign") }}', {
@@ -666,13 +701,7 @@
                 'X-CSRF-TOKEN': csrfToken || '{{ csrf_token() }}',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({
-                aliexpress_product_id: productId,
-                product_title: productTitle,
-                product_image: productImage,
-                product_price: productPrice,
-                currency: currency
-            })
+            body: JSON.stringify(requestData)
         })
         .then(response => response.json())
         .then(data => {
@@ -882,13 +911,22 @@
                 bulkAssignBtn.innerHTML = '<i class="ri-loader-4-line me-1 spinner-border spinner-border-sm"></i> Assigning...';
 
                 // Prepare products data
-                const products = Array.from(selectedCheckboxes).map(checkbox => ({
-                    aliexpress_product_id: checkbox.value,
-                    product_title: checkbox.dataset.title,
-                    product_image: checkbox.dataset.image,
-                    product_price: checkbox.dataset.price,
-                    currency: checkbox.dataset.currency
-                }));
+                const products = Array.from(selectedCheckboxes).map(checkbox => {
+                    const productData = {
+                        aliexpress_product_id: checkbox.value,
+                        product_title: checkbox.dataset.title,
+                        product_image: checkbox.dataset.image,
+                        product_price: checkbox.dataset.price,
+                        currency: checkbox.dataset.currency
+                    };
+
+                    // Add category_id if available
+                    if (checkbox.dataset.categoryId && checkbox.dataset.categoryId.trim() !== '') {
+                        productData.category_id = checkbox.dataset.categoryId;
+                    }
+
+                    return productData;
+                });
 
                 // CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';

@@ -8,6 +8,109 @@
         <p class="text-muted">{{ __('messages.welcome_seller_panel') }}</p>
     </div>
 
+    <!-- Subscription Countdown Timer -->
+    @php
+        $activeSubscription = auth()->user()->activeSubscription;
+    @endphp
+
+    @if($activeSubscription && $activeSubscription->end_date)
+        @php
+            $endDate = \Carbon\Carbon::parse($activeSubscription->end_date);
+            $daysRemaining = now()->diffInDays($endDate, false);
+        @endphp
+
+        @if($daysRemaining >= 0)
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card" style="background: linear-gradient(135deg, {{ $daysRemaining <= 5 ? '#dc2626' : ($daysRemaining <= 10 ? '#ea580c' : '#10b981') }} 0%, {{ $daysRemaining <= 5 ? '#991b1b' : ($daysRemaining <= 10 ? '#c2410c' : '#059669') }} 100%);">
+                        <div class="card-body text-white">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h4 class="text-white mb-2">
+                                        <i class="ri-time-line me-2"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'انتهاء الاشتراك' : 'Subscription Expiry' }}
+                                    </h4>
+                                    <p class="mb-0 opacity-75">
+                                        {{ app()->getLocale() == 'ar' ? 'ينتهي اشتراكك في:' : 'Your subscription expires on:' }}
+                                        <strong>{{ $endDate->format('Y-m-d H:i:s') }}</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <a href="{{ route('subscriptions.index') }}" class="btn btn-light btn-lg">
+                                        <i class="ri-refresh-line me-1"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'تجديد الاشتراك' : 'Renew Subscription' }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Countdown Timer -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-center gap-3" id="countdown-timer">
+                                        <div class="text-center">
+                                            <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
+                                                <h2 class="text-white mb-0 fw-bold" id="days">--</h2>
+                                                <small class="text-white opacity-75">{{ app()->getLocale() == 'ar' ? 'يوم' : 'Days' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
+                                                <h2 class="text-white mb-0 fw-bold" id="hours">--</h2>
+                                                <small class="text-white opacity-75">{{ app()->getLocale() == 'ar' ? 'ساعة' : 'Hours' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
+                                                <h2 class="text-white mb-0 fw-bold" id="minutes">--</h2>
+                                                <small class="text-white opacity-75">{{ app()->getLocale() == 'ar' ? 'دقيقة' : 'Minutes' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
+                                                <h2 class="text-white mb-0 fw-bold" id="seconds">--</h2>
+                                                <small class="text-white opacity-75">{{ app()->getLocale() == 'ar' ? 'ثانية' : 'Seconds' }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Countdown Timer
+                const endDate = new Date("{{ $endDate->format('Y-m-d H:i:s') }}").getTime();
+
+                function updateCountdown() {
+                    const now = new Date().getTime();
+                    const distance = endDate - now;
+
+                    if (distance < 0) {
+                        document.getElementById('countdown-timer').innerHTML = '<div class="alert alert-danger w-100 text-center mb-0"><strong>{{ app()->getLocale() == 'ar' ? 'انتهى الاشتراك!' : 'Subscription Expired!' }}</strong></div>';
+                        return;
+                    }
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    document.getElementById('days').innerText = days.toString().padStart(2, '0');
+                    document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+                    document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+                    document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+                }
+
+                // Update countdown every second
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            </script>
+        @endif
+    @endif
+    <!-- /Subscription Countdown Timer -->
+
     <!-- Statistics Cards -->
     <div class="row g-4 mb-4">
         <!-- Total Products -->
