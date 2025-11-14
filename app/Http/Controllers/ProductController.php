@@ -644,24 +644,24 @@ class ProductController extends Controller
 
         try {
             $keyword = $request->keyword ?? '';
-            $localCategoryId = $request->get('category_id');
+            $requestedCategoryId = $request->get('category_id');
             $sortFilter = $request->get('sort_filter', 'orders');
 
-            // Get AliExpress category ID from our local category
+            // The category_id from the request is the AliExpress category ID (from the subcategory dropdown)
+            // We use it directly for the API call
             $aliexpressCategoryId = null;
-            if (!empty($localCategoryId)) {
-                $category = \App\Models\Category::find($localCategoryId);
-                if ($category && $category->aliexpress_category_id) {
-                    $aliexpressCategoryId = $category->aliexpress_category_id;
-                    Log::info('Mapped local category to AliExpress category', [
-                        'local_category_id' => $localCategoryId,
-                        'aliexpress_category_id' => $aliexpressCategoryId
-                    ]);
-                } else {
-                    Log::warning('Category not found or missing AliExpress ID', [
-                        'local_category_id' => $localCategoryId
-                    ]);
-                }
+            if (!empty($requestedCategoryId)) {
+                // The frontend sends the AliExpress category ID directly
+                $aliexpressCategoryId = $requestedCategoryId;
+
+                // Find the local category for logging purposes
+                $category = \App\Models\Category::where('aliexpress_category_id', $requestedCategoryId)->first();
+
+                Log::info('Category search requested', [
+                    'aliexpress_category_id' => $aliexpressCategoryId,
+                    'local_category_found' => $category ? true : false,
+                    'local_category_name' => $category ? $category->name : 'N/A'
+                ]);
             }
 
             // Map sort filter to API sort_by parameter
@@ -679,7 +679,7 @@ class ProductController extends Controller
             if (!empty($aliexpressCategoryId)) {
                 // Category selected - get products from category immediately
                 Log::info('Getting products by category', [
-                    'local_category_id' => $localCategoryId,
+                    'requested_category_id' => $requestedCategoryId,
                     'aliexpress_category_id' => $aliexpressCategoryId,
                     'sort_filter' => $sortFilter
                 ]);
@@ -780,13 +780,13 @@ class ProductController extends Controller
 
                 if (empty($result['products'])) {
                     Log::warning('No products found for category', [
-                        'local_category_id' => $localCategoryId,
+                        'requested_category_id' => $requestedCategoryId,
                         'aliexpress_category_id' => $aliexpressCategoryId,
                         'attempts' => $attemptCount
                     ]);
                 } else {
                     Log::info('Final category search result', [
-                        'local_category_id' => $localCategoryId,
+                        'requested_category_id' => $requestedCategoryId,
                         'aliexpress_category_id' => $aliexpressCategoryId,
                         'products_returned' => count($result['products']),
                         'total_count' => $result['total_count'] ?? 0,
