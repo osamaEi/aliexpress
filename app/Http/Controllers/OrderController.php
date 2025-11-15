@@ -147,7 +147,22 @@ class OrderController extends Controller
             ]);
 
             // Dispatch event to place order on AliExpress
+            Log::info('🎯 Dispatching OrderCreated event', [
+                'event' => 'OrderCreated',
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'product_id' => $order->product_id,
+                'is_aliexpress_product' => $order->product->isAliexpressProduct(),
+                'payment_status' => $order->payment_status,
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
             event(new OrderCreated($order));
+
+            Log::info('✅ OrderCreated event dispatched successfully', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number
+            ]);
 
             return redirect()->route('orders.show', $order)
                 ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet. Your order will be placed on AliExpress automatically.');

@@ -153,14 +153,24 @@ class PlaceOrderOnAliExpress implements ShouldQueue
                 ]
             ];
 
-            Log::info('Placing order on AliExpress via event listener', [
+            Log::info('🚀 Calling AliExpress API to place order', [
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
-                'aliexpress_product_id' => $order->product->aliexpress_id
+                'aliexpress_product_id' => $order->product->aliexpress_id,
+                'quantity' => $order->quantity,
+                'sku_attr' => $skuAttr,
+                'shipping_country' => $order->shipping_country
             ]);
 
             // Call AliExpress API
             $result = $this->aliexpressService->createOrder($orderData);
+
+            Log::info('📥 Received response from AliExpress API', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'has_order_id' => isset($result['order_id']),
+                'result_keys' => $result ? array_keys($result) : []
+            ]);
 
             if ($result && isset($result['order_id'])) {
                 $order->update([
@@ -170,18 +180,29 @@ class PlaceOrderOnAliExpress implements ShouldQueue
                     'aliexpress_response' => $result,
                 ]);
 
-                Log::info('Order placed on AliExpress successfully via event listener', [
+                Log::info('✅ SUCCESS: Order placed on AliExpress successfully!', [
                     'order_id' => $order->id,
-                    'aliexpress_order_id' => $result['order_id']
+                    'order_number' => $order->order_number,
+                    'aliexpress_order_id' => $result['order_id'],
+                    'placed_at' => now()->toDateTimeString()
                 ]);
             } else {
+                Log::error('❌ Invalid response from AliExpress API', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'response' => $result
+                ]);
                 throw new \Exception('Invalid response from AliExpress API');
             }
 
         } catch (\Exception $e) {
-            Log::error('AliExpress Order Placement Error (Event Listener)', [
+            Log::error('❌ FAILURE: AliExpress Order Placement Error', [
+                'listener' => 'PlaceOrderOnAliExpress',
                 'order_id' => $order->id,
-                'error' => $e->getMessage(),
+                'order_number' => $order->order_number,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -190,8 +211,20 @@ class PlaceOrderOnAliExpress implements ShouldQueue
                 'admin_notes' => 'Failed to place on AliExpress: ' . $e->getMessage()
             ]);
 
+            Log::info('📝 Order status updated to failed', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number
+            ]);
+
             // Re-throw to mark job as failed for retry
             throw $e;
         }
+
+        Log::info('=== OrderCreated Event Completed ===', [
+            'listener' => 'PlaceOrderOnAliExpress',
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'timestamp' => now()->toDateTimeString()
+        ]);
     }
 }
