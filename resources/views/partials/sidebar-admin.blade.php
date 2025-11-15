@@ -134,10 +134,18 @@
         </li>
 
         <!-- Order Management -->
-        <li class="menu-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('admin.orders.*') && !request()->routeIs('admin.order-profits.*') ? 'active' : '' }}">
             <a href="{{ route('admin.orders.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-file-list-3-line"></i>
                 <div data-i18n="Order Management">{{ __('messages.order_management') }}</div>
+            </a>
+        </li>
+
+        <!-- Order Profits -->
+        <li class="menu-item {{ request()->routeIs('admin.order-profits.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.order-profits.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-funds-line"></i>
+                <div data-i18n="Order Profits">{{ __('messages.order_profits') }}</div>
             </a>
         </li>
 

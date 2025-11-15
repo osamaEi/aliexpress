@@ -21,6 +21,9 @@ class Order extends Model
         'unit_price',
         'total_price',
         'total_amount',
+        'aliexpress_profit',
+        'admin_category_profit',
+        'seller_profit',
         'currency',
         'customer_name',
         'customer_email',
@@ -48,6 +51,9 @@ class Order extends Model
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'aliexpress_profit' => 'decimal:2',
+        'admin_category_profit' => 'decimal:2',
+        'seller_profit' => 'decimal:2',
         'quantity' => 'integer',
         'selected_variant_details' => 'array',
         'placed_at' => 'datetime',
@@ -178,5 +184,13 @@ class Order extends Model
     public function canBeCancelled(): bool
     {
         return in_array($this->status, ['pending', 'processing', 'placed']);
+    }
+
+    /**
+     * Get total profit from all sources
+     */
+    public function getTotalProfit(): float
+    {
+        return $this->aliexpress_profit + $this->admin_category_profit + $this->seller_profit;
     }
 }

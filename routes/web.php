@@ -191,6 +191,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/orders/bulk-sync', [OrderManagementController::class, 'bulkSync'])->name('orders.bulk-sync');
         Route::post('/orders/{order}/update-status', [OrderManagementController::class, 'updateStatus'])->name('orders.update-status');
 
+        // Order Profit Management
+        Route::get('/order-profits', [App\Http\Controllers\Admin\OrderProfitController::class, 'index'])->name('order-profits.index');
+
         // Categories Management (use existing CategoryController)
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
