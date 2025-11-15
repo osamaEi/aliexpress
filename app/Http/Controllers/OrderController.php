@@ -84,11 +84,27 @@ class OrderController extends Controller
 
         try {
             $product = Product::findOrFail($validated['product_id']);
+            $user = auth()->user();
 
             // Calculate pricing
             $quantity = $validated['quantity'];
             $unitPrice = $product->price;
             $totalPrice = $unitPrice * $quantity;
+
+            // Check seller's wallet balance
+            if (!$user->wallet) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Please increase your balance to create orders.');
+            }
+
+            if ($user->wallet->balance < $totalPrice) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Insufficient balance. Please increase your balance to create this order. Required: ' . number_format($totalPrice, 2) . ' ' . ($product->currency ?? 'AED') . ', Available: ' . number_format($user->wallet->balance, 2) . ' AED');
+            }
+
+            DB::beginTransaction();
 
             // Create order
             $order = Order::create([
@@ -99,7 +115,7 @@ class OrderController extends Controller
                 'selected_sku_attr' => $validated['selected_sku_attr'] ?? null,
                 'unit_price' => $unitPrice,
                 'total_price' => $totalPrice,
-                'total_amount' => $totalPrice, // Ensure total_amount is set for payment
+                'total_amount' => $totalPrice,
                 'currency' => $product->currency ?? 'AED',
                 'customer_name' => $validated['customer_name'],
                 'customer_email' => $validated['customer_email'],
@@ -113,14 +129,28 @@ class OrderController extends Controller
                 'shipping_zip' => $validated['shipping_zip'],
                 'customer_notes' => $validated['customer_notes'],
                 'status' => 'pending',
-                'payment_status' => 'pending', // Set payment status
+                'payment_status' => 'paid', // Mark as paid since we're deducting from wallet
             ]);
 
-            // Redirect to PayPal payment
-            return redirect()->route('payment.order', $order)
-                ->with('info', 'Order created! Please complete payment. Order Number: ' . $order->order_number);
+            // Deduct amount from seller's wallet
+            $user->wallet->debit($totalPrice, 'Order payment for order #' . $order->order_number);
+
+            DB::commit();
+
+            Log::info('Order created and paid from wallet', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'user_id' => $user->id,
+                'amount' => $totalPrice,
+                'wallet_balance_after' => $user->wallet->fresh()->balance
+            ]);
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet.');
 
         } catch (\Exception $e) {
+            DB::rollBack();
+
             Log::error('Order Creation Error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
