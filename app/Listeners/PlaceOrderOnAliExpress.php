@@ -4,14 +4,10 @@ namespace App\Listeners;
 
 use App\Events\OrderCreated;
 use App\Services\AliExpressService;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 
-class PlaceOrderOnAliExpress implements ShouldQueue
+class PlaceOrderOnAliExpress
 {
-    use InteractsWithQueue;
-
     protected $aliexpressService;
 
     /**
