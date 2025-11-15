@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\AliExpressService;
@@ -145,8 +146,11 @@ class OrderController extends Controller
                 'wallet_balance_after' => $user->wallet->fresh()->balance
             ]);
 
+            // Dispatch event to place order on AliExpress
+            event(new OrderCreated($order));
+
             return redirect()->route('orders.show', $order)
-                ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet.');
+                ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet. Your order will be placed on AliExpress automatically.');
 
         } catch (\Exception $e) {
             DB::rollBack();
