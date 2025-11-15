@@ -29,19 +29,41 @@ class PlaceOrderOnAliExpress implements ShouldQueue
     {
         $order = $event->order;
 
+        Log::info('=== OrderCreated Event Triggered ===', [
+            'listener' => 'PlaceOrderOnAliExpress',
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'product_id' => $order->product_id,
+            'payment_status' => $order->payment_status,
+            'timestamp' => now()->toDateTimeString()
+        ]);
+
         // Only process if order is for an AliExpress product and payment is completed
         if (!$order->product->isAliexpressProduct() || $order->payment_status !== 'paid') {
-            Log::info('Skipping AliExpress placement', [
+            Log::warning('❌ Skipping AliExpress placement - Validation Failed', [
                 'order_id' => $order->id,
-                'is_aliexpress' => $order->product->isAliexpressProduct(),
-                'payment_status' => $order->payment_status
+                'order_number' => $order->order_number,
+                'is_aliexpress_product' => $order->product->isAliexpressProduct(),
+                'payment_status' => $order->payment_status,
+                'reason' => !$order->product->isAliexpressProduct() ? 'Not an AliExpress product' : 'Payment not completed'
             ]);
             return;
         }
 
+        Log::info('✅ Validation passed - Starting AliExpress placement', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'aliexpress_product_id' => $order->product->aliexpress_id
+        ]);
+
         try {
             // Update status to processing
             $order->update(['status' => 'processing']);
+
+            Log::info('📝 Order status updated to processing', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number
+            ]);
 
             // Use the SKU that was selected during order creation
             $skuAttr = $order->selected_sku_attr ?? '';
