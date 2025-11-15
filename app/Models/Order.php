@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
@@ -88,6 +89,14 @@ class Order extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Get the shipping information for this order.
+     */
+    public function shipping(): HasOne
+    {
+        return $this->hasOne(Shipping::class);
     }
 
     /**
@@ -192,5 +201,52 @@ class Order extends Model
     public function getTotalProfit(): float
     {
         return $this->aliexpress_profit + $this->admin_category_profit + $this->seller_profit;
+    }
+
+    /**
+     * Calculate and set all profit fields for this order
+     */
+    public function calculateProfits(): void
+    {
+        if (!$this->product) {
+            $this->load('product');
+        }
+
+        $product = $this->product;
+
+        // 1. Calculate AliExpress Profit (supplier profit margin)
+        $aliexpressProfit = 0;
+        if ($product->aliexpress_price && $product->supplier_profit_margin) {
+            $aliexpressCost = ($product->aliexpress_price + ($product->shipping_cost ?? 0)) * $this->quantity;
+            $aliexpressSellingPrice = $aliexpressCost * (1 + ($product->supplier_profit_margin / 100));
+            $aliexpressProfit = $aliexpressSellingPrice - $aliexpressCost;
+        }
+
+        // 2. Calculate Admin Category Profit
+        $adminCategoryProfit = 0;
+        if ($product->category_id) {
+            $adminProfitPerUnit = AdminCategoryProfit::getProfitForCategory($product->category_id);
+            $adminCategoryProfit = $adminProfitPerUnit * $this->quantity;
+        }
+
+        // 3. Calculate Seller Profit
+        $sellerProfit = 0;
+        if ($this->user_id && $product->category_id) {
+            $sellerProfitSetting = SellerSubcategoryProfit::where('user_id', $this->user_id)
+                ->where('category_id', $product->category_id)
+                ->where('is_active', true)
+                ->first();
+
+            if ($sellerProfitSetting) {
+                // Base price for seller profit calculation (product price per unit)
+                $basePrice = $product->price * $this->quantity;
+                $sellerProfit = $sellerProfitSetting->calculateProfit($basePrice);
+            }
+        }
+
+        // Update the profit fields
+        $this->aliexpress_profit = round($aliexpressProfit, 2);
+        $this->admin_category_profit = round($adminCategoryProfit, 2);
+        $this->seller_profit = round($sellerProfit, 2);
     }
 }

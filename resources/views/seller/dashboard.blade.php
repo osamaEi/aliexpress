@@ -49,26 +49,26 @@
                                     <div class="d-flex justify-content-center gap-3" id="countdown-timer">
                                         <div class="text-center">
                                             <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
-                                                <h2 class="text-white mb-0 fw-bold" id="days">--</h2>
-                                                <small class="text-white opacity-75">{{ app()->getLocale() == 'ar' ? 'يوم' : 'Days' }}</small>
+                                                <h2 class="text-dark mb-0 fw-bold" id="days">--</h2>
+                                                <small class="text-dark opacity-75">{{ app()->getLocale() == 'ar' ? 'يوم' : 'Days' }}</small>
                                             </div>
                                         </div>
                                         <div class="text-center">
                                             <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
-                                                <h2 class="text-white mb-0 fw-bold" id="hours">--</h2>
-                                                <small class="text-white opacity-75">{{ app()->getLocale() == 'ar' ? 'ساعة' : 'Hours' }}</small>
+                                                <h2 class="text-dark mb-0 fw-bold" id="hours">--</h2>
+                                                <small class="text-dark opacity-75">{{ app()->getLocale() == 'ar' ? 'ساعة' : 'Hours' }}</small>
                                             </div>
                                         </div>
                                         <div class="text-center">
                                             <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
-                                                <h2 class="text-white mb-0 fw-bold" id="minutes">--</h2>
-                                                <small class="text-white opacity-75">{{ app()->getLocale() == 'ar' ? 'دقيقة' : 'Minutes' }}</small>
+                                                <h2 class="text-dark mb-0 fw-bold" id="minutes">--</h2>
+                                                <small class="text-dark opacity-75">{{ app()->getLocale() == 'ar' ? 'دقيقة' : 'Minutes' }}</small>
                                             </div>
                                         </div>
                                         <div class="text-center">
                                             <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
-                                                <h2 class="text-white mb-0 fw-bold" id="seconds">--</h2>
-                                                <small class="text-white opacity-75">{{ app()->getLocale() == 'ar' ? 'ثانية' : 'Seconds' }}</small>
+                                                <h2 class="text-dark mb-0 fw-bold" id="seconds">--</h2>
+                                                <small class="text-dark opacity-75">{{ app()->getLocale() == 'ar' ? 'ثانية' : 'Seconds' }}</small>
                                             </div>
                                         </div>
                                     </div>

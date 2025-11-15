@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\Shipping;
 use App\Events\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -168,7 +169,7 @@ class AliExpressWebhookService
     {
         try {
             $aliexpressOrderId = $data['order_id'] ?? $data['orderId'] ?? null;
-            $trackingNumber = $data['tracking_number'] ?? $data['trackingNumber'] ?? null;
+            $trackingNumber = $data['tracking_number'] ?? $data['trackingNumber'] ?? $data['logistics_no'] ?? null;
 
             if (empty($aliexpressOrderId)) {
                 return [
@@ -186,6 +187,7 @@ class AliExpressWebhookService
                 ];
             }
 
+            // Update order tracking info
             if ($trackingNumber) {
                 $order->tracking_number = $trackingNumber;
             }
@@ -194,18 +196,60 @@ class AliExpressWebhookService
                 $order->shipping_method = $data['shipping_method'];
             }
 
-            // Store tracking events if provided
-            if (isset($data['tracking_events'])) {
-                $webhookData = $order->aliexpress_response ?? [];
-                $webhookData['tracking_events'] = $data['tracking_events'];
-                $order->aliexpress_response = $webhookData;
+            // Create or update Shipping record
+            $shippingData = [
+                'tracking_number' => $trackingNumber,
+                'carrier_name' => $data['logistics_name'] ?? $data['service_name'] ?? null,
+                'carrier_code' => $data['logistics_service'] ?? null,
+                'shipping_method' => $data['shipping_method'] ?? null,
+                'status' => $this->mapShippingStatus($data['shipping_status'] ?? $data['status'] ?? 'pending'),
+                'origin_country' => $data['origin_country'] ?? null,
+                'destination_country' => $data['destination_country'] ?? $order->shipping_country ?? null,
+                'raw_response' => $data,
+                'last_synced_at' => now(),
+            ];
+
+            // Add tracking events if provided
+            if (isset($data['tracking_events']) || isset($data['details'])) {
+                $shippingData['tracking_events'] = $data['tracking_events'] ?? $data['details'] ?? [];
+            }
+
+            // Update timestamps based on status
+            if (isset($data['shipped_at']) || isset($data['send_time'])) {
+                $shippingData['shipped_at'] = Carbon::parse($data['shipped_at'] ?? $data['send_time']);
+            }
+
+            if (isset($data['delivered_at']) || isset($data['receive_time'])) {
+                $shippingData['delivered_at'] = Carbon::parse($data['delivered_at'] ?? $data['receive_time']);
+            }
+
+            $shipping = Shipping::updateOrCreate(
+                ['order_id' => $order->id],
+                $shippingData
+            );
+
+            // Update order status based on shipping status
+            if ($shipping->status === 'delivered' && $order->status !== 'delivered') {
+                $order->status = 'delivered';
+                $order->delivered_at = $shipping->delivered_at ?? now();
+            } elseif ($shipping->status === 'in_transit' && $order->status === 'placed') {
+                $order->status = 'shipped';
+                $order->shipped_at = $shipping->shipped_at ?? now();
             }
 
             $order->save();
 
+            Log::info('Shipping tracking updated from webhook', [
+                'order_id' => $order->id,
+                'shipping_id' => $shipping->id,
+                'status' => $shipping->status,
+                'tracking_number' => $trackingNumber
+            ]);
+
             return [
                 'success' => true,
                 'order_id' => $order->id,
+                'shipping_id' => $shipping->id,
             ];
 
         } catch (\Exception $e) {
@@ -219,6 +263,29 @@ class AliExpressWebhookService
                 'error' => $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Map shipping status from webhook to our status
+     */
+    protected function mapShippingStatus(string $status): string
+    {
+        $statusMap = [
+            'WAIT_SELLER_SEND_GOODS' => 'pending',
+            'SELLER_SEND_GOODS' => 'in_transit',
+            'SELLER_PART_SEND_GOODS' => 'in_transit',
+            'WAIT_BUYER_ACCEPT_GOODS' => 'in_transit',
+            'FINISH' => 'delivered',
+            'SHIPPED' => 'in_transit',
+            'IN_TRANSIT' => 'in_transit',
+            'OUT_FOR_DELIVERY' => 'out_for_delivery',
+            'DELIVERED' => 'delivered',
+            'EXCEPTION' => 'exception',
+            'FAILED' => 'failed',
+            'RETURNED' => 'returned',
+        ];
+
+        return $statusMap[strtoupper($status)] ?? 'pending';
     }
 
     /**

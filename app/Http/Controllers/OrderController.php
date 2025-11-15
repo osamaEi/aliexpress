@@ -107,7 +107,7 @@ class OrderController extends Controller
 
             DB::beginTransaction();
 
-            // Create order
+            // Create order (profits will be calculated automatically by OrderObserver)
             $order = Order::create([
                 'user_id' => auth()->id(),
                 'order_number' => Order::generateOrderNumber(),

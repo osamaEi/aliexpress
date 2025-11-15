@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Order;
+use App\Observers\OrderObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator as PaginationPaginator;
 
@@ -21,5 +23,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         PaginationPaginator::useBootstrapFour();
+
+        // Register Order Observer
+        Order::observe(OrderObserver::class);
     }
 }

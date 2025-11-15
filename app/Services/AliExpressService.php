@@ -1483,4 +1483,122 @@ class AliExpressService
             ];
         }, $products);
     }
+
+    /**
+     * Get detailed logistics tracking information
+     * API: aliexpress.logistics.buyer.freight.get
+     */
+    public function getDetailedTrackingInfo(string $aliexpressOrderId)
+    {
+        $params = [
+            'ae_order_id' => $aliexpressOrderId,
+        ];
+
+        $data = $this->makeRequest('aliexpress.logistics.buyer.freight.get', $params, true);
+
+        Log::info('AliExpress Detailed Tracking Response', [
+            'order_id' => $aliexpressOrderId,
+            'response' => $data
+        ]);
+
+        if (isset($data['aliexpress_logistics_buyer_freight_get_response'])) {
+            return $data['aliexpress_logistics_buyer_freight_get_response'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Get logistics tracking details
+     * API: aliexpress.logistics.ds.trackinginfo.query
+     */
+    public function queryLogisticsTracking(string $aliexpressOrderId, string $logisticsNo = '', string $serviceName = '')
+    {
+        $params = [
+            'logistics_no' => $logisticsNo,
+            'origin' => 'ESCROW',
+            'out_ref' => $aliexpressOrderId,
+            'service_name' => $serviceName,
+            'to_area' => '',
+        ];
+
+        $data = $this->makeRequest('aliexpress.logistics.ds.trackinginfo.query', $params, true);
+
+        Log::info('AliExpress Logistics Tracking Query', [
+            'order_id' => $aliexpressOrderId,
+            'tracking_no' => $logisticsNo,
+            'response' => $data
+        ]);
+
+        if (isset($data['aliexpress_logistics_ds_trackinginfo_query_response']['result'])) {
+            return $data['aliexpress_logistics_ds_trackinginfo_query_response']['result'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Parse tracking status from AliExpress response
+     */
+    public function parseTrackingStatus(string $aliexpressStatus): string
+    {
+        $statusMap = [
+            'PLACE_ORDER_SUCCESS' => 'pending',
+            'IN_CANCEL' => 'pending',
+            'WAIT_SELLER_SEND_GOODS' => 'pending',
+            'SELLER_PART_SEND_GOODS' => 'in_transit',
+            'WAIT_BUYER_ACCEPT_GOODS' => 'in_transit',
+            'FUND_PROCESSING' => 'in_transit',
+            'IN_ISSUE' => 'exception',
+            'IN_FROZEN' => 'exception',
+            'WAIT_SELLER_EXAMINE_MONEY' => 'in_transit',
+            'RISK_CONTROL' => 'exception',
+            'FINISH' => 'delivered',
+        ];
+
+        return $statusMap[strtoupper($aliexpressStatus)] ?? 'pending';
+    }
+
+    /**
+     * Sync shipping information for an order
+     */
+    public function syncOrderShipping(Order $order): ?array
+    {
+        if (!$order->aliexpress_order_id) {
+            Log::warning('Cannot sync shipping: No AliExpress order ID', [
+                'order_id' => $order->id
+            ]);
+            return null;
+        }
+
+        try {
+            // Try to get tracking info
+            $trackingData = $this->getTrackingInfo($order->aliexpress_order_id);
+
+            if (!$trackingData) {
+                // Try alternative tracking method
+                $trackingData = $this->queryLogisticsTracking($order->aliexpress_order_id);
+            }
+
+            if ($trackingData) {
+                return [
+                    'tracking_number' => $trackingData['tracking_number'] ?? $trackingData['logistics_no'] ?? null,
+                    'carrier_name' => $trackingData['logistics_name'] ?? $trackingData['service_name'] ?? null,
+                    'carrier_code' => $trackingData['logistics_service'] ?? null,
+                    'status' => $this->parseTrackingStatus($trackingData['order_status'] ?? 'WAIT_SELLER_SEND_GOODS'),
+                    'tracking_events' => $trackingData['details'] ?? [],
+                    'raw_response' => $trackingData,
+                ];
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to sync order shipping', [
+                'order_id' => $order->id,
+                'aliexpress_order_id' => $order->aliexpress_order_id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return null;
+    }
 }
