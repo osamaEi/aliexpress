@@ -171,25 +171,15 @@
                         <div data-i18n="Create Order">{{ __('messages.create_order') }}</div>
                     </a>
                 </li>
-
-                <li class="menu-item">
-                    <a href="{{ route('orders.index', ['status' => 'pending']) }}" class="menu-link">
-                        <div data-i18n="Pending Orders">{{ __('messages.pending_orders') }}</div>
-                    </a>
-                </li>
-
-                <li class="menu-item">
-                    <a href="{{ route('orders.index', ['status' => 'placed']) }}" class="menu-link">
-                        <div data-i18n="Placed Orders">{{ __('messages.placed_orders') }}</div>
-                    </a>
-                </li>
-
-                <li class="menu-item">
-                    <a href="{{ route('orders.index', ['status' => 'shipped']) }}" class="menu-link">
-                        <div data-i18n="Shipped Orders">{{ __('messages.shipped_orders') }}</div>
-                    </a>
-                </li>
             </ul>
+        </li>
+
+        <!-- Shipping Tracking -->
+        <li class="menu-item {{ request()->routeIs('seller.shipping.*') ? 'active' : '' }}">
+            <a href="{{ route('seller.shipping.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-ship-line"></i>
+                <div data-i18n="Shipping Tracking">{{ __('messages.shipping_tracking') }}</div>
+            </a>
         </li>
 
         <!-- Account Section -->

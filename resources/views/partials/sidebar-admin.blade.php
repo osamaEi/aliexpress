@@ -149,6 +149,14 @@
             </a>
         </li>
 
+        <!-- Shipping Tracking -->
+        <li class="menu-item {{ request()->routeIs('admin.shipping.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.shipping.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-ship-line"></i>
+                <div data-i18n="Shipping Tracking">{{ __('messages.shipping_tracking') }}</div>
+            </a>
+        </li>
+
         <!-- Category Management -->
         <li class="menu-item {{ request()->routeIs('admin.categories.*') || request()->routeIs('categories.*') ? 'active' : '' }}">
             <a href="{{ route('categories.index') }}" class="menu-link">

@@ -170,6 +170,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/api/subcategory/{categoryId}', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'getProfitForSubcategory'])->name('api.get');
     });
 
+    // Seller Shipping Tracking Routes
+    Route::prefix('seller/shipping')->name('seller.shipping.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Seller\ShippingController::class, 'index'])->name('index');
+        Route::get('/{shipping}', [App\Http\Controllers\Seller\ShippingController::class, 'show'])->name('show');
+        Route::post('/{order}/sync', [App\Http\Controllers\Seller\ShippingController::class, 'syncTracking'])->name('sync');
+    });
+
     // Admin Routes
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         // Admin Dashboard
@@ -193,6 +200,14 @@ Route::middleware('auth')->group(function () {
 
         // Order Profit Management
         Route::get('/order-profits', [App\Http\Controllers\Admin\OrderProfitController::class, 'index'])->name('order-profits.index');
+
+        // Shipping Tracking Management
+        Route::prefix('shipping')->name('shipping.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\ShippingTrackingController::class, 'index'])->name('index');
+            Route::get('/{shipping}', [App\Http\Controllers\Admin\ShippingTrackingController::class, 'show'])->name('show');
+            Route::post('/{order}/sync', [App\Http\Controllers\Admin\ShippingTrackingController::class, 'syncTracking'])->name('sync');
+            Route::post('/sync-all', [App\Http\Controllers\Admin\ShippingTrackingController::class, 'syncAll'])->name('sync-all');
+        });
 
         // Categories Management (use existing CategoryController)
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
