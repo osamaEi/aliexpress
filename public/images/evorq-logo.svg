@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 150" width="850" height="150">
+  <!-- Black Circle with @ symbol -->
+  <circle cx="75" cy="75" r="65" fill="#000000"/>
+
+  <!-- White @ symbol -->
+  <g fill="#FFFFFF">
+    <!-- Outer part of @ -->
+    <path d="M 75 25 A 50 50 0 1 0 75 125 A 50 50 0 0 0 75 25 M 75 40 A 35 35 0 1 1 75 110 A 35 35 0 0 1 75 40"/>
+    <!-- Inner circle of @ -->
+    <circle cx="75" cy="75" r="18"/>
+    <!-- Vertical line of @ -->
+    <rect x="90" y="55" width="12" height="55" rx="2"/>
+  </g>
+
+  <!-- "BY" text in gray -->
+  <text x="20" y="85" font-family="Arial, sans-serif" font-size="32" font-weight="300" fill="#808080">BY</text>
+
+  <!-- "EVORQ TECHNOLOGIES" text in gray -->
+  <text x="230" y="95" font-family="Arial, sans-serif" font-size="48" font-weight="300" fill="#808080" letter-spacing="8">EVORQ TECHNOLOGIES</text>
+</svg>

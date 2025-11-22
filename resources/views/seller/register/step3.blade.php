@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل بائع جديد - الخطوة 3</title>
+    <title>{{ app()->getLocale() == 'ar' ? 'تسجيل بائع جديد - الخطوة 3' : 'Seller Registration - Step 3' }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
-    <!-- Cairo Font -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @if(app()->getLocale() == 'ar')
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @else
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @endif
     <style>
         :root {
             --primary-color: #561C04;
@@ -24,7 +28,7 @@
         }
 
         body {
-            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: {{ app()->getLocale() == 'ar' ? "'Cairo'" : "'Inter'" }}, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to bottom right, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             display: flex;
@@ -155,7 +159,7 @@
         }
 
         .progress-step.completed .step-number {
-            background: #10b981;
+            background: #b9a010;
             color: white;
         }
 
@@ -378,39 +382,96 @@
                 font-size: 20px;
             }
         }
+
+        /* Language Switcher */
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .lang-btn:hover {
+            background: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .lang-btn img {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
+            <span>🇬🇧</span>
+            <span>English</span>
+        </a>
+        <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
+            <span>🇸🇦</span>
+            <span>العربية</span>
+        </a>
+    </div>
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-wrapper">
                 <img src="{{ asset('logo/logo.png') }}" alt="Logo">
-                <h3>تسجيل البائع</h3>
+                <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل البائع' : 'Seller Registration' }}</h3>
             </div>
 
             <div class="progress-sidebar">
                 <div class="progress-step completed">
                     <div class="step-number"><i class="ri-check-line"></i></div>
                     <div class="step-content">
-                        <h4>المعلومات الأساسية</h4>
-                        <p>البيانات الشخصية والتواصل</p>
+                        <h4>{{ app()->getLocale() == 'ar' ? 'المعلومات الأساسية' : 'Basic Information' }}</h4>
+                        <p>{{ app()->getLocale() == 'ar' ? 'البيانات الشخصية والتواصل' : 'Personal and contact details' }}</p>
                     </div>
                 </div>
 
                 <div class="progress-step completed">
                     <div class="step-number"><i class="ri-check-line"></i></div>
                     <div class="step-content">
-                        <h4>النشاط التجاري</h4>
-                        <p>حدد مجال عملك</p>
+                        <h4>{{ app()->getLocale() == 'ar' ? 'النشاط التجاري' : 'Business Activity' }}</h4>
+                        <p>{{ app()->getLocale() == 'ar' ? 'حدد مجال عملك' : 'Select your business field' }}</p>
                     </div>
                 </div>
 
                 <div class="progress-step active">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h4>التحقق</h4>
-                        <p>تأكيد البريد الإلكتروني</p>
+                        <h4>{{ app()->getLocale() == 'ar' ? 'التحقق' : 'Verification' }}</h4>
+                        <p>{{ app()->getLocale() == 'ar' ? 'تأكيد البريد الإلكتروني' : 'Email confirmation' }}</p>
                     </div>
                 </div>
             </div>
@@ -422,8 +483,8 @@
                 <div class="icon-box pulse">
                     <i class="ri-mail-check-line"></i>
                 </div>
-                <h2>تحقق من بريدك الإلكتروني</h2>
-                <p>أدخل الرمز المرسل إليك لإتمام التسجيل</p>
+                <h2>{{ app()->getLocale() == 'ar' ? 'تحقق من بريدك الإلكتروني' : 'Verify Your Email' }}</h2>
+                <p>{{ app()->getLocale() == 'ar' ? 'أدخل الرمز المرسل إليك لإتمام التسجيل' : 'Enter the code sent to you to complete registration' }}</p>
             </div>
 
             @if ($errors->any())
@@ -441,16 +502,16 @@
             @endif
 
             <div class="otp-info">
-                <p>تم إرسال رمز التحقق المكون من 6 أرقام إلى:</p>
+                <p>{{ app()->getLocale() == 'ar' ? 'تم إرسال رمز التحقق المكون من 6 أرقام إلى:' : 'A 6-digit verification code has been sent to:' }}</p>
                 <strong>{{ $email }}</strong>
-                <p style="margin-top: 15px; margin-bottom: 0; font-size: 13px; color: #999;">يرجى التحقق من صندوق الوارد أو البريد المزعج</p>
+                <p style="margin-top: 15px; margin-bottom: 0; font-size: 13px; color: #999;">{{ app()->getLocale() == 'ar' ? 'يرجى التحقق من صندوق الوارد أو البريد المزعج' : 'Please check your inbox or spam folder' }}</p>
             </div>
 
             <form action="{{ route('seller.register.verify-otp') }}" method="POST" id="otpForm">
                 @csrf
 
                 <div style="text-align: center;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 15px; color: #333;">أدخل رمز التحقق</label>
+                    <label style="display: block; font-weight: 600; margin-bottom: 15px; color: #333;">{{ app()->getLocale() == 'ar' ? 'أدخل رمز التحقق' : 'Enter Verification Code' }}</label>
                     <div class="otp-inputs">
                         <input type="text" class="otp-input" maxlength="1" id="otp1" />
                         <input type="text" class="otp-input" maxlength="1" id="otp2" />
@@ -464,21 +525,32 @@
 
                 <button type="submit" class="btn-verify">
                     <i class="ri-check-double-line"></i>
-                    تحقق وأكمل التسجيل
+                    {{ app()->getLocale() == 'ar' ? 'تحقق وأكمل التسجيل' : 'Verify and Complete Registration' }}
                 </button>
             </form>
 
             <div style="text-align: center; margin-top: 30px;">
-                <p style="color: #999; margin-bottom: 10px; font-size: 14px;">لم تستلم الرمز؟</p>
+                <p style="color: #999; margin-bottom: 10px; font-size: 14px;">{{ app()->getLocale() == 'ar' ? 'لم تستلم الرمز؟' : "Didn't receive the code?" }}</p>
                 <form action="{{ route('seller.register.resend-otp') }}" method="POST" id="resendForm">
                     @csrf
                     <button type="submit" class="btn-resend" id="resendBtn">
-                        إعادة إرسال الرمز
+                        {{ app()->getLocale() == 'ar' ? 'إعادة إرسال الرمز' : 'Resend Code' }}
                     </button>
                 </form>
                 <div class="timer" id="timer"></div>
             </div>
         </div>
+    </div>
+
+    <!-- Footer with EVORQ Logo -->
+    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
+        <span style="color: #808080; font-size: 14px; font-weight: 400;">BY</span>
+        <img src="{{ asset('footer.png') }}"
+             alt="EVORQ Logo"
+             style="height: 50px; opacity: 0.75; transition: opacity 0.3s;"
+             onmouseover="this.style.opacity='1'"
+             onmouseout="this.style.opacity='0.75'">
+        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">EVORQ TECHNOLOGIES</span>
     </div>
 
     <script>
@@ -545,7 +617,7 @@
 
             const interval = setInterval(() => {
                 timeLeft--;
-                timerDiv.textContent = `يمكنك إعادة الإرسال بعد ${timeLeft} ثانية`;
+                timerDiv.textContent = `{{ app()->getLocale() == 'ar' ? 'يمكنك إعادة الإرسال بعد ' : 'You can resend after ' }}${timeLeft}{{ app()->getLocale() == 'ar' ? ' ثانية' : ' seconds' }}`;
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);

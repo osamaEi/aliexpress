@@ -65,7 +65,9 @@ class ProductController extends Controller
         }
 
         $products = $query->latest()->paginate(20);
-        $categories = Category::active()->get();
+
+        // Filter categories for sellers based on their selected categories
+        $categories = $this->getFilteredCategoriesForUser();
 
         return view('products.index', compact('products', 'categories'));
     }
@@ -75,7 +77,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $categories = Category::active()->get();
+        // Filter categories for sellers based on their selected categories
+        $categories = $this->getFilteredCategoriesForUser();
         return view('products.create', compact('categories'));
     }
 
@@ -116,7 +119,8 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load('category');
-        $categories = Category::active()->get();
+        // Filter categories for sellers based on their selected categories
+        $categories = $this->getFilteredCategoriesForUser();
 
         // Fetch AliExpress details if it's an AliExpress product
         $aliexpressData = null;
@@ -156,7 +160,8 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        $categories = Category::active()->get();
+        // Filter categories for sellers based on their selected categories
+        $categories = $this->getFilteredCategoriesForUser();
         return view('products.edit', compact('product', 'categories'));
     }
 
@@ -216,7 +221,8 @@ class ProductController extends Controller
      */
     public function import()
     {
-        $categories = Category::active()->get();
+        // Filter categories for sellers based on their selected categories
+        $categories = $this->getFilteredCategoriesForUser();
         return view('products.import', compact('categories'));
     }
 
@@ -601,10 +607,29 @@ class ProductController extends Controller
     public function searchPage()
     {
         // Get only active categories with AliExpress IDs
-        $allCategories = Category::where('aliexpress_category_id', '!=', null)
-            ->where('is_active', true)
-            ->orderBy('order')
-            ->get();
+        $query = Category::where('aliexpress_category_id', '!=', null)
+            ->where('is_active', true);
+
+        // Filter categories for sellers based on their selected categories
+        $user = auth()->user();
+        if ($user && $user->user_type === 'seller') {
+            // Decode the seller's selected categories
+            $mainActivities = json_decode($user->main_activity, true) ?? [];
+            $subActivities = json_decode($user->sub_activity, true) ?? [];
+
+            // Combine both main and sub category IDs
+            $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+            // Filter query to only show allowed categories
+            if (!empty($allowedCategoryIds)) {
+                $query->whereIn('id', $allowedCategoryIds);
+            } else {
+                // If no categories selected, show nothing
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        $allCategories = $query->orderBy('order')->get();
 
         // Separate main categories (no parent) and subcategories
         $mainCategories = $allCategories->whereNull('parent_id');
@@ -789,10 +814,28 @@ class ProductController extends Controller
             }
 
             // Get only active categories with AliExpress IDs
-            $allCategories = Category::where('aliexpress_category_id', '!=', null)
-                ->where('is_active', true)
-                ->orderBy('order')
-                ->get();
+            $categoryQuery = Category::where('aliexpress_category_id', '!=', null)
+                ->where('is_active', true);
+
+            // Filter categories for sellers based on their selected categories
+            if ($user && $user->user_type === 'seller') {
+                // Decode the seller's selected categories
+                $mainActivities = json_decode($user->main_activity, true) ?? [];
+                $subActivities = json_decode($user->sub_activity, true) ?? [];
+
+                // Combine both main and sub category IDs
+                $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+                // Filter query to only show allowed categories
+                if (!empty($allowedCategoryIds)) {
+                    $categoryQuery->whereIn('id', $allowedCategoryIds);
+                } else {
+                    // If no categories selected, show nothing
+                    $categoryQuery->whereRaw('1 = 0');
+                }
+            }
+
+            $allCategories = $categoryQuery->orderBy('order')->get();
 
             // Separate main categories (no parent) and subcategories
             $mainCategories = $allCategories->whereNull('parent_id');
@@ -1199,5 +1242,34 @@ class ProductController extends Controller
             ->paginate(20);
 
         return view('products.assigned', compact('assignedProducts'));
+    }
+
+    /**
+     * Get filtered categories for the current user (sellers see only their selected categories)
+     */
+    protected function getFilteredCategoriesForUser()
+    {
+        $query = Category::active();
+
+        // Filter categories for sellers based on their selected categories
+        $user = auth()->user();
+        if ($user && $user->user_type === 'seller') {
+            // Decode the seller's selected categories
+            $mainActivities = json_decode($user->main_activity, true) ?? [];
+            $subActivities = json_decode($user->sub_activity, true) ?? [];
+
+            // Combine both main and sub category IDs
+            $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+            // Filter query to only show allowed categories
+            if (!empty($allowedCategoryIds)) {
+                $query->whereIn('id', $allowedCategoryIds);
+            } else {
+                // If no categories selected, show nothing
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        return $query->get();
     }
 }

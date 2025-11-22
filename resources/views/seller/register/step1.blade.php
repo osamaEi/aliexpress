@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل بائع جديد - الخطوة 1</title>
+    <title>{{ app()->getLocale() == 'ar' ? 'تسجيل بائع جديد - الخطوة 1' : 'Seller Registration - Step 1' }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
-    <!-- Cairo Font -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @if(app()->getLocale() == 'ar')
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @else
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @endif
     <style>
         :root {
             --primary-color: #561C04;
@@ -24,7 +28,7 @@
         }
 
         body {
-            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: {{ app()->getLocale() == 'ar' ? "'Cairo'" : "'Inter'" }}, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to bottom right, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             display: flex;
@@ -333,39 +337,96 @@
                 padding: 30px 25px;
             }
         }
+
+        /* Language Switcher */
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .lang-btn:hover {
+            background: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .lang-btn img {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
+            <span>🇬🇧</span>
+            <span>English</span>
+        </a>
+        <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
+            <span>🇸🇦</span>
+            <span>العربية</span>
+        </a>
+    </div>
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-wrapper">
                 <img src="{{ asset('logo/logo.png') }}" alt="Logo">
-                <h3>تسجيل البائع</h3>
+                <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل البائع' : 'Seller Registration' }}</h3>
             </div>
 
             <div class="progress-sidebar">
                 <div class="progress-step active">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <h4>المعلومات الأساسية</h4>
-                        <p>البيانات الشخصية والتواصل</p>
+                        <h4>{{ app()->getLocale() == 'ar' ? 'المعلومات الأساسية' : 'Basic Information' }}</h4>
+                        <p>{{ app()->getLocale() == 'ar' ? 'البيانات الشخصية والتواصل' : 'Personal and contact details' }}</p>
                     </div>
                 </div>
 
                 <div class="progress-step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <h4>النشاط التجاري</h4>
-                        <p>حدد مجال عملك</p>
+                        <h4>{{ app()->getLocale() == 'ar' ? 'النشاط التجاري' : 'Business Activity' }}</h4>
+                        <p>{{ app()->getLocale() == 'ar' ? 'حدد مجال عملك' : 'Select your business field' }}</p>
                     </div>
                 </div>
 
                 <div class="progress-step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h4>التحقق</h4>
-                        <p>تأكيد البريد الإلكتروني</p>
+                        <h4>{{ app()->getLocale() == 'ar' ? 'التحقق' : 'Verification' }}</h4>
+                        <p>{{ app()->getLocale() == 'ar' ? 'تأكيد البريد الإلكتروني' : 'Email confirmation' }}</p>
                     </div>
                 </div>
             </div>
@@ -374,15 +435,15 @@
         <!-- Content Area -->
         <div class="content-area">
             <div class="content-header">
-                <h2>مرحباً بك!</h2>
-                <p>ابدأ رحلتك معنا بتعبئة المعلومات الأساسية</p>
+                <h2>{{ app()->getLocale() == 'ar' ? 'مرحباً بك!' : 'Welcome!' }}</h2>
+                <p>{{ app()->getLocale() == 'ar' ? 'ابدأ رحلتك معنا بتعبئة المعلومات الأساسية' : 'Start your journey with us by filling basic information' }}</p>
             </div>
 
             @if ($errors->any())
                 <div class="alert alert-danger">
                     <i class="ri-error-warning-line me-2"></i>
-                    <strong>يرجى تصحيح الأخطاء التالية:</strong>
-                    <ul class="mb-0 mt-2" style="padding-right: 20px;">
+                    <strong>{{ app()->getLocale() == 'ar' ? 'يرجى تصحيح الأخطاء التالية:' : 'Please correct the following errors:' }}</strong>
+                    <ul class="mb-0 mt-2" style="padding-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 20px;">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -397,14 +458,14 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="full_name" class="form-label">
-                                <i class="ri-user-line"></i> الاسم الكامل
+                                <i class="ri-user-line"></i> {{ app()->getLocale() == 'ar' ? 'الاسم الكامل' : 'Full Name' }}
                             </label>
                             <input type="text"
                                    class="form-control @error('full_name') is-invalid @enderror"
                                    id="full_name"
                                    name="full_name"
                                    value="{{ old('full_name') }}"
-                                   placeholder="أدخل اسمك الكامل"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name' }}"
                                    required>
                             @error('full_name')
                                 <div class="text-danger">{{ $message }}</div>
@@ -415,14 +476,14 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="company_name" class="form-label">
-                                <i class="ri-building-line"></i> اسم الشركة
+                                <i class="ri-building-line"></i> {{ app()->getLocale() == 'ar' ? 'اسم الشركة' : 'Company Name' }}
                             </label>
                             <input type="text"
                                    class="form-control @error('company_name') is-invalid @enderror"
                                    id="company_name"
                                    name="company_name"
                                    value="{{ old('company_name') }}"
-                                   placeholder="أدخل اسم شركتك"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسم شركتك' : 'Enter your company name' }}"
                                    required>
                             @error('company_name')
                                 <div class="text-danger">{{ $message }}</div>
@@ -433,13 +494,13 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="country" class="form-label">
-                                <i class="ri-map-pin-line"></i> الدولة
+                                <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }}
                             </label>
                             <select class="form-select @error('country') is-invalid @enderror"
                                     id="country"
                                     name="country"
                                     required>
-                                <option value="">اختر الدولة</option>
+                                <option value="">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</option>
                                 <option value="الإمارات العربية المتحدة" {{ old('country') == 'الإمارات العربية المتحدة' ? 'selected' : '' }}>الإمارات العربية المتحدة</option>
                                 <option value="السعودية" {{ old('country') == 'السعودية' ? 'selected' : '' }}>السعودية</option>
                                 <option value="مصر" {{ old('country') == 'مصر' ? 'selected' : '' }}>مصر</option>
@@ -467,7 +528,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="email" class="form-label">
-                                <i class="ri-mail-line"></i> البريد الإلكتروني
+                                <i class="ri-mail-line"></i> {{ app()->getLocale() == 'ar' ? 'البريد الإلكتروني' : 'Email Address' }}
                             </label>
                             <input type="email"
                                    class="form-control @error('email') is-invalid @enderror"
@@ -479,22 +540,33 @@
                             @error('email')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
-                            <small class="text-muted d-block mt-1">سنرسل رمز التحقق إلى هذا البريد</small>
+                            <small class="text-muted d-block mt-1">{{ app()->getLocale() == 'ar' ? 'سنرسل رمز التحقق إلى هذا البريد' : 'We will send verification code to this email' }}</small>
                         </div>
                     </div>
                 </div>
 
                 <button type="submit" class="btn-continue">
-                    <span>التالي</span>
-                    <i class="ri-arrow-left-line"></i>
+                    <span>{{ app()->getLocale() == 'ar' ? 'التالي' : 'Next' }}</span>
+                    <i class="{{ app()->getLocale() == 'ar' ? 'ri-arrow-left-line' : 'ri-arrow-right-line' }}"></i>
                 </button>
 
                 <div class="login-link">
-                    لديك حساب بالفعل؟
-                    <a href="{{ route('login') }}">تسجيل الدخول</a>
+                    {{ app()->getLocale() == 'ar' ? 'لديك حساب بالفعل؟' : 'Already have an account?' }}
+                    <a href="{{ route('login') }}">{{ app()->getLocale() == 'ar' ? 'تسجيل الدخول' : 'Sign In' }}</a>
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Footer with EVORQ Logo -->
+    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
+        <span style="color: #808080; font-size: 14px; font-weight: 400;">BY</span>
+        <img src="{{ asset('footer.png') }}"
+             alt="EVORQ Logo"
+             style="height: 50px; opacity: 0.75; transition: opacity 0.3s;"
+             onmouseover="this.style.opacity='1'"
+             onmouseout="this.style.opacity='0.75'">
+        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">EVORQ TECHNOLOGIES</span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول</title>
+    <title>{{ app()->getLocale() == 'ar' ? 'تسجيل الدخول' : 'Login' }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
-    <!-- Cairo Font -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @if(app()->getLocale() == 'ar')
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @else
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @endif
     <style>
         :root {
             --primary-color: #561C04;
@@ -24,7 +28,7 @@
         }
 
         body {
-            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: {{ app()->getLocale() == 'ar' ? "'Cairo'" : "'Inter'" }}, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to bottom right, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             display: flex;
@@ -294,24 +298,82 @@
                 padding: 30px 25px;
             }
         }
+
+        /* Language Switcher */
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .lang-btn:hover {
+            background: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .lang-btn img {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
+            <span>🇬🇧</span>
+            <span>English</span>
+        </a>
+        <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
+            <span>🇸🇦</span>
+            <span>العربية</span>
+        </a>
+    </div>
+
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-wrapper">
                 <img src="{{ asset('logo/logo.png') }}" alt="Logo">
-                <h3>مرحباً بعودتك</h3>
-                <p>سجّل دخولك للوصول إلى حسابك ومتابعة أعمالك</p>
+                <h3>{{ app()->getLocale() == 'ar' ? 'مرحباً بعودتك' : 'Welcome Back' }}</h3>
+                <p>{{ app()->getLocale() == 'ar' ? 'سجّل دخولك للوصول إلى حسابك ومتابعة أعمالك' : 'Sign in to access your account and continue your work' }}</p>
             </div>
         </div>
 
         <!-- Content Area -->
         <div class="content-area">
             <div class="content-header">
-                <h2>تسجيل الدخول</h2>
-                <p>أدخل بياناتك للدخول إلى حسابك</p>
+                <h2>{{ app()->getLocale() == 'ar' ? 'تسجيل الدخول' : 'Sign In' }}</h2>
+                <p>{{ app()->getLocale() == 'ar' ? 'أدخل بياناتك للدخول إلى حسابك' : 'Enter your credentials to access your account' }}</p>
             </div>
 
             <!-- Session Status -->
@@ -328,7 +390,7 @@
                 <!-- Email Address -->
                 <div class="form-group">
                     <label for="email" class="form-label">
-                        <i class="ri-mail-line"></i> البريد الإلكتروني
+                        <i class="ri-mail-line"></i> {{ app()->getLocale() == 'ar' ? 'البريد الإلكتروني' : 'Email Address' }}
                     </label>
                     <input type="email"
                            class="form-control @error('email') is-invalid @enderror"
@@ -347,13 +409,13 @@
                 <!-- Password -->
                 <div class="form-group">
                     <label for="password" class="form-label">
-                        <i class="ri-lock-line"></i> كلمة المرور
+                        <i class="ri-lock-line"></i> {{ app()->getLocale() == 'ar' ? 'كلمة المرور' : 'Password' }}
                     </label>
                     <input type="password"
                            class="form-control @error('password') is-invalid @enderror"
                            id="password"
                            name="password"
-                           placeholder="أدخل كلمة المرور"
+                           placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل كلمة المرور' : 'Enter your password' }}"
                            required
                            autocomplete="current-password">
                     @error('password')
@@ -365,27 +427,38 @@
                 <div class="remember-forgot">
                     <div class="remember-me">
                         <input id="remember_me" type="checkbox" name="remember">
-                        <label for="remember_me">تذكرني</label>
+                        <label for="remember_me">{{ app()->getLocale() == 'ar' ? 'تذكرني' : 'Remember me' }}</label>
                     </div>
 
                     @if (Route::has('password.request'))
                         <a href="{{ route('password.request') }}" class="forgot-password">
-                            نسيت كلمة المرور؟
+                            {{ app()->getLocale() == 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot Password?' }}
                         </a>
                     @endif
                 </div>
 
                 <button type="submit" class="btn-login">
-                    <span>تسجيل الدخول</span>
+                    <span>{{ app()->getLocale() == 'ar' ? 'تسجيل الدخول' : 'Sign In' }}</span>
                     <i class="ri-login-box-line"></i>
                 </button>
 
                 <div class="register-link">
-                    ليس لديك حساب؟
-                    <a href="{{ route('register') }}">إنشاء حساب جديد</a>
+                    {{ app()->getLocale() == 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?" }}
+                    <a href="{{ route('register') }}">{{ app()->getLocale() == 'ar' ? 'إنشاء حساب جديد' : 'Create Account' }}</a>
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Footer with EVORQ Logo -->
+    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
+        <span style="color: #808080; font-size: 14px; font-weight: 400;">BY</span>
+        <img src="{{ asset('footer.png') }}"
+             alt="EVORQ Logo"
+             style="height: 45px; opacity: 0.75; transition: opacity 0.3s;"
+             onmouseover="this.style.opacity='1'"
+             onmouseout="this.style.opacity='0.75'">
+        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">EVORQ TECHNOLOGIES</span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

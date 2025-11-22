@@ -6,10 +6,14 @@
     <title>{{ __('Register') }} - {{ setting('site_name', 'EcommAli') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
-    <!-- Cairo Font -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @if(app()->getLocale() == 'ar')
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @else
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @endif
 
     @if(setting('site_favicon'))
         <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . setting('site_favicon')) }}" />
@@ -32,7 +36,7 @@
         }
 
         body {
-            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: {{ app()->getLocale() == 'ar' ? "'Cairo'" : "'Inter'" }}, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #ffffff;
             min-height: 100vh;
             display: flex;
@@ -372,9 +376,67 @@
             margin-right: 0;
             margin-left: 5px;
         }
+
+        /* Language Switcher */
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .lang-btn:hover {
+            background: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .lang-btn img {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
+            <span>🇬🇧</span>
+            <span>English</span>
+        </a>
+        <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
+            <span>🇸🇦</span>
+            <span>العربية</span>
+        </a>
+    </div>
+
     <div class="register-container">
         <!-- Left Panel -->
         <div class="left-panel">
@@ -531,6 +593,17 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Footer with EVORQ Logo -->
+    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
+        <span style="color: #808080; font-size: 14px; font-weight: 400;">BY</span>
+        <img src="{{ asset('footer.png') }}"
+             alt="EVORQ Logo"
+             style="height: 45px; opacity: 0.75; transition: opacity 0.3s;"
+             onmouseover="this.style.opacity='1'"
+             onmouseout="this.style.opacity='0.75'">
+        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">EVORQ TECHNOLOGIES</span>
     </div>
 
     <script>

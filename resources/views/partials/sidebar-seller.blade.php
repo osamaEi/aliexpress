@@ -53,10 +53,10 @@
                 </span>
             @endif
           </span>
-            <span class="app-brand-text demo menu-text fw-semibold ms-2">{{ setting('site_name', 'EcommAli') }}</span>
+            <span class="app-brand-text demo menu-text fw-semibold {{ app()->getLocale() == 'ar' ? 'me-2' : 'ms-2' }}">{{ setting('site_name', 'EcommAli') }}</span>
         </a>
 
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large {{ app()->getLocale() == 'ar' ? 'me-auto' : 'ms-auto' }}">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M8.47365 11.7183C8.11707 12.0749 8.11707 12.6531 8.47365 13.0097L12.071 16.607C12.4615 16.9975 12.4615 17.6305 12.071 18.021C11.6805 18.4115 11.0475 18.4115 10.657 18.021L5.83009 13.1941C5.37164 12.7356 5.37164 11.9924 5.83009 11.5339L10.657 6.707C11.0475 6.31653 11.6805 6.31653 12.071 6.707C12.4615 7.09747 12.4615 7.73053 12.071 8.121L8.47365 11.7183Z"
@@ -75,7 +75,7 @@
         <li class="menu-item {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}">
             <a href="{{ route('seller.dashboard') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-home-smile-line"></i>
-                <div data-i18n="Dashboard">{{ __('messages.dashboard') }}</div>
+                <div>{{ __('messages.dashboard') }}</div>
             </a>
         </li>
 
@@ -88,7 +88,7 @@
         <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('products.search-*') && !request()->routeIs('products.my-assigned') ? 'active' : '' }}">
             <a href="{{ route('products.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-shopping-bag-3-line"></i>
-                <div data-i18n="Products">{{ __('messages.products') }}</div>
+                <div>{{ __('messages.products') }}</div>
             </a>
         </li>
 
@@ -96,18 +96,18 @@
         <li class="menu-item {{ request()->routeIs('categories.*') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-price-tag-3-line"></i>
-                <div data-i18n="Categories">{{ __('messages.categories') }}</div>
+                <div>{{ __('messages.categories') }}</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('categories.index') ? 'active' : '' }}">
                     <a href="{{ route('categories.index') }}" class="menu-link">
-                        <div data-i18n="All Categories">{{ __('messages.all_categories') }}</div>
+                        <div>{{ __('messages.all_categories') }}</div>
                     </a>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('categories.create') ? 'active' : '' }}">
                     <a href="{{ route('categories.create') }}" class="menu-link">
-                        <div data-i18n="Add Category">{{ __('messages.add_category') }}</div>
+                        <div>{{ __('messages.add_category') }}</div>
                     </a>
                 </li>
             </ul>
@@ -117,24 +117,24 @@
         <li class="menu-item {{ request()->routeIs('products.search-*') || request()->routeIs('products.aliexpress.*') || request()->routeIs('products.my-assigned') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-shopping-cart-line"></i>
-                <div data-i18n="Product Import">{{ __('messages.product_import') }}</div>
+                <div>{{ __('messages.product_import') }}</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('products.search-*') ? 'active' : '' }}">
                     <a href="{{ route('products.search-page') }}" class="menu-link">
-                        <div data-i18n="Search Products">{{ __('messages.search_products') }}</div>
+                        <div>{{ __('messages.search_products') }}</div>
                     </a>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('products.my-assigned') ? 'active' : '' }}">
                     <a href="{{ route('products.my-assigned') }}" class="menu-link">
-                        <div data-i18n="My Assigned Products">{{ __('messages.my_assigned_products') }}</div>
+                        <div>{{ __('messages.my_assigned_products') }}</div>
                     </a>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('products.aliexpress.import') ? 'active' : '' }}">
                     <a href="{{ route('products.aliexpress.import') }}" class="menu-link">
-                        <div data-i18n="Import Products">{{ __('messages.import_product') }}</div>
+                        <div>{{ __('messages.import_product') }}</div>
                     </a>
                 </li>
             </ul>
@@ -144,7 +144,7 @@
         <li class="menu-item {{ request()->routeIs('seller.profit-settings.*') ? 'active' : '' }}">
             <a href="{{ route('seller.profit-settings.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-percent-line"></i>
-                <div data-i18n="Profit Settings">{{ __('messages.profit_settings') }}</div>
+                <div>{{ __('messages.profit_settings') }}</div>
             </a>
         </li>
 
@@ -157,18 +157,18 @@
         <li class="menu-item {{ request()->routeIs('orders.*') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-file-list-3-line"></i>
-                <div data-i18n="Orders">{{ __('messages.orders') }}</div>
+                <div>{{ __('messages.orders') }}</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
                     <a href="{{ route('orders.index') }}" class="menu-link">
-                        <div data-i18n="All Orders">{{ __('messages.all_orders') }}</div>
+                        <div>{{ __('messages.all_orders') }}</div>
                     </a>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('orders.create') ? 'active' : '' }}">
                     <a href="{{ route('orders.create') }}" class="menu-link">
-                        <div data-i18n="Create Order">{{ __('messages.create_order') }}</div>
+                        <div>{{ __('messages.create_order') }}</div>
                     </a>
                 </li>
             </ul>
@@ -178,7 +178,7 @@
         <li class="menu-item {{ request()->routeIs('seller.shipping.*') ? 'active' : '' }}">
             <a href="{{ route('seller.shipping.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-ship-line"></i>
-                <div data-i18n="Shipping Tracking">{{ __('messages.shipping_tracking') }}</div>
+                <div>{{ __('messages.shipping_tracking') }}</div>
             </a>
         </li>
 
@@ -190,7 +190,7 @@
         <li class="menu-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <a href="{{ route('profile.edit') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-user-line"></i>
-                <div data-i18n="Profile">{{ __('messages.profile') }}</div>
+                <div>{{ __('messages.profile') }}</div>
             </a>
         </li>
 
@@ -198,7 +198,7 @@
         <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'active' : '' }}">
             <a href="{{ route('subscriptions.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-vip-crown-line"></i>
-                <div data-i18n="Subscriptions">{{ __('messages.subscriptions') }}</div>
+                <div>{{ __('messages.subscriptions') }}</div>
             </a>
         </li>
 
@@ -206,7 +206,7 @@
         <li class="menu-item {{ request()->routeIs('wallet.*') ? 'active' : '' }}">
             <a href="{{ route('wallet.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-wallet-3-line"></i>
-                <div data-i18n="Wallet">{{ __('messages.my_wallet') }}</div>
+                <div>{{ __('messages.my_wallet') }}</div>
             </a>
         </li>
 
@@ -217,7 +217,7 @@
                 <a href="{{ route('logout') }}" class="menu-link"
                    onclick="event.preventDefault(); this.closest('form').submit();">
                     <i class="menu-icon tf-icons ri-logout-box-line"></i>
-                    <div data-i18n="Logout">{{ __('messages.logout') }}</div>
+                    <div>{{ __('messages.logout') }}</div>
                 </a>
             </form>
         </li>

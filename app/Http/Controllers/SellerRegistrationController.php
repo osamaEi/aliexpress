@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -47,10 +48,24 @@ class SellerRegistrationController extends Controller
             return redirect()->route('seller.register.step1');
         }
 
-        // Activities list in Arabic
-        $activities = $this->getActivities();
+        // Get main categories (parent categories)
+        $mainCategories = Category::active()
+            ->root()
+            ->orderBy('order')
+            ->orderBy('name')
+            ->get();
 
-        return view('seller.register.step2', compact('activities'));
+        // Get all subcategories grouped by parent
+        $subCategories = [];
+        foreach ($mainCategories as $category) {
+            $subCategories[$category->id] = $category->children()
+                ->active()
+                ->orderBy('order')
+                ->orderBy('name')
+                ->get();
+        }
+
+        return view('seller.register.step2', compact('mainCategories', 'subCategories'));
     }
 
     /**
@@ -59,8 +74,10 @@ class SellerRegistrationController extends Controller
     public function processStep2(Request $request)
     {
         $validated = $request->validate([
-            'main_activity' => 'required|string',
-            'sub_activity' => 'required|string',
+            'main_categories' => 'required|array|min:1',
+            'main_categories.*' => 'exists:categories,id',
+            'sub_categories' => 'required|array|min:1',
+            'sub_categories.*' => 'exists:categories,id',
         ]);
 
         // Merge with existing session data
@@ -125,8 +142,8 @@ class SellerRegistrationController extends Controller
             'email' => $data['email'],
             'password' => Hash::make(Str::random(16)), // Random password, will use OTP for login
             'user_type' => 'seller',
-            'main_activity' => $data['main_activity'],
-            'sub_activity' => $data['sub_activity'],
+            'main_activity' => json_encode($data['main_categories']),
+            'sub_activity' => json_encode($data['sub_categories']),
             'is_verified' => true,
             'verified_at' => now(),
             'email_verified_at' => now(),
@@ -171,10 +188,12 @@ class SellerRegistrationController extends Controller
         Session::put('otp_' . $email, $otp);
         Session::put('otp_expiry_' . $email, now()->addMinutes(10));
 
-        // Send email
-        Mail::raw("Your verification code is: $otp\n\nThis code will expire in 10 minutes.", function($message) use ($email) {
+        // Send email with beautiful template
+        Mail::send('emails.otp-verification', ['otp' => $otp], function($message) use ($email) {
             $message->to($email)
-                    ->subject('Email Verification Code - Seller Registration');
+                    ->subject(app()->getLocale() == 'ar'
+                        ? 'رمز التحقق - تسجيل البائع'
+                        : 'Email Verification Code - Seller Registration');
         });
     }
 

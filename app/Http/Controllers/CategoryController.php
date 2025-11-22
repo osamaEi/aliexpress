@@ -26,6 +26,25 @@ class CategoryController extends Controller
 
         $query = Category::withCount('products', 'children');
 
+        // Filter categories for sellers based on their selected categories
+        $user = auth()->user();
+        if ($user && $user->user_type === 'seller') {
+            // Decode the seller's selected categories
+            $mainActivities = json_decode($user->main_activity, true) ?? [];
+            $subActivities = json_decode($user->sub_activity, true) ?? [];
+
+            // Combine both main and sub category IDs
+            $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+            // Filter query to only show allowed categories
+            if (!empty($allowedCategoryIds)) {
+                $query->whereIn('id', $allowedCategoryIds);
+            } else {
+                // If no categories selected, show nothing
+                $query->whereRaw('1 = 0');
+            }
+        }
+
         if ($parentId) {
             // Show subcategories of a specific parent
             $query->where('parent_id', $parentId);
