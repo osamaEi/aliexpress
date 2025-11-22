@@ -237,6 +237,31 @@
                     </div>
                 </div>
 
+                <!-- Shipping Cost Information -->
+                @if(isset($product) && $product->isAliexpressProduct())
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div id="freight-info-container" class="card border-info" style="display: none;">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="ri-ship-line me-2"></i>Shipping Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="freight-loading" style="display: none;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span>Calculating shipping cost...</span>
+                                    </div>
+                                </div>
+                                <div id="freight-result" style="display: none;"></div>
+                                <div id="freight-error" class="alert alert-warning mb-0" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Customer Notes -->
                 <div class="row mb-4">
                     <div class="col-md-12">
@@ -290,6 +315,121 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Freight calculation for AliExpress products
+    @if(isset($product) && $product->isAliexpressProduct())
+    const productId = {{ $product->id }};
+    const quantityInput = document.getElementById('quantity');
+    const cityInput = document.getElementById('shipping_city');
+    const provinceInput = document.getElementById('shipping_province');
+    const freightInfoContainer = document.getElementById('freight-info-container');
+    const freightLoading = document.getElementById('freight-loading');
+    const freightResult = document.getElementById('freight-result');
+    const freightError = document.getElementById('freight-error');
+
+    let freightCalculationTimeout = null;
+
+    // Function to calculate freight
+    function calculateFreight() {
+        // Get current values
+        const country = shippingCountrySelect.value;
+        const city = cityInput.value.trim();
+        const province = provinceInput.value;
+        const quantity = parseInt(quantityInput.value) || 1;
+
+        // Only calculate if we have required fields
+        if (!country || !city || !province || quantity < 1) {
+            freightInfoContainer.style.display = 'none';
+            return;
+        }
+
+        // Show container and loading state
+        freightInfoContainer.style.display = 'block';
+        freightLoading.style.display = 'block';
+        freightResult.style.display = 'none';
+        freightError.style.display = 'none';
+
+        // Prepare request data
+        const data = {
+            product_id: productId,
+            quantity: quantity,
+            country: country,
+            city: city,
+            province: province,
+            _token: '{{ csrf_token() }}'
+        };
+
+        // Make AJAX request
+        fetch('{{ route("orders.calculate-freight") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            freightLoading.style.display = 'none';
+
+            if (data.success) {
+                // Display freight information
+                let html = '<div class="row">';
+                html += '<div class="col-md-6">';
+                html += '<p class="mb-2"><strong>Shipping Cost:</strong></p>';
+                html += '<p class="h4 text-success mb-0">' + data.freight_currency + ' ' + parseFloat(data.freight_amount).toFixed(2) + '</p>';
+                html += '</div>';
+
+                if (data.service_name) {
+                    html += '<div class="col-md-6">';
+                    html += '<p class="mb-2"><strong>Shipping Method:</strong></p>';
+                    html += '<p class="mb-0">' + data.service_name + '</p>';
+                    html += '</div>';
+                }
+
+                if (data.estimated_delivery_time) {
+                    html += '<div class="col-md-12 mt-3">';
+                    html += '<p class="mb-2"><strong>Estimated Delivery:</strong></p>';
+                    html += '<p class="mb-0">' + data.estimated_delivery_time + '</p>';
+                    html += '</div>';
+                }
+
+                html += '</div>';
+
+                freightResult.innerHTML = html;
+                freightResult.style.display = 'block';
+                freightError.style.display = 'none';
+            } else {
+                // Display error
+                freightError.textContent = data.error || 'Unable to calculate shipping cost. Please try again.';
+                freightError.style.display = 'block';
+                freightResult.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Freight calculation error:', error);
+            freightLoading.style.display = 'none';
+            freightError.textContent = 'An error occurred while calculating shipping cost.';
+            freightError.style.display = 'block';
+            freightResult.style.display = 'none';
+        });
+    }
+
+    // Debounced freight calculation
+    function debouncedCalculateFreight() {
+        if (freightCalculationTimeout) {
+            clearTimeout(freightCalculationTimeout);
+        }
+        freightCalculationTimeout = setTimeout(calculateFreight, 800);
+    }
+
+    // Add event listeners to trigger freight calculation
+    if (cityInput) cityInput.addEventListener('blur', debouncedCalculateFreight);
+    if (provinceInput) provinceInput.addEventListener('change', debouncedCalculateFreight);
+    if (shippingCountrySelect) shippingCountrySelect.addEventListener('change', debouncedCalculateFreight);
+    if (quantityInput) quantityInput.addEventListener('change', debouncedCalculateFreight);
+    @endif
 
     // Function to update province options based on country
     function updateProvinceOptions(country) {

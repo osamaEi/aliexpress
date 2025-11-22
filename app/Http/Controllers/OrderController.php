@@ -444,4 +444,87 @@ class OrderController extends Controller
         return redirect()->route('orders.index')
             ->with('success', 'Order deleted successfully.');
     }
+
+    /**
+     * Calculate freight for a product and shipping address
+     * API endpoint for AJAX requests from order creation form
+     */
+    public function calculateFreight(Request $request)
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'country' => 'required|string|size:2',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+        ]);
+
+        try {
+            $product = Product::findOrFail($validated['product_id']);
+
+            // Check if product is from AliExpress
+            if (!$product->isAliexpressProduct()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'This product is not from AliExpress'
+                ], 400);
+            }
+
+            // Prepare freight calculation parameters
+            $freightParams = [
+                'product_id' => $product->aliexpress_id,
+                'product_num' => $validated['quantity'],
+                'country' => $validated['country'],
+            ];
+
+            // Add optional parameters if provided
+            if (!empty($validated['city'])) {
+                $freightParams['city'] = $validated['city'];
+            }
+            if (!empty($validated['province'])) {
+                $freightParams['province'] = $validated['province'];
+            }
+            if (!empty($product->aliexpress_price)) {
+                $freightParams['price'] = $product->aliexpress_price;
+            }
+
+            // Call AliExpress API to calculate freight
+            $freightResult = $this->aliexpressService->calculateFreight($freightParams);
+
+            Log::info('Freight calculation result', [
+                'product_id' => $product->id,
+                'aliexpress_id' => $product->aliexpress_id,
+                'country' => $validated['country'],
+                'result' => $freightResult
+            ]);
+
+            // Return the result
+            if ($freightResult['success']) {
+                return response()->json([
+                    'success' => true,
+                    'freight_amount' => $freightResult['freight_amount'],
+                    'freight_currency' => $freightResult['freight_currency'],
+                    'estimated_delivery_time' => $freightResult['estimated_delivery_time'] ?? null,
+                    'service_name' => $freightResult['service_name'] ?? null,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'error' => $freightResult['error_desc'] ?? 'Unable to calculate freight',
+                    'error_code' => $freightResult['error_code'] ?? null,
+                ], 400);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Freight calculation API error', [
+                'error' => $e->getMessage(),
+                'request' => $validated
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to calculate freight: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

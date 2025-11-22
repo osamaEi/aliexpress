@@ -951,6 +951,111 @@ class AliExpressService
     }
 
     /**
+     * Calculate freight for product and shipping address
+     * API: aliexpress.freight.redefining.calculatefreight
+     * Documentation: https://openservice.aliexpress.com/doc/doc.htm?nodeId=27493&docId=118729#/?docId=1597
+     */
+    public function calculateFreight(array $params): array
+    {
+        // Validate required parameters
+        if (empty($params['product_id'])) {
+            throw new \InvalidArgumentException('product_id is required');
+        }
+        if (empty($params['country'])) {
+            throw new \InvalidArgumentException('country is required');
+        }
+        if (empty($params['product_num'])) {
+            throw new \InvalidArgumentException('product_num is required');
+        }
+
+        // Build freight calculation request
+        $freightRequest = [
+            'country' => $params['country'], // Country code (e.g., AE, SA)
+            'product_id' => (string)$params['product_id'], // AliExpress product ID
+            'product_num' => (int)$params['product_num'], // Quantity
+            'send_goods_country_code' => $params['send_goods_country_code'] ?? 'CN', // Sending country (default: China)
+        ];
+
+        // Optional parameters
+        if (!empty($params['city'])) {
+            $freightRequest['city'] = $params['city'];
+        }
+        if (!empty($params['province'])) {
+            $freightRequest['province'] = $params['province'];
+        }
+        if (!empty($params['price'])) {
+            $freightRequest['price'] = (string)$params['price'];
+        }
+
+        Log::info('Calculating freight for product', [
+            'product_id' => $params['product_id'],
+            'country' => $params['country'],
+            'quantity' => $params['product_num'],
+            'city' => $params['city'] ?? 'not specified',
+            'province' => $params['province'] ?? 'not specified'
+        ]);
+
+        try {
+            $data = $this->makeRequest(
+                'aliexpress.freight.redefining.calculatefreight',
+                ['param_aeop_freight_calculate_for_buyer_d_t_o' => json_encode($freightRequest)],
+                true // Requires authentication
+            );
+
+            Log::debug('Freight calculation response', [
+                'response_keys' => array_keys($data ?? []),
+                'data' => $data
+            ]);
+
+            // Parse response
+            if (isset($data['aliexpress_freight_redefining_calculatefreight_response'])) {
+                $response = $data['aliexpress_freight_redefining_calculatefreight_response'];
+
+                // Check for error in response
+                if (isset($response['error_code'])) {
+                    throw new \Exception(
+                        'Freight calculation error: ' . ($response['error_msg'] ?? 'Unknown error') .
+                        ' (Code: ' . $response['error_code'] . ')'
+                    );
+                }
+
+                // Extract freight information
+                if (isset($response['aeop_freight_calculate_result_for_buyer_d_t_o'])) {
+                    $result = $response['aeop_freight_calculate_result_for_buyer_d_t_o'];
+
+                    return [
+                        'success' => $result['success'] ?? false,
+                        'error_code' => $result['error_code'] ?? null,
+                        'error_desc' => $result['error_desc'] ?? null,
+                        'freight_amount' => $result['freight']['amount'] ?? null,
+                        'freight_currency' => $result['freight']['currency_code'] ?? null,
+                        'estimated_delivery_time' => $result['estimated_delivery_time'] ?? null,
+                        'service_name' => $result['service_name'] ?? null,
+                        'raw_response' => $result
+                    ];
+                }
+            }
+
+            // If no standard response format found
+            return [
+                'success' => false,
+                'error_code' => 'PARSE_ERROR',
+                'error_desc' => 'Unable to parse freight calculation response',
+                'raw_response' => $data
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Freight calculation failed', [
+                'error' => $e->getMessage(),
+                'product_id' => $params['product_id'],
+                'country' => $params['country']
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
      * Import product from AliExpress
      * This method retrieves product details and formats them for local storage
      */

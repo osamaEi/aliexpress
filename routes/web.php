@@ -124,6 +124,7 @@ Route::middleware('auth')->group(function () {
 
     // Order routes
     Route::resource('orders', OrderController::class);
+    Route::post('/orders/calculate-freight', [OrderController::class, 'calculateFreight'])->name('orders.calculate-freight');
     Route::post('/orders/{order}/place-on-aliexpress', [OrderController::class, 'placeOnAliexpress'])->name('orders.place-on-aliexpress');
     Route::post('/orders/{order}/update-tracking', [OrderController::class, 'updateTracking'])->name('orders.update-tracking');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
