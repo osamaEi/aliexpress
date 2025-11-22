@@ -153,12 +153,45 @@ class AdminController extends Controller
             $authService = new \App\Services\AliExpressAuthService();
             $tokenData = $authService->createToken($request->code);
 
+            // Save access token to .env file
+            $this->saveAccessTokenToEnv($tokenData['access_token']);
+
             return redirect()->route('admin.tokens')
-                ->with('success', 'Access token generated successfully! Expires: ' .
+                ->with('success', 'Access token generated successfully and saved to .env! Expires: ' .
                        \Carbon\Carbon::createFromTimestampMs($tokenData['expire_time'])->diffForHumans());
         } catch (\Exception $e) {
             return redirect()->route('admin.tokens')
                 ->with('error', 'Failed to generate access token: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Save access token to .env file
+     */
+    private function saveAccessTokenToEnv(string $accessToken)
+    {
+        $envFile = base_path('.env');
+
+        if (!file_exists($envFile)) {
+            throw new \Exception('.env file not found');
+        }
+
+        $envContent = file_get_contents($envFile);
+
+        // Update or add ALIEXPRESS_ACCESS_TOKEN
+        if (preg_match('/ALIEXPRESS_ACCESS_TOKEN=/', $envContent)) {
+            $envContent = preg_replace(
+                '/ALIEXPRESS_ACCESS_TOKEN=.*/',
+                'ALIEXPRESS_ACCESS_TOKEN=' . $accessToken,
+                $envContent
+            );
+        } else {
+            $envContent .= "\nALIEXPRESS_ACCESS_TOKEN=" . $accessToken;
+        }
+
+        file_put_contents($envFile, $envContent);
+
+        // Clear config cache to reload the new value
+        \Artisan::call('config:clear');
     }
 }

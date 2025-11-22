@@ -79,14 +79,16 @@ class AliExpressAuthService
      */
     public function getAuthorizationUrl(string $redirectUri, ?string $state = null): string
     {
-        $authUrl = 'https://oauth.aliexpress.com/authorize';
+        // IMPORTANT: Use the correct AliExpress OAuth endpoint
+        // https://api-sg.aliexpress.com/oauth/authorize (CORRECT)
+        // NOT https://oauth.aliexpress.com/authorize (WRONG - causes appkey不存在 error)
+        $authUrl = 'https://api-sg.aliexpress.com/oauth/authorize';
 
         $params = [
             'response_type' => 'code',
             'client_id' => $this->apiKey,
             'redirect_uri' => $redirectUri,
             'state' => $state ?? bin2hex(random_bytes(16)),
-            'sp' => 'ae',
         ];
 
         Log::debug('AliExpress Authorization URL Generated', [
