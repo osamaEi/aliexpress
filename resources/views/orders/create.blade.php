@@ -237,31 +237,6 @@
                     </div>
                 </div>
 
-                <!-- Shipping Cost Information -->
-                @if(isset($product) && $product->isAliexpressProduct())
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <div id="freight-info-container" class="card border-info" style="display: none;">
-                            <div class="card-header bg-info text-white">
-                                <h6 class="mb-0"><i class="ri-ship-line me-2"></i>Shipping Information</h6>
-                            </div>
-                            <div class="card-body">
-                                <div id="freight-loading" style="display: none;">
-                                    <div class="d-flex align-items-center">
-                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                        <span>Calculating shipping cost...</span>
-                                    </div>
-                                </div>
-                                <div id="freight-result" style="display: none;"></div>
-                                <div id="freight-error" class="alert alert-warning mb-0" style="display: none;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
                 <!-- Customer Notes -->
                 <div class="row mb-4">
                     <div class="col-md-12">
@@ -273,12 +248,47 @@
                     </div>
                 </div>
 
+                <!-- Shipping Cost Information - Displayed Before Submit -->
+                @if(isset($product) && $product->isAliexpressProduct())
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div id="freight-info-container" class="card border-primary shadow-sm" style="display: none;">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="ri-ship-line me-2"></i>Shipping Cost Details</h5>
+                                <small>Please review the shipping information before placing your order</small>
+                            </div>
+                            <div class="card-body">
+                                <div id="freight-loading" style="display: none;">
+                                    <div class="d-flex align-items-center justify-content-center py-3">
+                                        <div class="spinner-border text-primary me-3" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span class="h6 mb-0">Calculating shipping cost...</span>
+                                    </div>
+                                </div>
+                                <div id="freight-result" style="display: none;"></div>
+                                <div id="freight-error" class="alert alert-danger mb-0" style="display: none;">
+                                    <i class="ri-error-warning-line me-2"></i>
+                                    <span id="freight-error-message"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instruction to complete address -->
+                        <div id="freight-instruction" class="alert alert-info mt-3">
+                            <i class="ri-information-line me-2"></i>
+                            <strong>Please complete the shipping address above</strong> to calculate shipping cost and see estimated delivery time.
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Submit Buttons -->
                 <div class="d-flex justify-content-between">
                     <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
                         <i class="ri-arrow-left-line me-1"></i> Back to Orders
                     </a>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submit-order-btn">
                         <i class="ri-save-line me-1"></i> Create Order
                     </button>
                 </div>
@@ -287,7 +297,7 @@
     </div>
 </div>
 
-@push('scripts')
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const phoneInput = document.getElementById('customer_phone');
@@ -326,8 +336,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const freightLoading = document.getElementById('freight-loading');
     const freightResult = document.getElementById('freight-result');
     const freightError = document.getElementById('freight-error');
+    const freightErrorMessage = document.getElementById('freight-error-message');
+    const freightInstruction = document.getElementById('freight-instruction');
 
     let freightCalculationTimeout = null;
+    let freightCalculated = false;
 
     // Function to calculate freight
     function calculateFreight() {
@@ -340,7 +353,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Only calculate if we have required fields
         if (!country || !city || !province || quantity < 1) {
             freightInfoContainer.style.display = 'none';
+            if (freightInstruction) {
+                freightInstruction.style.display = 'block';
+            }
+            freightCalculated = false;
             return;
+        }
+
+        // Hide instruction
+        if (freightInstruction) {
+            freightInstruction.style.display = 'none';
         }
 
         // Show container and loading state
@@ -348,6 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
         freightLoading.style.display = 'block';
         freightResult.style.display = 'none';
         freightError.style.display = 'none';
+        freightCalculated = false;
 
         // Prepare request data
         const data = {
@@ -374,24 +397,51 @@ document.addEventListener('DOMContentLoaded', function() {
             freightLoading.style.display = 'none';
 
             if (data.success) {
-                // Display freight information
-                let html = '<div class="row">';
-                html += '<div class="col-md-6">';
-                html += '<p class="mb-2"><strong>Shipping Cost:</strong></p>';
-                html += '<p class="h4 text-success mb-0">' + data.freight_currency + ' ' + parseFloat(data.freight_amount).toFixed(2) + '</p>';
+                // Display freight information with better styling
+                let html = '<div class="alert alert-success border-success mb-3">';
+                html += '<div class="row align-items-center">';
+                html += '<div class="col-md-12 mb-3">';
+                html += '<div class="d-flex align-items-center">';
+                html += '<i class="ri-checkbox-circle-line text-success me-2" style="font-size: 24px;"></i>';
+                html += '<span class="h6 mb-0 text-success">Shipping Available</span>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
                 html += '</div>';
 
+                html += '<div class="row">';
+
+                // Shipping cost - prominent display
+                html += '<div class="col-md-6 mb-3">';
+                html += '<div class="card bg-light border-0">';
+                html += '<div class="card-body text-center py-4">';
+                html += '<p class="text-muted mb-2"><strong><i class="ri-money-dollar-circle-line me-1"></i>Shipping Cost</strong></p>';
+                html += '<p class="h2 text-primary mb-0"><strong>' + data.freight_currency + ' ' + parseFloat(data.freight_amount).toFixed(2) + '</strong></p>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+
+                // Service name
                 if (data.service_name) {
-                    html += '<div class="col-md-6">';
-                    html += '<p class="mb-2"><strong>Shipping Method:</strong></p>';
-                    html += '<p class="mb-0">' + data.service_name + '</p>';
+                    html += '<div class="col-md-6 mb-3">';
+                    html += '<div class="card bg-light border-0">';
+                    html += '<div class="card-body text-center py-4">';
+                    html += '<p class="text-muted mb-2"><strong><i class="ri-ship-line me-1"></i>Shipping Method</strong></p>';
+                    html += '<p class="h5 mb-0">' + data.service_name + '</p>';
+                    html += '</div>';
+                    html += '</div>';
                     html += '</div>';
                 }
 
+                // Estimated delivery
                 if (data.estimated_delivery_time) {
-                    html += '<div class="col-md-12 mt-3">';
-                    html += '<p class="mb-2"><strong>Estimated Delivery:</strong></p>';
+                    html += '<div class="col-md-12">';
+                    html += '<div class="card bg-light border-0">';
+                    html += '<div class="card-body text-center py-3">';
+                    html += '<p class="text-muted mb-2"><strong><i class="ri-time-line me-1"></i>Estimated Delivery Time</strong></p>';
                     html += '<p class="mb-0">' + data.estimated_delivery_time + '</p>';
+                    html += '</div>';
+                    html += '</div>';
                     html += '</div>';
                 }
 
@@ -400,19 +450,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 freightResult.innerHTML = html;
                 freightResult.style.display = 'block';
                 freightError.style.display = 'none';
+                freightCalculated = true;
+
+                // Scroll to freight result
+                setTimeout(() => {
+                    freightInfoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
             } else {
                 // Display error
-                freightError.textContent = data.error || 'Unable to calculate shipping cost. Please try again.';
+                freightErrorMessage.textContent = data.error || 'Unable to calculate shipping cost. This may mean shipping is not available to this location.';
                 freightError.style.display = 'block';
                 freightResult.style.display = 'none';
+                freightCalculated = false;
             }
         })
         .catch(error => {
             console.error('Freight calculation error:', error);
             freightLoading.style.display = 'none';
-            freightError.textContent = 'An error occurred while calculating shipping cost.';
+            freightErrorMessage.textContent = 'An error occurred while calculating shipping cost. Please try again or contact support.';
             freightError.style.display = 'block';
             freightResult.style.display = 'none';
+            freightCalculated = false;
         });
     }
 
@@ -508,5 +566,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endpush
+
 @endsection
