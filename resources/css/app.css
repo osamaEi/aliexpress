@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Sidebar active menu styling */
+.menu-item.active > .menu-link,
+.menu-item.open.active > .menu-link.menu-toggle {
+    color: white !important;
+}
+
+.menu-item.active > .menu-link i,
+.menu-item.open.active > .menu-link.menu-toggle i {
+    color: white !important;
+}
+
+.menu-item.active > .menu-link div,
+.menu-item.open.active > .menu-link.menu-toggle div {
+    color: white !important;
+}

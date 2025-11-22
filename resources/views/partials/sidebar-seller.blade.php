@@ -81,7 +81,7 @@
 
         <!-- Products Section -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text" style="color: white;">{{ __('messages.product_management') }}</span>
+            <span class="menu-header-text" >{{ __('messages.product_management') }}</span>
         </li>
 
         <!-- Products -->
@@ -150,7 +150,7 @@
 
         <!-- Orders Section -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text" style="color: white;">{{ __('messages.order_management') }}</span>
+            <span class="menu-header-text" >{{ __('messages.order_management') }}</span>
         </li>
 
         <!-- Orders -->
@@ -184,7 +184,7 @@
 
         <!-- Account Section -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text" style="color: white;">{{ __('messages.account') }}</span>
+            <span class="menu-header-text" >{{ __('messages.account') }}</span>
         </li>
 
         <li class="menu-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">

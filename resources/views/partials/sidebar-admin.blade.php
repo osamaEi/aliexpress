@@ -81,7 +81,7 @@
 
         <!-- System Management -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text" style="color: white;">{{ __('messages.system_management') }}</span>
+            <span class="menu-header-text" >{{ __('messages.system_management') }}</span>
         </li>
 
         <!-- Settings -->
@@ -130,7 +130,7 @@
 
         <!-- Business Management -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text" style="color: white;">{{ __('messages.business_management') }}</span>
+            <span class="menu-header-text" >{{ __('messages.business_management') }}</span>
         </li>
 
         <!-- Order Management -->
@@ -183,7 +183,7 @@
 
         <!-- User Management -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text" style="color: white;">{{ __('messages.users') }}</span>
+            <span class="menu-header-text" >{{ __('messages.users') }}</span>
         </li>
 
         <!-- All Users -->
@@ -229,7 +229,7 @@
 
         <!-- Account -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text" style="color: white;">{{ __('messages.account') }}</span>
+            <span class="menu-header-text" >{{ __('messages.account') }}</span>
         </li>
 
         <li class="menu-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
