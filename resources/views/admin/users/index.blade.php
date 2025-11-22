@@ -63,6 +63,7 @@
                             <th>{{ __('messages.subscriptions') }}</th>
                             <th>{{ __('messages.registered') }}</th>
                             <th>{{ __('messages.status') }}</th>
+                            <th>{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,16 +100,24 @@
                             </td>
                             <td>{{ $user->created_at->format('Y-m-d') }}</td>
                             <td>
-                                @if($user->email_verified_at)
+                                @if($user->is_blocked)
+                                    <span class="badge bg-danger">{{ __('messages.blocked') }}</span>
+                                @elseif($user->email_verified_at)
                                     <span class="badge bg-success">{{ __('messages.verified') }}</span>
                                 @else
                                     <span class="badge bg-warning">{{ __('messages.unverified') }}</span>
                                 @endif
                             </td>
+                            <td>
+                                <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-primary">
+                                    <i class="ri-eye-line me-1"></i>
+                                    {{ __('messages.view') }}
+                                </a>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center py-4">
+                            <td colspan="7" class="text-center py-4">
                                 {{ __('messages.no_users_found') }}
                             </td>
                         </tr>

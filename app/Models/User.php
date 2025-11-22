@@ -36,6 +36,8 @@ class User extends Authenticatable
         'is_verified',
         'verified_at',
         'email_verified_at',
+        'is_blocked',
+        'block_reason',
     ];
 
     /**
@@ -61,6 +63,7 @@ class User extends Authenticatable
             'otp_expires_at' => 'datetime',
             'is_verified' => 'boolean',
             'verified_at' => 'datetime',
+            'is_blocked' => 'boolean',
         ];
     }
 

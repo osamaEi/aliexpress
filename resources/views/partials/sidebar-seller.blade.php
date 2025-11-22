@@ -210,6 +210,14 @@
             </a>
         </li>
 
+        <!-- Support Tickets -->
+        <li class="menu-item {{ request()->routeIs('seller.tickets.*') ? 'active' : '' }}">
+            <a href="{{ route('seller.tickets.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-customer-service-line"></i>
+                <div>{{ __('messages.support_tickets') }}</div>
+            </a>
+        </li>
+
         <!-- Logout -->
         <li class="menu-item">
             <form method="POST" action="{{ route('logout') }}">

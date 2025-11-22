@@ -52,9 +52,24 @@
                                 <div class="text-muted small">{{ $order->created_at->format('Y-m-d H:i') }}</div>
                             </td>
                             <td>
-                                <div>
-                                    <strong>{{ $order->user->name }}</strong>
-                                    <div class="text-muted small">{{ $order->user->email }}</div>
+                                <div class="d-flex align-items-center">
+                                    @if($order->user->profile_image)
+                                        <img src="{{ asset('storage/' . $order->user->profile_image) }}"
+                                             alt="{{ $order->user->name }}"
+                                             class="rounded-circle me-2"
+                                             width="40"
+                                             height="40"
+                                             style="object-fit: cover;">
+                                    @else
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
+                                             style="width: 40px; height: 40px; font-size: 16px; font-weight: bold;">
+                                            {{ strtoupper(substr($order->user->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <strong>{{ $order->user->name }}</strong>
+                                        <div class="text-muted small">{{ $order->user->email }}</div>
+                                    </div>
                                 </div>
                             </td>
                             <td>

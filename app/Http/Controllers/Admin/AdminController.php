@@ -46,21 +46,21 @@ class AdminController extends Controller
      */
     public function tokens()
     {
-        $envFile = base_path('.env');
-        $envContent = file_exists($envFile) ? file_get_contents($envFile) : '';
-
-        // Extract current tokens
-        preg_match('/ALIEXPRESS_APP_KEY=(.*)/', $envContent, $appKey);
-        preg_match('/ALIEXPRESS_APP_SECRET=(.*)/', $envContent, $appSecret);
-        preg_match('/ALIEXPRESS_ACCESS_TOKEN=(.*)/', $envContent, $accessToken);
-
         $tokens = [
-            'app_key' => $appKey[1] ?? '',
-            'app_secret' => $appSecret[1] ?? '',
-            'access_token' => $accessToken[1] ?? '',
+            'app_key' => config('services.aliexpress.api_key', env('ALIEXPRESS_APP_KEY', '')),
+            'app_secret' => config('services.aliexpress.api_secret', env('ALIEXPRESS_APP_SECRET', '')),
         ];
 
-        return view('admin.tokens', compact('tokens'));
+        // Get token status from database
+        $tokenStatus = null;
+        try {
+            $authService = new \App\Services\AliExpressAuthService();
+            $tokenStatus = $authService->getTokenStatus();
+        } catch (\Exception $e) {
+            // No tokens yet
+        }
+
+        return view('admin.tokens', compact('tokens', 'tokenStatus'));
     }
 
     /**
@@ -71,31 +71,37 @@ class AdminController extends Controller
         $request->validate([
             'app_key' => 'required|string',
             'app_secret' => 'required|string',
-            'access_token' => 'nullable|string',
         ]);
 
         $envFile = base_path('.env');
+
+        if (!file_exists($envFile)) {
+            return redirect()->route('admin.tokens')
+                ->with('error', '.env file not found');
+        }
+
         $envContent = file_get_contents($envFile);
 
-        // Update tokens
-        $envContent = preg_replace(
-            '/ALIEXPRESS_APP_KEY=.*/',
-            'ALIEXPRESS_APP_KEY=' . $request->app_key,
-            $envContent
-        );
-
-        $envContent = preg_replace(
-            '/ALIEXPRESS_APP_SECRET=.*/',
-            'ALIEXPRESS_APP_SECRET=' . $request->app_secret,
-            $envContent
-        );
-
-        if ($request->filled('access_token')) {
+        // Update or add APP_KEY
+        if (preg_match('/ALIEXPRESS_APP_KEY=/', $envContent)) {
             $envContent = preg_replace(
-                '/ALIEXPRESS_ACCESS_TOKEN=.*/',
-                'ALIEXPRESS_ACCESS_TOKEN=' . $request->access_token,
+                '/ALIEXPRESS_APP_KEY=.*/',
+                'ALIEXPRESS_APP_KEY=' . $request->app_key,
                 $envContent
             );
+        } else {
+            $envContent .= "\nALIEXPRESS_APP_KEY=" . $request->app_key;
+        }
+
+        // Update or add APP_SECRET
+        if (preg_match('/ALIEXPRESS_APP_SECRET=/', $envContent)) {
+            $envContent = preg_replace(
+                '/ALIEXPRESS_APP_SECRET=.*/',
+                'ALIEXPRESS_APP_SECRET=' . $request->app_secret,
+                $envContent
+            );
+        } else {
+            $envContent .= "\nALIEXPRESS_APP_SECRET=" . $request->app_secret;
         }
 
         file_put_contents($envFile, $envContent);
@@ -105,5 +111,54 @@ class AdminController extends Controller
 
         return redirect()->route('admin.tokens')
             ->with('success', __('messages.tokens_updated_successfully'));
+    }
+
+    /**
+     * Generate new access token using authorization URL
+     */
+    public function generateToken()
+    {
+        // Check if credentials are configured
+        $appKey = config('services.aliexpress.api_key');
+        $appSecret = config('services.aliexpress.api_secret');
+
+        if (empty($appKey) || empty($appSecret)) {
+            return redirect()->route('admin.tokens')
+                ->with('error', 'Please configure your App Key and App Secret first before generating a token.');
+        }
+
+        try {
+            $authService = new \App\Services\AliExpressAuthService();
+            $redirectUri = route('admin.tokens.callback');
+            $authUrl = $authService->getAuthorizationUrl($redirectUri);
+
+            return redirect($authUrl);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.tokens')
+                ->with('error', 'Failed to generate authorization URL: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle OAuth callback and exchange code for token
+     */
+    public function tokenCallback(Request $request)
+    {
+        if (!$request->has('code')) {
+            return redirect()->route('admin.tokens')
+                ->with('error', 'Authorization code not received');
+        }
+
+        try {
+            $authService = new \App\Services\AliExpressAuthService();
+            $tokenData = $authService->createToken($request->code);
+
+            return redirect()->route('admin.tokens')
+                ->with('success', 'Access token generated successfully! Expires: ' .
+                       \Carbon\Carbon::createFromTimestampMs($tokenData['expire_time'])->diffForHumans());
+        } catch (\Exception $e) {
+            return redirect()->route('admin.tokens')
+                ->with('error', 'Failed to generate access token: ' . $e->getMessage());
+        }
     }
 }

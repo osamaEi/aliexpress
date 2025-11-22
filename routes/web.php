@@ -177,6 +177,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/{order}/sync', [App\Http\Controllers\Seller\ShippingController::class, 'syncTracking'])->name('sync');
     });
 
+    // Seller Ticket Routes
+    Route::prefix('seller/tickets')->name('seller.tickets.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Seller\TicketController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Seller\TicketController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Seller\TicketController::class, 'store'])->name('store');
+        Route::get('/{ticket}', [App\Http\Controllers\Seller\TicketController::class, 'show'])->name('show');
+        Route::post('/{ticket}/reply', [App\Http\Controllers\Seller\TicketController::class, 'reply'])->name('reply');
+    });
+
     // Admin Routes
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         // Admin Dashboard
@@ -185,6 +194,8 @@ Route::middleware('auth')->group(function () {
         // Token Management
         Route::get('/tokens', [AdminController::class, 'tokens'])->name('tokens');
         Route::post('/tokens', [AdminController::class, 'updateTokens'])->name('tokens.update');
+        Route::get('/tokens/generate', [AdminController::class, 'generateToken'])->name('tokens.generate');
+        Route::get('/tokens/callback', [AdminController::class, 'tokenCallback'])->name('tokens.callback');
 
         // Subscription Management
         Route::get('/subscriptions', [SubscriptionManagementController::class, 'index'])->name('subscriptions.index');
@@ -222,6 +233,11 @@ Route::middleware('auth')->group(function () {
 
         // User Management - General
         Route::get('/users', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [App\Http\Controllers\Admin\UserManagementController::class, 'show'])->name('users.show');
+        Route::post('/users/{user}/toggle-block', [App\Http\Controllers\Admin\UserManagementController::class, 'toggleBlock'])->name('users.toggle-block');
+        Route::post('/users/{user}/send-notification', [App\Http\Controllers\Admin\UserManagementController::class, 'sendNotification'])->name('users.send-notification');
+        Route::post('/users/{user}/assign-subscription', [App\Http\Controllers\Admin\UserManagementController::class, 'assignSubscription'])->name('users.assign-subscription');
+        Route::post('/users/{user}/extend-subscription', [App\Http\Controllers\Admin\UserManagementController::class, 'extendSubscription'])->name('users.extend-subscription');
 
         // Admin Users Management
         Route::get('/admins', [App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('admins.index');
@@ -268,6 +284,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/logs/download', [App\Http\Controllers\Admin\LogController::class, 'download'])->name('logs.download');
         Route::delete('/logs/delete', [App\Http\Controllers\Admin\LogController::class, 'delete'])->name('logs.delete');
         Route::delete('/logs/clear', [App\Http\Controllers\Admin\LogController::class, 'clear'])->name('logs.clear');
+
+        // Ticket Management
+        Route::prefix('tickets')->name('tickets.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\TicketController::class, 'index'])->name('index');
+            Route::get('/{ticket}', [App\Http\Controllers\Admin\TicketController::class, 'show'])->name('show');
+            Route::post('/{ticket}/reply', [App\Http\Controllers\Admin\TicketController::class, 'reply'])->name('reply');
+            Route::post('/{ticket}/status', [App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('update-status');
+            Route::post('/{ticket}/assign', [App\Http\Controllers\Admin\TicketController::class, 'assign'])->name('assign');
+        });
     });
 });
 

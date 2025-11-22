@@ -274,6 +274,7 @@
                                 {{ old('api_access', $subscription->api_access) ? 'checked' : '' }}
                             >
                             <label class="form-check-label" for="api_access">
+                                <img src="{{ asset('vector.png') }}" alt="Taif" style="height: 20px; vertical-align: middle;" class="{{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}">
                                 {{ __('messages.api_access') }}
                             </label>
                         </div>

@@ -2,10 +2,6 @@
 
 namespace App\Providers;
 
-use App\Events\OrderCreated;
-use App\Events\OrderStatusUpdated;
-use App\Listeners\NotifyOrderStatusChange;
-use App\Listeners\PlaceOrderOnAliExpress;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -16,11 +12,11 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        OrderCreated::class => [
-            PlaceOrderOnAliExpress::class,
+        \App\Events\OrderCreated::class => [
+            \App\Listeners\PlaceOrderOnAliExpress::class,
         ],
-        OrderStatusUpdated::class => [
-            NotifyOrderStatusChange::class,
+        \App\Events\OrderStatusUpdated::class => [
+            \App\Listeners\NotifyOrderStatusChange::class,
         ],
     ];
 

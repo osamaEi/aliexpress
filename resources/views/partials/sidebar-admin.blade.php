@@ -194,6 +194,14 @@
             </a>
         </li>
 
+        <!-- Support Tickets -->
+        <li class="menu-item {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.tickets.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-customer-service-2-line"></i>
+                <div>{{ __('messages.support_tickets') }}</div>
+            </a>
+        </li>
+
         <!-- Wallet Management -->
         <li class="menu-item {{ request()->routeIs('admin.wallets.*') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">

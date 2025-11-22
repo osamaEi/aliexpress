@@ -36,8 +36,8 @@ return [
     ],
 
     'aliexpress' => [
-        'api_key' => env('ALIEXPRESS_API_KEY'),
-        'api_secret' => env('ALIEXPRESS_API_SECRET'),
+        'api_key' => env('ALIEXPRESS_APP_KEY', env('ALIEXPRESS_API_KEY')),
+        'api_secret' => env('ALIEXPRESS_APP_SECRET', env('ALIEXPRESS_API_SECRET')),
         'tracking_id' => env('ALIEXPRESS_TRACKING_ID'),
         'access_token' => env('ALIEXPRESS_ACCESS_TOKEN'),
         'api_url' => env('ALIEXPRESS_API_URL', 'https://api-sg.aliexpress.com/sync'),
