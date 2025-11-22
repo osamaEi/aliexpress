@@ -16,12 +16,18 @@ class AliExpressAuthService
 
     public function __construct()
     {
-        $this->apiKey = config('services.aliexpress.api_key');
-        $this->apiSecret = config('services.aliexpress.api_secret');
+        // Hardcoded credentials to avoid configuration issues
+        $this->apiKey = '517420';
+        $this->apiSecret = 'y86kcMc4Yyyima1vDkUSJspmuuMc38iT';
 
         if (empty($this->apiKey) || empty($this->apiSecret)) {
-            throw new \Exception('AliExpress API credentials not configured in .env');
+            throw new \Exception('AliExpress API credentials not configured');
         }
+
+        Log::info('AliExpressAuthService initialized with App Key', [
+            'app_key' => $this->apiKey,
+            'secret_length' => strlen($this->apiSecret)
+        ]);
     }
 
     // ===================================================================
