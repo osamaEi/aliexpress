@@ -540,6 +540,7 @@ class OrderController extends Controller
                     'success' => false,
                     'error' => $freightResult['error_desc'] ?? 'Unable to calculate freight',
                     'error_code' => $freightResult['error_code'] ?? null,
+                    'raw_response' => $freightResult['raw_response'] ?? null, // Include raw response for debugging
                 ], 400);
             }
 

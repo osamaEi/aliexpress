@@ -1045,6 +1045,13 @@ class AliExpressService
                     }
 
                     // No delivery options available
+                    Log::warning('No delivery options returned from AliExpress', [
+                        'product_id' => $params['product_id'],
+                        'country' => $params['country'],
+                        'full_response' => $result,
+                        'delivery_options' => $deliveryOptions
+                    ]);
+
                     return [
                         'success' => false,
                         'error_code' => 'NO_DELIVERY_OPTIONS',
@@ -1055,6 +1062,12 @@ class AliExpressService
             }
 
             // If no standard response format found
+            Log::error('Unexpected response format from AliExpress freight API', [
+                'product_id' => $params['product_id'],
+                'country' => $params['country'],
+                'full_raw_response' => $data
+            ]);
+
             return [
                 'success' => false,
                 'error_code' => 'PARSE_ERROR',

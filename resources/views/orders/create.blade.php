@@ -526,8 +526,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     freightInfoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 100);
             } else {
-                // Display error
-                freightErrorMessage.textContent = data.error || 'Unable to calculate shipping cost. This may mean shipping is not available to this location.';
+                // Display error with raw response for debugging
+                let errorMsg = data.error || 'Unable to calculate shipping cost. This may mean shipping is not available to this location.';
+
+                // Log raw response to console for debugging
+                if (data.raw_response) {
+                    console.log('AliExpress Raw Response:', data.raw_response);
+                    console.log('AliExpress Raw Response (JSON):', JSON.stringify(data.raw_response, null, 2));
+                }
+
+                // Display error with raw response details
+                if (data.raw_response) {
+                    freightErrorMessage.innerHTML = errorMsg + '<br><br><strong>Raw AliExpress Response:</strong><br><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-size: 11px;">' + JSON.stringify(data.raw_response, null, 2) + '</pre>';
+                } else {
+                    freightErrorMessage.textContent = errorMsg;
+                }
+
                 freightError.style.display = 'block';
                 freightResult.style.display = 'none';
                 freightCalculated = false;
