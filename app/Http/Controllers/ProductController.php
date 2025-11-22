@@ -818,6 +818,7 @@ class ProductController extends Controller
                 ->where('is_active', true);
 
             // Filter categories for sellers based on their selected categories
+            $user = auth()->user();
             if ($user && $user->user_type === 'seller') {
                 // Decode the seller's selected categories
                 $mainActivities = json_decode($user->main_activity, true) ?? [];
