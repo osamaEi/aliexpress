@@ -14,7 +14,7 @@
                         {{ __('messages.shipping_tracking') }}
                     </h4>
                     <p class="mb-0 mt-2 small">
-                        {{ __('messages.track_all_orders_shipping') }}
+                        {{ __('messages.track_your_orders_shipping') }}
                     </p>
                 </div>
             </div>
@@ -91,7 +91,7 @@
     <!-- Sync All Button -->
     <div class="row mb-3">
         <div class="col-12">
-            <form method="POST" action="{{ route('admin.shipping.sync-all') }}" class="d-inline">
+            <form method="POST" action="{{ route('seller.shipping.sync-all') }}" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-primary" id="sync-all-btn">
                     <i class="ri-refresh-line me-1"></i>
@@ -106,7 +106,7 @@
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-body">
-                    <form method="GET" action="{{ route('admin.shipping.index') }}" class="row g-3">
+                    <form method="GET" action="{{ route('seller.shipping.index') }}" class="row g-3">
                         <div class="col-md-4">
                             <label for="search" class="form-label">{{ __('messages.search') }}</label>
                             <input type="text" class="form-control" id="search" name="search"
@@ -153,7 +153,6 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>{{ __('messages.order_number') }}</th>
-                                    <th>{{ __('messages.seller') }}</th>
                                     <th>{{ __('messages.customer') }}</th>
                                     <th>{{ __('messages.product') }}</th>
                                     <th>{{ __('messages.order_date') }}</th>
@@ -171,14 +170,6 @@
                                         <strong>{{ $order->order_number }}</strong>
                                         @if($order->aliexpress_order_id)
                                             <br><small class="text-muted">AE: {{ $order->aliexpress_order_id }}</small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($order->user)
-                                            {{ $order->user->name }}<br>
-                                            <small class="text-muted">{{ $order->user->email }}</small>
-                                        @else
-                                            <span class="text-muted">N/A</span>
                                         @endif
                                     </td>
                                     <td>
@@ -226,7 +217,7 @@
                                     </td>
                                     <td class="text-center">
                                         @if($order->aliexpress_order_id)
-                                            <form method="POST" action="{{ route('admin.shipping.sync', $order) }}" class="d-inline">
+                                            <form method="POST" action="{{ route('seller.shipping.sync', $order) }}" class="d-inline">
                                                 @csrf
                                                 <button type="submit" class="btn btn-sm btn-outline-primary"
                                                         title="{{ __('messages.sync_tracking') }}">
@@ -240,7 +231,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="10" class="text-center py-4">
+                                    <td colspan="9" class="text-center py-4">
                                         <i class="ri-inbox-line" style="font-size: 3rem; color: #ccc;"></i>
                                         <p class="text-muted mt-2">{{ __('messages.no_orders_found') }}</p>
                                     </td>

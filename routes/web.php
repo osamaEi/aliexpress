@@ -174,7 +174,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('seller/shipping')->name('seller.shipping.')->group(function () {
         Route::get('/', [App\Http\Controllers\Seller\ShippingController::class, 'index'])->name('index');
         Route::get('/{shipping}', [App\Http\Controllers\Seller\ShippingController::class, 'show'])->name('show');
-        Route::post('/{order}/sync', [App\Http\Controllers\Seller\ShippingController::class, 'syncTracking'])->name('sync');
+        Route::post('/{order}/sync', [App\Http\Controllers\Seller\ShippingController::class, 'sync'])->name('sync');
+        Route::post('/sync-all', [App\Http\Controllers\Seller\ShippingController::class, 'syncAll'])->name('sync-all');
     });
 
     // Seller Ticket Routes

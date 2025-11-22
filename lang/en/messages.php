@@ -796,4 +796,9 @@ return [
     'all' => 'All',
     'user' => 'User',
     'back' => 'Back',
+
+    // Category Assignment
+    'assign_to_sellers' => 'Assign to Sellers',
+    'optional' => 'Optional',
+    'assign_sellers_hint' => 'Hold Ctrl (Cmd on Mac) to select multiple sellers. This category will be added to their available categories.',
 ];

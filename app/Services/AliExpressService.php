@@ -1560,6 +1560,45 @@ class AliExpressService
     }
 
     /**
+     * Get shipping information for an order by AliExpress order ID
+     */
+    public function getOrderShippingInfo(string $aliexpressOrderId): ?array
+    {
+        if (!$aliexpressOrderId) {
+            return null;
+        }
+
+        try {
+            // Try to get tracking info
+            $trackingData = $this->getTrackingInfo($aliexpressOrderId);
+
+            if (!$trackingData) {
+                // Try alternative tracking method
+                $trackingData = $this->queryLogisticsTracking($aliexpressOrderId);
+            }
+
+            if ($trackingData) {
+                return [
+                    'tracking_number' => $trackingData['tracking_number'] ?? $trackingData['logistics_no'] ?? null,
+                    'shipping_method' => $trackingData['logistics_name'] ?? $trackingData['service_name'] ?? null,
+                    'carrier_code' => $trackingData['logistics_service'] ?? null,
+                    'status' => $this->parseTrackingStatus($trackingData['order_status'] ?? 'WAIT_SELLER_SEND_GOODS'),
+                    'tracking_events' => $trackingData['details'] ?? [],
+                    'raw_response' => $trackingData,
+                ];
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get order shipping info', [
+                'aliexpress_order_id' => $aliexpressOrderId,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
      * Sync shipping information for an order
      */
     public function syncOrderShipping(Order $order): ?array
@@ -1571,34 +1610,6 @@ class AliExpressService
             return null;
         }
 
-        try {
-            // Try to get tracking info
-            $trackingData = $this->getTrackingInfo($order->aliexpress_order_id);
-
-            if (!$trackingData) {
-                // Try alternative tracking method
-                $trackingData = $this->queryLogisticsTracking($order->aliexpress_order_id);
-            }
-
-            if ($trackingData) {
-                return [
-                    'tracking_number' => $trackingData['tracking_number'] ?? $trackingData['logistics_no'] ?? null,
-                    'carrier_name' => $trackingData['logistics_name'] ?? $trackingData['service_name'] ?? null,
-                    'carrier_code' => $trackingData['logistics_service'] ?? null,
-                    'status' => $this->parseTrackingStatus($trackingData['order_status'] ?? 'WAIT_SELLER_SEND_GOODS'),
-                    'tracking_events' => $trackingData['details'] ?? [],
-                    'raw_response' => $trackingData,
-                ];
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Failed to sync order shipping', [
-                'order_id' => $order->id,
-                'aliexpress_order_id' => $order->aliexpress_order_id,
-                'error' => $e->getMessage()
-            ]);
-        }
-
-        return null;
+        return $this->getOrderShippingInfo($order->aliexpress_order_id);
     }
 }

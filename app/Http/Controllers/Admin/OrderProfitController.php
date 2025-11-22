@@ -42,13 +42,14 @@ class OrderProfitController extends Controller
             });
         }
 
-        $orders = $query->latest('placed_at')->paginate(20);
-
-        // Calculate totals
+        // Calculate totals BEFORE pagination
         $totalAliexpressProfit = $query->sum('aliexpress_profit');
         $totalAdminCategoryProfit = $query->sum('admin_category_profit');
         $totalSellerProfit = $query->sum('seller_profit');
         $totalProfit = $totalAliexpressProfit + $totalAdminCategoryProfit + $totalSellerProfit;
+
+        // Get paginated orders (clone query to avoid affecting totals)
+        $orders = (clone $query)->latest('placed_at')->paginate(20);
 
         return view('admin.order-profits.index', compact(
             'orders',

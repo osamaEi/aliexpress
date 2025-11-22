@@ -796,4 +796,9 @@ return [
     'all' => 'الكل',
     'user' => 'المستخدم',
     'back' => 'رجوع',
+
+    // Category Assignment
+    'assign_to_sellers' => 'تعيين للبائعين',
+    'optional' => 'اختياري',
+    'assign_sellers_hint' => 'اضغط Ctrl (Cmd على Mac) لتحديد عدة بائعين. سيتم إضافة هذا التصنيف إلى التصنيفات المتاحة لهم.',
 ];

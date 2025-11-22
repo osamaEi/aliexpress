@@ -214,15 +214,25 @@ class Order extends Model
 
         $product = $this->product;
 
+        if (!$product) {
+            // No product found, set all profits to 0
+            $this->aliexpress_profit = 0;
+            $this->admin_category_profit = 0;
+            $this->seller_profit = 0;
+            return;
+        }
+
         // 1. Calculate AliExpress Profit (supplier profit margin)
         $aliexpressProfit = 0;
         if ($product->aliexpress_price && $product->supplier_profit_margin) {
+            // AliExpress cost = (product price + shipping) * quantity
             $aliexpressCost = ($product->aliexpress_price + ($product->shipping_cost ?? 0)) * $this->quantity;
-            $aliexpressSellingPrice = $aliexpressCost * (1 + ($product->supplier_profit_margin / 100));
-            $aliexpressProfit = $aliexpressSellingPrice - $aliexpressCost;
+
+            // Calculate profit based on margin percentage
+            $aliexpressProfit = $aliexpressCost * ($product->supplier_profit_margin / 100);
         }
 
-        // 2. Calculate Admin Category Profit
+        // 2. Calculate Admin Category Profit (per unit * quantity)
         $adminCategoryProfit = 0;
         if ($product->category_id) {
             $adminProfitPerUnit = AdminCategoryProfit::getProfitForCategory($product->category_id);
@@ -238,8 +248,8 @@ class Order extends Model
                 ->first();
 
             if ($sellerProfitSetting) {
-                // Base price for seller profit calculation (product price per unit)
-                $basePrice = $product->price * $this->quantity;
+                // Use the actual total_price from the order as base price
+                $basePrice = $this->total_price ?? ($this->unit_price * $this->quantity);
                 $sellerProfit = $sellerProfitSetting->calculateProfit($basePrice);
             }
         }

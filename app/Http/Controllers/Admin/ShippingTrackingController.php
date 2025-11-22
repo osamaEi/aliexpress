@@ -23,36 +23,52 @@ class ShippingTrackingController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Shipping::with(['order.user', 'order.product']);
+        $query = Order::with(['user', 'product'])
+            ->whereNotNull('aliexpress_order_id'); // Only orders placed on AliExpress
 
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
+        // Filter by seller
+        if ($request->has('seller_id') && $request->seller_id) {
+            $query->where('user_id', $request->seller_id);
+        }
+
         // Search by tracking number or order number
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('tracking_number', 'like', "%{$search}%")
-                  ->orWhereHas('order', function($orderQuery) use ($search) {
-                      $orderQuery->where('order_number', 'like', "%{$search}%");
-                  });
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('tracking_number', 'like', "%{$search}%")
+                  ->orWhere('aliexpress_order_id', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%");
             });
         }
 
-        $shippings = $query->latest('updated_at')->paginate(20);
+        // Filter by date
+        if ($request->has('date_from') && $request->date_from) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        $orders = $query->latest('created_at')->paginate(20);
 
         // Get statistics
         $stats = [
-            'total' => Shipping::count(),
-            'pending' => Shipping::where('status', 'pending')->count(),
-            'in_transit' => Shipping::where('status', 'in_transit')->count(),
-            'delivered' => Shipping::where('status', 'delivered')->count(),
-            'exception' => Shipping::where('status', 'exception')->count(),
+            'total' => Order::whereNotNull('aliexpress_order_id')->count(),
+            'pending' => Order::whereNotNull('aliexpress_order_id')
+                ->whereIn('status', ['pending', 'placed'])
+                ->count(),
+            'shipped' => Order::whereNotNull('aliexpress_order_id')
+                ->where('status', 'shipped')
+                ->count(),
+            'delivered' => Order::whereNotNull('aliexpress_order_id')
+                ->where('status', 'delivered')
+                ->count(),
         ];
 
-        return view('admin.shipping.index', compact('shippings', 'stats'));
+        return view('admin.shipping.index', compact('orders', 'stats'));
     }
 
     /**
@@ -76,38 +92,38 @@ class ShippingTrackingController extends Controller
             }
 
             // Get tracking data from AliExpress
-            $trackingData = $this->aliexpressService->syncOrderShipping($order);
+            $trackingData = $this->aliexpressService->getOrderShippingInfo($order->aliexpress_order_id);
 
             if (!$trackingData) {
                 return redirect()->back()->with('warning', 'No tracking information available yet.');
             }
 
-            // Create or update shipping record
-            $shipping = Shipping::updateOrCreate(
-                ['order_id' => $order->id],
-                array_merge($trackingData, [
-                    'last_synced_at' => now(),
-                ])
-            );
+            // Update order with tracking info
+            $order->update([
+                'tracking_number' => $trackingData['tracking_number'] ?? null,
+                'shipping_method' => $trackingData['shipping_method'] ?? null,
+            ]);
 
             // Update order status based on shipping status
-            if ($shipping->status === 'delivered' && $order->status !== 'delivered') {
-                $order->update([
-                    'status' => 'delivered',
-                    'delivered_at' => now(),
-                ]);
-            } elseif ($shipping->status === 'in_transit' && $order->status === 'placed') {
-                $order->update([
-                    'status' => 'shipped',
-                    'shipped_at' => $shipping->shipped_at ?? now(),
-                    'tracking_number' => $shipping->tracking_number,
-                ]);
+            if (isset($trackingData['status'])) {
+                if ($trackingData['status'] === 'delivered' && $order->status !== 'delivered') {
+                    $order->update([
+                        'status' => 'delivered',
+                        'delivered_at' => now(),
+                    ]);
+                } elseif ($trackingData['status'] === 'shipped' && $order->status === 'placed') {
+                    $order->update([
+                        'status' => 'shipped',
+                        'shipped_at' => now(),
+                    ]);
+                }
             }
 
-            Log::info('Shipping tracking synced successfully', [
+            Log::info('Admin synced shipping tracking', [
+                'admin_id' => auth()->id(),
                 'order_id' => $order->id,
-                'shipping_id' => $shipping->id,
-                'status' => $shipping->status
+                'aliexpress_order_id' => $order->aliexpress_order_id,
+                'tracking_number' => $order->tracking_number
             ]);
 
             return redirect()->back()->with('success', 'Tracking information updated successfully!');
@@ -130,23 +146,39 @@ class ShippingTrackingController extends Controller
         try {
             // Get all orders with AliExpress IDs that are not delivered
             $orders = Order::whereNotNull('aliexpress_order_id')
-                ->whereNotIn('status', ['delivered', 'cancelled', 'failed'])
+                ->whereIn('status', ['placed', 'shipped'])
                 ->get();
+
+            if ($orders->isEmpty()) {
+                return redirect()->back()->with('warning', 'No orders to sync.');
+            }
 
             $synced = 0;
             $failed = 0;
 
             foreach ($orders as $order) {
                 try {
-                    $trackingData = $this->aliexpressService->syncOrderShipping($order);
+                    $trackingData = $this->aliexpressService->getOrderShippingInfo($order->aliexpress_order_id);
 
                     if ($trackingData) {
-                        Shipping::updateOrCreate(
-                            ['order_id' => $order->id],
-                            array_merge($trackingData, [
-                                'last_synced_at' => now(),
-                            ])
-                        );
+                        $order->update([
+                            'tracking_number' => $trackingData['tracking_number'] ?? null,
+                            'shipping_method' => $trackingData['shipping_method'] ?? null,
+                        ]);
+
+                        // Update status if delivered
+                        if (isset($trackingData['status']) && $trackingData['status'] === 'delivered') {
+                            $order->update([
+                                'status' => 'delivered',
+                                'delivered_at' => now(),
+                            ]);
+                        } elseif (isset($trackingData['status']) && $trackingData['status'] === 'shipped' && $order->status === 'placed') {
+                            $order->update([
+                                'status' => 'shipped',
+                                'shipped_at' => now(),
+                            ]);
+                        }
+
                         $synced++;
                     }
                 } catch (\Exception $e) {
@@ -161,7 +193,14 @@ class ShippingTrackingController extends Controller
                 usleep(500000); // 0.5 second delay
             }
 
-            $message = "Synced {$synced} shipments successfully.";
+            Log::info('Admin synced all shipping tracking', [
+                'admin_id' => auth()->id(),
+                'total_orders' => $orders->count(),
+                'synced' => $synced,
+                'failed' => $failed
+            ]);
+
+            $message = "Successfully synced {$synced} shipments.";
             if ($failed > 0) {
                 $message .= " {$failed} failed.";
             }

@@ -173,6 +173,36 @@
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
+
+    @if(isset($sellers) && $sellers->count() > 0)
+    <div class="col-12">
+        <label for="seller_ids" class="form-label">
+            {{ __('messages.assign_to_sellers') }}
+            <small class="text-muted">({{ __('messages.optional') }})</small>
+        </label>
+        <select
+            class="form-select @error('seller_ids') is-invalid @enderror"
+            id="seller_ids"
+            name="seller_ids[]"
+            multiple
+            size="8"
+            style="height: auto;"
+        >
+            @foreach($sellers as $seller)
+                <option value="{{ $seller->id }}">
+                    {{ $seller->name }} ({{ $seller->email }})
+                </option>
+            @endforeach
+        </select>
+        @error('seller_ids')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+        <small class="text-muted d-block mt-1">
+            <i class="ri-information-line"></i>
+            {{ __('messages.assign_sellers_hint') }}
+        </small>
+    </div>
+    @endif
 </div>
 
 <div class="mt-4">

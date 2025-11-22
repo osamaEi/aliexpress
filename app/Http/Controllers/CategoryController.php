@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\User;
 use App\Services\AliExpressService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -69,7 +70,13 @@ class CategoryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('categories.create', compact('parentCategories'));
+        // Get all verified sellers
+        $sellers = User::where('role', 'seller')
+            ->where('is_verified', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('categories.create', compact('parentCategories', 'sellers'));
     }
 
     /**
@@ -88,6 +95,8 @@ class CategoryController extends Controller
             'parent_id' => 'nullable|exists:categories,id',
             'order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
+            'seller_ids' => 'nullable|array',
+            'seller_ids.*' => 'exists:users,id',
         ]);
 
         // Generate slug if not provided
@@ -103,7 +112,12 @@ class CategoryController extends Controller
         $validated['is_active'] = $request->has('is_active');
         $validated['order'] = $validated['order'] ?? 0;
 
-        Category::create($validated);
+        $category = Category::create($validated);
+
+        // Assign category to selected sellers
+        if ($request->has('seller_ids') && is_array($request->seller_ids)) {
+            $this->assignCategoryToSellers($category, $request->seller_ids, $request->parent_id);
+        }
 
         return redirect()->route('categories.index')
             ->with('success', 'Category created successfully.');
@@ -570,6 +584,43 @@ class CategoryController extends Controller
             ]);
 
             return back()->with('error', 'Failed to toggle category status: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Assign category to selected sellers by updating their activity fields
+     */
+    protected function assignCategoryToSellers(Category $category, array $sellerIds, $parentId = null)
+    {
+        foreach ($sellerIds as $sellerId) {
+            $seller = User::find($sellerId);
+
+            if (!$seller) {
+                continue;
+            }
+
+            // Determine if this is a main category or subcategory
+            $isMainCategory = is_null($parentId);
+
+            if ($isMainCategory) {
+                // Add to main_activity
+                $mainActivities = json_decode($seller->main_activity, true) ?? [];
+
+                if (!in_array($category->id, $mainActivities)) {
+                    $mainActivities[] = $category->id;
+                    $seller->main_activity = json_encode(array_values($mainActivities));
+                }
+            } else {
+                // Add to sub_activity
+                $subActivities = json_decode($seller->sub_activity, true) ?? [];
+
+                if (!in_array($category->id, $subActivities)) {
+                    $subActivities[] = $category->id;
+                    $seller->sub_activity = json_encode(array_values($subActivities));
+                }
+            }
+
+            $seller->save();
         }
     }
 }
