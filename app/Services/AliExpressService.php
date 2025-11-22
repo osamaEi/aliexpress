@@ -952,8 +952,8 @@ class AliExpressService
 
     /**
      * Calculate freight for product and shipping address
-     * API: aliexpress.freight.redefining.calculatefreight
-     * Documentation: https://openservice.aliexpress.com/doc/doc.htm?nodeId=27493&docId=118729#/?docId=1597
+     * API: aliexpress.ds.freight.query
+     * Documentation: Dropshipping Freight Query API
      */
     public function calculateFreight(array $params): array
     {
@@ -968,24 +968,23 @@ class AliExpressService
             throw new \InvalidArgumentException('product_num is required');
         }
 
-        // Build freight calculation request
-        // Based on AliExpress API documentation for freight calculation
-        $freightRequest = [
-            'country_code' => $params['country'], // Destination country code (e.g., AE, SA)
-            'send_goods_country_code' => $params['send_goods_country_code'] ?? 'CN', // Sending country (default: China)
-            'product_id' => (string)$params['product_id'], // AliExpress product ID
-            'product_num' => (int)$params['product_num'], // Quantity
+        // Build freight query request according to aliexpress.ds.freight.query API
+        $queryDeliveryReq = [
+            'quantity' => (int)$params['product_num'],
+            'shipToCountry' => $params['country'], // Country code (e.g., AE, SA, US)
+            'productId' => (string)$params['product_id'], // AliExpress product ID
+            'language' => $params['language'] ?? 'en_US',
+            'locale' => $params['locale'] ?? 'en_US',
+            'currency' => $params['currency'] ?? 'USD',
+            'selectedSkuId' => $params['sku_id'] ?? '', // SKU ID if available
         ];
 
-        // Optional parameters
-        if (!empty($params['city'])) {
-            $freightRequest['city_code'] = $params['city'];
-        }
+        // Add optional parameters
         if (!empty($params['province'])) {
-            $freightRequest['province_code'] = $params['province'];
+            $queryDeliveryReq['provinceCode'] = $params['province'];
         }
-        if (!empty($params['price'])) {
-            $freightRequest['price'] = (string)$params['price'];
+        if (!empty($params['city'])) {
+            $queryDeliveryReq['cityCode'] = $params['city'];
         }
 
         Log::info('Calculating freight for product', [
@@ -993,13 +992,15 @@ class AliExpressService
             'country' => $params['country'],
             'quantity' => $params['product_num'],
             'city' => $params['city'] ?? 'not specified',
-            'province' => $params['province'] ?? 'not specified'
+            'province' => $params['province'] ?? 'not specified',
+            'query_delivery_req' => $queryDeliveryReq
         ]);
 
         try {
+            // Make API request using aliexpress.ds.freight.query
             $data = $this->makeRequest(
-                'aliexpress.freight.redefining.calculatefreight',
-                ['param_aeop_freight_calculate_for_buyer_d_t_o' => json_encode($freightRequest)],
+                'aliexpress.ds.freight.query',
+                ['queryDeliveryReq' => json_encode($queryDeliveryReq)],
                 true // Requires authentication
             );
 
@@ -1008,9 +1009,9 @@ class AliExpressService
                 'data' => $data
             ]);
 
-            // Parse response
-            if (isset($data['aliexpress_freight_redefining_calculatefreight_response'])) {
-                $response = $data['aliexpress_freight_redefining_calculatefreight_response'];
+            // Parse response from aliexpress.ds.freight.query
+            if (isset($data['aliexpress_ds_freight_query_response'])) {
+                $response = $data['aliexpress_ds_freight_query_response'];
 
                 // Check for error in response
                 if (isset($response['error_code'])) {
@@ -1020,18 +1021,34 @@ class AliExpressService
                     );
                 }
 
-                // Extract freight information
-                if (isset($response['aeop_freight_calculate_result_for_buyer_d_t_o'])) {
-                    $result = $response['aeop_freight_calculate_result_for_buyer_d_t_o'];
+                // Extract freight information from result
+                if (isset($response['result'])) {
+                    $result = $response['result'];
 
+                    // Get first delivery option if available
+                    $deliveryOptions = $result['aeop_freight_result_d_t_o_list'] ?? [];
+
+                    if (!empty($deliveryOptions) && is_array($deliveryOptions)) {
+                        $firstOption = is_array($deliveryOptions) ? $deliveryOptions[0] : $deliveryOptions;
+
+                        return [
+                            'success' => true,
+                            'error_code' => null,
+                            'error_desc' => null,
+                            'freight_amount' => $firstOption['freight_amount'] ?? $firstOption['freight']['amount'] ?? null,
+                            'freight_currency' => $firstOption['freight_currency'] ?? $firstOption['freight']['currency_code'] ?? $params['currency'] ?? 'USD',
+                            'estimated_delivery_time' => $firstOption['estimated_delivery_time'] ?? $firstOption['delivery_time'] ?? null,
+                            'service_name' => $firstOption['service_name'] ?? $firstOption['company'] ?? null,
+                            'raw_response' => $result,
+                            'all_options' => $deliveryOptions
+                        ];
+                    }
+
+                    // No delivery options available
                     return [
-                        'success' => $result['success'] ?? false,
-                        'error_code' => $result['error_code'] ?? null,
-                        'error_desc' => $result['error_desc'] ?? null,
-                        'freight_amount' => $result['freight']['amount'] ?? null,
-                        'freight_currency' => $result['freight']['currency_code'] ?? null,
-                        'estimated_delivery_time' => $result['estimated_delivery_time'] ?? null,
-                        'service_name' => $result['service_name'] ?? null,
+                        'success' => false,
+                        'error_code' => 'NO_DELIVERY_OPTIONS',
+                        'error_desc' => 'No delivery options available for this destination',
                         'raw_response' => $result
                     ];
                 }
