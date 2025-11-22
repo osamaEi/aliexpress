@@ -31,6 +31,7 @@ class PlaceOrderOnAliExpress
             'order_number' => $order->order_number,
             'product_id' => $order->product_id,
             'payment_status' => $order->payment_status,
+            'status' => $order->status,
             'timestamp' => now()->toDateTimeString()
         ]);
 
@@ -46,6 +47,30 @@ class PlaceOrderOnAliExpress
             return;
         }
 
+        // IMPORTANT: Prevent duplicate placements
+        // Only auto-place if order is still in 'pending' status
+        // If status is already 'processing', 'placed', or 'failed', it means placement was already attempted
+        if (!in_array($order->status, ['pending'])) {
+            Log::warning('❌ Skipping AliExpress placement - Order already processed', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'current_status' => $order->status,
+                'reason' => 'Order is not in pending status, placement already attempted or in progress'
+            ]);
+            return;
+        }
+
+        // Check if already placed on AliExpress
+        if (!empty($order->aliexpress_order_id)) {
+            Log::warning('❌ Skipping AliExpress placement - Already placed', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'aliexpress_order_id' => $order->aliexpress_order_id,
+                'reason' => 'Order already has AliExpress order ID'
+            ]);
+            return;
+        }
+
         Log::info('✅ Validation passed - Starting AliExpress placement', [
             'order_id' => $order->id,
             'order_number' => $order->order_number,
@@ -53,8 +78,26 @@ class PlaceOrderOnAliExpress
         ]);
 
         try {
-            // Update status to processing
-            $order->update(['status' => 'processing']);
+            // Update status to processing with database lock to prevent race conditions
+            // Using lockForUpdate ensures only one process can update this order at a time
+            $updated = \DB::table('orders')
+                ->where('id', $order->id)
+                ->where('status', 'pending') // Only update if still pending
+                ->whereNull('aliexpress_order_id') // And not already placed
+                ->update(['status' => 'processing', 'updated_at' => now()]);
+
+            // If update failed, another process already started placing this order
+            if (!$updated) {
+                Log::warning('❌ Skipping - Another process already placing this order', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'reason' => 'Race condition prevented - order status was already changed'
+                ]);
+                return;
+            }
+
+            // Refresh the order model to get updated status
+            $order->refresh();
 
             Log::info('📝 Order status updated to processing', [
                 'order_id' => $order->id,

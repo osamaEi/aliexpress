@@ -206,8 +206,28 @@ class OrderController extends Controller
                 ->with('error', 'This product is not from AliExpress.');
         }
 
+        // Check if already placed to prevent duplicates
+        if (!empty($order->aliexpress_order_id)) {
+            return redirect()->back()
+                ->with('error', 'This order has already been placed on AliExpress. Order ID: ' . $order->aliexpress_order_id);
+        }
+
         try {
-            $order->update(['status' => 'processing']);
+            // Update status to processing with database lock to prevent race conditions
+            $updated = \DB::table('orders')
+                ->where('id', $order->id)
+                ->where('status', 'pending')
+                ->whereNull('aliexpress_order_id')
+                ->update(['status' => 'processing', 'updated_at' => now()]);
+
+            // If update failed, order was already processed
+            if (!$updated) {
+                return redirect()->back()
+                    ->with('error', 'This order is already being processed or has been placed.');
+            }
+
+            // Refresh the order model
+            $order->refresh();
 
             // Use the SKU that was selected during order creation
             $skuAttr = $order->selected_sku_attr ?? '';

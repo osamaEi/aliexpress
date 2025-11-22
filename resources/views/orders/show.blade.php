@@ -14,11 +14,15 @@
                     @endif
                 </div>
                 <div class="btn-group">
-                    @if($order->canBePlaced())
+                    @if($order->canBePlaced() && empty($order->aliexpress_order_id))
+                        <div class="alert alert-info mb-2" style="font-size: 0.875rem;">
+                            <i class="ri-information-line me-1"></i>
+                            This order will be automatically placed on AliExpress. If it doesn't happen automatically, you can use the button below.
+                        </div>
                         <form action="{{ route('orders.place-on-aliexpress', $order) }}" method="POST" class="d-inline">
                             @csrf
-                            <button type="submit" class="btn btn-success" onclick="return confirm('Place this order with supplier?')">
-                                <i class="ri-shopping-cart-line me-1"></i> Place with Supplier
+                            <button type="submit" class="btn btn-success" onclick="return confirm('Place this order with supplier?\n\nNote: Orders are automatically placed. Only click if automatic placement failed.')">
+                                <i class="ri-shopping-cart-line me-1"></i> Manually Place with Supplier
                             </button>
                         </form>
                     @endif
