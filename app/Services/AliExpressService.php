@@ -969,19 +969,20 @@ class AliExpressService
         }
 
         // Build freight calculation request
+        // Based on AliExpress API documentation for freight calculation
         $freightRequest = [
-            'country' => $params['country'], // Country code (e.g., AE, SA)
+            'country_code' => $params['country'], // Destination country code (e.g., AE, SA)
+            'send_goods_country_code' => $params['send_goods_country_code'] ?? 'CN', // Sending country (default: China)
             'product_id' => (string)$params['product_id'], // AliExpress product ID
             'product_num' => (int)$params['product_num'], // Quantity
-            'send_goods_country_code' => $params['send_goods_country_code'] ?? 'CN', // Sending country (default: China)
         ];
 
         // Optional parameters
         if (!empty($params['city'])) {
-            $freightRequest['city'] = $params['city'];
+            $freightRequest['city_code'] = $params['city'];
         }
         if (!empty($params['province'])) {
-            $freightRequest['province'] = $params['province'];
+            $freightRequest['province_code'] = $params['province'];
         }
         if (!empty($params['price'])) {
             $freightRequest['price'] = (string)$params['price'];
