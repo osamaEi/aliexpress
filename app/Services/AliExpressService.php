@@ -968,6 +968,11 @@ class AliExpressService
             throw new \InvalidArgumentException('product_num is required');
         }
 
+        // Validate SKU ID is required
+        if (empty($params['sku_id'])) {
+            throw new \InvalidArgumentException('sku_id is required for freight calculation');
+        }
+
         // Build freight query request according to aliexpress.ds.freight.query API
         $queryDeliveryReq = [
             'quantity' => (int)$params['product_num'],
@@ -976,7 +981,7 @@ class AliExpressService
             'language' => $params['language'] ?? 'en_US',
             'locale' => $params['locale'] ?? 'en_US',
             'currency' => $params['currency'] ?? 'USD',
-            'selectedSkuId' => $params['sku_id'] ?? '', // SKU ID if available
+            'selectedSkuId' => (string)$params['sku_id'], // SKU ID - REQUIRED
         ];
 
         // Add optional parameters
@@ -989,6 +994,7 @@ class AliExpressService
 
         Log::info('Calculating freight for product', [
             'product_id' => $params['product_id'],
+            'sku_id' => $params['sku_id'],
             'country' => $params['country'],
             'quantity' => $params['product_num'],
             'city' => $params['city'] ?? 'not specified',

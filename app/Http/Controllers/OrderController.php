@@ -498,11 +498,53 @@ class OrderController extends Controller
                 ], 400);
             }
 
+            // Get SKU ID - required by AliExpress freight API
+            $skuId = null;
+            if ($product->aliexpress_data) {
+                // Try to get SKU from stored product data
+                $skuId = $this->aliexpressService->getFirstAvailableSku($product->aliexpress_data);
+            }
+
+            // If no SKU found in stored data, try from variants
+            if (!$skuId && $product->aliexpress_variants) {
+                $skuId = $this->aliexpressService->getFirstAvailableSku([
+                    'aeop_ae_product_s_k_us' => $product->aliexpress_variants
+                ]);
+            }
+
+            // If still no SKU, fetch fresh product details
+            if (!$skuId) {
+                try {
+                    $freshProductData = $this->aliexpressService->getProductDetails($product->aliexpress_id);
+                    $skuId = $this->aliexpressService->getFirstAvailableSku($freshProductData);
+                } catch (\Exception $e) {
+                    Log::warning('Could not fetch fresh product data for SKU', [
+                        'product_id' => $product->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            // If we still don't have a SKU, return error
+            if (!$skuId) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Could not find SKU for this product. SKU is required for freight calculation.'
+                ], 400);
+            }
+
+            Log::info('Found SKU for freight calculation', [
+                'product_id' => $product->id,
+                'aliexpress_id' => $product->aliexpress_id,
+                'sku_id' => $skuId
+            ]);
+
             // Prepare freight calculation parameters
             $freightParams = [
                 'product_id' => $product->aliexpress_id,
                 'product_num' => $validated['quantity'],
                 'country' => $validated['country'],
+                'sku_id' => $skuId, // Required parameter
             ];
 
             // Add optional parameters if provided
