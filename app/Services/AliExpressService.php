@@ -1053,15 +1053,31 @@ class AliExpressService
                     // No delivery options available
                     Log::warning('No delivery options returned from AliExpress', [
                         'product_id' => $params['product_id'],
+                        'sku_id' => $params['sku_id'],
                         'country' => $params['country'],
+                        'city' => $params['city'] ?? null,
+                        'province' => $params['province'] ?? null,
                         'full_response' => $result,
                         'delivery_options' => $deliveryOptions
                     ]);
 
+                    // Provide more specific error message based on error code
+                    $errorMsg = 'No delivery options available for this destination';
+                    if (isset($result['code'])) {
+                        if ($result['code'] == 501) {
+                            $errorMsg = 'Shipping information not available. This product may not ship to the selected location.';
+                        } elseif ($result['code'] == 507) {
+                            $errorMsg = 'Invalid SKU selected. Please try again or contact support.';
+                        }
+                    }
+                    if (isset($result['msg'])) {
+                        $errorMsg .= ' (' . $result['msg'] . ')';
+                    }
+
                     return [
                         'success' => false,
                         'error_code' => 'NO_DELIVERY_OPTIONS',
-                        'error_desc' => 'No delivery options available for this destination',
+                        'error_desc' => $errorMsg,
                         'raw_response' => $result
                     ];
                 }

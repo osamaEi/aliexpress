@@ -561,6 +561,23 @@ class OrderController extends Controller
             // Call AliExpress API to calculate freight
             $freightResult = $this->aliexpressService->calculateFreight($freightParams);
 
+            // If freight calculation fails with DELIVERY_INFO_EMPTY and we had city/province,
+            // try again without them (they might be invalid codes)
+            if (!$freightResult['success'] &&
+                isset($freightResult['raw_response']['code']) &&
+                $freightResult['raw_response']['code'] == 501 &&
+                (!empty($freightParams['city']) || !empty($freightParams['province']))) {
+
+                Log::info('Retrying freight calculation without city/province codes');
+
+                // Remove optional location parameters
+                unset($freightParams['city']);
+                unset($freightParams['province']);
+
+                // Try again with just country
+                $freightResult = $this->aliexpressService->calculateFreight($freightParams);
+            }
+
             Log::info('Freight calculation result', [
                 'product_id' => $product->id,
                 'aliexpress_id' => $product->aliexpress_id,

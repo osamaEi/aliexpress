@@ -537,7 +537,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Display error with raw response details
                 if (data.raw_response) {
-                    freightErrorMessage.innerHTML = errorMsg + '<br><br><strong>Raw AliExpress Response:</strong><br><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-size: 11px;">' + JSON.stringify(data.raw_response, null, 2) + '</pre>';
+                    // Check if it's a delivery info empty error (product doesn't ship to location)
+                    if (data.raw_response.code === 501) {
+                        freightErrorMessage.innerHTML = '<strong>⚠️ Shipping Not Available</strong><br><br>' + errorMsg + '<br><br><small class="text-muted">This product may not be available for shipping to your selected location, or the product may be out of stock on AliExpress.</small><br><br><strong>Debug Information:</strong><br><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-size: 11px;">' + JSON.stringify(data.raw_response, null, 2) + '</pre>';
+                    } else {
+                        freightErrorMessage.innerHTML = errorMsg + '<br><br><strong>Raw AliExpress Response:</strong><br><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-size: 11px;">' + JSON.stringify(data.raw_response, null, 2) + '</pre>';
+                    }
                 } else {
                     freightErrorMessage.textContent = errorMsg;
                 }
