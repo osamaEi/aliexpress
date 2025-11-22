@@ -23,6 +23,49 @@
         </div>
     @endif
 
+    <!-- Diagnostic Information -->
+    <div class="card mb-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="ri-information-line me-2"></i>Configuration Diagnostics
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <strong>If you're getting "param-appkey.not.exists" error:</strong>
+                <ol class="mb-0 mt-2">
+                    <li>Verify your App Key at <a href="https://openservice.aliexpress.com/myapp/index.htm" target="_blank">AliExpress Open Platform</a></li>
+                    <li>Ensure your app is in "Active" status</li>
+                    <li>Check that the redirect URI below is registered in your AliExpress app settings</li>
+                    <li>Your App Key must be valid and not deactivated</li>
+                </ol>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <p><strong>Current App Key:</strong> <code>{{ $tokens['app_key'] ?: 'Not configured' }}</code></p>
+                    <p><strong>Callback URL:</strong> <code>{{ route('admin.tokens.callback') }}</code></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>OAuth Endpoint:</strong> <code>https://oauth.aliexpress.com/authorize</code></p>
+                    <p><strong>App Secret Configured:</strong>
+                        <span class="badge {{ $tokens['app_secret'] ? 'bg-success' : 'bg-danger' }}">
+                            {{ $tokens['app_secret'] ? 'Yes' : 'No' }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <p class="text-muted mb-0">
+                    <i class="ri-lightbulb-line"></i>
+                    <strong>Important:</strong> Make sure to add <code>{{ route('admin.tokens.callback') }}</code>
+                    to your app's "Redirect URI" or "Callback URL" settings in the AliExpress Developer Console.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Token Status Card -->
     @if($tokenStatus)
     <div class="card mb-4">

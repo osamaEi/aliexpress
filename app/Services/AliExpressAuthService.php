@@ -83,6 +83,13 @@ class AliExpressAuthService
             'sp' => 'ae',
         ];
 
+        Log::debug('AliExpress Authorization URL Generated', [
+            'auth_url' => $authUrl,
+            'client_id' => $this->apiKey,
+            'redirect_uri' => $redirectUri,
+            'full_url' => $authUrl . '?' . http_build_query($params)
+        ]);
+
         return $authUrl . '?' . http_build_query($params);
     }
 
