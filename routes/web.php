@@ -130,6 +130,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{order}/update-tracking', [OrderController::class, 'updateTracking'])->name('orders.update-tracking');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
+    // Shipping Test Routes
+    Route::get('/shipping/test', [App\Http\Controllers\ShippingTestController::class, 'index'])->name('shipping.test');
+    Route::post('/shipping/test/calculate', [App\Http\Controllers\ShippingTestController::class, 'calculate'])->name('shipping.test.calculate');
+
     // Payment routes
     Route::get('/payment/subscription/{subscription}', [App\Http\Controllers\PaymentController::class, 'initiateSubscriptionPayment'])->name('payment.subscription');
     Route::get('/payment/order/{order}', [App\Http\Controllers\PaymentController::class, 'initiateOrderPayment'])->name('payment.order');

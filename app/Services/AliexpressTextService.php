@@ -66,7 +66,8 @@ class AliexpressTextService
         // Build API parameters - IMPORTANT: Use exact parameter names from API docs
         $params = [
             'app_key' => $this->appKey,
-            'countryCode' => $options['country'] ?? 'AE',
+            'countryCode' => $options['country'] ?? 'AE',  // Price display country
+            'shipToCountry' => $options['country'] ?? 'AE', // SHIPPING filter - only show products that ship to this country
             'currency' => $options['currency'] ?? 'AED',
             'format' => 'json',
             'keyWord' => $keyword,
@@ -97,6 +98,7 @@ class AliexpressTextService
             'method' => 'aliexpress.ds.text.search',
             'keyword' => $keyword,
             'category_id' => $options['category_id'] ?? 'none',
+            'ship_to_country' => $options['country'] ?? 'AE',
             'params' => array_merge($params, ['sign' => substr($params['sign'], 0, 20) . '...']),
         ]);
 
