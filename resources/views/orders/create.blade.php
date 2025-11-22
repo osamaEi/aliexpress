@@ -249,8 +249,7 @@
                 </div>
 
                 <!-- Shipping Cost Information - Displayed Before Submit -->
-                @if(isset($product) && $product->isAliexpressProduct())
-                <div class="row mb-4">
+                <div class="row mb-4" id="freight-section" style="display: none;">
                     <div class="col-md-12">
                         <div id="freight-info-container" class="card border-primary shadow-sm" style="display: none;">
                             <div class="card-header bg-primary text-white">
@@ -281,7 +280,6 @@
                         </div>
                     </div>
                 </div>
-                @endif
 
                 <!-- Submit Buttons -->
                 <div class="d-flex justify-content-between">
@@ -327,11 +325,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Freight calculation for AliExpress products
-    @if(isset($product) && $product->isAliexpressProduct())
-    const productId = {{ $product->id }};
+    const productSelect = document.getElementById('product_id');
     const quantityInput = document.getElementById('quantity');
     const cityInput = document.getElementById('shipping_city');
     const provinceInput = document.getElementById('shipping_province');
+    const freightSection = document.getElementById('freight-section');
     const freightInfoContainer = document.getElementById('freight-info-container');
     const freightLoading = document.getElementById('freight-loading');
     const freightResult = document.getElementById('freight-result');
@@ -339,11 +337,82 @@ document.addEventListener('DOMContentLoaded', function() {
     const freightErrorMessage = document.getElementById('freight-error-message');
     const freightInstruction = document.getElementById('freight-instruction');
 
+    let currentProductId = @if(isset($product)) {{ $product->id }} @else null @endif;
     let freightCalculationTimeout = null;
     let freightCalculated = false;
 
+    // Product data cache (to store if product is from AliExpress)
+    const productData = {
+        @if(isset($product))
+        {{ $product->id }}: {
+            isAliexpress: {{ $product->isAliexpressProduct() ? 'true' : 'false' }}
+        }
+        @endif
+    };
+
+    // Show/hide freight section based on product selection
+    function updateFreightSectionVisibility() {
+        if (!currentProductId) {
+            if (freightSection) freightSection.style.display = 'none';
+            return;
+        }
+
+        // Check if product is from AliExpress
+        if (productData[currentProductId] && productData[currentProductId].isAliexpress) {
+            if (freightSection) freightSection.style.display = 'block';
+        } else {
+            if (freightSection) freightSection.style.display = 'none';
+        }
+    }
+
+    // Handle product selection change
+    if (productSelect) {
+        productSelect.addEventListener('change', function() {
+            const selectedProductId = this.value;
+
+            if (!selectedProductId) {
+                currentProductId = null;
+                updateFreightSectionVisibility();
+                return;
+            }
+
+            // Fetch product details to check if it's from AliExpress
+            fetch(`/orders/product/${selectedProductId}/info`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentProductId = selectedProductId;
+
+                        // Store product data in cache
+                        productData[selectedProductId] = {
+                            isAliexpress: data.product.is_aliexpress
+                        };
+
+                        updateFreightSectionVisibility();
+                    } else {
+                        console.error('Failed to fetch product info');
+                        currentProductId = null;
+                        updateFreightSectionVisibility();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching product:', error);
+                    currentProductId = null;
+                    updateFreightSectionVisibility();
+                });
+        });
+    }
+
+    // Initialize visibility on page load
+    updateFreightSectionVisibility();
+
     // Function to calculate freight
     function calculateFreight() {
+        // Check if we have a product selected
+        if (!currentProductId) {
+            return;
+        }
+
         // Get current values
         const country = shippingCountrySelect.value;
         const city = cityInput.value.trim();
@@ -374,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Prepare request data
         const data = {
-            product_id: productId,
+            product_id: currentProductId,
             quantity: quantity,
             country: country,
             city: city,
@@ -487,7 +556,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (provinceInput) provinceInput.addEventListener('change', debouncedCalculateFreight);
     if (shippingCountrySelect) shippingCountrySelect.addEventListener('change', debouncedCalculateFreight);
     if (quantityInput) quantityInput.addEventListener('change', debouncedCalculateFreight);
-    @endif
 
     // Function to update province options based on country
     function updateProvinceOptions(country) {

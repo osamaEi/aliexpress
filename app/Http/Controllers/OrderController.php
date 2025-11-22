@@ -446,6 +446,34 @@ class OrderController extends Controller
     }
 
     /**
+     * Get product details for order creation form
+     * Returns product info including whether it's from AliExpress
+     */
+    public function getProductInfo(Request $request, $productId)
+    {
+        try {
+            $product = Product::findOrFail($productId);
+
+            return response()->json([
+                'success' => true,
+                'product' => [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'currency' => $product->currency ?? 'AED',
+                    'is_aliexpress' => $product->isAliexpressProduct(),
+                    'aliexpress_id' => $product->aliexpress_id,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Product not found'
+            ], 404);
+        }
+    }
+
+    /**
      * Calculate freight for a product and shipping address
      * API endpoint for AJAX requests from order creation form
      */
