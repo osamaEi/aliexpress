@@ -15,8 +15,13 @@
                     <!-- Product ID -->
                     <div class="col-md-6">
                         <label for="product_id" class="form-label fw-semibold">Product ID <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="product_id" name="product_id"
-                               placeholder="e.g., 1005006886632074" required>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="product_id" name="product_id"
+                                   placeholder="e.g., 1005006886632074" required>
+                            <button type="button" class="btn btn-outline-secondary" id="fetchSkusBtn">
+                                <i class="ri-search-line"></i> Fetch SKUs
+                            </button>
+                        </div>
                         <small class="text-muted">AliExpress Product ID</small>
                     </div>
 
@@ -25,7 +30,19 @@
                         <label for="sku_id" class="form-label fw-semibold">SKU ID</label>
                         <input type="text" class="form-control" id="sku_id" name="sku_id"
                                placeholder="e.g., 12000038618907652">
-                        <small class="text-muted">Leave empty for auto-detection</small>
+                        <small class="text-muted">Leave empty for auto-detection or click "Fetch SKUs"</small>
+                    </div>
+
+                    <!-- SKU List (hidden by default) -->
+                    <div class="col-12" id="skuListSection" style="display: none;">
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="ri-list-check me-2"></i>Available SKUs for Product: <span id="skuProductTitle"></span></h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="skuListContent"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Quantity -->
@@ -233,6 +250,92 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsSection = document.getElementById('resultsSection');
     const successResults = document.getElementById('successResults');
     const errorResults = document.getElementById('errorResults');
+
+    // Fetch SKUs button
+    document.getElementById('fetchSkusBtn').addEventListener('click', function() {
+        const productId = document.getElementById('product_id').value;
+
+        if (!productId) {
+            alert('Please enter a Product ID first');
+            return;
+        }
+
+        // Show loading state
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Fetching...';
+
+        // Fetch product details
+        fetch('{{ route("shipping.test.product-details") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ product_id: productId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show SKU list section
+                document.getElementById('skuListSection').style.display = 'block';
+                document.getElementById('skuProductTitle').textContent = data.product_title;
+
+                // Build SKU list HTML
+                let html = '';
+
+                if (data.first_available_sku) {
+                    html += `<div class="alert alert-success mb-3">
+                        <strong>Recommended SKU (First Available):</strong>
+                        <code class="text-dark">${data.first_available_sku}</code>
+                        <button type="button" class="btn btn-sm btn-success ms-2" onclick="document.getElementById('sku_id').value='${data.first_available_sku}'">
+                            <i class="ri-check-line"></i> Use This
+                        </button>
+                    </div>`;
+                }
+
+                if (data.skus && data.skus.length > 0) {
+                    html += `<p class="mb-2"><strong>Total SKUs Found:</strong> ${data.total_skus}</p>`;
+                    html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
+                    html += '<thead><tr><th>SKU ID</th><th>Price</th><th>Stock</th><th>Available</th><th>Action</th></tr></thead><tbody>';
+
+                    data.skus.forEach(sku => {
+                        const available = sku.available ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>';
+                        html += `<tr>
+                            <td><code>${sku.id}</code></td>
+                            <td>${sku.price || 'N/A'}</td>
+                            <td>${sku.stock || 'N/A'}</td>
+                            <td>${available}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('sku_id').value='${sku.id}'">
+                                    <i class="ri-arrow-right-line"></i> Select
+                                </button>
+                            </td>
+                        </tr>`;
+                    });
+
+                    html += '</tbody></table></div>';
+                } else {
+                    html += '<p class="text-warning">No SKUs found in product details. This might be a single-variant product.</p>';
+                }
+
+                document.getElementById('skuListContent').innerHTML = html;
+
+                // Scroll to SKU list
+                document.getElementById('skuListSection').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('Failed to fetch product details: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error fetching product details: ' + error.message);
+        })
+        .finally(() => {
+            // Reset button
+            this.disabled = false;
+            this.innerHTML = '<i class="ri-search-line"></i> Fetch SKUs';
+        });
+    });
 
     // Auto-change currency based on country
     document.getElementById('country').addEventListener('change', function() {

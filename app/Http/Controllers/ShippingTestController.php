@@ -24,6 +24,105 @@ class ShippingTestController extends Controller
     }
 
     /**
+     * Get product details including available SKUs
+     */
+    public function getProductDetails(Request $request)
+    {
+        try {
+            $productId = $request->input('product_id');
+
+            if (empty($productId)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product ID is required',
+                ]);
+            }
+
+            Log::info('Shipping Test - Fetching Product Details', ['product_id' => $productId]);
+
+            // Fetch product details from AliExpress
+            $productDetails = $this->aliexpressService->getProductDetails($productId);
+
+            if (!$productDetails) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product not found or API error',
+                ]);
+            }
+
+            // Extract SKUs
+            $skus = [];
+
+            // Method 1: Check aeop_ae_product_s_k_us
+            if (isset($productDetails['aeop_ae_product_s_k_us']['aeop_ae_product_sku'])) {
+                $skuList = $productDetails['aeop_ae_product_s_k_us']['aeop_ae_product_sku'];
+
+                // Ensure it's an array
+                if (!is_array($skuList) || (isset($skuList['id']) && is_string($skuList['id']))) {
+                    $skuList = [$skuList];
+                }
+
+                foreach ($skuList as $sku) {
+                    if (isset($sku['id'])) {
+                        $skus[] = [
+                            'id' => $sku['id'],
+                            'price' => $sku['sku_price'] ?? null,
+                            'stock' => $sku['sku_stock'] ?? null,
+                            'available' => ($sku['sku_available_stock'] ?? 0) > 0,
+                            'properties' => $sku['aeop_s_k_u_propertys']['aeop_sku_property'] ?? [],
+                        ];
+                    }
+                }
+            }
+
+            // Method 2: Check ae_item_sku_info_dtos
+            if (empty($skus) && isset($productDetails['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
+                $skuList = $productDetails['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
+
+                if (!is_array($skuList) || (isset($skuList['id']) && is_string($skuList['id']))) {
+                    $skuList = [$skuList];
+                }
+
+                foreach ($skuList as $sku) {
+                    if (isset($sku['id'])) {
+                        $skus[] = [
+                            'id' => $sku['id'],
+                            'price' => $sku['sku_price'] ?? null,
+                            'stock' => $sku['sku_stock'] ?? null,
+                            'available' => ($sku['sku_available_stock'] ?? 0) > 0,
+                            'properties' => $sku['aeop_s_k_u_propertys']['aeop_sku_property'] ?? [],
+                        ];
+                    }
+                }
+            }
+
+            // Get first available SKU
+            $firstSku = $this->aliexpressService->getFirstAvailableSku($productDetails);
+
+            return response()->json([
+                'success' => true,
+                'product_id' => $productId,
+                'product_title' => $productDetails['subject'] ?? 'N/A',
+                'first_available_sku' => $firstSku,
+                'total_skus' => count($skus),
+                'skus' => $skus,
+                'raw_response' => $productDetails,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Shipping Test - Failed to get product details', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching product details: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Calculate freight using the provided parameters
      */
     public function calculate(Request $request)

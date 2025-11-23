@@ -133,6 +133,7 @@ Route::middleware('auth')->group(function () {
     // Shipping Test Routes
     Route::get('/shipping/test', [App\Http\Controllers\ShippingTestController::class, 'index'])->name('shipping.test');
     Route::post('/shipping/test/calculate', [App\Http\Controllers\ShippingTestController::class, 'calculate'])->name('shipping.test.calculate');
+    Route::post('/shipping/test/product-details', [App\Http\Controllers\ShippingTestController::class, 'getProductDetails'])->name('shipping.test.product-details');
 
     // Payment routes
     Route::get('/payment/subscription/{subscription}', [App\Http\Controllers\PaymentController::class, 'initiateSubscriptionPayment'])->name('payment.subscription');
