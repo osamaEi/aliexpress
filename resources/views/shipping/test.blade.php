@@ -296,17 +296,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (data.skus && data.skus.length > 0) {
                     html += `<p class="mb-2"><strong>Total SKUs Found:</strong> ${data.total_skus}</p>`;
-                    html += '<div class="alert alert-info small mb-2">';
-                    html += '<strong>Per Official Docs:</strong> Use the <strong>numeric SKU ID</strong> (e.g., "12000023999200390") for selectedSkuId parameter.';
-                    html += '</div>';
+
+                    // Check if we have numeric IDs or just property combos
+                    const hasNumericIds = data.skus.some(sku => sku.id && !sku.id.includes('#'));
+
+                    if (!hasNumericIds) {
+                        html += '<div class="alert alert-warning small mb-2">';
+                        html += '<strong>⚠️ Warning:</strong> No numeric SKU IDs found! The product API only returned property combinations. ';
+                        html += 'The freight API may fail with DELIVERY_INFO_EMPTY. This often means the product doesn\'t support detailed shipping calculations.';
+                        html += '</div>';
+                    } else {
+                        html += '<div class="alert alert-info small mb-2">';
+                        html += '<strong>Per Official Docs:</strong> Use the <strong>numeric SKU ID</strong> (e.g., "12000023999200390") for selectedSkuId parameter.';
+                        html += '</div>';
+                    }
+
                     html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
-                    html += '<thead><tr><th>SKU ID (Use This)</th><th>Property Combo</th><th>Price</th><th>Stock</th><th>Available</th><th>Action</th></tr></thead><tbody>';
+                    html += '<thead><tr><th>SKU ID</th><th>Property Combo</th><th>Price</th><th>Stock</th><th>Available</th><th>Action</th></tr></thead><tbody>';
 
                     data.skus.forEach(sku => {
                         const available = sku.available ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>';
                         const skuAttr = sku.sku_attr ? `<small class="text-muted">${sku.sku_attr}</small>` : '<small class="text-muted">N/A</small>';
+                        const isNumeric = sku.id && !sku.id.includes('#');
+                        const idDisplay = isNumeric ?
+                            `<code class="text-success fw-bold">${sku.id}</code>` :
+                            `<code class="text-warning">${sku.id}</code>`;
+
                         html += `<tr>
-                            <td><code class="text-primary fw-bold">${sku.id}</code></td>
+                            <td>${idDisplay}</td>
                             <td>${skuAttr}</td>
                             <td>${sku.price || 'N/A'}</td>
                             <td>${sku.stock || 'N/A'}</td>
@@ -320,6 +337,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
 
                     html += '</tbody></table></div>';
+
+                    // Debug section - show raw SKU structure for ALL SKUs
+                    if (data.skus.length > 0 && data.skus[0].raw_sku) {
+                        html += '<div class="mt-3">';
+                        html += '<button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#debugSkuStructure">';
+                        html += '🔍 Debug: View All SKU Fields (Click to find real SKU IDs)';
+                        html += '</button>';
+                        html += '<div class="collapse mt-2" id="debugSkuStructure">';
+                        html += '<div class="alert alert-dark">';
+                        html += '<h6 class="text-white">Raw SKU Data - All Fields:</h6>';
+                        html += '<small class="text-warning">Look for fields like: id, sku_id, sku_code, or any numeric identifier</small>';
+
+                        // Show each SKU's structure
+                        data.skus.forEach((sku, index) => {
+                            html += `<div class="mt-3">`;
+                            html += `<strong class="text-info">SKU #${index + 1}:</strong>`;
+                            html += '<pre class="mt-1 p-2 bg-secondary text-white" style="max-height: 400px; overflow: auto; font-size: 0.7rem;">';
+                            html += JSON.stringify(sku.raw_sku, null, 2);
+                            html += '</pre></div>';
+                        });
+
+                        html += '</div></div></div>';
+                    }
                 } else {
                     html += '<p class="text-warning">No SKUs found in product details. This might be a single-variant product.</p>';
                 }
