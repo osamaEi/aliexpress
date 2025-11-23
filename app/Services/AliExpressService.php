@@ -1031,20 +1031,50 @@ class AliExpressService
                 if (isset($response['result'])) {
                     $result = $response['result'];
 
-                    // Get first delivery option if available
-                    $deliveryOptions = $result['aeop_freight_result_d_t_o_list'] ?? [];
+                    // Check if successful
+                    if (isset($result['success']) && $result['success'] === false) {
+                        // API returned error
+                        return [
+                            'success' => false,
+                            'message' => $result['msg'] ?? 'Unknown error',
+                            'raw_response' => $result
+                        ];
+                    }
+
+                    // Get delivery options - try multiple possible structures
+                    $deliveryOptions = null;
+
+                    // Structure 1: delivery_options.delivery_option_d_t_o (newer API format)
+                    if (isset($result['delivery_options']['delivery_option_d_t_o'])) {
+                        $deliveryOptions = $result['delivery_options']['delivery_option_d_t_o'];
+                    }
+                    // Structure 2: aeop_freight_result_d_t_o_list (older format)
+                    elseif (isset($result['aeop_freight_result_d_t_o_list'])) {
+                        $deliveryOptions = $result['aeop_freight_result_d_t_o_list'];
+                    }
+
+                    // Ensure delivery options is an array
+                    if ($deliveryOptions && !isset($deliveryOptions[0])) {
+                        $deliveryOptions = [$deliveryOptions];
+                    }
 
                     if (!empty($deliveryOptions) && is_array($deliveryOptions)) {
-                        $firstOption = is_array($deliveryOptions) ? $deliveryOptions[0] : $deliveryOptions;
+                        $firstOption = $deliveryOptions[0];
 
                         return [
                             'success' => true,
-                            'error_code' => null,
-                            'error_desc' => null,
-                            'freight_amount' => $firstOption['freight_amount'] ?? $firstOption['freight']['amount'] ?? null,
-                            'freight_currency' => $firstOption['freight_currency'] ?? $firstOption['freight']['currency_code'] ?? $params['currency'] ?? 'USD',
-                            'estimated_delivery_time' => $firstOption['estimated_delivery_time'] ?? $firstOption['delivery_time'] ?? null,
-                            'service_name' => $firstOption['service_name'] ?? $firstOption['company'] ?? null,
+                            'data' => [
+                                'freight_amount' => $firstOption['shipping_fee_cent'] ?? $firstOption['freight_amount'] ?? null,
+                                'freight_currency' => $firstOption['shipping_fee_currency'] ?? $firstOption['freight_currency'] ?? $params['currency'] ?? 'USD',
+                                'delivery_time' => $firstOption['delivery_date_desc'] ?? $firstOption['estimated_delivery_time'] ?? null,
+                                'shipping_method' => $firstOption['code'] ?? null,
+                                'service_name' => $firstOption['company'] ?? $firstOption['service_name'] ?? null,
+                                'company_name' => $firstOption['company'] ?? null,
+                                'min_delivery_days' => $firstOption['min_delivery_days'] ?? null,
+                                'max_delivery_days' => $firstOption['max_delivery_days'] ?? null,
+                                'free_shipping' => $firstOption['free_shipping'] ?? false,
+                                'tracking' => $firstOption['tracking'] ?? false,
+                            ],
                             'raw_response' => $result,
                             'all_options' => $deliveryOptions
                         ];
@@ -1281,27 +1311,37 @@ class AliExpressService
             foreach ($skus as $sku) {
                 // Check if SKU has stock
                 if (isset($sku['sku_available_stock']) && $sku['sku_available_stock'] > 0) {
-                    // For freight API, use numeric SKU ID (per official docs: selectedSkuId should be like "12000023999200390")
-                    // Priority: id (numeric SKU ID) is required
+                    // For freight API, use ONLY numeric SKU ID (per official docs: selectedSkuId should be like "12000023999200390")
                     $skuId = $sku['id'] ?? null;
-                    Log::info('Selected SKU with stock', [
+
+                    // IMPORTANT: Validate that SKU is numeric (not property combination like "14:29#Pro 5")
+                    if ($skuId && !str_contains((string)$skuId, '#')) {
+                        Log::info('Selected numeric SKU with stock', [
+                            'sku_id' => $skuId,
+                            'stock' => $sku['sku_available_stock'],
+                            'sku_attr' => $sku['sku_attr'] ?? null
+                        ]);
+                        return $skuId;
+                    }
+                }
+            }
+
+            // If no SKU with stock has numeric ID, try first SKU with numeric ID
+            foreach ($skus as $sku) {
+                $skuId = $sku['id'] ?? null;
+                if ($skuId && !str_contains((string)$skuId, '#')) {
+                    Log::warning('No SKU with stock found, using first numeric SKU', [
                         'sku_id' => $skuId,
-                        'stock' => $sku['sku_available_stock'],
                         'sku_attr' => $sku['sku_attr'] ?? null
                     ]);
                     return $skuId;
                 }
             }
 
-            // If no SKU with stock, return first SKU anyway
-            if (!empty($skus[0])) {
-                $skuId = $skus[0]['id'] ?? null;
-                Log::warning('No SKU with stock found, using first SKU', [
-                    'sku_id' => $skuId,
-                    'sku_attr' => $skus[0]['sku_attr'] ?? null
-                ]);
-                return $skuId;
-            }
+            // If no numeric SKU found, log warning
+            Log::warning('No numeric SKU ID found in ae_item_sku_info_dtos, only property combinations', [
+                'first_sku' => $skus[0] ?? null
+            ]);
         }
 
         // Check in aeop_ae_product_s_k_us structure (from aliexpress_variants)

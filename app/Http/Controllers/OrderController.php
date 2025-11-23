@@ -587,17 +587,25 @@ class OrderController extends Controller
 
             // Return the result
             if ($freightResult['success']) {
+                // Extract data from the result
+                $data = $freightResult['data'] ?? $freightResult;
+
                 return response()->json([
                     'success' => true,
-                    'freight_amount' => $freightResult['freight_amount'],
-                    'freight_currency' => $freightResult['freight_currency'],
-                    'estimated_delivery_time' => $freightResult['estimated_delivery_time'] ?? null,
-                    'service_name' => $freightResult['service_name'] ?? null,
+                    'freight_amount' => $data['freight_amount'] ?? null,
+                    'freight_currency' => $data['freight_currency'] ?? null,
+                    'estimated_delivery_time' => $data['delivery_time'] ?? $data['estimated_delivery_time'] ?? null,
+                    'service_name' => $data['service_name'] ?? $data['company_name'] ?? null,
+                    'delivery_days_min' => $data['min_delivery_days'] ?? null,
+                    'delivery_days_max' => $data['max_delivery_days'] ?? null,
+                    'free_shipping' => $data['free_shipping'] ?? false,
+                    'tracking' => $data['tracking'] ?? false,
+                    'shipping_method' => $data['shipping_method'] ?? null,
                 ]);
             } else {
                 return response()->json([
                     'success' => false,
-                    'error' => $freightResult['error_desc'] ?? 'Unable to calculate freight',
+                    'error' => $freightResult['message'] ?? $freightResult['error_desc'] ?? 'Unable to calculate freight',
                     'error_code' => $freightResult['error_code'] ?? null,
                     'raw_response' => $freightResult['raw_response'] ?? null, // Include raw response for debugging
                 ], 400);

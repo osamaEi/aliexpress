@@ -503,16 +503,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 // Estimated delivery
-                if (data.estimated_delivery_time) {
+                if (data.estimated_delivery_time || (data.delivery_days_min && data.delivery_days_max)) {
                     html += '<div class="col-md-12">';
                     html += '<div class="card bg-light border-0">';
                     html += '<div class="card-body text-center py-3">';
-                    html += '<p class="text-muted mb-2"><strong><i class="ri-time-line me-1"></i>Estimated Delivery Time</strong></p>';
-                    html += '<p class="mb-0">' + data.estimated_delivery_time + '</p>';
+                    html += '<p class="text-muted mb-2"><strong><i class="ri-time-line me-1"></i>Estimated Delivery</strong></p>';
+                    if (data.estimated_delivery_time) {
+                        html += '<p class="mb-0">' + data.estimated_delivery_time + '</p>';
+                    }
+                    if (data.delivery_days_min && data.delivery_days_max) {
+                        html += '<p class="mb-0 text-muted small">' + data.delivery_days_min + ' - ' + data.delivery_days_max + ' days</p>';
+                    }
                     html += '</div>';
                     html += '</div>';
                     html += '</div>';
                 }
+
+                // Additional shipping info badges
+                html += '<div class="col-md-12 mt-2">';
+                html += '<div class="d-flex gap-2 justify-content-center flex-wrap">';
+                if (data.free_shipping) {
+                    html += '<span class="badge bg-success"><i class="ri-gift-line me-1"></i>Free Shipping</span>';
+                }
+                if (data.tracking) {
+                    html += '<span class="badge bg-info"><i class="ri-map-pin-line me-1"></i>Tracking Available</span>';
+                }
+                if (data.shipping_method) {
+                    html += '<span class="badge bg-secondary">' + data.shipping_method + '</span>';
+                }
+                html += '</div>';
+                html += '</div>';
 
                 html += '</div>';
 
