@@ -943,6 +943,9 @@ document.addEventListener('DOMContentLoaded', function() {
         freightError.style.display = 'none';
         freightCalculated = false;
 
+        // Get selected SKU ID if available
+        const selectedSkuId = document.getElementById('selected_sku_id')?.value;
+
         // Prepare request data
         const data = {
             product_id: currentProductId,
@@ -950,6 +953,7 @@ document.addEventListener('DOMContentLoaded', function() {
             country: country,
             city: city,
             province: province,
+            sku_id: selectedSkuId || null, // Pass selected SKU ID
             _token: '{{ csrf_token() }}'
         };
 
@@ -968,73 +972,85 @@ document.addEventListener('DOMContentLoaded', function() {
             freightLoading.style.display = 'none';
 
             if (data.success) {
-                // Display freight information with better styling
-                let html = '<div class="alert alert-success border-success mb-3">';
-                html += '<div class="row align-items-center">';
-                html += '<div class="col-md-12 mb-3">';
+                // Display freight information with enhanced styling
+                let html = '';
+
+                // Success header with checkmark
+                html += '<div class="alert alert-success border-0 shadow-sm mb-4">';
                 html += '<div class="d-flex align-items-center">';
-                html += '<i class="ri-checkbox-circle-line text-success me-2" style="font-size: 24px;"></i>';
-                html += '<span class="h6 mb-0 text-success">Shipping Available</span>';
-                html += '</div>';
-                html += '</div>';
-                html += '</div>';
-                html += '</div>';
-
-                html += '<div class="row">';
-
-                // Shipping cost - prominent display
-                html += '<div class="col-md-6 mb-3">';
-                html += '<div class="card bg-light border-0">';
-                html += '<div class="card-body text-center py-4">';
-                html += '<p class="text-muted mb-2"><strong><i class="ri-money-dollar-circle-line me-1"></i>Shipping Cost</strong></p>';
-                html += '<p class="h2 text-primary mb-0"><strong>' + data.freight_currency + ' ' + parseFloat(data.freight_amount).toFixed(2) + '</strong></p>';
+                html += '<i class="ri-checkbox-circle-fill text-success me-3" style="font-size: 32px;"></i>';
+                html += '<div>';
+                html += '<h5 class="mb-0 text-success">Shipping Available!</h5>';
+                html += '<small class="text-muted">Freight calculated successfully for your location</small>';
                 html += '</div>';
                 html += '</div>';
                 html += '</div>';
 
-                // Service name
-                if (data.service_name) {
-                    html += '<div class="col-md-6 mb-3">';
-                    html += '<div class="card bg-light border-0">';
-                    html += '<div class="card-body text-center py-4">';
-                    html += '<p class="text-muted mb-2"><strong><i class="ri-ship-line me-1"></i>Shipping Method</strong></p>';
-                    html += '<p class="h5 mb-0">' + data.service_name + '</p>';
-                    html += '</div>';
-                    html += '</div>';
-                    html += '</div>';
-                }
+                html += '<div class="row g-3">';
+
+                // Shipping cost - prominent display with better design
+                html += '<div class="col-md-6">';
+                html += '<div class="card border-primary shadow-sm h-100">';
+                html += '<div class="card-body text-center d-flex flex-column justify-content-center" style="min-height: 140px;">';
+                html += '<div class="mb-2"><i class="ri-money-dollar-circle-line text-primary" style="font-size: 36px;"></i></div>';
+                html += '<p class="text-muted mb-2 fw-semibold">Shipping Cost</p>';
+                html += '<h2 class="text-primary mb-0 fw-bold">' + data.freight_currency + ' ' + parseFloat(data.freight_amount).toFixed(2) + '</h2>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
 
                 // Estimated delivery
                 if (data.estimated_delivery_time || (data.delivery_days_min && data.delivery_days_max)) {
-                    html += '<div class="col-md-12">';
-                    html += '<div class="card bg-light border-0">';
-                    html += '<div class="card-body text-center py-3">';
-                    html += '<p class="text-muted mb-2"><strong><i class="ri-time-line me-1"></i>Estimated Delivery</strong></p>';
+                    html += '<div class="col-md-6">';
+                    html += '<div class="card border-info shadow-sm h-100">';
+                    html += '<div class="card-body text-center d-flex flex-column justify-content-center" style="min-height: 140px;">';
+                    html += '<div class="mb-2"><i class="ri-calendar-line text-info" style="font-size: 36px;"></i></div>';
+                    html += '<p class="text-muted mb-2 fw-semibold">Estimated Delivery</p>';
                     if (data.estimated_delivery_time) {
-                        html += '<p class="mb-0">' + data.estimated_delivery_time + '</p>';
+                        html += '<p class="mb-1 fw-bold">' + data.estimated_delivery_time + '</p>';
                     }
                     if (data.delivery_days_min && data.delivery_days_max) {
-                        html += '<p class="mb-0 text-muted small">' + data.delivery_days_min + ' - ' + data.delivery_days_max + ' days</p>';
+                        html += '<p class="mb-0 text-muted"><small>' + data.delivery_days_min + '-' + data.delivery_days_max + ' business days</small></p>';
                     }
                     html += '</div>';
                     html += '</div>';
                     html += '</div>';
                 }
 
-                // Additional shipping info badges
-                html += '<div class="col-md-12 mt-2">';
-                html += '<div class="d-flex gap-2 justify-content-center flex-wrap">';
-                if (data.free_shipping) {
-                    html += '<span class="badge bg-success"><i class="ri-gift-line me-1"></i>Free Shipping</span>';
+                // Service name & shipping method
+                if (data.service_name || data.shipping_method) {
+                    html += '<div class="col-md-12">';
+                    html += '<div class="card border-secondary shadow-sm">';
+                    html += '<div class="card-body">';
+                    html += '<div class="row align-items-center">';
+                    html += '<div class="col-auto">';
+                    html += '<i class="ri-truck-line text-secondary" style="font-size: 32px;"></i>';
+                    html += '</div>';
+                    html += '<div class="col">';
+                    if (data.service_name) {
+                        html += '<h6 class="mb-1">Shipping Carrier</h6>';
+                        html += '<p class="mb-0 text-muted">' + data.service_name + '</p>';
+                    }
+                    if (data.shipping_method && data.shipping_method !== data.service_name) {
+                        html += '<small class="text-muted">Method: ' + data.shipping_method + '</small>';
+                    }
+                    html += '</div>';
+                    html += '<div class="col-auto">';
+
+                    // Badges for additional info
+                    if (data.free_shipping) {
+                        html += '<span class="badge bg-success me-1 mb-1"><i class="ri-gift-line me-1"></i>Free Shipping</span>';
+                    }
+                    if (data.tracking) {
+                        html += '<span class="badge bg-info mb-1"><i class="ri-map-pin-line me-1"></i>Tracking</span>';
+                    }
+
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
                 }
-                if (data.tracking) {
-                    html += '<span class="badge bg-info"><i class="ri-map-pin-line me-1"></i>Tracking Available</span>';
-                }
-                if (data.shipping_method) {
-                    html += '<span class="badge bg-secondary">' + data.shipping_method + '</span>';
-                }
-                html += '</div>';
-                html += '</div>';
 
                 html += '</div>';
 
@@ -1048,8 +1064,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     freightInfoContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 100);
             } else {
-                // Display error with raw response for debugging
-                let errorMsg = data.error || 'Unable to calculate shipping cost. This may mean shipping is not available to this location.';
+                // Display error with better messaging
+                let errorMsg = data.error || 'Unable to calculate shipping cost.';
 
                 // Log raw response to console for debugging
                 if (data.raw_response) {
@@ -1057,16 +1073,57 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('AliExpress Raw Response (JSON):', JSON.stringify(data.raw_response, null, 2));
                 }
 
-                // Display error with raw response details
-                if (data.raw_response) {
-                    // Check if it's a delivery info empty error (product doesn't ship to location)
-                    if (data.raw_response.code === 501) {
-                        freightErrorMessage.innerHTML = '<strong>⚠️ Shipping Not Available</strong><br><br>' + errorMsg + '<br><br><small class="text-muted">This product may not be available for shipping to your selected location, or the product may be out of stock on AliExpress.</small><br><br><strong>Debug Information:</strong><br><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-size: 11px;">' + JSON.stringify(data.raw_response, null, 2) + '</pre>';
-                    } else {
-                        freightErrorMessage.innerHTML = errorMsg + '<br><br><strong>Raw AliExpress Response:</strong><br><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-size: 11px;">' + JSON.stringify(data.raw_response, null, 2) + '</pre>';
-                    }
+                // Handle specific error codes
+                if (data.error_code === 'INVALID_SKU_FORMAT') {
+                    freightErrorMessage.innerHTML = `
+                        <strong><i class="ri-error-warning-line me-2"></i>Invalid SKU Format</strong><br><br>
+                        ${errorMsg}<br><br>
+                        <div class="alert alert-warning mb-0 mt-2">
+                            <i class="ri-information-line me-1"></i>
+                            <strong>What to do:</strong> Click "Change SKU" above and select a SKU with the
+                            <span class="badge bg-success">Numeric SKU</span> badge (shown in green).
+                        </div>
+                    `;
+                } else if (data.error_code === 'NO_NUMERIC_SKU') {
+                    freightErrorMessage.innerHTML = `
+                        <strong><i class="ri-error-warning-line me-2"></i>No Valid SKU Found</strong><br><br>
+                        ${errorMsg}<br><br>
+                        <div class="alert alert-info mb-0 mt-2">
+                            <i class="ri-information-line me-1"></i>
+                            This product only has property combinations (like "Color:Red#Size:Large"),
+                            which don't work with the AliExpress freight API. Shipping cost cannot be calculated automatically.
+                        </div>
+                    `;
+                } else if (data.raw_response && data.raw_response.code === 501) {
+                    // DELIVERY_INFO_EMPTY error
+                    freightErrorMessage.innerHTML = `
+                        <strong><i class="ri-error-warning-line me-2"></i>Shipping Not Available</strong><br><br>
+                        ${errorMsg}<br><br>
+                        <div class="alert alert-warning mb-0 mt-2">
+                            <i class="ri-alert-line me-1"></i>
+                            <strong>Possible reasons:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Product doesn't ship to this location</li>
+                                <li>Selected SKU is out of stock on AliExpress</li>
+                                <li>Invalid SKU format (property combination instead of numeric ID)</li>
+                            </ul>
+                        </div>
+                        <details class="mt-3">
+                            <summary class="text-muted" style="cursor: pointer;">Show Debug Information</summary>
+                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 200px; overflow-y: auto; font-size: 11px; margin-top: 10px;">${JSON.stringify(data.raw_response, null, 2)}</pre>
+                        </details>
+                    `;
+                } else if (data.raw_response) {
+                    freightErrorMessage.innerHTML = `
+                        <strong><i class="ri-error-warning-line me-2"></i>Error</strong><br><br>
+                        ${errorMsg}<br><br>
+                        <details class="mt-2">
+                            <summary class="text-muted" style="cursor: pointer;">Show Details</summary>
+                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 200px; overflow-y: auto; font-size: 11px; margin-top: 10px;">${JSON.stringify(data.raw_response, null, 2)}</pre>
+                        </details>
+                    `;
                 } else {
-                    freightErrorMessage.textContent = errorMsg;
+                    freightErrorMessage.innerHTML = `<strong><i class="ri-error-warning-line me-2"></i>Error</strong><br><br>${errorMsg}`;
                 }
 
                 freightError.style.display = 'block';

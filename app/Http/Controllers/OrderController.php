@@ -485,6 +485,7 @@ class OrderController extends Controller
             'country' => 'required|string|size:2',
             'city' => 'nullable|string|max:100',
             'province' => 'nullable|string|max:100',
+            'sku_id' => 'nullable|string', // Accept SKU ID from frontend
         ]);
 
         try {
@@ -498,38 +499,53 @@ class OrderController extends Controller
                 ], 400);
             }
 
-            // Get SKU ID - required by AliExpress freight API
-            $skuId = null;
-            if ($product->aliexpress_data) {
-                // Try to get SKU from stored product data
-                $skuId = $this->aliexpressService->getFirstAvailableSku($product->aliexpress_data);
-            }
+            // Get SKU ID - prioritize the one passed from frontend (user-selected)
+            $skuId = $validated['sku_id'] ?? null;
 
-            // If no SKU found in stored data, try from variants
-            if (!$skuId && $product->aliexpress_variants) {
-                $skuId = $this->aliexpressService->getFirstAvailableSku([
-                    'aeop_ae_product_s_k_us' => $product->aliexpress_variants
-                ]);
-            }
-
-            // If still no SKU, fetch fresh product details
+            // If no SKU provided, try to auto-detect
             if (!$skuId) {
-                try {
-                    $freshProductData = $this->aliexpressService->getProductDetails($product->aliexpress_id);
-                    $skuId = $this->aliexpressService->getFirstAvailableSku($freshProductData);
-                } catch (\Exception $e) {
-                    Log::warning('Could not fetch fresh product data for SKU', [
-                        'product_id' => $product->id,
-                        'error' => $e->getMessage()
+                if ($product->aliexpress_data) {
+                    // Try to get SKU from stored product data
+                    $skuId = $this->aliexpressService->getFirstAvailableSku($product->aliexpress_data);
+                }
+
+                // If no SKU found in stored data, try from variants
+                if (!$skuId && $product->aliexpress_variants) {
+                    $skuId = $this->aliexpressService->getFirstAvailableSku([
+                        'aeop_ae_product_s_k_us' => $product->aliexpress_variants
                     ]);
                 }
+
+                // If still no SKU, fetch fresh product details
+                if (!$skuId) {
+                    try {
+                        $freshProductData = $this->aliexpressService->getProductDetails($product->aliexpress_id);
+                        $skuId = $this->aliexpressService->getFirstAvailableSku($freshProductData);
+                    } catch (\Exception $e) {
+                        Log::warning('Could not fetch fresh product data for SKU', [
+                            'product_id' => $product->id,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
+            }
+
+            // Validate SKU is numeric (not property combination)
+            if ($skuId && str_contains((string)$skuId, '#')) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid SKU format. Please select a numeric SKU (property combinations do not work with freight calculation).',
+                    'error_code' => 'INVALID_SKU_FORMAT',
+                    'sku_provided' => $skuId
+                ], 400);
             }
 
             // If we still don't have a SKU, return error
             if (!$skuId) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Could not find SKU for this product. SKU is required for freight calculation.'
+                    'error' => 'Could not find valid numeric SKU for this product. SKU is required for freight calculation.',
+                    'error_code' => 'NO_NUMERIC_SKU'
                 ], 400);
             }
 
