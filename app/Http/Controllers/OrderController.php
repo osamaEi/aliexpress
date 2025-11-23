@@ -58,7 +58,28 @@ class OrderController extends Controller
             $product = Product::findOrFail($productId);
         }
 
-        return view('orders.create', compact('product'));
+        // Extract query parameters for auto-population
+        $queryParams = [
+            'selected_variant' => $request->get('selected_variant'),
+            'selected_variant_index' => $request->get('selected_variant_index'),
+            'selected_sku_attr' => $request->get('selected_sku_attr'),
+            'quantity' => $request->get('quantity', 1),
+            'customer_notes' => $request->get('customer_notes'),
+            // Shipping information for auto-freight calculation
+            'shipping_country' => $request->get('shipping_country'),
+            'shipping_city' => $request->get('shipping_city'),
+            'shipping_province' => $request->get('shipping_province'),
+        ];
+
+        // Parse SKU attribute to extract numeric SKU ID if available
+        $selectedSkuId = null;
+        if (!empty($queryParams['selected_sku_attr'])) {
+            // SKU attr format: "5:4183;14:200004890" - extract the actual numeric SKU if needed
+            // For now, we'll let the frontend handle SKU loading from product
+            $queryParams['has_sku_params'] = true;
+        }
+
+        return view('orders.create', compact('product', 'queryParams'));
     }
 
     /**

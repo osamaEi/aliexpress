@@ -679,6 +679,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update step progress
         updateStepProgress('sku', true);
+
+        // If auto-calculate freight flag is set, trigger freight calculation
+        if (window.autoCalculateFreight) {
+            console.log('Auto-calculating freight after SKU selection');
+            // Give a small delay to ensure UI is updated
+            setTimeout(() => {
+                calculateFreight();
+                window.autoCalculateFreight = false; // Reset flag
+            }, 500);
+        }
     }
 
     // Function to show SKU modal
@@ -1252,6 +1262,55 @@ document.addEventListener('DOMContentLoaded', function() {
             zipInput.value = '00000';
         }
     });
+
+    // Auto-populate form fields from URL query parameters
+    @if(isset($queryParams) && !empty($queryParams['quantity']))
+        // Set quantity if provided
+        if (quantityInput) {
+            quantityInput.value = {{ $queryParams['quantity'] }};
+        }
+    @endif
+
+    @if(isset($queryParams) && !empty($queryParams['customer_notes']))
+        // Set customer notes if provided
+        const customerNotesInput = document.getElementById('customer_notes');
+        if (customerNotesInput) {
+            customerNotesInput.value = '{{ $queryParams['customer_notes'] }}';
+        }
+    @endif
+
+    @if(isset($queryParams) && !empty($queryParams['shipping_country']))
+        // Set shipping country if provided
+        if (shippingCountrySelect) {
+            shippingCountrySelect.value = '{{ $queryParams['shipping_country'] }}';
+            // Trigger change event to update province options
+            shippingCountrySelect.dispatchEvent(new Event('change'));
+        }
+    @endif
+
+    @if(isset($queryParams) && !empty($queryParams['shipping_city']))
+        // Set shipping city if provided
+        if (cityInput) {
+            cityInput.value = '{{ $queryParams['shipping_city'] }}';
+        }
+    @endif
+
+    @if(isset($queryParams) && !empty($queryParams['shipping_province']))
+        // Set shipping province if provided (with a delay to ensure province options are loaded)
+        setTimeout(() => {
+            if (provinceInput) {
+                provinceInput.value = '{{ $queryParams['shipping_province'] }}';
+            }
+        }, 100);
+    @endif
+
+    @if(isset($queryParams) && !empty($queryParams['has_sku_params']))
+        // If SKU parameters are present, wait for SKUs to load then auto-trigger freight calculation
+        console.log('Query parameters detected - will auto-calculate freight when SKUs are loaded');
+
+        // Store flag to trigger freight calculation after SKU loading
+        window.autoCalculateFreight = true;
+    @endif
 
     // Clean phone number on input
     phoneInput.addEventListener('blur', function() {
