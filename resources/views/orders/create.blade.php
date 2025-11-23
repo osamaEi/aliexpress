@@ -539,11 +539,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Helper function to clean up alert messages
+    function clearSkuAlerts() {
+        const alerts = skuLoadingMessage.parentElement.querySelectorAll('.alert-warning, .alert-danger, .alert-info');
+        alerts.forEach(alert => {
+            if (alert !== skuLoadingMessage) {
+                alert.remove();
+            }
+        });
+    }
+
     // Function to load SKUs for selected product
     function loadProductSkus(productId) {
+        // Clear any existing alerts
+        clearSkuAlerts();
+
         skuLoadingMessage.style.display = 'block';
         skuDisplayCard.style.display = 'none';
         selectSkuBtn.style.display = 'none';
+
+        const aliexpressId = productData[productId]?.aliexpressId;
+
+        if (!aliexpressId) {
+            console.error('No AliExpress ID found for product');
+            skuLoadingMessage.style.display = 'none';
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-warning mt-2';
+            alertDiv.innerHTML = '<i class="ri-error-warning-line me-2"></i>Product SKU information is not available. The product may not be synced with AliExpress.';
+            skuLoadingMessage.parentElement.appendChild(alertDiv);
+            return;
+        }
 
         fetch('{{ route("shipping.test.product-details") }}', {
             method: 'POST',
@@ -553,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                product_id: productData[productId]?.aliexpressId || productId
+                product_id: aliexpressId
             })
         })
         .then(response => response.json())
@@ -572,18 +597,34 @@ document.addEventListener('DOMContentLoaded', function() {
                         selectSkuBtn.style.display = 'block';
                     }
                 } else {
+                    // No numeric SKU found - show warning
                     selectSkuBtn.style.display = 'block';
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-warning mt-2';
+                    alertDiv.innerHTML = '<i class="ri-error-warning-line me-2"></i><strong>No numeric SKUs found.</strong> This product only has property combinations, which may not work with freight calculation.';
+                    const existingAlert = skuLoadingMessage.parentElement.querySelector('.alert-warning');
+                    if (!existingAlert) {
+                        skuLoadingMessage.parentElement.appendChild(alertDiv);
+                    }
                 }
             } else {
                 selectSkuBtn.style.display = 'none';
                 // Product might not have SKUs or is single-variant
                 console.log('No SKUs found for product');
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-info mt-2';
+                alertDiv.innerHTML = '<i class="ri-information-line me-2"></i>This product appears to be a single-variant item (no SKU selection needed).';
+                skuLoadingMessage.parentElement.appendChild(alertDiv);
             }
         })
         .catch(error => {
             console.error('Error loading SKUs:', error);
             skuLoadingMessage.style.display = 'none';
             selectSkuBtn.style.display = 'none';
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger mt-2';
+            alertDiv.innerHTML = '<i class="ri-error-warning-line me-2"></i>Error loading SKU information: ' + error.message;
+            skuLoadingMessage.parentElement.appendChild(alertDiv);
         });
     }
 
@@ -653,6 +694,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Load SKUs if not already loaded
             const productId = currentProductId;
+            const aliexpressId = productData[productId]?.aliexpressId;
+
+            if (!aliexpressId) {
+                showSkuModalError('Product does not have AliExpress ID. Cannot load SKUs.');
+                return;
+            }
+
             fetch('{{ route("shipping.test.product-details") }}', {
                 method: 'POST',
                 headers: {
@@ -661,7 +709,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    product_id: productData[productId]?.aliexpressId || productId
+                    product_id: aliexpressId
                 })
             })
             .then(response => response.json())
