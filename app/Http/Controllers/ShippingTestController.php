@@ -63,13 +63,14 @@ class ShippingTestController extends Controller
                 }
 
                 foreach ($skuList as $sku) {
-                    // Priority: id > sku_id > sku_attr
-                    $skuId = $sku['id'] ?? $sku['sku_id'] ?? $sku['sku_attr'] ?? null;
+                    // For AliExpress freight API, use numeric SKU ID (per official docs)
+                    // Example from docs: selectedSkuId = "12000023999200390"
+                    $skuId = $sku['id'] ?? null;
 
                     if ($skuId) {
                         $skus[] = [
-                            'id' => $skuId,
-                            'sku_attr' => $sku['sku_attr'] ?? null,
+                            'id' => $skuId,  // Numeric SKU ID (REQUIRED for freight API)
+                            'sku_attr' => $sku['sku_attr'] ?? null,  // Property combo (for reference only)
                             'price' => $sku['sku_price'] ?? null,
                             'stock' => $sku['sku_stock'] ?? $sku['sku_available_stock'] ?? null,
                             'available' => ($sku['sku_available_stock'] ?? 0) > 0,

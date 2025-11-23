@@ -1281,8 +1281,9 @@ class AliExpressService
             foreach ($skus as $sku) {
                 // Check if SKU has stock
                 if (isset($sku['sku_available_stock']) && $sku['sku_available_stock'] > 0) {
-                    // Priority: id > sku_id > sku_attr
-                    $skuId = $sku['id'] ?? $sku['sku_id'] ?? $sku['sku_attr'] ?? null;
+                    // For freight API, use numeric SKU ID (per official docs: selectedSkuId should be like "12000023999200390")
+                    // Priority: id (numeric SKU ID) is required
+                    $skuId = $sku['id'] ?? null;
                     Log::info('Selected SKU with stock', [
                         'sku_id' => $skuId,
                         'stock' => $sku['sku_available_stock'],
@@ -1294,7 +1295,7 @@ class AliExpressService
 
             // If no SKU with stock, return first SKU anyway
             if (!empty($skus[0])) {
-                $skuId = $skus[0]['id'] ?? $skus[0]['sku_id'] ?? $skus[0]['sku_attr'] ?? null;
+                $skuId = $skus[0]['id'] ?? null;
                 Log::warning('No SKU with stock found, using first SKU', [
                     'sku_id' => $skuId,
                     'sku_attr' => $skus[0]['sku_attr'] ?? null
