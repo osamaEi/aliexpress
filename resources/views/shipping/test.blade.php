@@ -296,13 +296,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (data.skus && data.skus.length > 0) {
                     html += `<p class="mb-2"><strong>Total SKUs Found:</strong> ${data.total_skus}</p>`;
+                    html += '<div class="alert alert-info small mb-2">';
+                    html += '<strong>Note:</strong> Use <strong>SKU ID</strong> (numeric) for freight calculation, not SKU Attr (property combination).';
+                    html += '</div>';
                     html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
-                    html += '<thead><tr><th>SKU ID</th><th>Price</th><th>Stock</th><th>Available</th><th>Action</th></tr></thead><tbody>';
+                    html += '<thead><tr><th>SKU ID</th><th>SKU Attr</th><th>Price</th><th>Stock</th><th>Available</th><th>Action</th></tr></thead><tbody>';
 
                     data.skus.forEach(sku => {
                         const available = sku.available ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>';
+                        const skuAttr = sku.sku_attr ? `<small class="text-muted">${sku.sku_attr}</small>` : '<small class="text-muted">N/A</small>';
                         html += `<tr>
-                            <td><code>${sku.id}</code></td>
+                            <td><code class="text-primary">${sku.id}</code></td>
+                            <td>${skuAttr}</td>
                             <td>${sku.price || 'N/A'}</td>
                             <td>${sku.stock || 'N/A'}</td>
                             <td>${available}</td>

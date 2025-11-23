@@ -1268,6 +1268,11 @@ class AliExpressService
         if (isset($productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
             $skus = $productData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
 
+            // Ensure it's an array of SKUs
+            if (!isset($skus[0])) {
+                $skus = [$skus];
+            }
+
             Log::debug('Found SKUs in ae_item_sku_info_dtos', [
                 'sku_count' => count($skus),
                 'first_sku_keys' => isset($skus[0]) ? array_keys($skus[0]) : []
@@ -1276,22 +1281,25 @@ class AliExpressService
             foreach ($skus as $sku) {
                 // Check if SKU has stock
                 if (isset($sku['sku_available_stock']) && $sku['sku_available_stock'] > 0) {
-                    $skuAttr = $sku['sku_attr'] ?? $sku['id'] ?? null;
+                    // Priority: id > sku_id > sku_attr
+                    $skuId = $sku['id'] ?? $sku['sku_id'] ?? $sku['sku_attr'] ?? null;
                     Log::info('Selected SKU with stock', [
-                        'sku_attr' => $skuAttr,
-                        'stock' => $sku['sku_available_stock']
+                        'sku_id' => $skuId,
+                        'stock' => $sku['sku_available_stock'],
+                        'sku_attr' => $sku['sku_attr'] ?? null
                     ]);
-                    return $skuAttr;
+                    return $skuId;
                 }
             }
 
             // If no SKU with stock, return first SKU anyway
             if (!empty($skus[0])) {
-                $skuAttr = $skus[0]['sku_attr'] ?? $skus[0]['id'] ?? null;
+                $skuId = $skus[0]['id'] ?? $skus[0]['sku_id'] ?? $skus[0]['sku_attr'] ?? null;
                 Log::warning('No SKU with stock found, using first SKU', [
-                    'sku_attr' => $skuAttr
+                    'sku_id' => $skuId,
+                    'sku_attr' => $skus[0]['sku_attr'] ?? null
                 ]);
-                return $skuAttr;
+                return $skuId;
             }
         }
 

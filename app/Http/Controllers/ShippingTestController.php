@@ -53,33 +53,37 @@ class ShippingTestController extends Controller
             // Extract SKUs
             $skus = [];
 
-            // Method 1: Check aeop_ae_product_s_k_us
-            if (isset($productDetails['aeop_ae_product_s_k_us']['aeop_ae_product_sku'])) {
-                $skuList = $productDetails['aeop_ae_product_s_k_us']['aeop_ae_product_sku'];
+            // Method 1: Check ae_item_sku_info_dtos (preferred - from product details API)
+            if (isset($productDetails['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
+                $skuList = $productDetails['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
 
                 // Ensure it's an array
-                if (!is_array($skuList) || (isset($skuList['id']) && is_string($skuList['id']))) {
+                if (!isset($skuList[0])) {
                     $skuList = [$skuList];
                 }
 
                 foreach ($skuList as $sku) {
-                    if (isset($sku['id'])) {
+                    // Priority: id > sku_id > sku_attr
+                    $skuId = $sku['id'] ?? $sku['sku_id'] ?? $sku['sku_attr'] ?? null;
+
+                    if ($skuId) {
                         $skus[] = [
-                            'id' => $sku['id'],
+                            'id' => $skuId,
+                            'sku_attr' => $sku['sku_attr'] ?? null,
                             'price' => $sku['sku_price'] ?? null,
-                            'stock' => $sku['sku_stock'] ?? null,
+                            'stock' => $sku['sku_stock'] ?? $sku['sku_available_stock'] ?? null,
                             'available' => ($sku['sku_available_stock'] ?? 0) > 0,
-                            'properties' => $sku['aeop_s_k_u_propertys']['aeop_sku_property'] ?? [],
                         ];
                     }
                 }
             }
 
-            // Method 2: Check ae_item_sku_info_dtos
-            if (empty($skus) && isset($productDetails['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
-                $skuList = $productDetails['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
+            // Method 2: Check aeop_ae_product_s_k_us (fallback)
+            if (empty($skus) && isset($productDetails['aeop_ae_product_s_k_us']['aeop_ae_product_sku'])) {
+                $skuList = $productDetails['aeop_ae_product_s_k_us']['aeop_ae_product_sku'];
 
-                if (!is_array($skuList) || (isset($skuList['id']) && is_string($skuList['id']))) {
+                // Ensure it's an array
+                if (!isset($skuList[0])) {
                     $skuList = [$skuList];
                 }
 
@@ -87,10 +91,10 @@ class ShippingTestController extends Controller
                     if (isset($sku['id'])) {
                         $skus[] = [
                             'id' => $sku['id'],
+                            'sku_attr' => null,
                             'price' => $sku['sku_price'] ?? null,
-                            'stock' => $sku['sku_stock'] ?? null,
-                            'available' => ($sku['sku_available_stock'] ?? 0) > 0,
-                            'properties' => $sku['aeop_s_k_u_propertys']['aeop_sku_property'] ?? [],
+                            'stock' => $sku['sku_stock'] ?? $sku['s_k_u_available_stock'] ?? null,
+                            'available' => ($sku['s_k_u_available_stock'] ?? 0) > 0,
                         ];
                     }
                 }
