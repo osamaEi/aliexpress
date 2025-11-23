@@ -2,37 +2,81 @@
 
 @section('content')
 <div class="col-12">
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Create New Order</h5>
+    <!-- Progress Tracker -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="step-item active" id="step-product">
+                    <div class="step-icon"><i class="ri-shopping-bag-line"></i></div>
+                    <div class="step-text">Product</div>
+                </div>
+                <div class="step-line" id="line-sku"></div>
+                <div class="step-item" id="step-sku">
+                    <div class="step-icon"><i class="ri-list-check"></i></div>
+                    <div class="step-text">SKU</div>
+                </div>
+                <div class="step-line" id="line-customer"></div>
+                <div class="step-item" id="step-customer">
+                    <div class="step-icon"><i class="ri-user-line"></i></div>
+                    <div class="step-text">Customer</div>
+                </div>
+                <div class="step-line" id="line-shipping"></div>
+                <div class="step-item" id="step-shipping">
+                    <div class="step-icon"><i class="ri-map-pin-line"></i></div>
+                    <div class="step-text">Shipping</div>
+                </div>
+                <div class="step-line" id="line-review"></div>
+                <div class="step-item" id="step-review">
+                    <div class="step-icon"><i class="ri-check-line"></i></div>
+                    <div class="step-text">Review</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="ri-add-circle-line me-2"></i>Create New Order</h5>
+            <small>Fill in the details below to create a new order</small>
         </div>
 
         <div class="card-body">
-            <form action="{{ route('orders.store') }}" method="POST">
+            <form action="{{ route('orders.store') }}" method="POST" id="orderForm">
                 @csrf
 
                 <!-- Product Selection -->
                 <div class="row mb-4">
                     <div class="col-md-12">
-                        <label for="product_id" class="form-label">Product *</label>
+                        <label for="product_id" class="form-label fw-semibold">
+                            <i class="ri-shopping-bag-line text-primary me-1"></i> Product *
+                        </label>
                         @if(isset($product))
-                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <div class="card">
-                                <div class="card-body d-flex align-items-center">
-                                    @if($product->images && count($product->images) > 0)
-                                        <img src="{{ $product->images[0] }}" alt="{{ $product->name }}" class="me-3" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
-                                    @endif
-                                    <div>
-                                        <h6 class="mb-1">{{ $product->name }}</h6>
-                                        <p class="mb-0 text-primary"><strong>{{ $product->currency }} {{ number_format($product->price, 2) }}</strong></p>
+                            <input type="hidden" name="product_id" id="product_id" value="{{ $product->id }}">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        @if($product->images && count($product->images) > 0)
+                                            <div class="col-auto">
+                                                <img src="{{ $product->images[0] }}" alt="{{ $product->name }}" class="rounded" style="width: 100px; height: 100px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                            </div>
+                                        @endif
+                                        <div class="col">
+                                            <h6 class="mb-1">{{ $product->name }}</h6>
+                                            <p class="mb-1 text-primary"><strong>{{ $product->currency }} {{ number_format($product->price, 2) }}</strong></p>
+                                            @if($product->isAliexpressProduct())
+                                                <span class="badge bg-info"><i class="ri-global-line me-1"></i>AliExpress Product</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         @else
                             <select name="product_id" id="product_id" class="form-select @error('product_id') is-invalid @enderror" required>
-                                <option value="">Select a product</option>
+                                <option value="">-- Select a product --</option>
                                 @foreach(App\Models\Product::active()->get() as $prod)
-                                    <option value="{{ $prod->id }}">{{ $prod->name }} - {{ $prod->currency }} {{ $prod->price }}</option>
+                                    <option value="{{ $prod->id }}" data-is-aliexpress="{{ $prod->isAliexpressProduct() ? '1' : '0' }}">
+                                        {{ $prod->name }} - {{ $prod->currency }} {{ number_format($prod->price, 2) }}
+                                    </option>
                                 @endforeach
                             </select>
                             @error('product_id')
@@ -42,66 +86,55 @@
                     </div>
                 </div>
 
-                <!-- Product Variant Selection (if available) -->
-                @if(isset($product) && !empty($product->aliexpress_data))
-                    @php
-                        $skus = [];
-                        if (isset($product->aliexpress_data['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
-                            $skus = $product->aliexpress_data['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
-                        }
-                    @endphp
+                <!-- SKU Selection Section -->
+                <div class="row mb-4" id="sku-selection-section" style="display: none;">
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold">
+                            <i class="ri-list-check text-primary me-1"></i> Product SKU / Variant
+                        </label>
+                        <input type="hidden" name="selected_sku_attr" id="selected_sku_attr">
+                        <input type="hidden" name="selected_sku_id" id="selected_sku_id">
 
-                    @if(count($skus) > 1)
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <label for="selected_sku_attr" class="form-label">Product Variant * <small class="text-muted">(Color/Size/Type)</small></label>
-                                <select name="selected_sku_attr" id="selected_sku_attr" class="form-select @error('selected_sku_attr') is-invalid @enderror" required>
-                                    <option value="">Select a variant</option>
-                                    @foreach($skus as $sku)
-                                        @php
-                                            $skuAttr = $sku['sku_attr'] ?? $sku['id'];
-                                            $stock = $sku['sku_available_stock'] ?? 0;
-                                            $price = $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 0;
-
-                                            // Extract display name from sku_attr (e.g., "14:496#Green 116Plus" -> "Green 116Plus")
-                                            $displayName = $skuAttr;
-                                            if (strpos($skuAttr, '#') !== false) {
-                                                $displayName = explode('#', $skuAttr)[1];
-                                            }
-
-                                            // Get image if available
-                                            $skuImage = null;
-                                            if (isset($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'][0]['sku_image'])) {
-                                                $skuImage = $sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'][0]['sku_image'];
-                                            }
-                                        @endphp
-                                        <option value="{{ $skuAttr }}"
-                                                data-stock="{{ $stock }}"
-                                                data-price="{{ $price }}"
-                                                data-image="{{ $skuImage }}"
-                                                data-details="{{ json_encode($sku) }}"
-                                                {{ $stock <= 0 ? 'disabled' : '' }}>
-                                            {{ $displayName }}
-                                            - ${{ number_format($price, 2) }}
-                                            ({{ $stock > 0 ? $stock . ' in stock' : 'Out of stock' }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('selected_sku_attr')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <div id="variant-preview" class="mt-2" style="display: none;">
-                                    <img id="variant-image" src="" alt="Variant" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+                        <div class="card border-secondary" id="sku-display-card" style="display: none;">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto" id="sku-image-container" style="display: none;">
+                                        <img id="sku-selected-image" src="" alt="SKU" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="mb-1" id="sku-selected-name">No SKU selected</h6>
+                                        <p class="mb-1"><strong id="sku-selected-price"></strong></p>
+                                        <span id="sku-selected-stock" class="badge bg-success"></span>
+                                        <span id="sku-selected-type" class="badge bg-info"></span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-outline-primary" id="change-sku-btn">
+                                            <i class="ri-edit-line me-1"></i> Change SKU
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    @endif
-                @endif
+
+                        <button type="button" class="btn btn-primary w-100" id="select-sku-btn" style="display: none;">
+                            <i class="ri-list-check me-1"></i> Select Product SKU / Variant
+                        </button>
+
+                        <div class="alert alert-info mt-2" id="sku-loading-message" style="display: none;">
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border spinner-border-sm text-info me-2"></div>
+                                <span>Loading available SKUs...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Quantity -->
                 <div class="row mb-4">
                     <div class="col-md-3">
-                        <label for="quantity" class="form-label">Quantity *</label>
+                        <label for="quantity" class="form-label fw-semibold">
+                            <i class="ri-hashtag text-primary me-1"></i> Quantity *
+                        </label>
                         <input type="number" name="quantity" id="quantity" class="form-control @error('quantity') is-invalid @enderror" value="{{ old('quantity', 1) }}" min="1" required>
                         @error('quantity')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -109,8 +142,12 @@
                     </div>
                 </div>
 
+                <hr class="my-4">
+
                 <!-- Customer Information -->
-                <h6 class="mb-3">Customer Information</h6>
+                <h5 class="mb-3">
+                    <i class="ri-user-line text-primary me-2"></i> Customer Information
+                </h5>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="customer_name" class="form-label">Full Name *</label>
@@ -155,8 +192,12 @@
                     </div>
                 </div>
 
+                <hr class="my-4">
+
                 <!-- Shipping Information -->
-                <h6 class="mb-3">Shipping Information</h6>
+                <h5 class="mb-3">
+                    <i class="ri-map-pin-line text-primary me-2"></i> Shipping Information
+                </h5>
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <label for="shipping_address" class="form-label">Address *</label>
@@ -293,8 +334,149 @@
             </form>
         </div>
     </div>
+
+    <!-- SKU Selection Modal -->
+    <div class="modal fade" id="skuModal" tabindex="-1" aria-labelledby="skuModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="skuModalLabel">
+                        <i class="ri-list-check me-2"></i>Select Product SKU / Variant
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="sku-modal-loading" class="text-center py-5">
+                        <div class="spinner-border text-primary mb-3"></div>
+                        <p>Loading SKUs...</p>
+                    </div>
+
+                    <div id="sku-modal-error" class="alert alert-danger" style="display: none;">
+                        <i class="ri-error-warning-line me-2"></i>
+                        <span id="sku-modal-error-message"></span>
+                    </div>
+
+                    <div id="sku-modal-content" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="ri-information-line me-2"></i>
+                            <strong>Note:</strong> Only <strong class="text-success">numeric SKU IDs</strong> work with freight calculation.
+                            Property combinations won't calculate shipping correctly.
+                        </div>
+                        <div id="sku-list-container"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<style>
+/* Progress Tracker Styles */
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 8px;
+    transition: all 0.3s;
+    border: 3px solid #e9ecef;
+}
+
+.step-item.active .step-icon {
+    background: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+}
+
+.step-item.completed .step-icon {
+    background: #198754;
+    color: white;
+    border-color: #198754;
+}
+
+.step-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    text-align: center;
+}
+
+.step-item.active .step-text {
+    color: #0d6efd;
+}
+
+.step-item.completed .step-text {
+    color: #198754;
+}
+
+.step-line {
+    height: 3px;
+    background: #e9ecef;
+    flex: 1;
+    margin: 0 10px;
+    margin-top: -30px;
+}
+
+.step-line.active {
+    background: #0d6efd;
+}
+
+/* SKU Card Styles */
+.sku-card {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.sku-card:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.sku-card.numeric {
+    border-color: #198754;
+    background: #f8fff8;
+}
+
+.sku-card.property-combo {
+    border-color: #ffc107;
+    background: #fffcf0;
+}
+
+.sku-card.out-of-stock {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.sku-card.selected {
+    border-color: #0d6efd;
+    background: #e7f1ff;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -305,24 +487,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const uaeProvinces = document.getElementById('uae-provinces');
     const saudiProvinces = document.getElementById('saudi-provinces');
 
-    // Variant selection handling
-    const variantSelect = document.getElementById('selected_sku_attr');
-    const variantPreview = document.getElementById('variant-preview');
-    const variantImage = document.getElementById('variant-image');
+    // SKU Selection Elements
+    const skuSelectionSection = document.getElementById('sku-selection-section');
+    const skuDisplayCard = document.getElementById('sku-display-card');
+    const selectSkuBtn = document.getElementById('select-sku-btn');
+    const changeSkuBtn = document.getElementById('change-sku-btn');
+    const skuLoadingMessage = document.getElementById('sku-loading-message');
+    const skuModal = new bootstrap.Modal(document.getElementById('skuModal'));
 
-    if (variantSelect) {
-        variantSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const imageUrl = selectedOption.getAttribute('data-image');
-
-            if (imageUrl && imageUrl !== 'null') {
-                variantImage.src = imageUrl;
-                variantPreview.style.display = 'block';
-            } else {
-                variantPreview.style.display = 'none';
-            }
-        });
-    }
+    let availableSkus = [];
+    let selectedSkuData = null;
 
     // Freight calculation for AliExpress products
     const productSelect = document.getElementById('product_id');
@@ -365,6 +539,261 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Function to load SKUs for selected product
+    function loadProductSkus(productId) {
+        skuLoadingMessage.style.display = 'block';
+        skuDisplayCard.style.display = 'none';
+        selectSkuBtn.style.display = 'none';
+
+        fetch('{{ route("shipping.test.product-details") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: productData[productId]?.aliexpressId || productId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            skuLoadingMessage.style.display = 'none';
+
+            if (data.success && data.skus && data.skus.length > 0) {
+                availableSkus = data.skus;
+
+                // Auto-select first numeric SKU if available
+                if (data.first_available_sku) {
+                    const firstSku = data.skus.find(s => s.id === data.first_available_sku);
+                    if (firstSku) {
+                        selectSku(firstSku);
+                    } else {
+                        selectSkuBtn.style.display = 'block';
+                    }
+                } else {
+                    selectSkuBtn.style.display = 'block';
+                }
+            } else {
+                selectSkuBtn.style.display = 'none';
+                // Product might not have SKUs or is single-variant
+                console.log('No SKUs found for product');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading SKUs:', error);
+            skuLoadingMessage.style.display = 'none';
+            selectSkuBtn.style.display = 'none';
+        });
+    }
+
+    // Function to select a SKU
+    function selectSku(sku) {
+        selectedSkuData = sku;
+
+        // Update hidden form fields
+        document.getElementById('selected_sku_attr').value = sku.sku_attr || sku.id;
+        document.getElementById('selected_sku_id').value = sku.id;
+
+        // Update display
+        document.getElementById('sku-selected-name').textContent = sku.sku_attr ?
+            (sku.sku_attr.includes('#') ? sku.sku_attr.split('#')[1] : sku.sku_attr) : sku.id;
+        document.getElementById('sku-selected-price').textContent = sku.price ?
+            `$${parseFloat(sku.price).toFixed(2)}` : '';
+
+        const stockBadge = document.getElementById('sku-selected-stock');
+        if (sku.available && sku.stock > 0) {
+            stockBadge.className = 'badge bg-success';
+            stockBadge.textContent = `${sku.stock} in stock`;
+        } else {
+            stockBadge.className = 'badge bg-danger';
+            stockBadge.textContent = 'Out of stock';
+        }
+
+        const typeBadge = document.getElementById('sku-selected-type');
+        if (sku.is_numeric) {
+            typeBadge.className = 'badge bg-success';
+            typeBadge.innerHTML = '<i class="ri-check-line me-1"></i>Numeric SKU';
+        } else {
+            typeBadge.className = 'badge bg-warning';
+            typeBadge.innerHTML = '<i class="ri-error-warning-line me-1"></i>Property Combo';
+        }
+
+        // Show/hide image
+        const imageContainer = document.getElementById('sku-image-container');
+        if (sku.raw_sku && sku.raw_sku.ae_sku_property_dtos) {
+            const props = sku.raw_sku.ae_sku_property_dtos.ae_sku_property_d_t_o;
+            if (props && props[0] && props[0].sku_image) {
+                document.getElementById('sku-selected-image').src = props[0].sku_image;
+                imageContainer.style.display = 'block';
+            } else {
+                imageContainer.style.display = 'none';
+            }
+        } else {
+            imageContainer.style.display = 'none';
+        }
+
+        skuDisplayCard.style.display = 'block';
+        selectSkuBtn.style.display = 'none';
+
+        // Update step progress
+        updateStepProgress('sku', true);
+    }
+
+    // Function to show SKU modal
+    function showSkuModal() {
+        document.getElementById('sku-modal-loading').style.display = 'block';
+        document.getElementById('sku-modal-error').style.display = 'none';
+        document.getElementById('sku-modal-content').style.display = 'none';
+
+        skuModal.show();
+
+        if (availableSkus.length > 0) {
+            renderSkuList();
+        } else {
+            // Load SKUs if not already loaded
+            const productId = currentProductId;
+            fetch('{{ route("shipping.test.product-details") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: productData[productId]?.aliexpressId || productId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.skus) {
+                    availableSkus = data.skus;
+                    renderSkuList();
+                } else {
+                    showSkuModalError('No SKUs available for this product');
+                }
+            })
+            .catch(error => {
+                showSkuModalError('Error loading SKUs: ' + error.message);
+            });
+        }
+    }
+
+    // Function to render SKU list in modal
+    function renderSkuList() {
+        document.getElementById('sku-modal-loading').style.display = 'none';
+        document.getElementById('sku-modal-content').style.display = 'block';
+
+        const container = document.getElementById('sku-list-container');
+        let html = '';
+
+        availableSkus.forEach((sku, index) => {
+            const isNumeric = sku.is_numeric === true;
+            const isAvailable = sku.available && sku.stock > 0;
+            const isSelected = selectedSkuData && selectedSkuData.id === sku.id;
+
+            const cardClass = `sku-card ${isNumeric ? 'numeric' : 'property-combo'} ${!isAvailable ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}`;
+
+            html += `<div class="${cardClass}" onclick="${isAvailable ? `selectSkuFromModal(${index})` : ''}" style="${!isAvailable ? 'cursor: not-allowed;' : ''}">`;
+            html += '<div class="row align-items-center">';
+
+            // SKU Image
+            if (sku.raw_sku && sku.raw_sku.ae_sku_property_dtos) {
+                const props = sku.raw_sku.ae_sku_property_dtos.ae_sku_property_d_t_o;
+                if (props && props[0] && props[0].sku_image) {
+                    html += '<div class="col-auto">';
+                    html += `<img src="${props[0].sku_image}" alt="SKU" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">`;
+                    html += '</div>';
+                }
+            }
+
+            html += '<div class="col">';
+
+            // SKU Name/Attr
+            const displayName = sku.sku_attr ?
+                (sku.sku_attr.includes('#') ? sku.sku_attr.split('#')[1] : sku.sku_attr) :
+                `SKU: ${sku.id}`;
+            html += `<h6 class="mb-1">${displayName}</h6>`;
+
+            // Price
+            if (sku.price) {
+                html += `<p class="mb-2 text-primary"><strong>$${parseFloat(sku.price).toFixed(2)}</strong></p>`;
+            }
+
+            // Badges
+            html += '<div class="d-flex gap-2 flex-wrap">';
+            if (isNumeric) {
+                html += '<span class="badge bg-success"><i class="ri-check-line me-1"></i>Numeric SKU</span>';
+            } else {
+                html += '<span class="badge bg-warning"><i class="ri-error-warning-line me-1"></i>Property Combo</span>';
+            }
+
+            if (isAvailable) {
+                html += `<span class="badge bg-info">${sku.stock} in stock</span>`;
+            } else {
+                html += '<span class="badge bg-danger">Out of stock</span>';
+            }
+
+            if (isSelected) {
+                html += '<span class="badge bg-primary"><i class="ri-check-line me-1"></i>Selected</span>';
+            }
+
+            html += '</div>';
+
+            // SKU ID
+            html += `<small class="text-muted mt-1 d-block">ID: <code>${sku.id}</code></small>`;
+
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+        });
+
+        if (availableSkus.length === 0) {
+            html = '<p class="text-center text-muted">No SKUs available</p>';
+        }
+
+        container.innerHTML = html;
+    }
+
+    // Function to select SKU from modal
+    window.selectSkuFromModal = function(index) {
+        const sku = availableSkus[index];
+        if (sku && sku.available && sku.stock > 0) {
+            selectSku(sku);
+            skuModal.hide();
+        }
+    };
+
+    // Function to show error in SKU modal
+    function showSkuModalError(message) {
+        document.getElementById('sku-modal-loading').style.display = 'none';
+        document.getElementById('sku-modal-error').style.display = 'block';
+        document.getElementById('sku-modal-error-message').textContent = message;
+    }
+
+    // Event listeners for SKU buttons
+    if (selectSkuBtn) {
+        selectSkuBtn.addEventListener('click', showSkuModal);
+    }
+
+    if (changeSkuBtn) {
+        changeSkuBtn.addEventListener('click', showSkuModal);
+    }
+
+    // Function to update step progress
+    function updateStepProgress(step, completed) {
+        const stepElement = document.getElementById('step-' + step);
+        const lineElement = document.getElementById('line-' + step);
+
+        if (completed) {
+            stepElement.classList.add('completed');
+            if (lineElement) lineElement.classList.add('active');
+        } else {
+            stepElement.classList.remove('completed');
+            if (lineElement) lineElement.classList.remove('active');
+        }
+    }
+
     // Handle product selection change
     if (productSelect) {
         productSelect.addEventListener('change', function() {
@@ -372,9 +801,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!selectedProductId) {
                 currentProductId = null;
+                skuSelectionSection.style.display = 'none';
                 updateFreightSectionVisibility();
+                updateStepProgress('product', false);
                 return;
             }
+
+            updateStepProgress('product', true);
 
             // Fetch product details to check if it's from AliExpress
             fetch(`/orders/product/${selectedProductId}/info`)
@@ -385,23 +818,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         // Store product data in cache
                         productData[selectedProductId] = {
-                            isAliexpress: data.product.is_aliexpress
+                            isAliexpress: data.product.is_aliexpress,
+                            aliexpressId: data.product.aliexpress_id
                         };
 
                         updateFreightSectionVisibility();
+
+                        // Show SKU selection if AliExpress product
+                        if (data.product.is_aliexpress) {
+                            skuSelectionSection.style.display = 'block';
+                            loadProductSkus(selectedProductId);
+                        } else {
+                            skuSelectionSection.style.display = 'none';
+                        }
                     } else {
                         console.error('Failed to fetch product info');
                         currentProductId = null;
+                        skuSelectionSection.style.display = 'none';
                         updateFreightSectionVisibility();
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching product:', error);
                     currentProductId = null;
+                    skuSelectionSection.style.display = 'none';
                     updateFreightSectionVisibility();
                 });
         });
     }
+
+    // Auto-load SKUs if product is pre-selected
+    @if(isset($product) && $product->isAliexpressProduct())
+        skuSelectionSection.style.display = 'block';
+        productData[{{ $product->id }}] = {
+            isAliexpress: true,
+            aliexpressId: '{{ $product->aliexpress_id }}'
+        };
+        loadProductSkus({{ $product->id }});
+    @endif
 
     // Initialize visibility on page load
     updateFreightSectionVisibility();
@@ -590,11 +1044,55 @@ document.addEventListener('DOMContentLoaded', function() {
         freightCalculationTimeout = setTimeout(calculateFreight, 800);
     }
 
-    // Add event listeners to trigger freight calculation
-    if (cityInput) cityInput.addEventListener('blur', debouncedCalculateFreight);
-    if (provinceInput) provinceInput.addEventListener('change', debouncedCalculateFreight);
-    if (shippingCountrySelect) shippingCountrySelect.addEventListener('change', debouncedCalculateFreight);
+    // Add event listeners to trigger freight calculation and update progress
+    if (cityInput) {
+        cityInput.addEventListener('blur', debouncedCalculateFreight);
+        cityInput.addEventListener('blur', () => checkShippingComplete());
+    }
+    if (provinceInput) {
+        provinceInput.addEventListener('change', debouncedCalculateFreight);
+        provinceInput.addEventListener('change', () => checkShippingComplete());
+    }
+    if (shippingCountrySelect) {
+        shippingCountrySelect.addEventListener('change', debouncedCalculateFreight);
+        shippingCountrySelect.addEventListener('change', () => checkShippingComplete());
+    }
     if (quantityInput) quantityInput.addEventListener('change', debouncedCalculateFreight);
+
+    // Check if customer information is complete
+    function checkCustomerComplete() {
+        const name = document.getElementById('customer_name').value.trim();
+        const phone = document.getElementById('customer_phone').value.trim();
+
+        if (name && phone) {
+            updateStepProgress('customer', true);
+        } else {
+            updateStepProgress('customer', false);
+        }
+    }
+
+    // Check if shipping information is complete
+    function checkShippingComplete() {
+        const address = document.getElementById('shipping_address').value.trim();
+        const city = cityInput.value.trim();
+        const province = provinceInput.value;
+        const country = shippingCountrySelect.value;
+
+        if (address && city && province && country) {
+            updateStepProgress('shipping', true);
+            updateStepProgress('review', true);
+        } else {
+            updateStepProgress('shipping', false);
+            updateStepProgress('review', false);
+        }
+    }
+
+    // Add listeners to customer fields
+    document.getElementById('customer_name').addEventListener('blur', checkCustomerComplete);
+    document.getElementById('customer_phone').addEventListener('blur', checkCustomerComplete);
+
+    // Add listeners to shipping fields
+    document.getElementById('shipping_address').addEventListener('blur', checkShippingComplete);
 
     // Function to update province options based on country
     function updateProvinceOptions(country) {

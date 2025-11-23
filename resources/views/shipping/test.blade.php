@@ -297,8 +297,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.skus && data.skus.length > 0) {
                     html += `<p class="mb-2"><strong>Total SKUs Found:</strong> ${data.total_skus}</p>`;
 
-                    // Check if we have numeric IDs or just property combos
-                    const hasNumericIds = data.skus.some(sku => sku.id && !sku.id.includes('#'));
+                    // Check if we have numeric IDs or just property combos (use is_numeric flag from backend)
+                    const hasNumericIds = data.skus.some(sku => sku.is_numeric === true);
 
                     if (!hasNumericIds) {
                         html += '<div class="alert alert-warning small mb-2">';
@@ -307,29 +307,35 @@ document.addEventListener('DOMContentLoaded', function() {
                         html += '</div>';
                     } else {
                         html += '<div class="alert alert-info small mb-2">';
-                        html += '<strong>Per Official Docs:</strong> Use the <strong>numeric SKU ID</strong> (e.g., "12000023999200390") for selectedSkuId parameter.';
+                        html += '<strong>✅ Per Official Docs:</strong> Use the <strong>numeric SKU ID</strong> (shown in <span class="text-success fw-bold">GREEN</span>) for selectedSkuId parameter. ';
+                        html += 'Property combinations (shown in <span class="text-warning">YELLOW</span>) will NOT work with the freight API.';
                         html += '</div>';
                     }
 
                     html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
-                    html += '<thead><tr><th>SKU ID</th><th>Property Combo</th><th>Price</th><th>Stock</th><th>Available</th><th>Action</th></tr></thead><tbody>';
+                    html += '<thead><tr><th>SKU ID</th><th>Type</th><th>Property Combo</th><th>Price</th><th>Stock</th><th>Available</th><th>Action</th></tr></thead><tbody>';
 
                     data.skus.forEach(sku => {
                         const available = sku.available ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>';
                         const skuAttr = sku.sku_attr ? `<small class="text-muted">${sku.sku_attr}</small>` : '<small class="text-muted">N/A</small>';
-                        const isNumeric = sku.id && !sku.id.includes('#');
+                        // Use is_numeric flag from backend validation
+                        const isNumeric = sku.is_numeric === true;
                         const idDisplay = isNumeric ?
                             `<code class="text-success fw-bold">${sku.id}</code>` :
                             `<code class="text-warning">${sku.id}</code>`;
+                        const typeDisplay = isNumeric ?
+                            '<span class="badge bg-success"><i class="ri-check-line"></i> Numeric</span>' :
+                            '<span class="badge bg-warning"><i class="ri-error-warning-line"></i> Property Combo</span>';
 
-                        html += `<tr>
+                        html += `<tr class="${isNumeric ? 'table-success' : 'table-warning'}">
                             <td>${idDisplay}</td>
+                            <td>${typeDisplay}</td>
                             <td>${skuAttr}</td>
                             <td>${sku.price || 'N/A'}</td>
                             <td>${sku.stock || 'N/A'}</td>
                             <td>${available}</td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('sku_id').value='${sku.id}'">
+                                <button type="button" class="btn btn-sm ${isNumeric ? 'btn-success' : 'btn-warning'}" onclick="document.getElementById('sku_id').value='${sku.id}'">
                                     <i class="ri-check-line"></i> Use
                                 </button>
                             </td>
