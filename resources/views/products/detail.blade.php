@@ -654,6 +654,19 @@ function selectShippingVariant(index) {
 
     selectedVariantIndex = index;
     selectedVariantData = variantsData[index];
+
+    // DEBUG: Log full variant structure
+    console.log('═══ VARIANT SELECTED ═══');
+    console.log('Variant Index:', index);
+    console.log('Variant Data (Full):', selectedVariantData);
+    console.log('Variant Data (JSON):', JSON.stringify(selectedVariantData, null, 2));
+    console.log('Available Fields:', Object.keys(selectedVariantData));
+    console.log('ID Field:', selectedVariantData.id);
+    console.log('ID Type:', typeof selectedVariantData.id);
+    console.log('ID Contains #:', selectedVariantData.id ? selectedVariantData.id.toString().includes('#') : 'N/A');
+    console.log('sku_id Field:', selectedVariantData.sku_id);
+    console.log('sku_code Field:', selectedVariantData.sku_code);
+    console.log('═══════════════════════');
 }
 
 function goToStep(step) {
