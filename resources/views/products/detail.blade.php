@@ -81,19 +81,19 @@
                                 <div class="d-flex align-items-center">
                                     <div class="text-warning me-2" style="font-size: 20px;">
                                         @for($i = 0; $i < 5; $i++)
-                                            @if($i < floor($aliexpressData['ae_item_base_info_dto']['avg_evaluation_rating']))
+                                            @if($i < floor((float)$aliexpressData['ae_item_base_info_dto']['avg_evaluation_rating']))
                                                 ⭐
                                             @endif
                                         @endfor
                                     </div>
-                                    <span class="fw-bold">{{ number_format($aliexpressData['ae_item_base_info_dto']['avg_evaluation_rating'], 1) }}</span>
-                                    <span class="text-muted ms-1">({{ $aliexpressData['ae_item_base_info_dto']['evaluation_count'] ?? 0 }} reviews)</span>
+                                    <span class="fw-bold">{{ number_format((float)$aliexpressData['ae_item_base_info_dto']['avg_evaluation_rating'], 1) }}</span>
+                                    <span class="text-muted ms-1">({{ (int)($aliexpressData['ae_item_base_info_dto']['evaluation_count'] ?? 0) }} reviews)</span>
                                 </div>
                             @endif
                             @if(isset($aliexpressData['ae_item_base_info_dto']['sales_count']))
                                 <div class="text-muted">
                                     <i class="ri-shopping-cart-line me-1"></i>
-                                    <strong>{{ number_format($aliexpressData['ae_item_base_info_dto']['sales_count']) }}</strong> sold
+                                    <strong>{{ number_format((float)$aliexpressData['ae_item_base_info_dto']['sales_count']) }}</strong> sold
                                 </div>
                             @endif
                         </div>
