@@ -22,64 +22,102 @@
 
     <!-- Summary Cards -->
     <div class="row mb-4">
-        <div class="col-md-3 col-sm-6 mb-3">
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
             <div class="card shadow-sm border-start border-primary border-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">AliExpress Profit</h6>
-                            <h4 class="mb-0 text-primary">{{ number_format($totalAliexpressProfit, 2) }} AED</h4>
+                            <h6 class="text-muted mb-1 small">Total Revenue</h6>
+                            <h5 class="mb-0 text-primary">{{ number_format($totalRevenue, 2) }}</h5>
+                            <small class="text-muted">AED</small>
                         </div>
                         <div class="text-primary">
-                            <i class="ri-aliexpress-line" style="font-size: 2rem;"></i>
+                            <i class="ri-money-dollar-circle-line" style="font-size: 1.8rem;"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 col-sm-6 mb-3">
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="card shadow-sm border-start border-danger border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1 small">Total Cost</h6>
+                            <h5 class="mb-0 text-danger">{{ number_format($totalCost, 2) }}</h5>
+                            <small class="text-muted">AED</small>
+                        </div>
+                        <div class="text-danger">
+                            <i class="ri-shopping-cart-line" style="font-size: 1.8rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
             <div class="card shadow-sm border-start border-success border-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">Admin Category Profit</h6>
-                            <h4 class="mb-0 text-success">{{ number_format($totalAdminCategoryProfit, 2) }} AED</h4>
+                            <h6 class="text-muted mb-1 small">Admin Profit</h6>
+                            <h5 class="mb-0 text-success">{{ number_format($totalAdminProfit, 2) }}</h5>
+                            <small class="text-muted">AED</small>
                         </div>
                         <div class="text-success">
-                            <i class="ri-admin-line" style="font-size: 2rem;"></i>
+                            <i class="ri-admin-line" style="font-size: 1.8rem;"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 col-sm-6 mb-3">
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
             <div class="card shadow-sm border-start border-info border-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">Seller Profit</h6>
-                            <h4 class="mb-0 text-info">{{ number_format($totalSellerProfit, 2) }} AED</h4>
+                            <h6 class="text-muted mb-1 small">Seller Profit</h6>
+                            <h5 class="mb-0 text-info">{{ number_format($totalSellerProfit, 2) }}</h5>
+                            <small class="text-muted">AED</small>
                         </div>
                         <div class="text-info">
-                            <i class="ri-store-line" style="font-size: 2rem;"></i>
+                            <i class="ri-store-line" style="font-size: 1.8rem;"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 col-sm-6 mb-3">
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="card shadow-sm border-start border-secondary border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1 small">Shipping Cost</h6>
+                            <h5 class="mb-0 text-secondary">{{ number_format($totalShippingCost, 2) }}</h5>
+                            <small class="text-muted">AED</small>
+                        </div>
+                        <div class="text-secondary">
+                            <i class="ri-truck-line" style="font-size: 1.8rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
             <div class="card shadow-sm border-start border-warning border-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">Total Profit</h6>
-                            <h4 class="mb-0 text-warning">{{ number_format($totalProfit, 2) }} AED</h4>
+                            <h6 class="text-muted mb-1 small">Total Profit</h6>
+                            <h5 class="mb-0 text-warning">{{ number_format($totalProfit, 2) }}</h5>
+                            <small class="text-muted">AED</small>
                         </div>
                         <div class="text-warning">
-                            <i class="ri-wallet-line" style="font-size: 2rem;"></i>
+                            <i class="ri-wallet-line" style="font-size: 1.8rem;"></i>
                         </div>
                     </div>
                 </div>
@@ -156,85 +194,97 @@
                         <table class="table table-hover table-striped mb-0">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Order Number</th>
+                                    <th>Order #</th>
                                     <th>Customer</th>
                                     <th>Product</th>
                                     <th>Seller</th>
-                                    <th>Order Date</th>
-                                    <th>Total Amount</th>
-                                    <th class="text-center">AliExpress Profit</th>
-                                    <th class="text-center">Admin Profit</th>
-                                    <th class="text-center">Seller Profit</th>
-                                    <th class="text-center">Total Profit</th>
-                                    <th class="text-center">Status</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Qty</th>
+                                    <th class="text-end">AliEx Price</th>
+                                    <th class="text-end">Shipping</th>
+                                    <th class="text-end">Admin Profit</th>
+                                    <th class="text-end">Seller Profit</th>
+                                    <th class="text-end">Total Cost</th>
+                                    <th class="text-end">Final Price</th>
+                                    <th class="text-end">Total Profit</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($orders as $order)
+                                @forelse($profits as $profit)
                                 <tr>
                                     <td>
-                                        <strong>{{ $order->order_number }}</strong>
-                                    </td>
-                                    <td>
-                                        {{ $order->customer_name }}<br>
-                                        <small class="text-muted">{{ $order->customer_email }}</small>
-                                    </td>
-                                    <td>
-                                        @if($order->product)
-                                            {{ Str::limit($order->product->name, 30) }}
+                                        @if($profit->order)
+                                            <strong>{{ $profit->order->order_number }}</strong>
                                         @else
                                             <span class="text-muted">N/A</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if($order->user)
-                                            {{ $order->user->name }}
+                                        @if($profit->order)
+                                            {{ $profit->order->customer_name }}<br>
+                                            <small class="text-muted">{{ $profit->order->customer_email }}</small>
                                         @else
                                             <span class="text-muted">N/A</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if($order->placed_at)
-                                            {{ $order->placed_at->format('Y-m-d') }}<br>
-                                            <small class="text-muted">{{ $order->placed_at->format('H:i') }}</small>
+                                        @if($profit->product)
+                                            {{ Str::limit($profit->product->name, 30) }}
                                         @else
-                                            <span class="text-muted">Not placed</span>
+                                            <span class="text-muted">N/A</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <strong>{{ number_format($order->total_amount, 2) }}</strong> {{ $order->currency }}
+                                        @if($profit->order && $profit->order->user)
+                                            {{ $profit->order->user->name }}
+                                        @else
+                                            <span class="text-muted">N/A</span>
+                                        @endif
                                     </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-primary">
-                                            {{ number_format($order->aliexpress_profit, 2) }} AED
-                                        </span>
+                                    <td>
+                                        {{ $profit->created_at->format('Y-m-d') }}<br>
+                                        <small class="text-muted">{{ $profit->created_at->format('H:i') }}</small>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-end">
+                                        <span class="badge bg-secondary">{{ $profit->quantity }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        {{ number_format($profit->aliexpress_price, 2) }}
+                                        <small class="text-muted">{{ $profit->currency }}</small>
+                                    </td>
+                                    <td class="text-end">
+                                        {{ number_format($profit->shipping_price, 2) }}
+                                        <small class="text-muted">{{ $profit->currency }}</small>
+                                    </td>
+                                    <td class="text-end">
                                         <span class="badge bg-success">
-                                            {{ number_format($order->admin_category_profit, 2) }} AED
+                                            {{ number_format($profit->admin_profit, 2) }}
                                         </span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-end">
                                         <span class="badge bg-info">
-                                            {{ number_format($order->seller_profit, 2) }} AED
+                                            {{ number_format($profit->seller_profit, 2) }}
                                         </span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-end">
+                                        <strong>{{ number_format($profit->total_cost, 2) }}</strong>
+                                        <small class="text-muted">{{ $profit->currency }}</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong class="text-primary">{{ number_format($profit->final_price, 2) }}</strong>
+                                        <small class="text-muted">{{ $profit->currency }}</small>
+                                    </td>
+                                    <td class="text-end">
                                         <span class="badge bg-warning text-dark">
-                                            {{ number_format($order->getTotalProfit(), 2) }} AED
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-{{ $order->getStatusBadgeColor() }}">
-                                            {{ $order->getStatusName() }}
+                                            {{ number_format($profit->total_profit, 2) }}
                                         </span>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="11" class="text-center py-4">
+                                    <td colspan="13" class="text-center py-4">
                                         <i class="ri-inbox-line" style="font-size: 3rem; color: #ccc;"></i>
-                                        <p class="text-muted mt-2">No orders found matching your criteria</p>
+                                        <p class="text-muted mt-2">No profit records found matching your criteria</p>
                                     </td>
                                 </tr>
                                 @endforelse
@@ -242,14 +292,14 @@
                         </table>
                     </div>
                 </div>
-                @if($orders->hasPages())
+                @if($profits->hasPages())
                 <div class="card-footer">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            Showing {{ $orders->firstItem() }} to {{ $orders->lastItem() }} of {{ $orders->total() }} orders
+                            Showing {{ $profits->firstItem() }} to {{ $profits->lastItem() }} of {{ $profits->total() }} profit records
                         </div>
                         <div>
-                            {{ $orders->links() }}
+                            {{ $profits->links() }}
                         </div>
                     </div>
                 </div>
