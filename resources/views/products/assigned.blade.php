@@ -142,9 +142,13 @@
                                         </small>
                                     </td>
                                     <td>
+                                        <a href="{{ route('products.detail', $assignedProduct->id) }}"
+                                           class="btn btn-sm btn-primary mb-1">
+                                            <i class="ri-ship-line me-1"></i> View & Ship
+                                        </a>
                                         <a href="{{ route('products.show', $assignedProduct->id) }}"
                                            class="btn btn-sm btn-outline-primary mb-1">
-                                            <i class="ri-eye-line me-1"></i> View
+                                            <i class="ri-eye-line me-1"></i> Details
                                         </a>
                                         <a href="{{ route('products.edit', $assignedProduct->id) }}"
                                            class="btn btn-sm btn-outline-secondary mb-1">

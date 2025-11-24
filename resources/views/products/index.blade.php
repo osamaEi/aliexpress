@@ -159,6 +159,12 @@
                                         <i class="ri-more-2-line"></i>
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-end">
+                                            @if($product->isAliexpressProduct())
+                                                <a class="dropdown-item text-primary fw-semibold" href="{{ route('products.detail', $product) }}">
+                                                    <i class="ri-ship-line me-2"></i> View & Calculate Shipping
+                                                </a>
+                                                <div class="dropdown-divider"></div>
+                                            @endif
                                             <a class="dropdown-item" href="{{ route('products.show', $product) }}">
                                                 <i class="ri-eye-line me-2"></i> {{ __('messages.view') }}
                                             </a>

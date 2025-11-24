@@ -156,6 +156,46 @@ class ProductController extends Controller
     }
 
     /**
+     * Show enhanced product detail view with shipping calculator.
+     */
+    public function detail(Product $product)
+    {
+        $product->load('category');
+
+        // Fetch AliExpress details if it's an AliExpress product
+        $aliexpressData = null;
+        if ($product->isAliexpressProduct()) {
+            try {
+                $result = $this->aliexpressService->getProductDetails(
+                    $product->aliexpress_id,
+                    [
+                        'country' => 'US',
+                        'currency' => 'USD',
+                        'language' => 'EN',
+                    ]
+                );
+
+                if ($result['success']) {
+                    $aliexpressData = $result['product'];
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to fetch AliExpress details for product detail view', [
+                    'product_id' => $product->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                // Fallback to stored data if API call fails
+                if ($product->aliexpress_data) {
+                    $aliexpressData = $product->aliexpress_data;
+                    Log::info('Using stored AliExpress data as fallback');
+                }
+            }
+        }
+
+        return view('products.detail', compact('product', 'aliexpressData'));
+    }
+
+    /**
      * Show the form for editing the specified product.
      */
     public function edit(Product $product)
