@@ -784,19 +784,28 @@ function goToStep(step) {
     document.getElementById('shipping-step-3').style.display = 'none';
     document.getElementById('shipping-step-4').style.display = 'none';
 
-    // Update step indicators
-    document.getElementById('step-1').classList.remove('active');
-    document.getElementById('step-2').classList.remove('active');
-    document.getElementById('step-3').classList.remove('active');
+    // Update step indicators (only if they exist - step 4 doesn't have an indicator)
+    if (step <= 3) {
+        document.getElementById('step-1')?.classList.remove('active');
+        document.getElementById('step-2')?.classList.remove('active');
+        document.getElementById('step-3')?.classList.remove('active');
 
-    // Show target step
-    document.getElementById(`shipping-step-${step}`).style.display = 'block';
-    document.getElementById(`step-${step}`).classList.add('active');
+        // Show target step indicator
+        document.getElementById(`step-${step}`)?.classList.add('active');
 
-    // Mark previous steps as active too
-    for (let i = 1; i < step; i++) {
-        document.getElementById(`step-${i}`).classList.add('active');
+        // Mark previous steps as active too
+        for (let i = 1; i < step; i++) {
+            document.getElementById(`step-${i}`)?.classList.add('active');
+        }
+    } else if (step === 4) {
+        // For step 4, keep all 3 indicators active
+        document.getElementById('step-1')?.classList.add('active');
+        document.getElementById('step-2')?.classList.add('active');
+        document.getElementById('step-3')?.classList.add('active');
     }
+
+    // Show target step content
+    document.getElementById(`shipping-step-${step}`).style.display = 'block';
 
     // If moving to step 4, populate order summary
     if (step === 4) {
