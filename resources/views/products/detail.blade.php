@@ -805,8 +805,12 @@ function goToStep(step) {
 }
 
 function populateOrderSummary() {
+    console.log('=== POPULATING ORDER SUMMARY ===');
+
     if (!selectedVariantData || !calculatedShippingData) {
         console.error('Missing required data for order summary');
+        console.log('selectedVariantData:', selectedVariantData);
+        console.log('calculatedShippingData:', calculatedShippingData);
         return;
     }
 
@@ -814,6 +818,13 @@ function populateOrderSummary() {
     const country = document.getElementById('shipping-country').value;
     const city = document.getElementById('shipping-city').value;
     const province = document.getElementById('shipping-province').value;
+
+    console.log('Form values from Step 2:', {
+        quantity,
+        country,
+        city,
+        province
+    });
 
     // Get product price
     const unitPrice = parseFloat(selectedVariantData.offer_sale_price || selectedVariantData.price || 0);
@@ -833,11 +844,25 @@ function populateOrderSummary() {
     document.getElementById('order-total-price').textContent = `${currency} ${totalAmount.toFixed(2)}`;
 
     // Populate hidden form fields
-    document.getElementById('order-form-quantity').value = quantity;
-    document.getElementById('order-form-country').value = country;
-    document.getElementById('order-form-city').value = city;
-    document.getElementById('order-form-province').value = province;
-    document.getElementById('order-form-freight').value = shippingCost;
+    const quantityField = document.getElementById('order-form-quantity');
+    const countryField = document.getElementById('order-form-country');
+    const cityField = document.getElementById('order-form-city');
+    const provinceField = document.getElementById('order-form-province');
+    const freightField = document.getElementById('order-form-freight');
+
+    if (quantityField) quantityField.value = quantity;
+    if (countryField) countryField.value = country;
+    if (cityField) cityField.value = city;
+    if (provinceField) provinceField.value = province;
+    if (freightField) freightField.value = shippingCost;
+
+    console.log('Hidden fields populated:', {
+        'order-form-quantity': quantityField?.value,
+        'order-form-country': countryField?.value,
+        'order-form-city': cityField?.value,
+        'order-form-province': provinceField?.value,
+        'order-form-freight': freightField?.value
+    });
 
     // Build SKU attributes
     let skuAttr = '';
@@ -846,7 +871,8 @@ function populateOrderSummary() {
             return `${prop.sku_property_id}:${prop.property_value_id}`;
         }).join(';');
     }
-    document.getElementById('order-form-sku-attr').value = skuAttr;
+    const skuAttrField = document.getElementById('order-form-sku-attr');
+    if (skuAttrField) skuAttrField.value = skuAttr;
 
     console.log('Order Summary Populated:', {
         unit_price: unitPrice,
@@ -857,6 +883,7 @@ function populateOrderSummary() {
         currency: currency,
         sku_attr: skuAttr
     });
+    console.log('=== ORDER SUMMARY COMPLETE ===');
 }
 
 function calculateShipping() {
