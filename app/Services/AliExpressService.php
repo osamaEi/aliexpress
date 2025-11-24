@@ -992,51 +992,94 @@ class AliExpressService
             $queryDeliveryReq['cityCode'] = $params['city'];
         }
 
-        Log::info('Calculating freight for product', [
+        Log::info('═══ ALIEXPRESS FREIGHT API CALL START ═══');
+        Log::info('Freight Calculation Parameters:', [
             'product_id' => $params['product_id'],
             'sku_id' => $params['sku_id'],
+            'sku_id_type' => gettype($params['sku_id']),
+            'sku_id_length' => strlen((string)$params['sku_id']),
+            'sku_id_is_numeric' => is_numeric($params['sku_id']),
+            'sku_id_contains_hash' => str_contains((string)$params['sku_id'], '#'),
             'country' => $params['country'],
             'quantity' => $params['product_num'],
             'city' => $params['city'] ?? 'not specified',
             'province' => $params['province'] ?? 'not specified',
-            'query_delivery_req' => $queryDeliveryReq
+        ]);
+
+        Log::info('Query Delivery Request Object:', $queryDeliveryReq);
+        Log::info('Query Delivery Request JSON:', [
+            'json' => json_encode($queryDeliveryReq, JSON_PRETTY_PRINT)
         ]);
 
         try {
             // Make API request using aliexpress.ds.freight.query
+            $apiParams = ['queryDeliveryReq' => json_encode($queryDeliveryReq)];
+
+            Log::info('Making API Request:', [
+                'method' => 'aliexpress.ds.freight.query',
+                'params' => $apiParams,
+                'requires_auth' => true
+            ]);
+
             $data = $this->makeRequest(
                 'aliexpress.ds.freight.query',
-                ['queryDeliveryReq' => json_encode($queryDeliveryReq)],
+                $apiParams,
                 true // Requires authentication
             );
 
-            Log::debug('Freight calculation response', [
+            Log::info('API Response Received:', [
                 'response_keys' => array_keys($data ?? []),
-                'data' => $data
+                'response_size' => strlen(json_encode($data)),
+                'has_response' => !empty($data)
             ]);
+
+            Log::debug('Full API Response Data:', $data);
 
             // Parse response from aliexpress.ds.freight.query
             if (isset($data['aliexpress_ds_freight_query_response'])) {
                 $response = $data['aliexpress_ds_freight_query_response'];
 
+                Log::info('Response Structure Found:', [
+                    'has_error_code' => isset($response['error_code']),
+                    'error_code' => $response['error_code'] ?? null,
+                    'error_msg' => $response['error_msg'] ?? null,
+                    'has_result' => isset($response['result']),
+                ]);
+
                 // Check for error in response
                 if (isset($response['error_code'])) {
-                    throw new \Exception(
-                        'Freight calculation error: ' . ($response['error_msg'] ?? 'Unknown error') .
-                        ' (Code: ' . $response['error_code'] . ')'
-                    );
+                    $errorMsg = 'Freight calculation error: ' . ($response['error_msg'] ?? 'Unknown error') . ' (Code: ' . $response['error_code'] . ')';
+                    Log::error($errorMsg);
+                    Log::info('═══ ALIEXPRESS FREIGHT API CALL END (ERROR) ═══');
+                    throw new \Exception($errorMsg);
                 }
 
                 // Extract freight information from result
                 if (isset($response['result'])) {
                     $result = $response['result'];
 
+                    Log::info('Result Object Found:', [
+                        'result_keys' => array_keys($result),
+                        'has_success_field' => isset($result['success']),
+                        'success_value' => $result['success'] ?? null,
+                        'has_code' => isset($result['code']),
+                        'code' => $result['code'] ?? null,
+                        'has_msg' => isset($result['msg']),
+                        'msg' => $result['msg'] ?? null,
+                    ]);
+
                     // Check if successful
                     if (isset($result['success']) && $result['success'] === false) {
                         // API returned error
+                        Log::warning('API returned success=false', [
+                            'message' => $result['msg'] ?? 'Unknown error',
+                            'code' => $result['code'] ?? null,
+                        ]);
+                        Log::info('═══ ALIEXPRESS FREIGHT API CALL END (FAILED) ═══');
                         return [
                             'success' => false,
                             'message' => $result['msg'] ?? 'Unknown error',
+                            'error_code' => $result['code'] ?? null,
                             'raw_response' => $result
                         ];
                     }
@@ -1044,24 +1087,46 @@ class AliExpressService
                     // Get delivery options - try multiple possible structures
                     $deliveryOptions = null;
 
+                    Log::info('Searching for delivery options...', [
+                        'has_delivery_options' => isset($result['delivery_options']),
+                        'has_aeop_freight' => isset($result['aeop_freight_result_d_t_o_list']),
+                    ]);
+
                     // Structure 1: delivery_options.delivery_option_d_t_o (newer API format)
                     if (isset($result['delivery_options']['delivery_option_d_t_o'])) {
                         $deliveryOptions = $result['delivery_options']['delivery_option_d_t_o'];
+                        Log::info('Found delivery options in delivery_options.delivery_option_d_t_o');
                     }
                     // Structure 2: aeop_freight_result_d_t_o_list (older format)
                     elseif (isset($result['aeop_freight_result_d_t_o_list'])) {
                         $deliveryOptions = $result['aeop_freight_result_d_t_o_list'];
+                        Log::info('Found delivery options in aeop_freight_result_d_t_o_list');
                     }
 
                     // Ensure delivery options is an array
                     if ($deliveryOptions && !isset($deliveryOptions[0])) {
                         $deliveryOptions = [$deliveryOptions];
+                        Log::info('Converted delivery options to array');
                     }
+
+                    Log::info('Delivery Options Status:', [
+                        'is_empty' => empty($deliveryOptions),
+                        'is_array' => is_array($deliveryOptions),
+                        'count' => is_array($deliveryOptions) ? count($deliveryOptions) : 0,
+                    ]);
 
                     if (!empty($deliveryOptions) && is_array($deliveryOptions)) {
                         $firstOption = $deliveryOptions[0];
 
-                        return [
+                        Log::info('First Delivery Option:', [
+                            'keys' => array_keys($firstOption),
+                            'shipping_fee_cent' => $firstOption['shipping_fee_cent'] ?? null,
+                            'shipping_fee_currency' => $firstOption['shipping_fee_currency'] ?? null,
+                            'freight_amount' => $firstOption['freight_amount'] ?? null,
+                            'company' => $firstOption['company'] ?? null,
+                        ]);
+
+                        $resultData = [
                             'success' => true,
                             'data' => [
                                 'freight_amount' => $firstOption['shipping_fee_cent'] ?? $firstOption['freight_amount'] ?? null,
@@ -1078,6 +1143,15 @@ class AliExpressService
                             'raw_response' => $result,
                             'all_options' => $deliveryOptions
                         ];
+
+                        Log::info('✅ Freight calculation successful!', [
+                            'freight_amount' => $resultData['data']['freight_amount'],
+                            'freight_currency' => $resultData['data']['freight_currency'],
+                            'service_name' => $resultData['data']['service_name'],
+                        ]);
+                        Log::info('═══ ALIEXPRESS FREIGHT API CALL END (SUCCESS) ═══');
+
+                        return $resultData;
                     }
 
                     // No delivery options available

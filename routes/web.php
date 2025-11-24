@@ -119,6 +119,7 @@ Route::middleware('auth')->group(function () {
 
     // Product routes (must be after specific routes to avoid conflicts)
     Route::get('/products/{product}/detail', [ProductController::class, 'detail'])->name('products.detail');
+    Route::get('/products/{product}/debug-skus', [ProductController::class, 'debugSkus'])->name('products.debug-skus');
     Route::resource('products', ProductController::class);
     Route::post('/products/{product}/sync', [ProductController::class, 'sync'])->name('products.sync');
     Route::post('/products/sync-all', [ProductController::class, 'syncAll'])->name('products.sync-all');

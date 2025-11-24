@@ -196,6 +196,81 @@ class ProductController extends Controller
     }
 
     /**
+     * Debug SKUs to find numeric SKU IDs.
+     */
+    public function debugSkus(Product $product)
+    {
+        if (!$product->isAliexpressProduct()) {
+            return response()->json([
+                'error' => 'This product is not from AliExpress'
+            ], 400);
+        }
+
+        try {
+            // Fetch fresh product details from AliExpress
+            $result = $this->aliexpressService->getProductDetails(
+                $product->aliexpress_id,
+                [
+                    'country' => 'US',
+                    'currency' => 'USD',
+                    'language' => 'EN',
+                ]
+            );
+
+            if (!$result['success']) {
+                return response()->json([
+                    'error' => 'Failed to fetch product details from AliExpress'
+                ], 500);
+            }
+
+            $aliexpressData = $result['product'];
+            $skus = [];
+
+            // Extract SKUs from ae_item_sku_info_dtos
+            if (isset($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'])) {
+                $skuList = $aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'];
+
+                if (!isset($skuList[0])) {
+                    $skuList = [$skuList];
+                }
+
+                foreach ($skuList as $index => $sku) {
+                    $skuAnalysis = [
+                        'index' => $index,
+                        'all_fields' => array_keys($sku),
+                        'id' => $sku['id'] ?? null,
+                        'sku_id' => $sku['sku_id'] ?? null,
+                        'sku_code' => $sku['sku_code'] ?? null,
+                        'sku_attr' => $sku['sku_attr'] ?? null,
+                        'sku_price' => $sku['sku_price'] ?? null,
+                        'sku_stock' => $sku['sku_stock'] ?? $sku['sku_available_stock'] ?? null,
+                        'is_id_numeric' => isset($sku['id']) && !str_contains((string)$sku['id'], '#'),
+                        'properties' => $sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] ?? null,
+                        'raw' => $sku,
+                    ];
+
+                    $skus[] = $skuAnalysis;
+                }
+            }
+
+            return response()->json([
+                'product_id' => $product->id,
+                'aliexpress_id' => $product->aliexpress_id,
+                'sku_count' => count($skus),
+                'skus' => $skus,
+                'has_numeric_skus' => collect($skus)->contains('is_id_numeric', true),
+                'numeric_skus' => collect($skus)->filter(fn($s) => $s['is_id_numeric'])->values(),
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Exception: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ], 500);
+        }
+    }
+
+    /**
      * Show the form for editing the specified product.
      */
     public function edit(Product $product)
