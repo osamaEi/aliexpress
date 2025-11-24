@@ -109,7 +109,7 @@
         </li>
 
         <!-- Subscription Management -->
-        <li class="menu-item {{ request()->routeIs('admin.subscriptions.*') ? 'open active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('admin.subscriptions.*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-vip-crown-line"></i>
                 <div>{{ __('messages.subscription_management') }}</div>
@@ -203,7 +203,7 @@
         </li>
 
         <!-- Wallet Management -->
-        <li class="menu-item {{ request()->routeIs('admin.wallets.*') ? 'open active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('admin.wallets.*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-wallet-3-line"></i>
                 <div>{{ __('messages.wallet_management') }}</div>

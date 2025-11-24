@@ -158,9 +158,23 @@ class ProductController extends Controller
     /**
      * Show enhanced product detail view with shipping calculator.
      */
-    public function detail(Product $product)
+    public function detail(Product $product, Request $request)
     {
+        // Handle language switching
+        if ($request->has('lang')) {
+            $lang = $request->get('lang');
+            if (in_array($lang, ['en', 'ar'])) {
+                app()->setLocale($lang);
+                session()->put('locale', $lang);
+            }
+        } elseif (session()->has('locale')) {
+            app()->setLocale(session()->get('locale'));
+        }
+
         $product->load('category');
+
+        // Determine language for AliExpress API
+        $apiLanguage = app()->getLocale() == 'ar' ? 'AR' : 'EN';
 
         // Fetch AliExpress details if it's an AliExpress product
         $aliexpressData = null;
@@ -171,7 +185,7 @@ class ProductController extends Controller
                     [
                         'country' => 'US',
                         'currency' => 'USD',
-                        'language' => 'EN',
+                        'language' => $apiLanguage,
                     ]
                 );
 

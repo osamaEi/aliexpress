@@ -62,49 +62,72 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Dynamic Primary Color from Settings */
+        /* Custom Color Scheme */
         @php
-            $primaryColor = setting('primary_color', '#666cff');
-            $primaryLightColor = setting('primary_light_color', '#e7e7ff');
-            // Calculate RGB values for both colors
+            // Primary color: Deep Brown #561C04
+            $primaryColor = setting('primary_color', '#561C04');
+            $primaryHover = '#6e2305'; // Lighter brown for hover
+            $primaryActive = '#3e1403'; // Darker brown for active
+            $primaryLight = '#f5e6d3'; // Very light brown/cream
+
+            // Secondary color: Dark Orange #CC5500
+            $secondaryColor = '#CC5500';
+            $secondaryHover = '#e66100'; // Lighter orange for hover
+            $secondaryActive = '#b34c00'; // Darker orange for active
+            $secondaryLight = '#ffe5cc'; // Light orange
+
+            // Calculate RGB values
             $primaryColorRgb = sscanf($primaryColor, "#%02x%02x%02x");
-            $primaryLightColorRgb = sscanf($primaryLightColor, "#%02x%02x%02x");
+            $secondaryColorRgb = sscanf($secondaryColor, "#%02x%02x%02x");
         @endphp
 
         :root {
+            /* Primary Colors */
             --bs-primary: {{ $primaryColor }};
             --bs-primary-rgb: {{ $primaryColorRgb[0] }}, {{ $primaryColorRgb[1] }}, {{ $primaryColorRgb[2] }};
-            --bs-primary-light: {{ $primaryLightColor }};
-            --bs-primary-light-rgb: {{ $primaryLightColorRgb[0] }}, {{ $primaryLightColorRgb[1] }}, {{ $primaryLightColorRgb[2] }};
+            --bs-primary-hover: {{ $primaryHover }};
+            --bs-primary-active: {{ $primaryActive }};
+            --bs-primary-light: {{ $primaryLight }};
+
+            /* Secondary Colors */
+            --bs-secondary: {{ $secondaryColor }};
+            --bs-secondary-rgb: {{ $secondaryColorRgb[0] }}, {{ $secondaryColorRgb[1] }}, {{ $secondaryColorRgb[2] }};
+            --bs-secondary-hover: {{ $secondaryHover }};
+            --bs-secondary-active: {{ $secondaryActive }};
+            --bs-secondary-light: {{ $secondaryLight }};
         }
 
-        /* Override template colors */
+        /* ========== PRIMARY COLOR STYLES ========== */
         .btn-primary,
         .badge.bg-primary,
         .bg-primary {
             background-color: {{ $primaryColor }} !important;
             border-color: {{ $primaryColor }} !important;
+            color: #fff !important;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: {{ $primaryHover }} !important;
+            border-color: {{ $primaryHover }} !important;
+            color: #fff !important;
+        }
+
+        .btn-primary:active,
+        .btn-primary.active {
+            background-color: {{ $primaryActive }} !important;
+            border-color: {{ $primaryActive }} !important;
+            color: #fff !important;
         }
 
         .text-primary {
             color: {{ $primaryColor }} !important;
         }
 
-        .btn-primary:hover,
-        .btn-primary:focus {
-            background-color: {{ $primaryColor }}dd !important;
-            border-color: {{ $primaryColor }}dd !important;
-        }
-
-        /* Use light primary color for label badges and subtle backgrounds */
-        .badge.bg-label-primary {
-            background-color: {{ $primaryLightColor }} !important;
-            color: {{ $primaryColor }} !important;
-        }
-
         .btn-outline-primary {
             color: {{ $primaryColor }} !important;
             border-color: {{ $primaryColor }} !important;
+            background-color: transparent !important;
         }
 
         .btn-outline-primary:hover {
@@ -113,41 +136,226 @@
             color: #fff !important;
         }
 
+        .btn-outline-primary:active,
+        .btn-outline-primary.active {
+            background-color: {{ $primaryActive }} !important;
+            border-color: {{ $primaryActive }} !important;
+            color: #fff !important;
+        }
+
+        /* Primary Light Backgrounds */
+        .badge.bg-label-primary {
+            background-color: {{ $primaryLight }} !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        .bg-primary-light {
+            background-color: {{ $primaryLight }} !important;
+        }
+
+        .alert-primary {
+            background-color: {{ $primaryLight }} !important;
+            border-color: {{ $primaryColor }}33 !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        /* ========== SECONDARY COLOR STYLES ========== */
+        .btn-secondary {
+            background-color: {{ $secondaryColor }} !important;
+            border-color: {{ $secondaryColor }} !important;
+            color: #fff !important;
+        }
+
+        .btn-secondary:hover,
+        .btn-secondary:focus {
+            background-color: {{ $secondaryHover }} !important;
+            border-color: {{ $secondaryHover }} !important;
+            color: #fff !important;
+        }
+
+        .btn-secondary:active,
+        .btn-secondary.active {
+            background-color: {{ $secondaryActive }} !important;
+            border-color: {{ $secondaryActive }} !important;
+            color: #fff !important;
+        }
+
+        .text-secondary {
+            color: {{ $secondaryColor }} !important;
+        }
+
+        .bg-secondary {
+            background-color: {{ $secondaryColor }} !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-secondary {
+            color: {{ $secondaryColor }} !important;
+            border-color: {{ $secondaryColor }} !important;
+            background-color: transparent !important;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: {{ $secondaryColor }} !important;
+            border-color: {{ $secondaryColor }} !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-secondary:active,
+        .btn-outline-secondary.active {
+            background-color: {{ $secondaryActive }} !important;
+            border-color: {{ $secondaryActive }} !important;
+            color: #fff !important;
+        }
+
+        /* Secondary Light Backgrounds */
+        .badge.bg-label-secondary {
+            background-color: {{ $secondaryLight }} !important;
+            color: {{ $secondaryColor }} !important;
+        }
+
+        .bg-secondary-light {
+            background-color: {{ $secondaryLight }} !important;
+        }
+
+        /* ========== MENU & NAVIGATION ========== */
+        .menu-item.active > .menu-link {
+            background-color: {{ $primaryLight }} !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        .menu-link:hover {
+            background-color: {{ $primaryLight }}80 !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        .menu-sub-item.active > .menu-link {
+            color: {{ $secondaryColor }} !important;
+        }
+
+        /* ========== FORMS & INPUTS ========== */
         .form-check-input:checked {
             background-color: {{ $primaryColor }} !important;
             border-color: {{ $primaryColor }} !important;
         }
 
-        /* Use light primary for active menu items background */
-        .menu-item.active > .menu-link {
-            background-color: {{ $primaryLightColor }} !important;
-            color: {{ $primaryColor }} !important;
+        .form-check-input:focus {
+            border-color: {{ $primaryHover }} !important;
+            box-shadow: 0 0 0 0.25rem {{ $primaryColor }}40 !important;
         }
 
-        /* Light background utilities */
-        .bg-primary-light {
-            background-color: {{ $primaryLightColor }} !important;
+        .form-control:focus,
+        .form-select:focus {
+            border-color: {{ $primaryColor }} !important;
+            box-shadow: 0 0 0 0.25rem {{ $primaryColor }}25 !important;
         }
 
-        /* Alerts and info boxes with light primary */
-        .alert-primary {
-            background-color: {{ $primaryLightColor }} !important;
-            border-color: {{ $primaryColor }}33 !important;
-            color: {{ $primaryColor }} !important;
-        }
-
-        /* Card highlights */
-        .card-primary-light {
-            border-left: 3px solid {{ $primaryColor }} !important;
-            background-color: {{ $primaryLightColor }}80 !important;
-        }
-
+        /* ========== LINKS ========== */
         a {
             color: {{ $primaryColor }};
         }
 
         a:hover {
-            color: {{ $primaryColor }}dd;
+            color: {{ $primaryHover }};
+        }
+
+        a:active {
+            color: {{ $primaryActive }};
+        }
+
+        /* ========== BADGES ========== */
+        .badge.bg-primary {
+            background-color: {{ $primaryColor }} !important;
+        }
+
+        .badge.bg-secondary {
+            background-color: {{ $secondaryColor }} !important;
+        }
+
+        /* ========== CARDS ========== */
+        .card-primary {
+            border-left: 3px solid {{ $primaryColor }} !important;
+        }
+
+        .card-secondary {
+            border-left: 3px solid {{ $secondaryColor }} !important;
+        }
+
+        .card-primary-light {
+            border-left: 3px solid {{ $primaryColor }} !important;
+            background-color: {{ $primaryLight }}80 !important;
+        }
+
+        /* ========== PAGINATION ========== */
+        .page-link {
+            color: {{ $primaryColor }} !important;
+        }
+
+        .page-link:hover {
+            color: {{ $primaryHover }} !important;
+            background-color: {{ $primaryLight }} !important;
+            border-color: {{ $primaryColor }} !important;
+        }
+
+        .page-item.active .page-link {
+            background-color: {{ $primaryColor }} !important;
+            border-color: {{ $primaryColor }} !important;
+        }
+
+        /* ========== PROGRESS BARS ========== */
+        .progress-bar {
+            background-color: {{ $primaryColor }} !important;
+        }
+
+        .progress-bar.bg-secondary {
+            background-color: {{ $secondaryColor }} !important;
+        }
+
+        /* ========== TABS ========== */
+        .nav-tabs .nav-link.active {
+            color: {{ $primaryColor }} !important;
+            border-bottom-color: {{ $primaryColor }} !important;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: {{ $primaryHover }} !important;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: {{ $primaryColor }} !important;
+        }
+
+        .nav-pills .nav-link:hover {
+            background-color: {{ $primaryLight }} !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        /* ========== DROPDOWNS ========== */
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background-color: {{ $primaryLight }} !important;
+            color: {{ $primaryColor }} !important;
+        }
+
+        .dropdown-item.active {
+            background-color: {{ $primaryColor }} !important;
+            color: #fff !important;
+        }
+
+        /* ========== ALERTS ========== */
+        .alert-secondary {
+            background-color: {{ $secondaryLight }} !important;
+            border-color: {{ $secondaryColor }}33 !important;
+            color: {{ $secondaryActive }} !important;
+        }
+
+        /* ========== SIDEBAR GRADIENTS ========== */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $primaryActive }} 100%) !important;
+        }
+
+        .bg-gradient-secondary {
+            background: linear-gradient(135deg, {{ $secondaryColor }} 0%, {{ $secondaryActive }} 100%) !important;
         }
 
         /* Hide template customizer button */

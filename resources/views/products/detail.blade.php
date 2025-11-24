@@ -1,7 +1,19 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+    <!-- Language Switcher -->
+    <div class="d-flex justify-content-end mb-3">
+        <div class="btn-group" role="group">
+            <a href="{{ url()->current() }}?lang=en" class="btn btn-sm {{ app()->getLocale() == 'en' ? 'btn-primary' : 'btn-outline-primary' }}">
+                English
+            </a>
+            <a href="{{ url()->current() }}?lang=ar" class="btn btn-sm {{ app()->getLocale() == 'ar' ? 'btn-primary' : 'btn-outline-primary' }}">
+                العربية
+            </a>
+        </div>
+    </div>
+
     <!-- Product Hero Section -->
     <div class="card shadow-lg mb-4" style="border-radius: 20px; overflow: hidden; border: none;">
         <div class="card-body p-0">

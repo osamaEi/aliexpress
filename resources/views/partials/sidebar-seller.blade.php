@@ -93,7 +93,7 @@
         </li>
 
         <!-- Categories -->
-        <li class="menu-item {{ request()->routeIs('categories.*') ? 'open active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('categories.*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-price-tag-3-line"></i>
                 <div>{{ __('messages.categories') }}</div>
@@ -114,7 +114,7 @@
         </li>
 
         <!-- Product Import -->
-        <li class="menu-item {{ request()->routeIs('products.search-*') || request()->routeIs('products.aliexpress.*') || request()->routeIs('products.my-assigned') ? 'open active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('products.search-*') || request()->routeIs('products.aliexpress.*') || request()->routeIs('products.my-assigned') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-shopping-cart-line"></i>
                 <div>{{ __('messages.product_import') }}</div>
@@ -150,7 +150,7 @@
         </li>
 
         <!-- Orders -->
-        <li class="menu-item {{ request()->routeIs('orders.*') ? 'open active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('orders.*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-file-list-3-line"></i>
                 <div>{{ __('messages.orders') }}</div>
