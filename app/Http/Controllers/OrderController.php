@@ -500,6 +500,9 @@ class OrderController extends Controller
      */
     public function calculateFreight(Request $request)
     {
+        Log::info('=== FREIGHT CALCULATION REQUEST RECEIVED ===');
+        Log::info('Request Data:', $request->all());
+
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
@@ -509,11 +512,21 @@ class OrderController extends Controller
             'sku_id' => 'nullable|string', // Accept SKU ID from frontend
         ]);
 
+        Log::info('Validated Data:', $validated);
+
         try {
             $product = Product::findOrFail($validated['product_id']);
 
+            Log::info('Product Found:', [
+                'id' => $product->id,
+                'name' => $product->name,
+                'aliexpress_id' => $product->aliexpress_id,
+                'is_aliexpress' => $product->isAliexpressProduct(),
+            ]);
+
             // Check if product is from AliExpress
             if (!$product->isAliexpressProduct()) {
+                Log::warning('Product is not from AliExpress');
                 return response()->json([
                     'success' => false,
                     'error' => 'This product is not from AliExpress'
@@ -522,6 +535,8 @@ class OrderController extends Controller
 
             // Get SKU ID - prioritize the one passed from frontend (user-selected)
             $skuId = $validated['sku_id'] ?? null;
+
+            Log::info('SKU ID from request:', ['sku_id' => $skuId]);
 
             // If no SKU provided, try to auto-detect
             if (!$skuId) {
@@ -553,6 +568,9 @@ class OrderController extends Controller
 
             // Validate SKU is numeric (not property combination)
             if ($skuId && str_contains((string)$skuId, '#')) {
+                Log::warning('Invalid SKU format - contains # (property combination)', [
+                    'sku_id' => $skuId
+                ]);
                 return response()->json([
                     'success' => false,
                     'error' => 'Invalid SKU format. Please select a numeric SKU (property combinations do not work with freight calculation).',
@@ -563,6 +581,10 @@ class OrderController extends Controller
 
             // If we still don't have a SKU, return error
             if (!$skuId) {
+                Log::error('No valid SKU found for product', [
+                    'product_id' => $product->id,
+                    'aliexpress_id' => $product->aliexpress_id
+                ]);
                 return response()->json([
                     'success' => false,
                     'error' => 'Could not find valid numeric SKU for this product. SKU is required for freight calculation.',
@@ -570,10 +592,12 @@ class OrderController extends Controller
                 ], 400);
             }
 
-            Log::info('Found SKU for freight calculation', [
+            Log::info('✅ Valid SKU found for freight calculation', [
                 'product_id' => $product->id,
                 'aliexpress_id' => $product->aliexpress_id,
-                'sku_id' => $skuId
+                'sku_id' => $skuId,
+                'sku_is_numeric' => is_numeric($skuId),
+                'sku_length' => strlen($skuId)
             ]);
 
             // Prepare freight calculation parameters
@@ -595,8 +619,17 @@ class OrderController extends Controller
                 $freightParams['price'] = $product->aliexpress_price;
             }
 
+            Log::info('Freight Calculation Parameters:', $freightParams);
+
             // Call AliExpress API to calculate freight
+            Log::info('Calling AliExpress API for freight calculation...');
             $freightResult = $this->aliexpressService->calculateFreight($freightParams);
+
+            Log::info('AliExpress API Response:', [
+                'success' => $freightResult['success'] ?? false,
+                'has_data' => isset($freightResult['data']),
+                'result_keys' => array_keys($freightResult ?? [])
+            ]);
 
             // If freight calculation fails with DELIVERY_INFO_EMPTY and we had city/province,
             // try again without them (they might be invalid codes)
@@ -627,36 +660,49 @@ class OrderController extends Controller
                 // Extract data from the result
                 $data = $freightResult['data'] ?? $freightResult;
 
-                return response()->json([
+                $responseData = [
                     'success' => true,
                     'freight_amount' => $data['freight_amount'] ?? null,
                     'freight_currency' => $data['freight_currency'] ?? null,
-                    'estimated_delivery_time' => $data['delivery_time'] ?? $data['estimated_delivery_time'] ?? null,
+                    'delivery_time' => $data['delivery_time'] ?? $data['estimated_delivery_time'] ?? null,
                     'service_name' => $data['service_name'] ?? $data['company_name'] ?? null,
                     'delivery_days_min' => $data['min_delivery_days'] ?? null,
                     'delivery_days_max' => $data['max_delivery_days'] ?? null,
                     'free_shipping' => $data['free_shipping'] ?? false,
                     'tracking' => $data['tracking'] ?? false,
                     'shipping_method' => $data['shipping_method'] ?? null,
-                ]);
+                ];
+
+                Log::info('✅ Freight calculation successful - Returning response', $responseData);
+                Log::info('=== FREIGHT CALCULATION END (SUCCESS) ===');
+
+                return response()->json($responseData);
             } else {
-                return response()->json([
+                $errorResponse = [
                     'success' => false,
                     'error' => $freightResult['message'] ?? $freightResult['error_desc'] ?? 'Unable to calculate freight',
                     'error_code' => $freightResult['error_code'] ?? null,
                     'raw_response' => $freightResult['raw_response'] ?? null, // Include raw response for debugging
-                ], 400);
+                ];
+
+                Log::warning('❌ Freight calculation failed - Returning error', $errorResponse);
+                Log::info('=== FREIGHT CALCULATION END (FAILED) ===');
+
+                return response()->json($errorResponse, 400);
             }
 
         } catch (\Exception $e) {
-            Log::error('Freight calculation API error', [
+            Log::error('❌ Freight calculation exception', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'request' => $validated
             ]);
+            Log::info('=== FREIGHT CALCULATION END (EXCEPTION) ===');
 
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to calculate freight: ' . $e->getMessage()
+                'error' => 'Failed to calculate freight: ' . $e->getMessage(),
+                'exception_class' => get_class($e)
             ], 500);
         }
     }

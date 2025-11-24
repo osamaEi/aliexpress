@@ -694,6 +694,31 @@ function calculateShipping() {
         return;
     }
 
+    // Extract SKU ID - try multiple fields
+    let skuId = selectedVariantData.id || selectedVariantData.sku_id || selectedVariantData.sku_code || null;
+
+    // Validate that SKU ID is numeric (not property combination)
+    if (skuId && skuId.toString().includes('#')) {
+        // This is a property combination, not a numeric SKU ID
+        displayShippingError({
+            error: 'Invalid SKU format detected',
+            error_code: 'INVALID_SKU_FORMAT',
+            message: 'The selected variant uses property combinations instead of numeric SKU ID. Please try a different product or contact support.'
+        });
+        goToStep(3);
+        return;
+    }
+
+    if (!skuId) {
+        displayShippingError({
+            error: 'No SKU ID found',
+            error_code: 'NO_SKU_ID',
+            message: 'Could not find a valid SKU ID for the selected variant.'
+        });
+        goToStep(3);
+        return;
+    }
+
     // Go to results step
     goToStep(3);
 
@@ -711,6 +736,29 @@ function calculateShipping() {
         }).join(';');
     }
 
+    console.log('=== FREIGHT CALCULATION START ===');
+    console.log('Selected Variant Data:', selectedVariantData);
+    console.log('SKU ID:', skuId);
+    console.log('Product ID:', {{ $product->id }});
+    console.log('AliExpress Product ID:', '{{ $product->aliexpress_id }}');
+    console.log('Quantity:', quantity);
+    console.log('Country:', country);
+    console.log('City:', city);
+    console.log('Province:', province);
+    console.log('SKU Attributes:', skuAttr);
+
+    const requestPayload = {
+        product_id: {{ $product->id }},
+        quantity: quantity,
+        country: country,
+        city: city,
+        province: province,
+        sku_id: skuId
+    };
+
+    console.log('Request Payload:', requestPayload);
+    console.log('Request Payload JSON:', JSON.stringify(requestPayload, null, 2));
+
     // Call freight calculation API
     fetch('{{ route("orders.calculate-freight") }}', {
         method: 'POST',
@@ -718,29 +766,37 @@ function calculateShipping() {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
-        body: JSON.stringify({
-            product_id: {{ $product->id }},
-            quantity: quantity,
-            country: country,
-            city: city,
-            province: province,
-            sku_id: selectedVariantData.id || null
-        })
+        body: JSON.stringify(requestPayload)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response Status:', response.status);
+        console.log('Response OK:', response.ok);
+        return response.json();
+    })
     .then(data => {
+        console.log('Response Data:', data);
+        console.log('Response JSON:', JSON.stringify(data, null, 2));
         document.getElementById('shipping-loading').style.display = 'none';
 
         if (data.success) {
+            console.log('✅ Freight calculation successful');
             calculatedShippingData = data;
             displayShippingSuccess(data);
         } else {
+            console.log('❌ Freight calculation failed');
+            console.log('Error:', data.error);
+            console.log('Error Code:', data.error_code);
             displayShippingError(data);
         }
+        console.log('=== FREIGHT CALCULATION END ===');
     })
     .catch(error => {
+        console.error('❌ Fetch Error:', error);
+        console.error('Error Message:', error.message);
+        console.error('Error Stack:', error.stack);
         document.getElementById('shipping-loading').style.display = 'none';
         displayShippingError({error: error.message});
+        console.log('=== FREIGHT CALCULATION END (ERROR) ===');
     });
 }
 
