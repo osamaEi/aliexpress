@@ -102,6 +102,7 @@ class OrderController extends Controller
             'shipping_country' => 'required|string|max:2',
             'shipping_zip' => 'required|string|max:20', // Required for AliExpress
             'customer_notes' => 'nullable|string',
+            'freight_amount' => 'nullable|numeric|min:0', // Shipping cost from freight calculation
         ]);
 
         try {
@@ -111,19 +112,37 @@ class OrderController extends Controller
             // Calculate pricing
             $quantity = $validated['quantity'];
             $unitPrice = $product->price;
-            $totalPrice = $unitPrice * $quantity;
+            $productTotal = $unitPrice * $quantity;
+
+            // Add freight/shipping cost if provided
+            $freightCost = isset($validated['freight_amount']) ? (float)$validated['freight_amount'] : 0;
+            $totalPrice = $productTotal + $freightCost;
 
             // Check seller's wallet balance
             if (!$user->wallet) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Please increase your balance to create orders.'
+                    ], 400);
+                }
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Please increase your balance to create orders.');
             }
 
             if ($user->wallet->balance < $totalPrice) {
+                $errorMsg = 'Insufficient balance. Please increase your balance to create this order. Required: ' . number_format($totalPrice, 2) . ' ' . ($product->currency ?? 'AED') . ', Available: ' . number_format($user->wallet->balance, 2) . ' AED';
+
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => $errorMsg
+                    ], 400);
+                }
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'Insufficient balance. Please increase your balance to create this order. Required: ' . number_format($totalPrice, 2) . ' ' . ($product->currency ?? 'AED') . ', Available: ' . number_format($user->wallet->balance, 2) . ' AED');
+                    ->with('error', $errorMsg);
             }
 
             DB::beginTransaction();
@@ -163,7 +182,9 @@ class OrderController extends Controller
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
                 'user_id' => $user->id,
-                'amount' => $totalPrice,
+                'product_total' => $productTotal,
+                'freight_cost' => $freightCost,
+                'total_amount' => $totalPrice,
                 'wallet_balance_after' => $user->wallet->fresh()->balance
             ]);
 
@@ -185,6 +206,21 @@ class OrderController extends Controller
                 'order_number' => $order->order_number
             ]);
 
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order created successfully! Your order will be placed on AliExpress automatically.',
+                    'order' => [
+                        'id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'status' => $order->status,
+                        'total_price' => $order->total_price,
+                        'currency' => $order->currency,
+                    ]
+                ]);
+            }
+
             return redirect()->route('orders.show', $order)
                 ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet. Your order will be placed on AliExpress automatically.');
 
@@ -195,6 +231,13 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Failed to create order: ' . $e->getMessage()
+                ], 500);
+            }
 
             return redirect()->back()
                 ->withInput()

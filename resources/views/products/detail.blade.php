@@ -507,9 +507,117 @@
                         <button type="button" class="btn btn-outline-secondary btn-lg" onclick="goToStep(2)">
                             <i class="ri-arrow-left-line me-2"></i>Back
                         </button>
-                        <button type="button" class="btn btn-success btn-lg flex-grow-1" id="proceedToOrderBtn" style="display: none;" onclick="proceedToOrder()">
+                        <button type="button" class="btn btn-success btn-lg flex-grow-1" id="proceedToOrderBtn" style="display: none;" onclick="goToStep(4)">
                             <i class="ri-shopping-bag-line me-2"></i>Create Order
                         </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Order Form -->
+                <div id="shipping-step-4" style="display: none;">
+                    <h5 class="mb-4">Order Details</h5>
+
+                    <!-- Order Summary -->
+                    <div class="card border-0 bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">Order Summary</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Product Price:</span>
+                                <strong id="order-product-price"></strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Shipping Cost:</span>
+                                <strong id="order-shipping-price"></strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Quantity:</span>
+                                <strong id="order-quantity"></strong>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>Total Amount:</strong>
+                                <strong class="text-primary fs-5" id="order-total-price"></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Information Form -->
+                    <form id="orderForm">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="quantity" id="order-form-quantity">
+                        <input type="hidden" name="selected_sku_attr" id="order-form-sku-attr">
+                        <input type="hidden" name="shipping_country" id="order-form-country">
+                        <input type="hidden" name="shipping_city" id="order-form-city">
+                        <input type="hidden" name="shipping_province" id="order-form-province">
+                        <input type="hidden" name="freight_amount" id="order-form-freight">
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="customer_name" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="customer_email">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Phone Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="phone_country" placeholder="+971" required>
+                            </div>
+
+                            <div class="col-md-9">
+                                <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="customer_phone" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Street Address <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="shipping_address" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Apartment, Suite, etc. (Optional)</label>
+                                <input type="text" class="form-control" name="shipping_address2">
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Postal/ZIP Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="shipping_zip" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Order Notes (Optional)</label>
+                                <textarea class="form-control" name="customer_notes" rows="3" placeholder="Any special instructions?"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="goToStep(3)">
+                                <i class="ri-arrow-left-line me-2"></i>Back
+                            </button>
+                            <button type="submit" class="btn btn-success btn-lg flex-grow-1">
+                                <i class="ri-shopping-bag-line me-2"></i>Confirm & Create Order
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Order Creation Result -->
+                    <div id="order-creation-result" style="display: none;">
+                        <div id="order-creation-loading" class="text-center py-5" style="display: none;">
+                            <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;"></div>
+                            <p class="text-muted">Creating your order...</p>
+                        </div>
+
+                        <div id="order-creation-success" style="display: none;" class="alert alert-success">
+                            <!-- Will be populated dynamically -->
+                        </div>
+
+                        <div id="order-creation-error" style="display: none;" class="alert alert-danger">
+                            <!-- Will be populated dynamically -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -674,6 +782,7 @@ function goToStep(step) {
     document.getElementById('shipping-step-1').style.display = 'none';
     document.getElementById('shipping-step-2').style.display = 'none';
     document.getElementById('shipping-step-3').style.display = 'none';
+    document.getElementById('shipping-step-4').style.display = 'none';
 
     // Update step indicators
     document.getElementById('step-1').classList.remove('active');
@@ -688,6 +797,66 @@ function goToStep(step) {
     for (let i = 1; i < step; i++) {
         document.getElementById(`step-${i}`).classList.add('active');
     }
+
+    // If moving to step 4, populate order summary
+    if (step === 4) {
+        populateOrderSummary();
+    }
+}
+
+function populateOrderSummary() {
+    if (!selectedVariantData || !calculatedShippingData) {
+        console.error('Missing required data for order summary');
+        return;
+    }
+
+    const quantity = parseInt(document.getElementById('shipping-quantity').value) || 1;
+    const country = document.getElementById('shipping-country').value;
+    const city = document.getElementById('shipping-city').value;
+    const province = document.getElementById('shipping-province').value;
+
+    // Get product price
+    const unitPrice = parseFloat(selectedVariantData.offer_sale_price || selectedVariantData.price || 0);
+    const productTotal = unitPrice * quantity;
+
+    // Get shipping cost
+    const shippingCost = parseFloat(calculatedShippingData.freight_amount || 0);
+    const currency = calculatedShippingData.freight_currency || '{{ $product->currency ?? "USD" }}';
+
+    // Calculate total
+    const totalAmount = productTotal + shippingCost;
+
+    // Update order summary display
+    document.getElementById('order-product-price').textContent = `${currency} ${productTotal.toFixed(2)} (${currency} ${unitPrice.toFixed(2)} × ${quantity})`;
+    document.getElementById('order-shipping-price').textContent = `${currency} ${shippingCost.toFixed(2)}`;
+    document.getElementById('order-quantity').textContent = quantity;
+    document.getElementById('order-total-price').textContent = `${currency} ${totalAmount.toFixed(2)}`;
+
+    // Populate hidden form fields
+    document.getElementById('order-form-quantity').value = quantity;
+    document.getElementById('order-form-country').value = country;
+    document.getElementById('order-form-city').value = city;
+    document.getElementById('order-form-province').value = province;
+    document.getElementById('order-form-freight').value = shippingCost;
+
+    // Build SKU attributes
+    let skuAttr = '';
+    if (selectedVariantData.ae_sku_property_dtos && selectedVariantData.ae_sku_property_dtos.ae_sku_property_d_t_o) {
+        skuAttr = selectedVariantData.ae_sku_property_dtos.ae_sku_property_d_t_o.map(prop => {
+            return `${prop.sku_property_id}:${prop.property_value_id}`;
+        }).join(';');
+    }
+    document.getElementById('order-form-sku-attr').value = skuAttr;
+
+    console.log('Order Summary Populated:', {
+        unit_price: unitPrice,
+        quantity: quantity,
+        product_total: productTotal,
+        shipping_cost: shippingCost,
+        total_amount: totalAmount,
+        currency: currency,
+        sku_attr: skuAttr
+    });
 }
 
 function calculateShipping() {
@@ -883,37 +1052,132 @@ function displayShippingError(data) {
     container.style.display = 'block';
 }
 
-function proceedToOrder() {
-    if (!selectedVariantData || !calculatedShippingData) {
-        alert('Missing required data');
-        return;
+// Handle order form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitOrder();
+        });
+    }
+});
+
+function submitOrder() {
+    console.log('=== ORDER CREATION START ===');
+
+    // Hide form and show loading
+    document.getElementById('orderForm').style.display = 'none';
+    document.getElementById('order-creation-result').style.display = 'block';
+    document.getElementById('order-creation-loading').style.display = 'block';
+    document.getElementById('order-creation-success').style.display = 'none';
+    document.getElementById('order-creation-error').style.display = 'none';
+
+    // Collect form data
+    const formData = new FormData(document.getElementById('orderForm'));
+    const orderData = {};
+    formData.forEach((value, key) => {
+        orderData[key] = value;
+    });
+
+    console.log('Order Data:', orderData);
+    console.log('Order Data JSON:', JSON.stringify(orderData, null, 2));
+
+    // Submit order
+    fetch('{{ route("orders.store") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => {
+        console.log('Response Status:', response.status);
+        console.log('Response OK:', response.ok);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response Data:', data);
+        document.getElementById('order-creation-loading').style.display = 'none';
+
+        if (data.success || data.order) {
+            console.log('✅ Order created successfully');
+            displayOrderSuccess(data);
+        } else {
+            console.log('❌ Order creation failed');
+            displayOrderError(data);
+        }
+        console.log('=== ORDER CREATION END ===');
+    })
+    .catch(error => {
+        console.error('❌ Order Creation Error:', error);
+        document.getElementById('order-creation-loading').style.display = 'none';
+        displayOrderError({ error: error.message });
+        console.log('=== ORDER CREATION END (ERROR) ===');
+    });
+}
+
+function displayOrderSuccess(data) {
+    const container = document.getElementById('order-creation-success');
+    const order = data.order || data;
+
+    container.innerHTML = `
+        <div class="text-center mb-3">
+            <i class="ri-checkbox-circle-fill text-success" style="font-size: 64px;"></i>
+        </div>
+        <h4 class="alert-heading text-center mb-3">Order Created Successfully!</h4>
+        <div class="mb-3">
+            <strong>Order Number:</strong> ${order.order_number || 'N/A'}<br>
+            <strong>Status:</strong> <span class="badge bg-warning">${order.status || 'Pending'}</span><br>
+            <strong>Total Amount:</strong> ${order.currency || 'USD'} ${parseFloat(order.total_price || 0).toFixed(2)}
+        </div>
+        <p class="mb-3">${data.message || 'Your order has been placed successfully and will be processed shortly.'}</p>
+        <div class="d-grid gap-2">
+            <a href="{{ route('seller.dashboard') }}" class="btn btn-primary">
+                <i class="ri-dashboard-line me-2"></i>View Dashboard
+            </a>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                <i class="ri-close-line me-2"></i>Close
+            </button>
+        </div>
+    `;
+    container.style.display = 'block';
+}
+
+function displayOrderError(data) {
+    const container = document.getElementById('order-creation-error');
+    let errorMsg = data.error || data.message || 'Failed to create order. Please try again.';
+
+    // Handle validation errors
+    if (data.errors) {
+        errorMsg = '<ul class="mb-0">';
+        Object.values(data.errors).forEach(errors => {
+            errors.forEach(error => {
+                errorMsg += `<li>${error}</li>`;
+            });
+        });
+        errorMsg += '</ul>';
     }
 
-    // Build SKU attributes
-    let skuAttr = '';
-    if (selectedVariantData.ae_sku_property_dtos && selectedVariantData.ae_sku_property_dtos.ae_sku_property_d_t_o) {
-        skuAttr = selectedVariantData.ae_sku_property_dtos.ae_sku_property_d_t_o.map(prop => {
-            return `${prop.sku_property_id}:${prop.property_value_id}`;
-        }).join(';');
-    }
+    container.innerHTML = `
+        <div class="text-center mb-3">
+            <i class="ri-error-warning-line text-danger" style="font-size: 48px;"></i>
+        </div>
+        <h6 class="alert-heading">Order Creation Failed</h6>
+        <div>${errorMsg}</div>
+        <div class="d-grid gap-2 mt-3">
+            <button type="button" class="btn btn-outline-secondary" onclick="retryOrder()">
+                <i class="ri-refresh-line me-2"></i>Try Again
+            </button>
+        </div>
+    `;
+    container.style.display = 'block';
+}
 
-    const country = document.getElementById('shipping-country').value;
-    const city = document.getElementById('shipping-city').value;
-    const province = document.getElementById('shipping-province').value;
-    const quantity = document.getElementById('shipping-quantity').value;
-
-    // Build URL with parameters
-    const url = '{{ route("orders.create") }}?' +
-        `product_id={{ $product->id }}` +
-        `&selected_variant=${selectedVariantIndex}` +
-        `&selected_variant_index=${selectedVariantIndex}` +
-        `&selected_sku_attr=${encodeURIComponent(skuAttr)}` +
-        `&quantity=${quantity}` +
-        `&shipping_country=${country}` +
-        `&shipping_city=${encodeURIComponent(city)}` +
-        `&shipping_province=${encodeURIComponent(province)}`;
-
-    window.location.href = url;
+function retryOrder() {
+    document.getElementById('order-creation-result').style.display = 'none';
+    document.getElementById('orderForm').style.display = 'block';
 }
 
 function syncProduct() {
@@ -966,6 +1230,11 @@ document.getElementById('shippingCalculatorModal')?.addEventListener('hidden.bs.
     document.querySelectorAll('[name="shipping_variant"]').forEach(radio => {
         radio.checked = false;
     });
+
+    // Reset order form
+    document.getElementById('orderForm')?.reset();
+    document.getElementById('orderForm').style.display = 'block';
+    document.getElementById('order-creation-result').style.display = 'none';
 });
 </script>
 @endsection
