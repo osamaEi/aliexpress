@@ -132,11 +132,7 @@
                     </a>
                 </li>
 
-                <li class="menu-item {{ request()->routeIs('products.aliexpress.import') ? 'active' : '' }}">
-                    <a href="{{ route('products.aliexpress.import') }}" class="menu-link">
-                        <div>{{ __('messages.import_product') }}</div>
-                    </a>
-                </li>
+                
             </ul>
         </li>
 

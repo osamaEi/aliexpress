@@ -219,11 +219,11 @@
                         <div>{{ __('messages.withdrawal_requests') }}</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('admin.wallets.transactions') ? 'active' : '' }}">
+                {{-- <li class="menu-item {{ request()->routeIs('admin.wallets.transactions') ? 'active' : '' }}">
                     <a href="{{ route('admin.wallets.transactions') }}" class="menu-link">
                         <div>{{ __('messages.all_transactions') }}</div>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </li>
 

@@ -424,6 +424,170 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Button Colors Settings -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ __('messages.button_colors') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            // Success Button Colors
+                            $btnSuccessColor = $settings->get('color', collect())->firstWhere('key', 'btn_success_color');
+                            $btnSuccessHoverColor = $settings->get('color', collect())->firstWhere('key', 'btn_success_hover_color');
+                            $btnSuccessActiveColor = $settings->get('color', collect())->firstWhere('key', 'btn_success_active_color');
+
+                            // Warning Button Colors
+                            $btnWarningColor = $settings->get('color', collect())->firstWhere('key', 'btn_warning_color');
+                            $btnWarningHoverColor = $settings->get('color', collect())->firstWhere('key', 'btn_warning_hover_color');
+                            $btnWarningActiveColor = $settings->get('color', collect())->firstWhere('key', 'btn_warning_active_color');
+
+                            // Danger Button Colors
+                            $btnDangerColor = $settings->get('color', collect())->firstWhere('key', 'btn_danger_color');
+                            $btnDangerHoverColor = $settings->get('color', collect())->firstWhere('key', 'btn_danger_hover_color');
+                            $btnDangerActiveColor = $settings->get('color', collect())->firstWhere('key', 'btn_danger_active_color');
+                        @endphp
+
+                        <!-- Success Button -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-success mb-3">{{ __('messages.success_button') }}</h6>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_success_color" class="form-label">{{ __('messages.default_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_success_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_success_color', $btnSuccessColor?->value ?? '#28a745') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_success_color]" id="btn_success_color" class="form-control"
+                                        value="{{ old('settings.btn_success_color', $btnSuccessColor?->value ?? '#28a745') }}"
+                                        placeholder="#28a745" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_success_hover_color" class="form-label">{{ __('messages.hover_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_success_hover_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_success_hover_color', $btnSuccessHoverColor?->value ?? '#218838') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_success_hover_color]" id="btn_success_hover_color" class="form-control"
+                                        value="{{ old('settings.btn_success_hover_color', $btnSuccessHoverColor?->value ?? '#218838') }}"
+                                        placeholder="#218838" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_success_active_color" class="form-label">{{ __('messages.active_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_success_active_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_success_active_color', $btnSuccessActiveColor?->value ?? '#1e7e34') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_success_active_color]" id="btn_success_active_color" class="form-control"
+                                        value="{{ old('settings.btn_success_active_color', $btnSuccessActiveColor?->value ?? '#1e7e34') }}"
+                                        placeholder="#1e7e34" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Warning Button -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-warning mb-3">{{ __('messages.warning_button') }}</h6>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_warning_color" class="form-label">{{ __('messages.default_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_warning_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_warning_color', $btnWarningColor?->value ?? '#ffc107') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_warning_color]" id="btn_warning_color" class="form-control"
+                                        value="{{ old('settings.btn_warning_color', $btnWarningColor?->value ?? '#ffc107') }}"
+                                        placeholder="#ffc107" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_warning_hover_color" class="form-label">{{ __('messages.hover_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_warning_hover_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_warning_hover_color', $btnWarningHoverColor?->value ?? '#e0a800') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_warning_hover_color]" id="btn_warning_hover_color" class="form-control"
+                                        value="{{ old('settings.btn_warning_hover_color', $btnWarningHoverColor?->value ?? '#e0a800') }}"
+                                        placeholder="#e0a800" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_warning_active_color" class="form-label">{{ __('messages.active_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_warning_active_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_warning_active_color', $btnWarningActiveColor?->value ?? '#d39e00') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_warning_active_color]" id="btn_warning_active_color" class="form-control"
+                                        value="{{ old('settings.btn_warning_active_color', $btnWarningActiveColor?->value ?? '#d39e00') }}"
+                                        placeholder="#d39e00" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Danger Button -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="text-danger mb-3">{{ __('messages.danger_button') }}</h6>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_danger_color" class="form-label">{{ __('messages.default_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_danger_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_danger_color', $btnDangerColor?->value ?? '#dc3545') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_danger_color]" id="btn_danger_color" class="form-control"
+                                        value="{{ old('settings.btn_danger_color', $btnDangerColor?->value ?? '#dc3545') }}"
+                                        placeholder="#dc3545" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_danger_hover_color" class="form-label">{{ __('messages.hover_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_danger_hover_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_danger_hover_color', $btnDangerHoverColor?->value ?? '#c82333') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_danger_hover_color]" id="btn_danger_hover_color" class="form-control"
+                                        value="{{ old('settings.btn_danger_hover_color', $btnDangerHoverColor?->value ?? '#c82333') }}"
+                                        placeholder="#c82333" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_danger_active_color" class="form-label">{{ __('messages.active_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_danger_active_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_danger_active_color', $btnDangerActiveColor?->value ?? '#bd2130') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_danger_active_color]" id="btn_danger_active_color" class="form-control"
+                                        value="{{ old('settings.btn_danger_active_color', $btnDangerActiveColor?->value ?? '#bd2130') }}"
+                                        placeholder="#bd2130" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="mb-3">{{ __('messages.preview') }}</h6>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-success" id="preview_btn_success">{{ __('messages.success') }}</button>
+                                    <button type="button" class="btn btn-warning" id="preview_btn_warning">{{ __('messages.warning') }}</button>
+                                    <button type="button" class="btn btn-danger" id="preview_btn_danger">{{ __('messages.danger') }}</button>
+                                </div>
+                                <small class="text-muted d-block mt-2">{{ __('messages.button_preview_hint') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-4">
@@ -609,6 +773,128 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Button color pickers sync and preview
+    const buttonColorInputs = [
+        { picker: 'btn_success_color_picker', hex: 'btn_success_color', preview: 'preview_btn_success', state: 'default' },
+        { picker: 'btn_success_hover_color_picker', hex: 'btn_success_hover_color', preview: 'preview_btn_success', state: 'hover' },
+        { picker: 'btn_success_active_color_picker', hex: 'btn_success_active_color', preview: 'preview_btn_success', state: 'active' },
+        { picker: 'btn_warning_color_picker', hex: 'btn_warning_color', preview: 'preview_btn_warning', state: 'default' },
+        { picker: 'btn_warning_hover_color_picker', hex: 'btn_warning_hover_color', preview: 'preview_btn_warning', state: 'hover' },
+        { picker: 'btn_warning_active_color_picker', hex: 'btn_warning_active_color', preview: 'preview_btn_warning', state: 'active' },
+        { picker: 'btn_danger_color_picker', hex: 'btn_danger_color', preview: 'preview_btn_danger', state: 'default' },
+        { picker: 'btn_danger_hover_color_picker', hex: 'btn_danger_hover_color', preview: 'preview_btn_danger', state: 'hover' },
+        { picker: 'btn_danger_active_color_picker', hex: 'btn_danger_active_color', preview: 'preview_btn_danger', state: 'active' },
+    ];
+
+    // Function to update button preview styles
+    function updateButtonPreview(buttonId, defaultColor, hoverColor, activeColor) {
+        const btn = document.getElementById(buttonId);
+        if (!btn) return;
+
+        // Set default color
+        btn.style.backgroundColor = defaultColor;
+        btn.style.borderColor = defaultColor;
+
+        // Remove existing event listeners by cloning
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        // Add hover effect
+        newBtn.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = hoverColor;
+            this.style.borderColor = hoverColor;
+        });
+
+        newBtn.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = defaultColor;
+            this.style.borderColor = defaultColor;
+        });
+
+        // Add active effect
+        newBtn.addEventListener('mousedown', function() {
+            this.style.backgroundColor = activeColor;
+            this.style.borderColor = activeColor;
+        });
+
+        newBtn.addEventListener('mouseup', function() {
+            this.style.backgroundColor = hoverColor;
+            this.style.borderColor = hoverColor;
+        });
+    }
+
+    // Setup each button color input
+    buttonColorInputs.forEach(item => {
+        const picker = document.getElementById(item.picker);
+        const hexInput = document.getElementById(item.hex);
+
+        if (!picker || !hexInput) return;
+
+        // Sync picker to hex input
+        picker.addEventListener('input', function() {
+            hexInput.value = this.value.toUpperCase();
+            hexInput.classList.remove('is-invalid');
+            hexInput.classList.add('is-valid');
+            updateAllButtonPreviews();
+        });
+
+        // Sync hex input to picker
+        hexInput.addEventListener('input', function() {
+            let value = this.value.trim();
+
+            // Auto-add # if missing
+            if (value && !value.startsWith('#')) {
+                value = '#' + value;
+                this.value = value;
+            }
+
+            // Convert to uppercase
+            this.value = value.toUpperCase();
+
+            // Update picker if valid
+            if (isValidHex(value)) {
+                picker.value = value;
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+                updateAllButtonPreviews();
+            } else if (value) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+    });
+
+    // Update all button previews
+    function updateAllButtonPreviews() {
+        // Success button
+        updateButtonPreview(
+            'preview_btn_success',
+            document.getElementById('btn_success_color').value || '#28a745',
+            document.getElementById('btn_success_hover_color').value || '#218838',
+            document.getElementById('btn_success_active_color').value || '#1e7e34'
+        );
+
+        // Warning button
+        updateButtonPreview(
+            'preview_btn_warning',
+            document.getElementById('btn_warning_color').value || '#ffc107',
+            document.getElementById('btn_warning_hover_color').value || '#e0a800',
+            document.getElementById('btn_warning_active_color').value || '#d39e00'
+        );
+
+        // Danger button
+        updateButtonPreview(
+            'preview_btn_danger',
+            document.getElementById('btn_danger_color').value || '#dc3545',
+            document.getElementById('btn_danger_hover_color').value || '#c82333',
+            document.getElementById('btn_danger_active_color').value || '#bd2130'
+        );
+    }
+
+    // Initialize button previews on load
+    updateAllButtonPreviews();
 });
 </script>
 @endpush

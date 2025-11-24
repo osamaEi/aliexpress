@@ -14,6 +14,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         \App\Events\OrderCreated::class => [
             \App\Listeners\PlaceOrderOnAliExpress::class,
+            \App\Listeners\CreateProfitRecord::class,
         ],
         \App\Events\OrderStatusUpdated::class => [
             \App\Listeners\NotifyOrderStatusChange::class,

@@ -12,10 +12,12 @@ class TicketReply extends Model
         'user_id',
         'message',
         'is_admin',
+        'attachments',
     ];
 
     protected $casts = [
         'is_admin' => 'boolean',
+        'attachments' => 'array',
     ];
 
     /**

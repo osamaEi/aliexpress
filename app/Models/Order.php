@@ -21,6 +21,7 @@ class Order extends Model
         'selected_variant_details',
         'unit_price',
         'total_price',
+        'freight_amount',
         'total_amount',
         'aliexpress_profit',
         'admin_category_profit',
@@ -51,6 +52,7 @@ class Order extends Model
     protected $casts = [
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'freight_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'aliexpress_profit' => 'decimal:2',
         'admin_category_profit' => 'decimal:2',
@@ -97,6 +99,14 @@ class Order extends Model
     public function shipping(): HasOne
     {
         return $this->hasOne(Shipping::class);
+    }
+
+    /**
+     * Get the profit record for this order.
+     */
+    public function profit(): HasOne
+    {
+        return $this->hasOne(Profit::class);
     }
 
     /**

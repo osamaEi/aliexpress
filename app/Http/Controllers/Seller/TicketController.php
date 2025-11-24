@@ -81,13 +81,25 @@ class TicketController extends Controller
 
         $request->validate([
             'message' => 'required|string',
+            'attachments.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Max 5MB per image
         ]);
+
+        // Handle image uploads
+        $attachmentPaths = [];
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('ticket-attachments', $filename, 'public');
+                $attachmentPaths[] = $path;
+            }
+        }
 
         TicketReply::create([
             'ticket_id' => $ticket->id,
             'user_id' => Auth::id(),
             'message' => $request->message,
             'is_admin' => false,
+            'attachments' => !empty($attachmentPaths) ? $attachmentPaths : null,
         ]);
 
         // If ticket was closed, reopen it
