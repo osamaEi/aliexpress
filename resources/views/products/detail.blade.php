@@ -707,8 +707,10 @@ function calculateShipping() {
         return;
     }
 
-    // Extract SKU ID - try multiple fields
-    let skuId = selectedVariantData.id || selectedVariantData.sku_id || selectedVariantData.sku_code || null;
+    // Extract SKU ID - try multiple fields (IMPORTANT: check sku_id first, not id!)
+    // The 'id' field often contains property combinations like "10:365211#A35 5G"
+    // The 'sku_id' field contains the actual numeric SKU like "12000040883098803"
+    let skuId = selectedVariantData.sku_id || selectedVariantData.sku_code || selectedVariantData.id || null;
 
     // Validate that SKU ID is numeric (not property combination)
     if (skuId && skuId.toString().includes('#')) {
