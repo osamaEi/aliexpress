@@ -1088,24 +1088,34 @@ function submitOrder() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify(orderData)
     })
-    .then(response => {
+    .then(async response => {
         console.log('Response Status:', response.status);
         console.log('Response OK:', response.ok);
-        return response.json();
+        console.log('Response Content-Type:', response.headers.get('content-type'));
+
+        // Parse JSON response
+        const data = await response.json();
+
+        // Return both response status and data
+        return { response, data };
     })
-    .then(data => {
+    .then(({ response, data }) => {
         console.log('Response Data:', data);
         document.getElementById('order-creation-loading').style.display = 'none';
 
-        if (data.success || data.order) {
+        // Check if successful (status 200-299)
+        if (response.ok && (data.success || data.order)) {
             console.log('✅ Order created successfully');
             displayOrderSuccess(data);
         } else {
             console.log('❌ Order creation failed');
+            console.log('Validation Errors:', data.errors);
             displayOrderError(data);
         }
         console.log('=== ORDER CREATION END ===');
