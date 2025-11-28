@@ -18,10 +18,25 @@ class AliExpressWebhookController extends Controller
 
     /**
      * Handle AliExpress order status webhook
+     * Supports both GET (verification) and POST (actual webhook) requests
      */
     public function handleOrderStatus(Request $request)
     {
         try {
+            // If GET request, return success for AliExpress verification
+            if ($request->isMethod('get')) {
+                Log::info('AliExpress Webhook Verification Request', [
+                    'ip' => $request->ip(),
+                    'params' => $request->all(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'AliExpress webhook endpoint is active and ready to receive notifications',
+                    'timestamp' => now()->toIso8601String(),
+                ], 200);
+            }
+
             // Log incoming webhook
             Log::info('AliExpress Webhook Received', [
                 'headers' => $request->headers->all(),

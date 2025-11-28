@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);
+        // Exclude webhooks from CSRF verification
+        $middleware->validateCsrfTokens(except: [
+            '/paymob/webhook',
+            '/webhooks/aliexpress/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

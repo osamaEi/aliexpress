@@ -107,11 +107,19 @@
                         <div class="col-12">
                             <h5 class="mb-3">{{ __('messages.select_payment_method') }}</h5>
 
-                            <!-- PayPal Smart Payment Buttons Container -->
-                            <div id="paypal-button-container" class="mb-4"></div>
+                            <!-- Paymob Payment Button -->
+                            <button id="paymob-button" class="btn btn-lg btn-primary w-100 mb-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="ri-bank-card-line fs-4 me-2"></i>
+                                    <span class="fs-5">Pay with Card (Paymob)</span>
+                                </div>
+                            </button>
+
+                            <!-- Paymob iFrame Container -->
+                            <div id="paymob-iframe-container" style="display: none;"></div>
 
                             <!-- Loading State -->
-                            <div id="paypal-loading" class="text-center mb-3" style="display: none;">
+                            <div id="payment-loading" class="text-center mb-3" style="display: none;">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
@@ -192,119 +200,67 @@
     }
 </style>
 
-<!-- PayPal SDK -->
-@php
-    $paypalMode = config('paypal.mode', 'sandbox');
-    $paypalClientId = config("paypal.{$paypalMode}.client_id");
-@endphp
-<script src="https://www.paypal.com/sdk/js?client-id={{ $paypalClientId }}&currency={{ config('paypal.currency', 'USD') }}"></script>
-
 <script>
-    // Check if PayPal SDK is loaded
-    if (typeof paypal === 'undefined') {
-        console.error('PayPal SDK failed to load. Please check your internet connection and PayPal credentials.');
-        document.getElementById('paypal-button-container').innerHTML = '<div class="alert alert-danger">Failed to load PayPal. Please refresh the page or use wallet payment.</div>';
-    } else {
-        console.log('PayPal SDK loaded successfully');
+    // Paymob Payment Integration
+    document.getElementById('paymob-button').addEventListener('click', function() {
+        const loadingDiv = document.getElementById('payment-loading');
+        const paymobButton = document.getElementById('paymob-button');
+        const iframeContainer = document.getElementById('paymob-iframe-container');
 
-        // Initialize PayPal Smart Payment Buttons
-        paypal.Buttons({
-            style: {
-                layout: 'vertical',
-                color: 'gold',
-                shape: 'rect',
-                label: 'paypal',
-                height: 55
-            },
+        // Show loading
+        loadingDiv.style.display = 'block';
+        paymobButton.disabled = true;
 
-            // Create order directly using PayPal SDK
-            createOrder: function(data, actions) {
-                console.log('Creating PayPal order...');
+        // Get CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-                return actions.order.create({
-                    purchase_units: [{
-                        description: '{{ $subscription->localized_name }} - Subscription Plan',
-                        amount: {
-                            currency_code: '{{ config("paypal.currency", "USD") }}',
-                            value: '{{ number_format($subscription->price, 2, ".", "") }}'
-                        },
-                        custom_id: 'SUB-{{ $subscription->id }}-' + Date.now()
-                    }],
-                    application_context: {
-                        shipping_preference: 'NO_SHIPPING'
-                    }
-                }).then(function(orderId) {
-                    console.log('PayPal order created:', orderId);
-                    return orderId;
-                });
-            },
-
-            // Approve order - Capture payment
-            onApprove: function(data, actions) {
-                console.log('Payment approved:', data);
-                document.getElementById('paypal-loading').style.display = 'block';
-
-                // Capture the payment
-                return actions.order.capture().then(function(details) {
-                    console.log('Payment captured:', details);
-
-                    // Send payment details to our backend
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
-                    return fetch('{{ route("subscriptions.process-payment", $subscription) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            order_id: data.orderID,
-                            payer_id: data.payerID,
-                            details: details
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        document.getElementById('paypal-loading').style.display = 'none';
-
-                        if (result.success) {
-                            // Redirect to subscriptions page with success message
-                            window.location.href = '{{ route("subscriptions.index") }}?payment=success';
-                        } else {
-                            throw new Error(result.message || 'Payment processing failed');
-                        }
-                    })
-                    .catch(error => {
-                        document.getElementById('paypal-loading').style.display = 'none';
-                        console.error('Backend processing error:', error);
-                        alert('Failed to process payment on our server. Please contact support if the amount was debited.');
-                        throw error;
-                    });
-                });
-            },
-
-            // Handle errors
-            onError: function(err) {
-                console.error('PayPal Error:', err);
-                document.getElementById('paypal-loading').style.display = 'none';
-                alert('An error occurred with PayPal. Please try again or use an alternative payment method.');
-            },
-
-            // Handle cancellation
-            onCancel: function(data) {
-                document.getElementById('paypal-loading').style.display = 'none';
-                console.log('Payment cancelled');
-                alert('Payment was cancelled. You can try again when ready.');
+        // Call backend to initiate payment
+        fetch('{{ route("paymob.initiate-subscription", $subscription) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
             }
-        }).render('#paypal-button-container')
-        .then(function() {
-            console.log('PayPal buttons rendered successfully');
         })
-        .catch(function(error) {
-            console.error('Failed to render PayPal buttons:', error);
-            document.getElementById('paypal-button-container').innerHTML = '<div class="alert alert-danger"><i class="ri-error-warning-line me-2"></i>Failed to load PayPal buttons. Please refresh the page or use wallet payment.</div>';
+        .then(response => response.json())
+        .then(result => {
+            loadingDiv.style.display = 'none';
+
+            if (result.success && result.paymentToken && result.iframeId) {
+                // Hide the payment button
+                paymobButton.style.display = 'none';
+
+                // Show iframe container
+                iframeContainer.style.display = 'block';
+
+                // Create and inject the Paymob iframe
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://accept.paymob.com/api/acceptance/iframes/${result.iframeId}?payment_token=${result.paymentToken}`;
+                iframe.width = '100%';
+                iframe.height = '600';
+                iframe.frameBorder = '0';
+                iframe.style.border = 'none';
+
+                iframeContainer.innerHTML = '';
+                iframeContainer.appendChild(iframe);
+
+                // Listen for payment completion messages
+                window.addEventListener('message', function(event) {
+                    // You can handle iframe messages here if needed
+                    console.log('Paymob iframe message:', event.data);
+                });
+            } else {
+                paymobButton.disabled = false;
+                alert(result.message || 'Failed to initialize payment. Please try again.');
+            }
+        })
+        .catch(error => {
+            loadingDiv.style.display = 'none';
+            paymobButton.disabled = false;
+            console.error('Payment initialization error:', error);
+            alert('Failed to initialize payment. Please try again or use an alternative payment method.');
         });
-    }
+    });
 </script>
 @endsection

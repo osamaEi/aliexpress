@@ -42,12 +42,25 @@ class AliExpressWebhookService
 
     /**
      * Process incoming webhook data
+     * Handles DROPSHIPPER_ORDER_STATUS_UPDATE (message_type: 53)
      */
     public function processWebhook(array $data): array
     {
         try {
-            // Extract order ID - support multiple possible field names
-            $aliexpressOrderId = $data['order_id'] ??
+            // Log the raw webhook payload
+            Log::info('Processing AliExpress webhook', [
+                'message_type' => $data['message_type'] ?? null,
+                'seller_id' => $data['seller_id'] ?? null,
+                'site' => $data['site'] ?? null,
+            ]);
+
+            // Extract order ID from the new format
+            // New format: { "data": { "orderId": 123, "orderStatus": "..." }, "message_type": 53 }
+            $webhookData = $data['data'] ?? $data;
+
+            $aliexpressOrderId = $webhookData['orderId'] ??
+                                 $webhookData['order_id'] ??
+                                 $data['order_id'] ??
                                  $data['orderId'] ??
                                  $data['ae_order_id'] ??
                                  $data['aeOrderId'] ??
@@ -74,8 +87,10 @@ class AliExpressWebhookService
                 ];
             }
 
-            // Extract status information
-            $orderStatus = $data['order_status'] ??
+            // Extract status information from new format
+            $orderStatus = $webhookData['orderStatus'] ??
+                          $webhookData['order_status'] ??
+                          $data['order_status'] ??
                           $data['orderStatus'] ??
                           $data['status'] ??
                           null;
@@ -330,6 +345,14 @@ class AliExpressWebhookService
             'DELIVERED' => 'delivered',
             'CANCELLED' => 'cancelled',
             'FAILED' => 'failed',
+
+            // New webhook event types (message_type: 53 - DROPSHIPPER_ORDER_STATUS_UPDATE)
+            'PAYMENTFAILEDEVENT' => 'failed',
+            'ORDERCREATED' => 'placed',
+            'ORDERCLOSED' => 'cancelled',
+            'PAYMENTAUTHORIZED' => 'paid',
+            'ORDERSHIPPED' => 'shipped',
+            'ORDERCONFIRMED' => 'paid',
         ];
 
         // Normalize status to uppercase

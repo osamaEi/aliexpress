@@ -1,21 +1,22 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\AliExpressTestController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\AliExpressController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\Seller\SellerController;
+use App\Http\Controllers\AliExpressTestController;
 use App\Http\Controllers\AliExpressWebhookController;
 use App\Http\Controllers\SellerRegistrationController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\SubscriptionManagementController;
 use App\Http\Controllers\Admin\OrderManagementController;
 use App\Http\Controllers\Admin\AdminCategoryProfitController;
-use App\Http\Controllers\Seller\SellerController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\SubscriptionManagementController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,9 +27,14 @@ Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.
 
 // PayPal Callback (Public - No Auth Required for return URL)
 Route::get('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');
+
+// Paymob Callback & Webhook Routes (Public - No Auth Required, No CSRF for webhook)
+Route::get('/paymob/callback', [App\Http\Controllers\PaymobController::class, 'callback'])->name('paymob.callback');
+Route::post('/paymob/webhook', [App\Http\Controllers\PaymobController::class, 'webhook'])->name('paymob.webhook');
+
 // AliExpress Webhook Routes (Public - No Auth Required, No CSRF)
-Route::prefix('webhooks/aliexpress')->name('webhook.aliexpress.')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->group(function () {
-    Route::post('/order-status', [AliExpressWebhookController::class, 'handleOrderStatus'])->name('order-status');
+Route::prefix('webhooks/aliexpress')->name('webhook.aliexpress.')->group(function () {
+    Route::match(['get', 'post'], '/order-status', [AliExpressWebhookController::class, 'handleOrderStatus'])->name('order-status');
     Route::post('/tracking-update', [AliExpressWebhookController::class, 'handleTrackingUpdate'])->name('tracking-update');
     Route::get('/test', [AliExpressWebhookController::class, 'test'])->name('test');
 });
@@ -94,6 +100,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/subscriptions/{subscription}/process-payment', [SubscriptionController::class, 'processPayment'])->name('subscriptions.process-payment');
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     Route::get('/subscriptions-history', [SubscriptionController::class, 'history'])->name('subscriptions.history');
+
+    // Paymob subscription payment routes
+    Route::post('/paymob/initiate-subscription/{subscription}', [App\Http\Controllers\PaymobController::class, 'initiateSubscriptionPayment'])->name('paymob.initiate-subscription');
 
     // Category routes
     Route::get('/categories/{category}/fetch-subcategories', [CategoryController::class, 'fetchSubcategories'])->name('categories.fetch-subcategories');
