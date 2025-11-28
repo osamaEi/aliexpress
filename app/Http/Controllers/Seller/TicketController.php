@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewTicketNotification;
 use App\Models\Ticket;
 use App\Models\TicketReply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class TicketController extends Controller
 {
@@ -49,6 +51,15 @@ class TicketController extends Controller
             'priority' => $request->priority,
             'status' => 'open',
         ]);
+
+        // Load the user relationship for the email
+        $ticket->load('user');
+
+        // Send email notification to admin
+        $adminEmail = env('MAIL_USERNAME');
+        if ($adminEmail) {
+            Mail::to($adminEmail)->send(new NewTicketNotification($ticket));
+        }
 
         return redirect()->route('seller.tickets.show', $ticket)
             ->with('success', __('messages.ticket_created_successfully'));
