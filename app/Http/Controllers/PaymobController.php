@@ -13,6 +13,108 @@ use Illuminate\Support\Facades\Auth;
 class PaymobController extends Controller
 {
     /**
+     * Initiate payment with Paymob (generic method)
+     */
+    public function initiatePayment(Request $request, string $merchantOrderId, float $amount, string $type = 'subscription')
+    {
+        try {
+            $user = Auth::user();
+
+            // Convert price to AED cents
+            $amountCents = (int) ($amount * 100);
+
+            // 1) Auth: get token
+            $authResponse = Http::timeout(30)
+                ->connectTimeout(10)
+                ->post(config('paymob.base_url') . '/api/auth/tokens', [
+                    'api_key' => config('paymob.api_key'),
+                ]);
+
+            if (!$authResponse->successful()) {
+                throw new \Exception('Authentication with Paymob failed');
+            }
+
+            $auth = $authResponse->json();
+            if (!isset($auth['token'])) {
+                throw new \Exception('Token not found in authentication response');
+            }
+
+            // 2) Register order
+            $orderResponse = Http::withToken($auth['token'])
+                ->timeout(30)
+                ->connectTimeout(10)
+                ->post(config('paymob.base_url') . '/api/ecommerce/orders', [
+                    'amount_cents' => $amountCents,
+                    'currency' => config('paymob.currency'),
+                    'merchant_order_id' => $merchantOrderId,
+                    'delivery_needed' => false,
+                    'items' => [],
+                ]);
+
+            if (!$orderResponse->successful()) {
+                throw new \Exception('Failed to create order with Paymob');
+            }
+
+            $order = $orderResponse->json();
+            if (!isset($order['id'])) {
+                throw new \Exception('Order ID not found in response');
+            }
+
+            // 3) Payment key
+            $billing = [
+                "apartment" => "NA",
+                "email" => $user->email,
+                "floor" => "NA",
+                "first_name" => explode(' ', $user->name)[0] ?? 'User',
+                "street" => "Address",
+                "building" => "NA",
+                "phone_number" => $user->phone ?? "0501234567",
+                "shipping_method" => "PKG",
+                "postal_code" => "00000",
+                "city" => "Dubai",
+                "country" => "AE",
+                "last_name" => explode(' ', $user->name)[1] ?? 'Name',
+                "state" => "Dubai"
+            ];
+
+            $paymentKeyResponse = Http::withToken($auth['token'])
+                ->timeout(30)
+                ->connectTimeout(10)
+                ->post(config('paymob.base_url') . '/api/acceptance/payment_keys', [
+                    'amount_cents' => $amountCents,
+                    'currency' => config('paymob.currency'),
+                    'order_id' => $order['id'],
+                    'billing_data' => $billing,
+                    'expiration' => 3600,
+                    'integration_id' => config('paymob.card_integration_id'),
+                ]);
+
+            if (!$paymentKeyResponse->successful()) {
+                throw new \Exception('Failed to generate payment key');
+            }
+
+            $paymentKey = $paymentKeyResponse->json();
+            if (!isset($paymentKey['token'])) {
+                throw new \Exception('Payment token not found in response');
+            }
+
+            // Redirect to Paymob iframe
+            $iframeUrl = 'https://accept.paymob.com/api/acceptance/iframes/' . config('paymob.iframe_id') . '?payment_token=' . $paymentKey['token'];
+            return redirect($iframeUrl);
+
+        } catch (\Exception $e) {
+            Log::error('Paymob payment initialization failed', [
+                'error' => $e->getMessage(),
+                'merchant_order_id' => $merchantOrderId,
+                'type' => $type,
+                'user_id' => Auth::id(),
+            ]);
+
+            return redirect()->back()->with('error', __('messages.payment_failed'));
+        }
+    }
+
+    /**
      * Initiate subscription payment with Paymob
      */
     public function initiateSubscriptionPayment(Request $request, Subscription $subscription)
@@ -223,13 +325,37 @@ class PaymobController extends Controller
                     $subscription = Subscription::find($subscriptionId);
 
                     if ($subscription) {
-                        // Create user subscription
-                        \DB::transaction(function () use ($userId, $subscription, $orderId, $merchantOrderId) {
+                        // Get subscription data from session (if exists)
+                        $sessionData = session('paymob_subscription');
+                        $remainingDays = 0;
+                        $totalDays = $subscription->duration_days;
+                        $currentSubscriptionId = null;
+
+                        if ($sessionData && $sessionData['merchant_order_id'] === $merchantOrderId) {
+                            $remainingDays = $sessionData['remaining_days'] ?? 0;
+                            $totalDays = $sessionData['total_days'] ?? $subscription->duration_days;
+                            $currentSubscriptionId = $sessionData['current_subscription_id'] ?? null;
+                        }
+
+                        // Create user subscription with upgrade logic
+                        \DB::transaction(function () use ($userId, $subscription, $orderId, $merchantOrderId, $totalDays, $currentSubscriptionId) {
+                            // Cancel current subscription if exists
+                            if ($currentSubscriptionId) {
+                                $current = UserSubscription::find($currentSubscriptionId);
+                                if ($current) {
+                                    $current->update([
+                                        'status' => 'cancelled',
+                                        'cancelled_at' => now(),
+                                        'cancellation_reason' => 'Upgraded to ' . $subscription->localized_name,
+                                    ]);
+                                }
+                            }
+
                             UserSubscription::create([
                                 'user_id' => $userId,
                                 'subscription_id' => $subscription->id,
                                 'start_date' => now()->toDateString(),
-                                'end_date' => now()->addDays($subscription->duration_days)->toDateString(),
+                                'end_date' => now()->addDays($totalDays)->toDateString(),
                                 'status' => 'active',
                                 'amount_paid' => $subscription->price,
                                 'payment_method' => 'paymob',
@@ -250,6 +376,9 @@ class PaymobController extends Controller
                                 'paid_at' => now(),
                             ]);
                         });
+
+                        // Clear session data
+                        session()->forget('paymob_subscription');
 
                         Log::info('Paymob webhook: Subscription activated', [
                             'subscription_id' => $subscriptionId,

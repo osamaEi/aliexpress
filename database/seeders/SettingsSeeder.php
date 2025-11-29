@@ -105,6 +105,24 @@ class SettingsSeeder extends Seeder
                 'description' => 'Light version of primary color for backgrounds and subtle elements',
             ],
             [
+                'key' => 'bg_primary_color',
+                'value' => '#561C04',
+                'type' => 'color',
+                'description' => 'Background primary color',
+            ],
+            [
+                'key' => 'bg_primary_hover_color',
+                'value' => '#4a1603',
+                'type' => 'color',
+                'description' => 'Background primary hover color',
+            ],
+            [
+                'key' => 'bg_primary_active_color',
+                'value' => '#3d1202',
+                'type' => 'color',
+                'description' => 'Background primary active color',
+            ],
+            [
                 'key' => 'btn_primary_hover_color',
                 'value' => '#4a1603',
                 'type' => 'color',
@@ -122,6 +140,24 @@ class SettingsSeeder extends Seeder
                 'value' => '#6d788d',
                 'type' => 'color',
                 'description' => 'Secondary color for the website theme',
+            ],
+            [
+                'key' => 'bg_secondary_color',
+                'value' => '#6d788d',
+                'type' => 'color',
+                'description' => 'Background secondary color',
+            ],
+            [
+                'key' => 'bg_secondary_hover_color',
+                'value' => '#5a6376',
+                'type' => 'color',
+                'description' => 'Background secondary hover color',
+            ],
+            [
+                'key' => 'bg_secondary_active_color',
+                'value' => '#4a5365',
+                'type' => 'color',
+                'description' => 'Background secondary active color',
             ],
             [
                 'key' => 'btn_secondary_hover_color',
@@ -143,6 +179,24 @@ class SettingsSeeder extends Seeder
                 'description' => 'Default color for success buttons',
             ],
             [
+                'key' => 'bg_success_color',
+                'value' => '#ff6f00',
+                'type' => 'color',
+                'description' => 'Background success color',
+            ],
+            [
+                'key' => 'bg_success_hover_color',
+                'value' => '#e56300',
+                'type' => 'color',
+                'description' => 'Background success hover color',
+            ],
+            [
+                'key' => 'bg_success_active_color',
+                'value' => '#cc5700',
+                'type' => 'color',
+                'description' => 'Background success active color',
+            ],
+            [
                 'key' => 'btn_success_hover_color',
                 'value' => '#e56300',
                 'type' => 'color',
@@ -160,6 +214,24 @@ class SettingsSeeder extends Seeder
                 'value' => '#000000',
                 'type' => 'color',
                 'description' => 'Default color for info buttons',
+            ],
+            [
+                'key' => 'bg_info_color',
+                'value' => '#000000',
+                'type' => 'color',
+                'description' => 'Background info color',
+            ],
+            [
+                'key' => 'bg_info_hover_color',
+                'value' => '#333333',
+                'type' => 'color',
+                'description' => 'Background info hover color',
+            ],
+            [
+                'key' => 'bg_info_active_color',
+                'value' => '#1a1a1a',
+                'type' => 'color',
+                'description' => 'Background info active color',
             ],
             [
                 'key' => 'btn_info_hover_color',
@@ -181,6 +253,24 @@ class SettingsSeeder extends Seeder
                 'description' => 'Default color for warning buttons',
             ],
             [
+                'key' => 'bg_warning_color',
+                'value' => '#fdb528',
+                'type' => 'color',
+                'description' => 'Background warning color',
+            ],
+            [
+                'key' => 'bg_warning_hover_color',
+                'value' => '#e0a800',
+                'type' => 'color',
+                'description' => 'Background warning hover color',
+            ],
+            [
+                'key' => 'bg_warning_active_color',
+                'value' => '#d39e00',
+                'type' => 'color',
+                'description' => 'Background warning active color',
+            ],
+            [
                 'key' => 'btn_warning_hover_color',
                 'value' => '#e0a800',
                 'type' => 'color',
@@ -198,6 +288,24 @@ class SettingsSeeder extends Seeder
                 'value' => '#ff4d49',
                 'type' => 'color',
                 'description' => 'Default color for danger buttons',
+            ],
+            [
+                'key' => 'bg_danger_color',
+                'value' => '#ff4d49',
+                'type' => 'color',
+                'description' => 'Background danger color',
+            ],
+            [
+                'key' => 'bg_danger_hover_color',
+                'value' => '#e63946',
+                'type' => 'color',
+                'description' => 'Background danger hover color',
+            ],
+            [
+                'key' => 'bg_danger_active_color',
+                'value' => '#cc2936',
+                'type' => 'color',
+                'description' => 'Background danger active color',
             ],
             [
                 'key' => 'btn_danger_hover_color',

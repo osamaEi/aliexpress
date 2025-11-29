@@ -36,15 +36,26 @@ class SubscriptionController extends Controller
     public function subscribe(Request $request, Subscription $subscription)
     {
         $user = Auth::user();
+        $currentSubscription = $user->activeSubscription;
+        $isUpgrade = false;
+        $remainingDays = 0;
+        $totalDays = $subscription->duration_days;
 
-        // Check if user already has an active subscription
-        if ($user->hasActiveSubscription()) {
+        // Check if user already has an active subscription to the same plan
+        if ($currentSubscription && $currentSubscription->subscription_id == $subscription->id) {
             return redirect()->route('subscriptions.index')
                 ->with('error', __('messages.already_have_active_subscription'));
         }
 
+        // If upgrading, calculate remaining days
+        if ($currentSubscription) {
+            $isUpgrade = true;
+            $remainingDays = $currentSubscription->days_remaining;
+            $totalDays = $subscription->duration_days + $remainingDays;
+        }
+
         // Show payment page with options
-        return view('subscriptions.payment', compact('subscription'));
+        return view('subscriptions.payment', compact('subscription', 'isUpgrade', 'remainingDays', 'totalDays', 'currentSubscription'));
     }
 
     /**
@@ -53,9 +64,10 @@ class SubscriptionController extends Controller
     public function payWithWallet(Request $request, Subscription $subscription)
     {
         $user = Auth::user();
+        $currentSubscription = $user->activeSubscription;
 
-        // Check if user already has an active subscription
-        if ($user->hasActiveSubscription()) {
+        // Check if user already has an active subscription to the same plan
+        if ($currentSubscription && $currentSubscription->subscription_id == $subscription->id) {
             return redirect()->route('subscriptions.index')
                 ->with('error', __('messages.already_have_active_subscription'));
         }
@@ -69,7 +81,7 @@ class SubscriptionController extends Controller
         }
 
         try {
-            \DB::transaction(function () use ($user, $subscription, $wallet) {
+            \DB::transaction(function () use ($user, $subscription, $wallet, $currentSubscription) {
                 // Deduct from wallet
                 $wallet->debit(
                     $subscription->price,
@@ -77,12 +89,27 @@ class SubscriptionController extends Controller
                     'Subscription payment: ' . $subscription->localized_name
                 );
 
+                // Calculate end date (add remaining days if upgrading)
+                $startDate = now()->toDateString();
+                $remainingDays = $currentSubscription ? $currentSubscription->days_remaining : 0;
+                $totalDays = $subscription->duration_days + $remainingDays;
+                $endDate = now()->addDays($totalDays)->toDateString();
+
+                // Cancel current subscription if exists
+                if ($currentSubscription) {
+                    $currentSubscription->update([
+                        'status' => 'cancelled',
+                        'cancelled_at' => now(),
+                        'cancellation_reason' => 'Upgraded to ' . $subscription->localized_name,
+                    ]);
+                }
+
                 // Create user subscription
                 UserSubscription::create([
                     'user_id' => $user->id,
                     'subscription_id' => $subscription->id,
-                    'start_date' => now()->toDateString(),
-                    'end_date' => now()->addDays($subscription->duration_days)->toDateString(),
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
                     'status' => 'active',
                     'amount_paid' => $subscription->price,
                     'payment_method' => 'wallet',
@@ -110,9 +137,10 @@ class SubscriptionController extends Controller
     public function processPayment(Request $request, Subscription $subscription)
     {
         $user = Auth::user();
+        $currentSubscription = $user->activeSubscription;
 
-        // Check if user already has an active subscription
-        if ($user->hasActiveSubscription()) {
+        // Check if user already has an active subscription to the same plan
+        if ($currentSubscription && $currentSubscription->subscription_id == $subscription->id) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.already_have_active_subscription')
@@ -138,13 +166,28 @@ class SubscriptionController extends Controller
                 throw new \Exception('Payment amount mismatch');
             }
 
+            // Calculate end date (add remaining days if upgrading)
+            $startDate = now()->toDateString();
+            $remainingDays = $currentSubscription ? $currentSubscription->days_remaining : 0;
+            $totalDays = $subscription->duration_days + $remainingDays;
+            $endDate = now()->addDays($totalDays)->toDateString();
+
             // Create user subscription
-            \DB::transaction(function () use ($user, $subscription, $validated) {
+            \DB::transaction(function () use ($user, $subscription, $validated, $currentSubscription, $startDate, $endDate) {
+                // Cancel current subscription if exists
+                if ($currentSubscription) {
+                    $currentSubscription->update([
+                        'status' => 'cancelled',
+                        'cancelled_at' => now(),
+                        'cancellation_reason' => 'Upgraded to ' . $subscription->localized_name,
+                    ]);
+                }
+
                 UserSubscription::create([
                     'user_id' => $user->id,
                     'subscription_id' => $subscription->id,
-                    'start_date' => now()->toDateString(),
-                    'end_date' => now()->addDays($subscription->duration_days)->toDateString(),
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
                     'status' => 'active',
                     'amount_paid' => $subscription->price,
                     'payment_method' => 'paypal',
@@ -190,6 +233,57 @@ class SubscriptionController extends Controller
                 'success' => false,
                 'message' => __('messages.payment_failed')
             ], 500);
+        }
+    }
+
+    /**
+     * Pay with Paymob
+     */
+    public function payWithPaymob(Request $request, Subscription $subscription)
+    {
+        $user = Auth::user();
+        $currentSubscription = $user->activeSubscription;
+
+        // Check if user already has an active subscription to the same plan
+        if ($currentSubscription && $currentSubscription->subscription_id == $subscription->id) {
+            return redirect()->route('subscriptions.index')
+                ->with('error', __('messages.already_have_active_subscription'));
+        }
+
+        try {
+            // Calculate remaining days if upgrading
+            $remainingDays = $currentSubscription ? $currentSubscription->days_remaining : 0;
+            $totalDays = $subscription->duration_days + $remainingDays;
+
+            // Create payment intent with Paymob
+            $merchantOrderId = 'SUB-' . $subscription->id . '-' . $user->id . '-' . time();
+
+            // Store payment intent in session for callback
+            session([
+                'paymob_subscription' => [
+                    'subscription_id' => $subscription->id,
+                    'user_id' => $user->id,
+                    'merchant_order_id' => $merchantOrderId,
+                    'amount' => $subscription->price,
+                    'remaining_days' => $remainingDays,
+                    'total_days' => $totalDays,
+                    'current_subscription_id' => $currentSubscription ? $currentSubscription->id : null,
+                ]
+            ]);
+
+            // Initialize Paymob payment
+            $paymobController = app(\App\Http\Controllers\PaymobController::class);
+            return $paymobController->initiatePayment($request, $merchantOrderId, $subscription->price, 'subscription');
+
+        } catch (\Exception $e) {
+            \Log::error('Paymob subscription payment initiation failed', [
+                'user_id' => $user->id,
+                'subscription_id' => $subscription->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->with('error', __('messages.payment_failed'));
         }
     }
 

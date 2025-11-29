@@ -74,6 +74,27 @@
                         </div>
                     </div>
 
+                    <!-- Current Subscription Info (if upgrading) -->
+                    @if($isUpgrade ?? false)
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6 class="mb-2">
+                                    <i class="ri-information-line me-2"></i>{{ __('messages.upgrading_subscription') }}
+                                </h6>
+                                <p class="mb-2 small">
+                                    {{ __('messages.current_plan') }}: <strong>{{ $currentSubscription->subscription->localized_name }}</strong>
+                                </p>
+                                <p class="mb-0 small">
+                                    {{ __('messages.remaining_days') }}: <strong>{{ $remainingDays ?? 0 }} {{ __('messages.days') }}</strong>
+                                    <br>
+                                    <span class="text-success">{{ __('messages.remaining_days_will_be_added') }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Billing Summary -->
                     <div class="row mb-4">
                         <div class="col-12">
@@ -85,9 +106,19 @@
                                         <strong>{{ $subscription->localized_name }}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
-                                        <span>{{ __('messages.duration') }}:</span>
+                                        <span>{{ __('messages.new_plan_duration') }}:</span>
                                         <strong>{{ $subscription->duration_days }} {{ __('messages.days') }}</strong>
                                     </div>
+                                    @if($isUpgrade ?? false)
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>{{ __('messages.remaining_days_bonus') }}:</span>
+                                        <strong class="text-success">+ {{ $remainingDays ?? 0 }} {{ __('messages.days') }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>{{ __('messages.total_subscription_days') }}:</span>
+                                        <strong class="text-primary">{{ $totalDays ?? $subscription->duration_days }} {{ __('messages.days') }}</strong>
+                                    </div>
+                                    @endif
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>{{ __('messages.price') }}:</span>
                                         <strong>{{ number_format($subscription->price, 2) }} AED</strong>
@@ -108,22 +139,22 @@
                             <h5 class="mb-3">{{ __('messages.select_payment_method') }}</h5>
 
                             <!-- Paymob Payment Button -->
-                            <button id="paymob-button" class="btn btn-lg btn-primary w-100 mb-4">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="ri-bank-card-line fs-4 me-2"></i>
-                                    <span class="fs-5">Pay with Card (Paymob)</span>
-                                </div>
-                            </button>
-
-                            <!-- Paymob iFrame Container -->
-                            <div id="paymob-iframe-container" style="display: none;"></div>
+                            <form action="{{ route('subscriptions.pay-with-paymob', $subscription) }}" method="POST" id="paymob-form">
+                                @csrf
+                                <button type="submit" class="btn btn-lg btn-primary w-100 mb-4" id="paymob-button">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="ri-bank-card-line fs-4 me-2"></i>
+                                        <span class="fs-5">{{ __('messages.pay_with_card_paymob') }}</span>
+                                    </div>
+                                </button>
+                            </form>
 
                             <!-- Loading State -->
                             <div id="payment-loading" class="text-center mb-3" style="display: none;">
                                 <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+                                    <span class="visually-hidden">{{ __('messages.loading') }}...</span>
                                 </div>
-                                <p class="mt-2 text-muted">Processing payment...</p>
+                                <p class="mt-2 text-muted">{{ __('messages.processing_payment') }}...</p>
                             </div>
 
                             <!-- OR Divider -->
@@ -201,66 +232,10 @@
 </style>
 
 <script>
-    // Paymob Payment Integration
-    document.getElementById('paymob-button').addEventListener('click', function() {
-        const loadingDiv = document.getElementById('payment-loading');
-        const paymobButton = document.getElementById('paymob-button');
-        const iframeContainer = document.getElementById('paymob-iframe-container');
-
-        // Show loading
-        loadingDiv.style.display = 'block';
-        paymobButton.disabled = true;
-
-        // Get CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
-        // Call backend to initiate payment
-        fetch('{{ route("paymob.initiate-subscription", $subscription) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(result => {
-            loadingDiv.style.display = 'none';
-
-            if (result.success && result.paymentToken && result.iframeId) {
-                // Hide the payment button
-                paymobButton.style.display = 'none';
-
-                // Show iframe container
-                iframeContainer.style.display = 'block';
-
-                // Create and inject the Paymob iframe
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://uae.paymob.com/api/acceptance/iframes/${result.iframeId}?payment_token=${result.paymentToken}`;
-                iframe.width = '100%';
-                iframe.height = '600';
-                iframe.frameBorder = '0';
-                iframe.style.border = 'none';
-
-                iframeContainer.innerHTML = '';
-                iframeContainer.appendChild(iframe);
-
-                // Listen for payment completion messages
-                window.addEventListener('message', function(event) {
-                    // You can handle iframe messages here if needed
-                    console.log('Paymob iframe message:', event.data);
-                });
-            } else {
-                paymobButton.disabled = false;
-                alert(result.message || 'Failed to initialize payment. Please try again.');
-            }
-        })
-        .catch(error => {
-            loadingDiv.style.display = 'none';
-            paymobButton.disabled = false;
-            console.error('Payment initialization error:', error);
-            alert('Failed to initialize payment. Please try again or use an alternative payment method.');
-        });
+    // Show loading on Paymob form submission
+    document.getElementById('paymob-form').addEventListener('submit', function() {
+        document.getElementById('payment-loading').style.display = 'block';
+        document.getElementById('paymob-button').disabled = true;
     });
 </script>
 @endsection

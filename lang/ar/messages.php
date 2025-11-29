@@ -1104,4 +1104,14 @@ return [
     'click_save_changes' => 'انقر فوق "حفظ التغييرات" لتخزينها في ملف .env',
     'after_saving_click_generate' => 'بعد الحفظ، انقر فوق "إنشاء توكن الوصول"',
     'after_auth_redirect_back' => 'بعد التفويض، سيتم إعادة توجيهك مع توكن صالح',
+
+    // Subscription Upgrade
+    'upgrading_subscription' => 'ترقية الاشتراك',
+    'current_plan' => 'الخطة الحالية',
+    'remaining_days_will_be_added' => 'سيتم إضافة الأيام المتبقية إلى الاشتراك الجديد',
+    'new_plan_duration' => 'مدة الخطة الجديدة',
+    'remaining_days_bonus' => 'مكافأة الأيام المتبقية',
+    'total_subscription_days' => 'إجمالي أيام الاشتراك',
+    'pay_with_card_paymob' => 'الدفع بالبطاقة (Paymob)',
+    'loading' => 'جاري التحميل',
 ];

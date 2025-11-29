@@ -69,30 +69,60 @@
             $primaryHoverColor = setting('btn_primary_hover_color', '#4a1603');
             $primaryActiveColor = setting('btn_primary_active_color', '#3d1202');
 
+            // Background Primary colors
+            $bgPrimaryColor = setting('bg_primary_color', '#561C04');
+            $bgPrimaryHoverColor = setting('bg_primary_hover_color', '#4a1603');
+            $bgPrimaryActiveColor = setting('bg_primary_active_color', '#3d1202');
+
             // Secondary colors
             $secondaryColor = setting('secondary_color', '#6d788d');
             $secondaryHoverColor = setting('btn_secondary_hover_color', '#5a6376');
             $secondaryActiveColor = setting('btn_secondary_active_color', '#4a5365');
+
+            // Background Secondary colors
+            $bgSecondaryColor = setting('bg_secondary_color', '#6d788d');
+            $bgSecondaryHoverColor = setting('bg_secondary_hover_color', '#5a6376');
+            $bgSecondaryActiveColor = setting('bg_secondary_active_color', '#4a5365');
 
             // Success colors
             $successColor = setting('btn_success_color', '#ff6f00');
             $successHoverColor = setting('btn_success_hover_color', '#e56300');
             $successActiveColor = setting('btn_success_active_color', '#cc5700');
 
+            // Background Success colors
+            $bgSuccessColor = setting('bg_success_color', '#ff6f00');
+            $bgSuccessHoverColor = setting('bg_success_hover_color', '#e56300');
+            $bgSuccessActiveColor = setting('bg_success_active_color', '#cc5700');
+
             // Warning colors
             $warningColor = setting('btn_warning_color', '#fdb528');
             $warningHoverColor = setting('btn_warning_hover_color', '#e0a800');
             $warningActiveColor = setting('btn_warning_active_color', '#d39e00');
+
+            // Background Warning colors
+            $bgWarningColor = setting('bg_warning_color', '#fdb528');
+            $bgWarningHoverColor = setting('bg_warning_hover_color', '#e0a800');
+            $bgWarningActiveColor = setting('bg_warning_active_color', '#d39e00');
 
             // Danger colors
             $dangerColor = setting('btn_danger_color', '#ff4d49');
             $dangerHoverColor = setting('btn_danger_hover_color', '#e63946');
             $dangerActiveColor = setting('btn_danger_active_color', '#cc2936');
 
+            // Background Danger colors
+            $bgDangerColor = setting('bg_danger_color', '#ff4d49');
+            $bgDangerHoverColor = setting('bg_danger_hover_color', '#e63946');
+            $bgDangerActiveColor = setting('bg_danger_active_color', '#cc2936');
+
             // Info colors
             $infoColor = setting('btn_info_color', '#000000');
             $infoHoverColor = setting('btn_info_hover_color', '#333333');
             $infoActiveColor = setting('btn_info_active_color', '#1a1a1a');
+
+            // Background Info colors
+            $bgInfoColor = setting('bg_info_color', '#000000');
+            $bgInfoHoverColor = setting('bg_info_hover_color', '#333333');
+            $bgInfoActiveColor = setting('bg_info_active_color', '#1a1a1a');
 
             // Calculate RGB values
             $primaryColorRgb = sscanf($primaryColor, "#%02x%02x%02x");
@@ -127,15 +157,9 @@
         }
 
         /* Override template colors */
-        .btn-primary,
-        .badge.bg-primary,
-        .bg-primary {
+        .btn-primary {
             background-color: {{ $primaryColor }} !important;
             border-color: {{ $primaryColor }} !important;
-        }
-
-        .text-primary {
-            color: {{ $primaryColor }} !important;
         }
 
         .btn-primary:hover,
@@ -148,6 +172,26 @@
         .btn-primary.active {
             background-color: {{ $primaryActiveColor }} !important;
             border-color: {{ $primaryActiveColor }} !important;
+        }
+
+        /* Background Primary Colors */
+        .badge.bg-primary,
+        .bg-primary {
+            background-color: {{ $bgPrimaryColor }} !important;
+            border-color: {{ $bgPrimaryColor }} !important;
+        }
+
+        .bg-primary:hover {
+            background-color: {{ $bgPrimaryHoverColor }} !important;
+        }
+
+        .bg-primary:active,
+        .bg-primary.active {
+            background-color: {{ $bgPrimaryActiveColor }} !important;
+        }
+
+        .text-primary {
+            color: {{ $primaryColor }} !important;
         }
 
         /* Use light primary color for label badges and subtle backgrounds */
@@ -205,15 +249,9 @@
         }
 
         /* Success Button Colors */
-        .btn-success,
-        .badge.bg-success,
-        .bg-success {
+        .btn-success {
             background-color: {{ $successColor }} !important;
             border-color: {{ $successColor }} !important;
-        }
-
-        .text-success {
-            color: {{ $successColor }} !important;
         }
 
         .btn-success:hover,
@@ -226,6 +264,26 @@
         .btn-success.active {
             background-color: {{ $successActiveColor }} !important;
             border-color: {{ $successActiveColor }} !important;
+        }
+
+        /* Background Success Colors */
+        .badge.bg-success,
+        .bg-success {
+            background-color: {{ $bgSuccessColor }} !important;
+            border-color: {{ $bgSuccessColor }} !important;
+        }
+
+        .bg-success:hover {
+            background-color: {{ $bgSuccessHoverColor }} !important;
+        }
+
+        .bg-success:active,
+        .bg-success.active {
+            background-color: {{ $bgSuccessActiveColor }} !important;
+        }
+
+        .text-success {
+            color: {{ $successColor }} !important;
         }
 
         .btn-outline-success {
@@ -246,15 +304,9 @@
         }
 
         /* Warning Button Colors */
-        .btn-warning,
-        .badge.bg-warning,
-        .bg-warning {
+        .btn-warning {
             background-color: {{ $warningColor }} !important;
             border-color: {{ $warningColor }} !important;
-        }
-
-        .text-warning {
-            color: {{ $warningColor }} !important;
         }
 
         .btn-warning:hover,
@@ -267,6 +319,26 @@
         .btn-warning.active {
             background-color: {{ $warningActiveColor }} !important;
             border-color: {{ $warningActiveColor }} !important;
+        }
+
+        /* Background Warning Colors */
+        .badge.bg-warning,
+        .bg-warning {
+            background-color: {{ $bgWarningColor }} !important;
+            border-color: {{ $bgWarningColor }} !important;
+        }
+
+        .bg-warning:hover {
+            background-color: {{ $bgWarningHoverColor }} !important;
+        }
+
+        .bg-warning:active,
+        .bg-warning.active {
+            background-color: {{ $bgWarningActiveColor }} !important;
+        }
+
+        .text-warning {
+            color: {{ $warningColor }} !important;
         }
 
         .btn-outline-warning {
@@ -287,15 +359,9 @@
         }
 
         /* Danger Button Colors */
-        .btn-danger,
-        .badge.bg-danger,
-        .bg-danger {
+        .btn-danger {
             background-color: {{ $dangerColor }} !important;
             border-color: {{ $dangerColor }} !important;
-        }
-
-        .text-danger {
-            color: {{ $dangerColor }} !important;
         }
 
         .btn-danger:hover,
@@ -308,6 +374,26 @@
         .btn-danger.active {
             background-color: {{ $dangerActiveColor }} !important;
             border-color: {{ $dangerActiveColor }} !important;
+        }
+
+        /* Background Danger Colors */
+        .badge.bg-danger,
+        .bg-danger {
+            background-color: {{ $bgDangerColor }} !important;
+            border-color: {{ $bgDangerColor }} !important;
+        }
+
+        .bg-danger:hover {
+            background-color: {{ $bgDangerHoverColor }} !important;
+        }
+
+        .bg-danger:active,
+        .bg-danger.active {
+            background-color: {{ $bgDangerActiveColor }} !important;
+        }
+
+        .text-danger {
+            color: {{ $dangerColor }} !important;
         }
 
         .btn-outline-danger {
@@ -328,15 +414,9 @@
         }
 
         /* Info Button Colors */
-        .btn-info,
-        .badge.bg-info,
-        .bg-info {
+        .btn-info {
             background-color: {{ $infoColor }} !important;
             border-color: {{ $infoColor }} !important;
-        }
-
-        .text-info {
-            color: {{ $infoColor }} !important;
         }
 
         .btn-info:hover,
@@ -349,6 +429,26 @@
         .btn-info.active {
             background-color: {{ $infoActiveColor }} !important;
             border-color: {{ $infoActiveColor }} !important;
+        }
+
+        /* Background Info Colors */
+        .badge.bg-info,
+        .bg-info {
+            background-color: {{ $bgInfoColor }} !important;
+            border-color: {{ $bgInfoColor }} !important;
+        }
+
+        .bg-info:hover {
+            background-color: {{ $bgInfoHoverColor }} !important;
+        }
+
+        .bg-info:active,
+        .bg-info.active {
+            background-color: {{ $bgInfoActiveColor }} !important;
+        }
+
+        .text-info {
+            color: {{ $infoColor }} !important;
         }
 
         .btn-outline-info {
@@ -369,15 +469,9 @@
         }
 
         /* Secondary Button Colors */
-        .btn-secondary,
-        .badge.bg-secondary,
-        .bg-secondary {
+        .btn-secondary {
             background-color: {{ $secondaryColor }} !important;
             border-color: {{ $secondaryColor }} !important;
-        }
-
-        .text-secondary {
-            color: {{ $secondaryColor }} !important;
         }
 
         .btn-secondary:hover,
@@ -390,6 +484,26 @@
         .btn-secondary.active {
             background-color: {{ $secondaryActiveColor }} !important;
             border-color: {{ $secondaryActiveColor }} !important;
+        }
+
+        /* Background Secondary Colors */
+        .badge.bg-secondary,
+        .bg-secondary {
+            background-color: {{ $bgSecondaryColor }} !important;
+            border-color: {{ $bgSecondaryColor }} !important;
+        }
+
+        .bg-secondary:hover {
+            background-color: {{ $bgSecondaryHoverColor }} !important;
+        }
+
+        .bg-secondary:active,
+        .bg-secondary.active {
+            background-color: {{ $bgSecondaryActiveColor }} !important;
+        }
+
+        .text-secondary {
+            color: {{ $secondaryColor }} !important;
         }
 
         .btn-outline-secondary {
