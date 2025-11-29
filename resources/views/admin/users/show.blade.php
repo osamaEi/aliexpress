@@ -484,7 +484,7 @@
                             <option value="">{{ __('messages.choose') }}...</option>
                             @foreach($subscriptions as $subscription)
                                 <option value="{{ $subscription->id }}">
-                                    {{ $subscription->localized_name }} - ${{ number_format($subscription->price, 2) }}
+                                    {{ $subscription->localized_name }} - {{ number_format($subscription->price * 3.67, 2) }} AED
                                 </option>
                             @endforeach
                         </select>
