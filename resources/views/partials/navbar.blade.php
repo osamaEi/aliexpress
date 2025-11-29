@@ -68,6 +68,31 @@
                         </li>
                         <!--/ Language Switcher -->
 
+                        <!-- Currency Switcher -->
+                        <li class="nav-item dropdown me-2 me-xl-0">
+                            <a
+                                class="nav-link btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow"
+                                href="javascript:void(0);"
+                                data-bs-toggle="dropdown">
+                                <i class="ri-money-dollar-circle-line ri-22px"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                @php
+                                    $currencies = \App\Models\Currency::active();
+                                    $currentCurrencyCode = session('currency_code', 'USD');
+                                @endphp
+                                @foreach($currencies as $currency)
+                                <li>
+                                    <a class="dropdown-item {{ $currentCurrencyCode == $currency->code ? 'active' : '' }}"
+                                       href="{{ route('currency.switch', $currency->code) }}">
+                                        <span class="align-middle">{{ $currency->symbol }} {{ $currency->name }} ({{ $currency->code }})</span>
+                                    </a>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </li>
+                        <!--/ Currency Switcher -->
+
                         <!-- Style Switcher -->
                         <li class="nav-item dropdown-style-switcher dropdown me-2 me-xl-0">
                             <a

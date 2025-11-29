@@ -68,15 +68,15 @@
                         <div>
                             @if($product->isAliexpressProduct())
                                 <span class="badge bg-gradient-info text-white mb-2 px-3 py-2">
-                                    <i class="ri-global-line me-1"></i> Dropshipping Product
+                                    <i class="ri-global-line me-1"></i> {{ __('messages.dropshipping_product') }}
                                 </span>
                             @endif
                             <span class="badge {{ $product->is_active ? 'bg-success' : 'bg-secondary' }} mb-2 px-3 py-2">
-                                {{ $product->is_active ? 'Available' : 'Unavailable' }}
+                                {{ $product->is_active ? __('messages.available') : __('messages.unavailable') }}
                             </span>
                         </div>
                         <a href="{{ route('products.index') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="ri-arrow-left-line me-1"></i> Back
+                            <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
                         </a>
                     </div>
 
@@ -99,13 +99,13 @@
                                         @endfor
                                     </div>
                                     <span class="fw-bold">{{ number_format((float)$aliexpressData['ae_item_base_info_dto']['avg_evaluation_rating'], 1) }}</span>
-                                    <span class="text-muted ms-1">({{ (int)($aliexpressData['ae_item_base_info_dto']['evaluation_count'] ?? 0) }} reviews)</span>
+                                    <span class="text-muted ms-1">({{ (int)($aliexpressData['ae_item_base_info_dto']['evaluation_count'] ?? 0) }} {{ __('messages.reviews') }})</span>
                                 </div>
                             @endif
                             @if(isset($aliexpressData['ae_item_base_info_dto']['sales_count']))
                                 <div class="text-muted">
                                     <i class="ri-shopping-cart-line me-1"></i>
-                                    <strong>{{ number_format((float)$aliexpressData['ae_item_base_info_dto']['sales_count']) }}</strong> sold
+                                    <strong>{{ number_format((float)$aliexpressData['ae_item_base_info_dto']['sales_count']) }}</strong> {{ __('messages.sold') }}
                                 </div>
                             @endif
                         </div>
@@ -114,27 +114,32 @@
                     <!-- Pricing -->
                     <div class="card bg-gradient-primary text-white mb-4 border-0" style="border-radius: 16px;">
                         <div class="card-body p-4">
+                            @php
+                                $convertedPrice = $currentCurrency->convertFrom($product->price, $product->currency ?? 'USD');
+                                $convertedComparePrice = $product->compare_price ? $currentCurrency->convertFrom($product->compare_price, $product->currency ?? 'USD') : null;
+                                $convertedOriginalPrice = $product->original_price ? $currentCurrency->convertFrom($product->original_price, $product->currency ?? 'USD') : null;
+                            @endphp
                             <div class="d-flex align-items-baseline mb-2">
-                                <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px;">{{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}</h2>
-                                @if($product->compare_price && $product->compare_price > $product->price)
-                                    <span class="text-white-50 text-decoration-line-through me-2" style="font-size: 20px;">{{ $product->currency }} {{ number_format($product->compare_price, 2) }}</span>
+                                <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px;">{{ $currentCurrency->format($convertedPrice) }}</h2>
+                                @if($convertedComparePrice && $convertedComparePrice > $convertedPrice)
+                                    <span class="text-white-50 text-decoration-line-through me-2" style="font-size: 20px;">{{ $currentCurrency->format($convertedComparePrice) }}</span>
                                     <span class="badge bg-danger" style="font-size: 14px;">
-                                        {{ round((($product->compare_price - $product->price) / $product->compare_price) * 100) }}% OFF
+                                        {{ round((($convertedComparePrice - $convertedPrice) / $convertedComparePrice) * 100) }}% OFF
                                     </span>
                                 @endif
                             </div>
 
-                            @if($product->original_price && $product->original_price > 0)
+                            @if($convertedOriginalPrice && $convertedOriginalPrice > 0)
                                 <div class="mt-3 pt-3 border-top border-white border-opacity-25">
-                                    <small class="d-block mb-2 text-white-50">💰 Your Profit Breakdown</small>
+                                    <small class="d-block mb-2 text-white-50">💰 {{ __('messages.profit_breakdown') }}</small>
                                     <div class="row g-2">
                                         <div class="col-6">
-                                            <small class="text-white-50">Supplier Price</small>
-                                            <div class="fw-bold">{{ $product->currency }} {{ number_format($product->original_price, 2) }}</div>
+                                            <small class="text-white-50">{{ __('messages.supplier_price') }}</small>
+                                            <div class="fw-bold">{{ $currentCurrency->format($convertedOriginalPrice) }}</div>
                                         </div>
                                         <div class="col-6 text-end">
-                                            <small class="text-white-50">Your Profit</small>
-                                            <div class="fw-bold text-warning">{{ $product->currency }} {{ number_format($product->price - $product->original_price, 2) }}</div>
+                                            <small class="text-white-50">{{ __('messages.your_profit') }}</small>
+                                            <div class="fw-bold text-warning">{{ $currentCurrency->format($convertedPrice - $convertedOriginalPrice) }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -149,7 +154,7 @@
                                 <div class="card-body text-center">
                                     <i class="ri-box-3-line text-primary mb-2" style="font-size: 28px;"></i>
                                     <div class="fs-3 fw-bold text-dark">{{ $product->stock_quantity }}</div>
-                                    <small class="text-muted">Units in Stock</small>
+                                    <small class="text-muted">{{ __('messages.units_in_stock') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -158,7 +163,7 @@
                                 <div class="card-body text-center">
                                     <i class="ri-price-tag-3-line text-success mb-2" style="font-size: 28px;"></i>
                                     <div class="fs-6 fw-bold text-dark">{{ $product->sku ?? 'N/A' }}</div>
-                                    <small class="text-muted">Product SKU</small>
+                                    <small class="text-muted">{{ __('messages.product_sku') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -168,24 +173,24 @@
                     <div class="d-grid gap-3">
                         @if($product->isAliexpressProduct())
                             <button type="button" class="btn btn-lg btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#shippingCalculatorModal" style="border-radius: 12px; padding: 16px;">
-                                <i class="ri-ship-line me-2"></i> Calculate Shipping & Create Order
+                                <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
                             </button>
                         @else
                             <a href="{{ route('orders.create', ['product_id' => $product->id]) }}" class="btn btn-lg btn-success shadow-sm" style="border-radius: 12px; padding: 16px;">
-                                <i class="ri-shopping-bag-line me-2"></i> Create Order
+                                <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
                             </a>
                         @endif
 
                         <div class="row g-2">
                             <div class="col-6">
                                 <a href="{{ route('products.edit', $product) }}" class="btn btn-outline-primary w-100" style="border-radius: 10px;">
-                                    <i class="ri-edit-line me-1"></i> Edit Product
+                                    <i class="ri-edit-line me-1"></i> {{ __('messages.edit_product') }}
                                 </a>
                             </div>
                             <div class="col-6">
                                 @if($product->isAliexpressProduct())
                                     <button type="button" class="btn btn-outline-info w-100" id="syncProductBtn" onclick="syncProduct()" style="border-radius: 10px;">
-                                        <i class="ri-refresh-line me-1"></i> Sync Data
+                                        <i class="ri-refresh-line me-1"></i> {{ __('messages.sync_data') }}
                                     </button>
                                 @endif
                             </div>
@@ -208,27 +213,27 @@
     <ul class="nav nav-tabs mb-4" id="productTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button">
-                <i class="ri-file-text-line me-2"></i>Description
+                <i class="ri-file-text-line me-2"></i>{{ __('messages.description') }}
             </button>
         </li>
         @if($aliexpressData && isset($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']))
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="variants-tab" data-bs-toggle="tab" data-bs-target="#variants" type="button">
-                    <i class="ri-list-check me-2"></i>Variants ({{ count($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']) }})
+                    <i class="ri-list-check me-2"></i>{{ __('messages.variants') }} ({{ count($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']) }})
                 </button>
             </li>
         @endif
         @if($aliexpressData && isset($aliexpressData['ae_item_properties']['ae_item_property']))
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button">
-                    <i class="ri-settings-3-line me-2"></i>Specifications
+                    <i class="ri-settings-3-line me-2"></i>{{ __('messages.specifications') }}
                 </button>
             </li>
         @endif
         @if($aliexpressData && isset($aliexpressData['package_info_dto']))
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button">
-                    <i class="ri-truck-line me-2"></i>Shipping Info
+                    <i class="ri-truck-line me-2"></i>{{ __('messages.shipping_info') }}
                 </button>
             </li>
         @endif
@@ -245,7 +250,7 @@
                             {!! $product->description !!}
                         </div>
                     @else
-                        <p class="text-muted text-center py-5">No description available.</p>
+                        <p class="text-muted text-center py-5">{{ __('messages.no_description_available') }}</p>
                     @endif
                 </div>
             </div>

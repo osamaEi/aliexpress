@@ -100,6 +100,7 @@ return [
     'price' => 'Price',
     'cost_price' => 'Cost Price',
     'sale_price' => 'Sale Price',
+    'exchange_rate' => 'Exchange Rate',
     'quantity' => 'Quantity',
     'stock' => 'Stock',
     'sku' => 'SKU',

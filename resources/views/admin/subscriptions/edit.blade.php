@@ -87,7 +87,7 @@
 
                     <!-- Price -->
                     <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">{{ __('messages.price') }} ($) <span class="text-danger">*</span></label>
+                        <label for="price" class="form-label">{{ __('messages.price') }} (AED) <span class="text-danger">*</span></label>
                         <input
                             type="number"
                             step="0.01"

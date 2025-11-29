@@ -94,13 +94,13 @@ class SettingsSeeder extends Seeder
             ],
             [
                 'key' => 'primary_color',
-                'value' => '#666cff',
+                'value' => '#561C04',
                 'type' => 'color',
                 'description' => 'Primary color for the website theme',
             ],
             [
                 'key' => 'primary_light_color',
-                'value' => '#e7e7ff',
+                'value' => '#F5E6D3',
                 'type' => 'color',
                 'description' => 'Light version of primary color for backgrounds and subtle elements',
             ],

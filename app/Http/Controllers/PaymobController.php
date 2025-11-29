@@ -28,9 +28,8 @@ class PaymobController extends Controller
                 ], 400);
             }
 
-            // Convert price to AED cents (assuming 1 USD = 3.67 AED, adjust as needed)
-            $exchangeRate = config('paymob.exchange_rate', 3.67); // USD to AED
-            $amountCents = (int) ($subscription->price * $exchangeRate * 100);
+            // Convert price to AED cents (price is already in AED)
+            $amountCents = (int) ($subscription->price * 100);
 
             $merchantOrderId = 'SUB-' . $subscription->id . '-' . $user->id . '-' . now()->timestamp;
 

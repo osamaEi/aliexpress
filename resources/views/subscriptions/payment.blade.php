@@ -18,7 +18,7 @@
                             <span class="badge mb-3" style="background-color: {{ $subscription->color }}; font-size: 1.3rem; padding: 10px 20px;">
                                 {{ $subscription->localized_name }}
                             </span>
-                            <h1 class="mb-1">{{ number_format($subscription->price * 3.67, 2) }} AED</h1>
+                            <h1 class="mb-1">{{ number_format($subscription->price, 2) }} AED</h1>
                             <p class="text-muted">{{ __('messages.per_month') }}</p>
                         </div>
                     </div>
@@ -90,12 +90,12 @@
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>{{ __('messages.price') }}:</span>
-                                        <strong>{{ number_format($subscription->price * 3.67, 2) }} AED</strong>
+                                        <strong>{{ number_format($subscription->price, 2) }} AED</strong>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between">
                                         <h5 class="mb-0">{{ __('messages.total') }}:</h5>
-                                        <h5 class="mb-0 text-primary">{{ number_format($subscription->price * 3.67, 2) }} AED</h5>
+                                        <h5 class="mb-0 text-primary">{{ number_format($subscription->price, 2) }} AED</h5>
                                     </div>
                                 </div>
                             </div>

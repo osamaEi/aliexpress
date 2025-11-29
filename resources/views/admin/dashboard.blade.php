@@ -15,7 +15,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-primary me-3 p-2">
+                        <div class="badge rounded-pill bg-label-success me-3 p-2">
                             <i class="ri-user-line ri-24px"></i>
                         </div>
                         <div class="card-info">
@@ -49,7 +49,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-info me-3 p-2">
+                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
                             <i class="ri-shopping-bag-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
@@ -100,7 +100,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-primary me-3 p-2">
+                        <div class="badge rounded-pill bg-label-success me-3 p-2">
                             <i class="ri-vip-crown-line ri-24px"></i>
                         </div>
                         <div class="card-info">
@@ -117,7 +117,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-info me-3 p-2">
+                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
                             <i class="ri-price-tag-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
@@ -156,19 +156,19 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ route('admin.tokens') }}" class="btn btn-primary">
+                        <a href="{{ route('admin.tokens') }}" class="btn btn-success">
                             <i class="ri-key-2-line me-1"></i>
                             {{ __('messages.manage_tokens') }}
                         </a>
-                        <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-info">
+                        <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-warning">
                             <i class="ri-vip-crown-line me-1"></i>
                             {{ __('messages.manage_subscriptions') }}
                         </a>
-                        <a href="{{ route('admin.orders.index') }}" class="btn btn-warning">
+                        <a href="{{ route('admin.orders.index') }}" class="btn btn-danger">
                             <i class="ri-file-list-3-line me-1"></i>
                             {{ __('messages.manage_orders') }}
                         </a>
-                        <a href="{{ route('admin.categories.index') }}" class="btn btn-success">
+                        <a href="{{ route('admin.categories.index') }}" class="btn btn-dark">
                             <i class="ri-price-tag-3-line me-1"></i>
                             {{ __('messages.manage_categories') }}
                         </a>
@@ -185,7 +185,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between">
                     <h5 class="mb-0">{{ __('messages.recent_orders') }}</h5>
-                    <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-success">
                         {{ __('messages.view_all') }}
                     </a>
                 </div>
@@ -206,7 +206,7 @@
                                     <td><strong>{{ $order->order_number }}</strong></td>
                                     <td>{{ $order->user->name }}</td>
                                     <td>
-                                        <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'delivered' ? 'success' : 'info') }}">
+                                        <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'delivered' ? 'success' : 'secondary') }}">
                                             {{ __('messages.' . $order->status) }}
                                         </span>
                                     </td>
@@ -229,7 +229,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between">
                     <h5 class="mb-0">{{ __('messages.recent_subscriptions') }}</h5>
-                    <a href="{{ route('admin.subscriptions.users') }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ route('admin.subscriptions.users') }}" class="btn btn-sm btn-outline-success">
                         {{ __('messages.view_all') }}
                     </a>
                 </div>

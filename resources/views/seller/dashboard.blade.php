@@ -118,7 +118,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-info me-3 p-2">
+                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
                             <i class="ri-shopping-bag-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
@@ -203,7 +203,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-info me-3 p-2">
+                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
                             <i class="ri-price-tag-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
@@ -220,7 +220,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-primary me-3 p-2">
+                        <div class="badge rounded-pill bg-label-success me-3 p-2">
                             <i class="ri-check-double-line ri-24px"></i>
                         </div>
                         <div class="card-info">
@@ -259,19 +259,19 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ route('products.create') }}" class="btn btn-primary">
+                        <a href="{{ route('products.create') }}" class="btn btn-success">
                             <i class="ri-add-line me-1"></i>
                             {{ __('messages.add_product') }}
                         </a>
-                        <a href="{{ route('products.index') }}" class="btn btn-info">
+                        <a href="{{ route('products.index') }}" class="btn btn-warning">
                             <i class="ri-shopping-bag-3-line me-1"></i>
                             {{ __('messages.my_products') }}
                         </a>
-                        <a href="{{ route('orders.index') }}" class="btn btn-warning">
+                        <a href="{{ route('orders.index') }}" class="btn btn-danger">
                             <i class="ri-file-list-3-line me-1"></i>
                             {{ __('messages.my_orders') }}
                         </a>
-                        <a href="{{ route('categories.index') }}" class="btn btn-success">
+                        <a href="{{ route('categories.index') }}" class="btn btn-dark">
                             <i class="ri-price-tag-3-line me-1"></i>
                             {{ __('messages.categories') }}
                         </a>
@@ -292,7 +292,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between">
                     <h5 class="mb-0">{{ __('messages.recent_orders') }}</h5>
-                    <a href="{{ route('orders.index') }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ route('orders.index') }}" class="btn btn-sm btn-outline-success">
                         {{ __('messages.view_all') }}
                     </a>
                 </div>
@@ -313,7 +313,7 @@
                                     <td><strong>{{ $order->order_number }}</strong></td>
                                     <td>{{ $order->product->name ?? 'N/A' }}</td>
                                     <td>
-                                        <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'delivered' ? 'success' : 'info') }}">
+                                        <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'delivered' ? 'success' : 'secondary') }}">
                                             {{ __('messages.' . $order->status) }}
                                         </span>
                                     </td>
@@ -336,7 +336,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between">
                     <h5 class="mb-0">{{ __('messages.recent_products') }}</h5>
-                    <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-success">
                         {{ __('messages.view_all') }}
                     </a>
                 </div>
@@ -362,7 +362,7 @@
                                                 {{ $product->stock }}
                                             </span>
                                         @else
-                                            <span class="badge bg-info">{{ __('messages.unlimited') }}</span>
+                                            <span class="badge bg-secondary">{{ __('messages.unlimited') }}</span>
                                         @endif
                                     </td>
                                     <td>

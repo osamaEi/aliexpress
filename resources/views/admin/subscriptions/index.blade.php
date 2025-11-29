@@ -19,7 +19,7 @@
                         <span class="badge mb-2" style="background-color: {{ $subscription->color }}; font-size: 1.1rem;">
                             {{ $subscription->localized_name }}
                         </span>
-                        <h2 class="mb-0">{{ number_format($subscription->price * 3.67, 2) }} AED</h2>
+                        <h2 class="mb-0">{{ number_format($subscription->price, 2) }} AED</h2>
                         <small class="text-muted">{{ __('messages.per_month') }}</small>
                     </div>
 

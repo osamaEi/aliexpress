@@ -22,7 +22,10 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <h5 class="mb-1">{{ $wallet->currency }} {{ number_format($wallet->balance, 2) }}</h5>
+                        @php
+                            $convertedBalance = $currentCurrency->convertFrom($wallet->balance, $wallet->currency);
+                        @endphp
+                        <h5 class="mb-1">{{ $currentCurrency->format($convertedBalance) }}</h5>
                         <small class="text-muted">{{ __('messages.total_balance') }}</small>
                     </div>
                 </div>
@@ -41,7 +44,10 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <h5 class="mb-1">{{ $wallet->currency }} {{ number_format($wallet->available_balance, 2) }}</h5>
+                        @php
+                            $convertedAvailable = $currentCurrency->convertFrom($wallet->available_balance, $wallet->currency);
+                        @endphp
+                        <h5 class="mb-1">{{ $currentCurrency->format($convertedAvailable) }}</h5>
                         <small class="text-muted">{{ __('messages.available_balance') }}</small>
                     </div>
                 </div>
@@ -60,7 +66,10 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <h5 class="mb-1">{{ $wallet->currency }} {{ number_format($wallet->pending_balance, 2) }}</h5>
+                        @php
+                            $convertedPending = $currentCurrency->convertFrom($wallet->pending_balance, $wallet->currency);
+                        @endphp
+                        <h5 class="mb-1">{{ $currentCurrency->format($convertedPending) }}</h5>
                         <small class="text-muted">{{ __('messages.pending_balance') }}</small>
                     </div>
                 </div>
@@ -134,7 +143,7 @@
                             <span class="text-danger">*</span>
                         </label>
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text">{{ $wallet->currency }}</span>
+                            <span class="input-group-text">{{ $currentCurrency->symbol }}</span>
                             <input type="number"
                                    class="form-control"
                                    id="deposit_amount"
@@ -264,11 +273,19 @@
                                 </div>
                             </td>
                             <td>
+                                @php
+                                    $convertedAmount = $currentCurrency->convertFrom($transaction->amount, $transaction->currency);
+                                @endphp
                                 <span class="{{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
-                                    {{ $transaction->formatted_amount }}
+                                    {{ ($transaction->type === 'credit' ? '+' : '-') . $currentCurrency->format(abs($convertedAmount)) }}
                                 </span>
                             </td>
-                            <td>{{ $transaction->currency }} {{ number_format($transaction->balance_after, 2) }}</td>
+                            <td>
+                                @php
+                                    $convertedBalanceAfter = $currentCurrency->convertFrom($transaction->balance_after, $transaction->currency);
+                                @endphp
+                                {{ $currentCurrency->format($convertedBalanceAfter) }}
+                            </td>
                             <td>
                                 @if($transaction->status === 'completed')
                                     <span class="badge bg-success">{{ __('messages.completed') }}</span>

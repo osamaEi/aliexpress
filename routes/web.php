@@ -25,6 +25,9 @@ Route::get('/', function () {
 // Language Routes
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
+// Currency Routes
+Route::get('/currency/{code}', [App\Http\Controllers\CurrencyController::class, 'switch'])->name('currency.switch');
+
 // PayPal Callback (Public - No Auth Required for return URL)
 Route::get('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');
 
