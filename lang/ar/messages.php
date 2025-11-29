@@ -1118,4 +1118,12 @@ return [
     'total_subscription_days' => 'إجمالي أيام الاشتراك',
     'pay_with_card_paymob' => 'الدفع بالبطاقة (Paymob)',
     'loading' => 'جاري التحميل',
+    'complete_payment' => 'إتمام الدفع',
+    'subscription_plan' => 'خطة الاشتراك',
+    'total_amount' => 'المبلغ الإجمالي',
+    'aed' => 'درهم',
+    'initializing_payment' => 'جاري تهيئة الدفع',
+    'please_wait' => 'يرجى الانتظار',
+    'payment_initialization_failed' => 'فشل تهيئة الدفع',
+    'back_to_subscriptions' => 'العودة إلى الاشتراكات',
 ];

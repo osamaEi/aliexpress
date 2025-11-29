@@ -237,7 +237,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Pay with Paymob
+     * Pay with Paymob - Show iframe page
      */
     public function payWithPaymob(Request $request, Subscription $subscription)
     {
@@ -250,40 +250,50 @@ class SubscriptionController extends Controller
                 ->with('error', __('messages.already_have_active_subscription'));
         }
 
+        // Calculate remaining days if upgrading
+        $remainingDays = $currentSubscription ? $currentSubscription->days_remaining : 0;
+        $totalDays = $subscription->duration_days + $remainingDays;
+
+        // Create payment intent with Paymob
+        $merchantOrderId = 'SUB-' . $subscription->id . '-' . $user->id . '-' . time();
+
+        // Store payment intent in session for callback
+        session([
+            'paymob_subscription' => [
+                'subscription_id' => $subscription->id,
+                'user_id' => $user->id,
+                'merchant_order_id' => $merchantOrderId,
+                'amount' => $subscription->price,
+                'remaining_days' => $remainingDays,
+                'total_days' => $totalDays,
+                'current_subscription_id' => $currentSubscription ? $currentSubscription->id : null,
+            ]
+        ]);
+
+        // Show payment iframe page
+        return view('subscriptions.paymob-iframe', compact('subscription'));
+    }
+
+    /**
+     * Initialize Paymob payment (AJAX)
+     */
+    public function initializePaymobPayment(Request $request, Subscription $subscription)
+    {
         try {
-            // Calculate remaining days if upgrading
-            $remainingDays = $currentSubscription ? $currentSubscription->days_remaining : 0;
-            $totalDays = $subscription->duration_days + $remainingDays;
-
-            // Create payment intent with Paymob
-            $merchantOrderId = 'SUB-' . $subscription->id . '-' . $user->id . '-' . time();
-
-            // Store payment intent in session for callback
-            session([
-                'paymob_subscription' => [
-                    'subscription_id' => $subscription->id,
-                    'user_id' => $user->id,
-                    'merchant_order_id' => $merchantOrderId,
-                    'amount' => $subscription->price,
-                    'remaining_days' => $remainingDays,
-                    'total_days' => $totalDays,
-                    'current_subscription_id' => $currentSubscription ? $currentSubscription->id : null,
-                ]
-            ]);
-
-            // Initialize Paymob payment
             $paymobController = app(\App\Http\Controllers\PaymobController::class);
-            return $paymobController->initiatePayment($request, $merchantOrderId, $subscription->price, 'subscription');
+            return $paymobController->initiateSubscriptionPayment($request, $subscription);
 
         } catch (\Exception $e) {
             \Log::error('Paymob subscription payment initiation failed', [
-                'user_id' => $user->id,
+                'user_id' => Auth::id(),
                 'subscription_id' => $subscription->id,
                 'error' => $e->getMessage()
             ]);
 
-            return redirect()->back()
-                ->with('error', __('messages.payment_failed'));
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.payment_failed')
+            ], 500);
         }
     }
 
