@@ -236,7 +236,7 @@
 
                 // Create and inject the Paymob iframe
                 const iframe = document.createElement('iframe');
-                iframe.src = `https://accept.paymob.com/api/acceptance/iframes/${result.iframeId}?payment_token=${result.paymentToken}`;
+                iframe.src = `https://uae.paymob.com/api/acceptance/iframes/${result.iframeId}?payment_token=${result.paymentToken}`;
                 iframe.width = '100%';
                 iframe.height = '600';
                 iframe.frameBorder = '0';

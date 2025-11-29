@@ -37,8 +37,8 @@ class PaymobController extends Controller
             // 1) Auth: get token
             $authResponse = Http::timeout(30)
                 ->connectTimeout(10)
-                ->post(env('PAYMOB_BASE') . '/api/auth/tokens', [
-                    'api_key' => env('PAYMOB_API_KEY'),
+                ->post(config('paymob.base_url') . '/api/auth/tokens', [
+                    'api_key' => config('paymob.api_key'),
                 ]);
 
             if (!$authResponse->successful()) {
@@ -62,9 +62,9 @@ class PaymobController extends Controller
             $orderResponse = Http::withToken($auth['token'])
                 ->timeout(30)
                 ->connectTimeout(10)
-                ->post(env('PAYMOB_BASE') . '/api/ecommerce/orders', [
+                ->post(config('paymob.base_url') . '/api/ecommerce/orders', [
                     'amount_cents' => $amountCents,
-                    'currency' => 'AED',
+                    'currency' => config('paymob.currency'),
                     'merchant_order_id' => $merchantOrderId,
                     'delivery_needed' => false,
                     'items' => [],
@@ -107,13 +107,13 @@ class PaymobController extends Controller
             $paymentKeyResponse = Http::withToken($auth['token'])
                 ->timeout(30)
                 ->connectTimeout(10)
-                ->post(env('PAYMOB_BASE') . '/api/acceptance/payment_keys', [
+                ->post(config('paymob.base_url') . '/api/acceptance/payment_keys', [
                     'amount_cents' => $amountCents,
-                    'currency' => 'AED',
+                    'currency' => config('paymob.currency'),
                     'order_id' => $order['id'],
                     'billing_data' => $billing,
                     'expiration' => 3600,
-                    'integration_id' => env('PAYMOB_CARD_INTEGRATION_ID'),
+                    'integration_id' => config('paymob.card_integration_id'),
                 ]);
 
             if (!$paymentKeyResponse->successful()) {
@@ -137,7 +137,7 @@ class PaymobController extends Controller
             return response()->json([
                 'success' => true,
                 'paymentToken' => $paymentKey['token'],
-                'iframeId' => env('PAYMOB_IFRAME_ID'),
+                'iframeId' => config('paymob.iframe_id'),
                 'merchantOrderId' => $merchantOrderId,
             ]);
 
@@ -179,7 +179,7 @@ class PaymobController extends Controller
             $payload = $request->all();
 
             // 1) Verify HMAC signature (optional for now)
-            $hmac = env('PAYMOB_HMAC');
+            $hmac = config('paymob.hmac');
             if ($hmac && !$this->validHmac($payload, $hmac)) {
                 Log::warning('Paymob webhook: Invalid HMAC signature', ['payload' => $payload]);
             }
