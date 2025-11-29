@@ -27,30 +27,30 @@
     <div class="card mb-4 border-info">
         <div class="card-header bg-info text-white">
             <h5 class="mb-0">
-                <i class="ri-information-line me-2"></i>Configuration Diagnostics
+                <i class="ri-information-line me-2"></i>{{ __('messages.configuration_diagnostics') }}
             </h5>
         </div>
         <div class="card-body">
             <div class="alert alert-warning">
-                <strong>If you're getting "param-appkey.not.exists" error:</strong>
+                <strong>{{ __('messages.token_error_message') }}</strong>
                 <ol class="mb-0 mt-2">
-                    <li>Verify your App Key at <a href="https://openservice.aliexpress.com/myapp/index.htm" target="_blank">AliExpress Open Platform</a></li>
-                    <li>Ensure your app is in "Active" status</li>
-                    <li>Check that the redirect URI below is registered in your AliExpress app settings</li>
-                    <li>Your App Key must be valid and not deactivated</li>
+                    <li>{{ __('messages.verify_app_key') }} <a href="https://openservice.aliexpress.com/myapp/index.htm" target="_blank">AliExpress Open Platform</a></li>
+                    <li>{{ __('messages.ensure_app_active') }}</li>
+                    <li>{{ __('messages.check_redirect_uri') }}</li>
+                    <li>{{ __('messages.app_key_must_be_valid') }}</li>
                 </ol>
             </div>
 
             <div class="row mt-3">
                 <div class="col-md-6">
-                    <p><strong>Current App Key:</strong> <code>{{ $tokens['app_key'] ?: 'Not configured' }}</code></p>
-                    <p><strong>Callback URL:</strong> <code>{{ route('admin.tokens.callback') }}</code></p>
+                    <p><strong>{{ __('messages.current_app_key') }}:</strong> <code>{{ $tokens['app_key'] ?: __('messages.not_configured') }}</code></p>
+                    <p><strong>{{ __('messages.callback_url') }}:</strong> <code>{{ route('admin.tokens.callback') }}</code></p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>OAuth Endpoint:</strong> <code>https://oauth.aliexpress.com/authorize</code></p>
-                    <p><strong>App Secret Configured:</strong>
+                    <p><strong>{{ __('messages.oauth_endpoint') }}:</strong> <code>https://oauth.aliexpress.com/authorize</code></p>
+                    <p><strong>{{ __('messages.app_secret_configured') }}:</strong>
                         <span class="badge {{ $tokens['app_secret'] ? 'bg-success' : 'bg-danger' }}">
-                            {{ $tokens['app_secret'] ? 'Yes' : 'No' }}
+                            {{ $tokens['app_secret'] ? __('messages.yes') : __('messages.no') }}
                         </span>
                     </p>
                 </div>
@@ -59,8 +59,7 @@
             <div class="mt-3">
                 <p class="text-muted mb-0">
                     <i class="ri-lightbulb-line"></i>
-                    <strong>Important:</strong> Make sure to add <code>{{ route('admin.tokens.callback') }}</code>
-                    to your app's "Redirect URI" or "Callback URL" settings in the AliExpress Developer Console.
+                    <strong>{{ __('messages.important') }}:</strong> {{ __('messages.check_redirect_uri') }} <code>{{ route('admin.tokens.callback') }}</code>
                 </p>
             </div>
         </div>
@@ -127,7 +126,7 @@
                             id="app_key"
                             name="app_key"
                             value="{{ old('app_key', $tokens['app_key']) }}"
-                            placeholder="Enter your AliExpress App Key"
+                            placeholder="{{ __('messages.app_key') }}"
                             required
                         >
                         @error('app_key')
@@ -154,7 +153,7 @@
                             id="app_secret"
                             name="app_secret"
                             value="{{ old('app_secret', $tokens['app_secret']) }}"
-                            placeholder="Enter your AliExpress App Secret"
+                            placeholder="{{ __('messages.app_secret') }}"
                             required
                         >
                         @error('app_secret')
@@ -187,17 +186,17 @@
     <div class="card">
         <div class="card-header">
             <h5 class="mb-0">
-                <i class="ri-refresh-line me-2"></i>Generate Access Token
+                <i class="ri-refresh-line me-2"></i>{{ __('messages.generate_access_token') }}
             </h5>
         </div>
         <div class="card-body">
             <p class="mb-3">
-                After saving your App Key and App Secret above, click the button below to authorize and generate an access token.
-                You will be redirected to AliExpress to authorize the application.
+                {{ __('messages.after_saving_credentials') }}.
+                {{ __('messages.redirected_to_aliexpress') }}.
             </p>
             <a href="{{ route('admin.tokens.generate') }}" class="btn btn-success">
                 <i class="ri-key-line me-1"></i>
-                Generate Access Token
+                {{ __('messages.generate_access_token') }}
             </a>
         </div>
     </div>
@@ -211,49 +210,49 @@
                 </div>
                 <div>
                     <h6 class="mb-2">
-                        <i class="ri-information-line me-2"></i>Important Instructions
+                        <i class="ri-information-line me-2"></i>{{ __('messages.important_instructions') }}
                     </h6>
                     <ol class="mb-3">
                         <li class="mb-2">
-                            <strong>Get Your AliExpress API Credentials:</strong>
+                            <strong>{{ __('messages.get_aliexpress_credentials') }}:</strong>
                             <ul>
-                                <li>Visit <a href="https://portals.aliexpress.com" target="_blank">AliExpress Open Platform</a></li>
-                                <li>Login with your AliExpress seller account</li>
-                                <li>Go to "App Management" → "My Apps"</li>
-                                <li>Create a new app or select an existing one</li>
-                                <li>Copy your <strong>App Key</strong> and <strong>App Secret</strong></li>
+                                <li>{{ __('messages.visit') }} <a href="https://portals.aliexpress.com" target="_blank">AliExpress Open Platform</a></li>
+                                <li>{{ __('messages.login_with_seller_account') }}</li>
+                                <li>{{ __('messages.go_to_app_management') }}</li>
+                                <li>{{ __('messages.create_or_select_app') }}</li>
+                                <li>{{ __('messages.copy_app_key_secret') }}</li>
                             </ul>
                         </li>
                         <li class="mb-2">
-                            <strong>Configure Redirect URI:</strong>
+                            <strong>{{ __('messages.configure_redirect_uri') }}:</strong>
                             <ul>
-                                <li>In your AliExpress app settings, add this redirect URI:</li>
+                                <li>{{ __('messages.add_redirect_uri') }}:</li>
                                 <li><code>{{ route('admin.tokens.callback') }}</code></li>
-                                <li>Save the configuration in AliExpress</li>
+                                <li>{{ __('messages.save_configuration') }}</li>
                             </ul>
                         </li>
                         <li class="mb-2">
-                            <strong>Enter Credentials Above:</strong>
+                            <strong>{{ __('messages.enter_credentials') }}:</strong>
                             <ul>
-                                <li>Paste your App Key and App Secret into the form above</li>
-                                <li>Click "Save Changes" to store them in your .env file</li>
+                                <li>{{ __('messages.paste_credentials') }}</li>
+                                <li>{{ __('messages.click_save_changes') }}</li>
                             </ul>
                         </li>
                         <li class="mb-2">
-                            <strong>Generate Access Token:</strong>
+                            <strong>{{ __('messages.generate_access_token') }}:</strong>
                             <ul>
-                                <li>After saving, click "Generate Access Token"</li>
-                                <li>You will be redirected to AliExpress to authorize</li>
-                                <li>After authorization, you'll be redirected back with a valid token</li>
+                                <li>{{ __('messages.after_saving_click_generate') }}</li>
+                                <li>{{ __('messages.redirected_to_aliexpress') }}</li>
+                                <li>{{ __('messages.after_auth_redirect_back') }}</li>
                             </ul>
                         </li>
                     </ol>
                     <div class="alert alert-danger mb-0">
-                        <strong><i class="ri-alert-line me-2"></i>Common Errors:</strong>
+                        <strong><i class="ri-alert-line me-2"></i>{{ __('messages.common_errors') }}:</strong>
                         <ul class="mb-0 mt-2">
-                            <li><code>appkey不存在 (appkey does not exist)</code> - Your App Key is invalid or doesn't exist</li>
-                            <li><code>Invalid redirect_uri</code> - The redirect URI is not configured in your AliExpress app</li>
-                            <li><code>Invalid app_secret</code> - Your App Secret is incorrect</li>
+                            <li><code>appkey不存在 (appkey does not exist)</code> - {{ __('messages.invalid_app_key') }}</li>
+                            <li><code>Invalid redirect_uri</code> - {{ __('messages.invalid_redirect_uri') }}</li>
+                            <li><code>Invalid app_secret</code> - {{ __('messages.invalid_app_secret') }}</li>
                         </ul>
                     </div>
                 </div>

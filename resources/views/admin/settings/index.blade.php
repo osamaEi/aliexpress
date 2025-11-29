@@ -433,6 +433,11 @@
                     </div>
                     <div class="card-body">
                         @php
+                            // Primary Button Colors
+                            $btnPrimaryColor = $settings->get('color', collect())->firstWhere('key', 'primary_color');
+                            $btnPrimaryHoverColor = $settings->get('color', collect())->firstWhere('key', 'btn_primary_hover_color');
+                            $btnPrimaryActiveColor = $settings->get('color', collect())->firstWhere('key', 'btn_primary_active_color');
+
                             // Success Button Colors
                             $btnSuccessColor = $settings->get('color', collect())->firstWhere('key', 'btn_success_color');
                             $btnSuccessHoverColor = $settings->get('color', collect())->firstWhere('key', 'btn_success_hover_color');
@@ -448,6 +453,48 @@
                             $btnDangerHoverColor = $settings->get('color', collect())->firstWhere('key', 'btn_danger_hover_color');
                             $btnDangerActiveColor = $settings->get('color', collect())->firstWhere('key', 'btn_danger_active_color');
                         @endphp
+
+                        <!-- Primary Button -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">{{ __('messages.primary_button') }}</h6>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="primary_color" class="form-label">{{ __('messages.default_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="primary_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.primary_color', $btnPrimaryColor?->value ?? '#561C04') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[primary_color]" id="primary_color" class="form-control"
+                                        value="{{ old('settings.primary_color', $btnPrimaryColor?->value ?? '#561C04') }}"
+                                        placeholder="#561C04" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_primary_hover_color" class="form-label">{{ __('messages.hover_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_primary_hover_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_primary_hover_color', $btnPrimaryHoverColor?->value ?? '#4a1603') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_primary_hover_color]" id="btn_primary_hover_color" class="form-control"
+                                        value="{{ old('settings.btn_primary_hover_color', $btnPrimaryHoverColor?->value ?? '#4a1603') }}"
+                                        placeholder="#4a1603" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="btn_primary_active_color" class="form-label">{{ __('messages.active_color') }}</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" id="btn_primary_active_color_picker" class="form-control form-control-color"
+                                        value="{{ old('settings.btn_primary_active_color', $btnPrimaryActiveColor?->value ?? '#3d1202') }}" style="width: 60px; height: 38px;">
+                                    <input type="text" name="settings[btn_primary_active_color]" id="btn_primary_active_color" class="form-control"
+                                        value="{{ old('settings.btn_primary_active_color', $btnPrimaryActiveColor?->value ?? '#3d1202') }}"
+                                        placeholder="#3d1202" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
 
                         <!-- Success Button -->
                         <div class="row mb-4">
