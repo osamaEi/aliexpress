@@ -24,13 +24,10 @@ class PaymobController extends Controller
             $amountCents = (int) ($amount * 100);
 
             // 1) Auth: get token
-            // Use secret key if available (newer UAE API), otherwise use API key
-            $apiKey = config('paymob.secret_key') ?: config('paymob.api_key');
-
             $authResponse = Http::timeout(30)
                 ->connectTimeout(10)
                 ->post(config('paymob.base_url') . '/api/auth/tokens', [
-                    'api_key' => $apiKey,
+                    'api_key' => config('paymob.api_key'),
                 ]);
 
             if (!$authResponse->successful()) {
@@ -139,13 +136,10 @@ class PaymobController extends Controller
             $merchantOrderId = 'SUB-' . $subscription->id . '-' . $user->id . '-' . now()->timestamp;
 
             // 1) Auth: get token
-            // Use secret key if available (newer UAE API), otherwise use API key
-            $apiKey = config('paymob.secret_key') ?: config('paymob.api_key');
-
             $authResponse = Http::timeout(30)
                 ->connectTimeout(10)
                 ->post(config('paymob.base_url') . '/api/auth/tokens', [
-                    'api_key' => $apiKey,
+                    'api_key' => config('paymob.api_key'),
                 ]);
 
             if (!$authResponse->successful()) {
