@@ -99,7 +99,7 @@ class PaymobController extends Controller
             }
 
             // Redirect to Paymob iframe
-            $iframeUrl = 'https://accept.paymob.com/api/acceptance/iframes/' . config('paymob.iframe_id') . '?payment_token=' . $paymentKey['token'];
+            $iframeUrl = config('paymob.base_url') . '/api/acceptance/iframes/' . config('paymob.iframe_id') . '?payment_token=' . $paymentKey['token'];
             return redirect($iframeUrl);
 
         } catch (\Exception $e) {
