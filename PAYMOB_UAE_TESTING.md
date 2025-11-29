@@ -13,17 +13,17 @@ I've updated the Paymob implementation to support UAE's newer API that uses `sec
 ## Your Current Configuration
 
 ```env
-PAYMOB_API_KEY=ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5...
-PAYMOB_SECRET_KEY=are_sk_test_a92cf4f39e73e09433258569fc016009e6efd97c6ef2ffff2aa0f85a44636fda
-PAYMOB_PUBLIC_KEY=are_pk_test_cdJDymei6pBB3ek41pUIE1X3EzBGLjWX
-PAYMOB_HMAC=EB1BCA7D744BB3F1A37649C01BCF6AB0
+PAYMOB_API_KEY=your_api_key_here
+PAYMOB_SECRET_KEY=your_secret_key_here (starts with are_sk_test_...)
+PAYMOB_PUBLIC_KEY=your_public_key_here (starts with are_pk_test_...)
+PAYMOB_HMAC=your_hmac_here
 PAYMOB_IFRAME_ID=35366
 PAYMOB_CARD_INTEGRATION_ID=76398
 PAYMOB_BASE=https://uae.paymob.com
 PAYMOB_CURRENCY=AED
 ```
 
-✅ All credentials have `_test_` which confirms test mode
+✅ Make sure to use credentials with `_test_` for test mode
 
 ---
 
