@@ -34,6 +34,9 @@ Route::get('/payment/callback', [App\Http\Controllers\PaymentController::class, 
 // Paymob Callback & Webhook Routes (Public - No Auth Required, No CSRF for webhook)
 Route::get('/paymob/callback', [App\Http\Controllers\PaymobController::class, 'callback'])->name('paymob.callback');
 Route::post('/paymob/webhook', [App\Http\Controllers\PaymobController::class, 'webhook'])->name('paymob.webhook');
+Route::get('/paymob-test', function() {
+    return view('paymob-test');
+})->name('paymob.test');
 
 // AliExpress Webhook Routes (Public - No Auth Required, No CSRF)
 Route::prefix('webhooks/aliexpress')->name('webhook.aliexpress.')->group(function () {
