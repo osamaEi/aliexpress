@@ -17,10 +17,10 @@
   --bs-gray-dark: rgba(234, 234, 255, 0.8);
   --bs-gray-25: rgba(234, 234, 255, 0.015);
   --bs-gray-50: rgba(234, 234, 255, 0.03);
-  --bs-primary: #666cff;
+  --bs-primary: #561C04;
   --bs-secondary: #6d788d;
-  --bs-success: #72e128;
-  --bs-info: #26c6f9;
+  --bs-success: #ff6f00;
+  --bs-info: #000000;
   --bs-warning: #fdb528;
   --bs-danger: #ff4d49;
   --bs-light: #46445b;

@@ -1,7 +1,7 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card mb-6 shadow-sm border-0">
         <div class="card-header bg-gradient d-flex justify-content-between align-items-center py-3"
              style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -10,12 +10,12 @@
                     <i class="ri-search-2-line" style="font-size: 24px; color: #667eea;"></i>
                 </div>
                 <div>
-                    <h5 class="mb-0 text-white fw-bold">Product Search</h5>
-                    <small class="text-white-50">Search millions of products from suppliers</small>
+                    <h5 class="mb-0 text-white fw-bold">{{ __('messages.product_search') }}</h5>
+                    <small class="text-white-50">{{ __('messages.search_millions_products') }}</small>
                 </div>
             </div>
             <div class="badge bg-white text-primary px-3 py-2">
-                <i class="ri-code-s-slash-line me-1"></i>Product Search API
+                <i class="ri-code-s-slash-line me-1"></i>{{ __('messages.product_search_api') }}
             </div>
         </div>
 
@@ -25,24 +25,24 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label for="keyword" class="form-label fw-semibold">
-                            <i class="ri-search-line me-1"></i>Search Keyword
+                            <i class="ri-search-line me-1"></i>{{ __('messages.search_keyword') }}
                         </label>
                         <input
                             type="text"
                             id="keyword"
                             name="keyword"
                             class="form-control form-control-lg shadow-sm"
-                            placeholder="e.g., phone, laptop, watch..."
+                            placeholder="{{ __('messages.search_placeholder') }}"
                             value="{{ old('keyword', $keyword ?? '') }}"
                         >
                     </div>
 
                     <div class="col-md-2">
                         <label for="main_category" class="form-label fw-semibold">
-                            <i class="ri-folder-line me-1"></i>Main Category
+                            <i class="ri-folder-line me-1"></i>{{ __('messages.main_category') }}
                         </label>
                         <select id="main_category" class="form-select form-select-lg shadow-sm">
-                            <option value="">All Categories</option>
+                            <option value="">{{ __('messages.all_categories') }}</option>
                             @if(isset($categories) && count($categories) > 0)
                                 @foreach($categories as $category)
                                     @php
@@ -77,16 +77,16 @@
 
                     <div class="col-md-2">
                         <label for="sub_category" class="form-label fw-semibold">
-                            <i class="ri-folder-open-line me-1"></i>Sub Category
+                            <i class="ri-folder-open-line me-1"></i>{{ __('messages.sub_category') }}
                         </label>
                         <select name="category_id" id="sub_category" class="form-select form-select-lg shadow-sm" disabled>
-                            <option value="">Select main category first</option>
+                            <option value="">{{ __('messages.select_main_category_first') }}</option>
                         </select>
                     </div>
 
                     <div class="col-md-2">
                         <label for="country" class="form-label fw-semibold">
-                            <i class="ri-ship-line me-1"></i>Ship To
+                            <i class="ri-ship-line me-1"></i>{{ __('messages.ship_to') }}
                         </label>
                         <select name="country" id="country" class="form-select form-select-lg shadow-sm">
                             <option value="AE" {{ request('country') == 'AE' ? 'selected' : '' }}>🇦🇪 UAE</option>
@@ -97,7 +97,7 @@
                     <div class="col-md-2">
                         <label class="form-label fw-semibold d-block">&nbsp;</label>
                         <button type="submit" class="btn btn-primary btn-lg w-100 shadow">
-                            <i class="ri-search-line me-1"></i> Search
+                            <i class="ri-search-line me-1"></i> {{ __('messages.search') }}
                         </button>
                     </div>
                 </div>
