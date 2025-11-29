@@ -883,6 +883,10 @@ class ProductController extends Controller
                 }
 
                 // Make a single API call with the optimized keyword
+                // Determine locale based on app language
+                $appLocale = app()->getLocale();
+                $aliexpressLocale = $appLocale === 'ar' ? 'ar_SA' : 'en_US';
+
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $categoryKeyword,
                     [
@@ -892,7 +896,7 @@ class ProductController extends Controller
                         'sort_by' => $sortBy,
                         'country' => $request->get('country', 'AE'),
                         'currency' => $request->get('currency', 'AED'),
-                        'locale' => $request->get('locale', 'en_US'),
+                        'locale' => $request->get('locale', $aliexpressLocale),
                     ]
                 );
 
@@ -910,6 +914,10 @@ class ProductController extends Controller
                     'sort_filter' => $sortFilter
                 ]);
 
+                // Determine locale based on app language
+                $appLocale = app()->getLocale();
+                $aliexpressLocale = $appLocale === 'ar' ? 'ar_SA' : 'en_US';
+
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $keyword,
                     [
@@ -918,7 +926,7 @@ class ProductController extends Controller
                         'sort_by' => $sortBy, // Use mapped sort parameter
                         'country' => $request->get('country', 'AE'),
                         'currency' => $request->get('currency', 'AED'),
-                        'locale' => $request->get('locale', 'en_US'),
+                        'locale' => $request->get('locale', $aliexpressLocale),
                     ]
                 );
             } else {
