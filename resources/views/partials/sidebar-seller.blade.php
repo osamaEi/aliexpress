@@ -105,11 +105,11 @@
                     </a>
                 </li>
 
-                <li class="menu-item {{ request()->routeIs('categories.create') ? 'active' : '' }}">
+                {{-- <li class="menu-item {{ request()->routeIs('categories.create') ? 'active' : '' }}">
                     <a href="{{ route('categories.create') }}" class="menu-link">
                         <div>{{ __('messages.add_category') }}</div>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </li>
 

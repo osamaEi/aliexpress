@@ -66,6 +66,13 @@
         @php
             $primaryColor = setting('primary_color', '#666cff');
             $primaryLightColor = setting('primary_light_color', '#e7e7ff');
+            $primaryHoverColor = setting('btn_primary_hover_color', '#4a1603');
+            $primaryActiveColor = setting('btn_primary_active_color', '#3d1202');
+
+            // Secondary colors
+            $secondaryColor = setting('secondary_color', '#6d788d');
+            $secondaryHoverColor = setting('btn_secondary_hover_color', '#5a6376');
+            $secondaryActiveColor = setting('btn_secondary_active_color', '#4a5365');
 
             // Success colors
             $successColor = setting('btn_success_color', '#ff6f00');
@@ -90,6 +97,7 @@
             // Calculate RGB values
             $primaryColorRgb = sscanf($primaryColor, "#%02x%02x%02x");
             $primaryLightColorRgb = sscanf($primaryLightColor, "#%02x%02x%02x");
+            $secondaryColorRgb = sscanf($secondaryColor, "#%02x%02x%02x");
             $successColorRgb = sscanf($successColor, "#%02x%02x%02x");
             $warningColorRgb = sscanf($warningColor, "#%02x%02x%02x");
             $dangerColorRgb = sscanf($dangerColor, "#%02x%02x%02x");
@@ -101,6 +109,9 @@
             --bs-primary-rgb: {{ $primaryColorRgb[0] }}, {{ $primaryColorRgb[1] }}, {{ $primaryColorRgb[2] }};
             --bs-primary-light: {{ $primaryLightColor }};
             --bs-primary-light-rgb: {{ $primaryLightColorRgb[0] }}, {{ $primaryLightColorRgb[1] }}, {{ $primaryLightColorRgb[2] }};
+
+            --bs-secondary: {{ $secondaryColor }};
+            --bs-secondary-rgb: {{ $secondaryColorRgb[0] }}, {{ $secondaryColorRgb[1] }}, {{ $secondaryColorRgb[2] }};
 
             --bs-success: {{ $successColor }};
             --bs-success-rgb: {{ $successColorRgb[0] }}, {{ $successColorRgb[1] }}, {{ $successColorRgb[2] }};
@@ -129,8 +140,14 @@
 
         .btn-primary:hover,
         .btn-primary:focus {
-            background-color: {{ $primaryColor }}dd !important;
-            border-color: {{ $primaryColor }}dd !important;
+            background-color: {{ $primaryHoverColor }} !important;
+            border-color: {{ $primaryHoverColor }} !important;
+        }
+
+        .btn-primary:active,
+        .btn-primary.active {
+            background-color: {{ $primaryActiveColor }} !important;
+            border-color: {{ $primaryActiveColor }} !important;
         }
 
         /* Use light primary color for label badges and subtle backgrounds */
@@ -349,6 +366,47 @@
             background-color: {{ $infoColor }}1a !important;
             border-color: {{ $infoColor }}33 !important;
             color: {{ $infoColor }} !important;
+        }
+
+        /* Secondary Button Colors */
+        .btn-secondary,
+        .badge.bg-secondary,
+        .bg-secondary {
+            background-color: {{ $secondaryColor }} !important;
+            border-color: {{ $secondaryColor }} !important;
+        }
+
+        .text-secondary {
+            color: {{ $secondaryColor }} !important;
+        }
+
+        .btn-secondary:hover,
+        .btn-secondary:focus {
+            background-color: {{ $secondaryHoverColor }} !important;
+            border-color: {{ $secondaryHoverColor }} !important;
+        }
+
+        .btn-secondary:active,
+        .btn-secondary.active {
+            background-color: {{ $secondaryActiveColor }} !important;
+            border-color: {{ $secondaryActiveColor }} !important;
+        }
+
+        .btn-outline-secondary {
+            color: {{ $secondaryColor }} !important;
+            border-color: {{ $secondaryColor }} !important;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: {{ $secondaryColor }} !important;
+            border-color: {{ $secondaryColor }} !important;
+            color: #fff !important;
+        }
+
+        .alert-secondary {
+            background-color: {{ $secondaryColor }}1a !important;
+            border-color: {{ $secondaryColor }}33 !important;
+            color: {{ $secondaryColor }} !important;
         }
 
         /* Hide template customizer button */
