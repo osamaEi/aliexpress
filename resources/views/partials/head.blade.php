@@ -62,13 +62,38 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Dynamic Primary Color from Settings */
+        /* Dynamic Colors from Settings */
         @php
             $primaryColor = setting('primary_color', '#666cff');
             $primaryLightColor = setting('primary_light_color', '#e7e7ff');
-            // Calculate RGB values for both colors
+
+            // Success colors
+            $successColor = setting('btn_success_color', '#ff6f00');
+            $successHoverColor = setting('btn_success_hover_color', '#e56300');
+            $successActiveColor = setting('btn_success_active_color', '#cc5700');
+
+            // Warning colors
+            $warningColor = setting('btn_warning_color', '#fdb528');
+            $warningHoverColor = setting('btn_warning_hover_color', '#e0a800');
+            $warningActiveColor = setting('btn_warning_active_color', '#d39e00');
+
+            // Danger colors
+            $dangerColor = setting('btn_danger_color', '#ff4d49');
+            $dangerHoverColor = setting('btn_danger_hover_color', '#e63946');
+            $dangerActiveColor = setting('btn_danger_active_color', '#cc2936');
+
+            // Info colors
+            $infoColor = setting('btn_info_color', '#000000');
+            $infoHoverColor = setting('btn_info_hover_color', '#333333');
+            $infoActiveColor = setting('btn_info_active_color', '#1a1a1a');
+
+            // Calculate RGB values
             $primaryColorRgb = sscanf($primaryColor, "#%02x%02x%02x");
             $primaryLightColorRgb = sscanf($primaryLightColor, "#%02x%02x%02x");
+            $successColorRgb = sscanf($successColor, "#%02x%02x%02x");
+            $warningColorRgb = sscanf($warningColor, "#%02x%02x%02x");
+            $dangerColorRgb = sscanf($dangerColor, "#%02x%02x%02x");
+            $infoColorRgb = sscanf($infoColor, "#%02x%02x%02x");
         @endphp
 
         :root {
@@ -76,6 +101,18 @@
             --bs-primary-rgb: {{ $primaryColorRgb[0] }}, {{ $primaryColorRgb[1] }}, {{ $primaryColorRgb[2] }};
             --bs-primary-light: {{ $primaryLightColor }};
             --bs-primary-light-rgb: {{ $primaryLightColorRgb[0] }}, {{ $primaryLightColorRgb[1] }}, {{ $primaryLightColorRgb[2] }};
+
+            --bs-success: {{ $successColor }};
+            --bs-success-rgb: {{ $successColorRgb[0] }}, {{ $successColorRgb[1] }}, {{ $successColorRgb[2] }};
+
+            --bs-warning: {{ $warningColor }};
+            --bs-warning-rgb: {{ $warningColorRgb[0] }}, {{ $warningColorRgb[1] }}, {{ $warningColorRgb[2] }};
+
+            --bs-danger: {{ $dangerColor }};
+            --bs-danger-rgb: {{ $dangerColorRgb[0] }}, {{ $dangerColorRgb[1] }}, {{ $dangerColorRgb[2] }};
+
+            --bs-info: {{ $infoColor }};
+            --bs-info-rgb: {{ $infoColorRgb[0] }}, {{ $infoColorRgb[1] }}, {{ $infoColorRgb[2] }};
         }
 
         /* Override template colors */
@@ -148,6 +185,170 @@
 
         a:hover {
             color: {{ $primaryColor }}dd;
+        }
+
+        /* Success Button Colors */
+        .btn-success,
+        .badge.bg-success,
+        .bg-success {
+            background-color: {{ $successColor }} !important;
+            border-color: {{ $successColor }} !important;
+        }
+
+        .text-success {
+            color: {{ $successColor }} !important;
+        }
+
+        .btn-success:hover,
+        .btn-success:focus {
+            background-color: {{ $successHoverColor }} !important;
+            border-color: {{ $successHoverColor }} !important;
+        }
+
+        .btn-success:active,
+        .btn-success.active {
+            background-color: {{ $successActiveColor }} !important;
+            border-color: {{ $successActiveColor }} !important;
+        }
+
+        .btn-outline-success {
+            color: {{ $successColor }} !important;
+            border-color: {{ $successColor }} !important;
+        }
+
+        .btn-outline-success:hover {
+            background-color: {{ $successColor }} !important;
+            border-color: {{ $successColor }} !important;
+            color: #fff !important;
+        }
+
+        .alert-success {
+            background-color: {{ $successColor }}1a !important;
+            border-color: {{ $successColor }}33 !important;
+            color: {{ $successColor }} !important;
+        }
+
+        /* Warning Button Colors */
+        .btn-warning,
+        .badge.bg-warning,
+        .bg-warning {
+            background-color: {{ $warningColor }} !important;
+            border-color: {{ $warningColor }} !important;
+        }
+
+        .text-warning {
+            color: {{ $warningColor }} !important;
+        }
+
+        .btn-warning:hover,
+        .btn-warning:focus {
+            background-color: {{ $warningHoverColor }} !important;
+            border-color: {{ $warningHoverColor }} !important;
+        }
+
+        .btn-warning:active,
+        .btn-warning.active {
+            background-color: {{ $warningActiveColor }} !important;
+            border-color: {{ $warningActiveColor }} !important;
+        }
+
+        .btn-outline-warning {
+            color: {{ $warningColor }} !important;
+            border-color: {{ $warningColor }} !important;
+        }
+
+        .btn-outline-warning:hover {
+            background-color: {{ $warningColor }} !important;
+            border-color: {{ $warningColor }} !important;
+            color: #fff !important;
+        }
+
+        .alert-warning {
+            background-color: {{ $warningColor }}1a !important;
+            border-color: {{ $warningColor }}33 !important;
+            color: {{ $warningColor }} !important;
+        }
+
+        /* Danger Button Colors */
+        .btn-danger,
+        .badge.bg-danger,
+        .bg-danger {
+            background-color: {{ $dangerColor }} !important;
+            border-color: {{ $dangerColor }} !important;
+        }
+
+        .text-danger {
+            color: {{ $dangerColor }} !important;
+        }
+
+        .btn-danger:hover,
+        .btn-danger:focus {
+            background-color: {{ $dangerHoverColor }} !important;
+            border-color: {{ $dangerHoverColor }} !important;
+        }
+
+        .btn-danger:active,
+        .btn-danger.active {
+            background-color: {{ $dangerActiveColor }} !important;
+            border-color: {{ $dangerActiveColor }} !important;
+        }
+
+        .btn-outline-danger {
+            color: {{ $dangerColor }} !important;
+            border-color: {{ $dangerColor }} !important;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: {{ $dangerColor }} !important;
+            border-color: {{ $dangerColor }} !important;
+            color: #fff !important;
+        }
+
+        .alert-danger {
+            background-color: {{ $dangerColor }}1a !important;
+            border-color: {{ $dangerColor }}33 !important;
+            color: {{ $dangerColor }} !important;
+        }
+
+        /* Info Button Colors */
+        .btn-info,
+        .badge.bg-info,
+        .bg-info {
+            background-color: {{ $infoColor }} !important;
+            border-color: {{ $infoColor }} !important;
+        }
+
+        .text-info {
+            color: {{ $infoColor }} !important;
+        }
+
+        .btn-info:hover,
+        .btn-info:focus {
+            background-color: {{ $infoHoverColor }} !important;
+            border-color: {{ $infoHoverColor }} !important;
+        }
+
+        .btn-info:active,
+        .btn-info.active {
+            background-color: {{ $infoActiveColor }} !important;
+            border-color: {{ $infoActiveColor }} !important;
+        }
+
+        .btn-outline-info {
+            color: {{ $infoColor }} !important;
+            border-color: {{ $infoColor }} !important;
+        }
+
+        .btn-outline-info:hover {
+            background-color: {{ $infoColor }} !important;
+            border-color: {{ $infoColor }} !important;
+            color: #fff !important;
+        }
+
+        .alert-info {
+            background-color: {{ $infoColor }}1a !important;
+            border-color: {{ $infoColor }}33 !important;
+            color: {{ $infoColor }} !important;
         }
 
         /* Hide template customizer button */
