@@ -185,54 +185,90 @@ class WalletController extends Controller
     }
 
     /**
-     * Process PayPal deposit - Initiate payment
+     * Process PayPal deposit - Handle captured payment from frontend
      */
     public function depositPayPal(Request $request)
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:5|max:10000',
             'note' => 'nullable|string|max:500',
+            'order_id' => 'required|string',
+            'payer_id' => 'nullable|string',
+            'details' => 'required|array',
         ]);
 
         try {
             $user = Auth::user();
 
+            // Check if payment was already processed
+            $existingTransaction = \App\Models\PaymentTransaction::where('paypal_order_id', $validated['order_id'])->first();
+
+            if ($existingTransaction && $existingTransaction->status === 'success') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment already processed'
+                ], 400);
+            }
+
             // Create payment transaction record
             $merchantOrderId = 'WALLET-' . $user->id . '-' . time();
+
+            // Extract transaction ID from PayPal details
+            $transactionId = $validated['details']['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+
             $paymentTransaction = \App\Models\PaymentTransaction::create([
                 'user_id' => $user->id,
                 'merchant_order_id' => $merchantOrderId,
                 'type' => 'wallet_deposit',
                 'amount' => $validated['amount'],
                 'currency' => config('paypal.currency'),
-                'status' => 'pending',
+                'status' => 'success',
+                'payment_method' => 'paypal',
+                'paypal_order_id' => $validated['order_id'],
+                'transaction_id' => $transactionId,
+                'callback_data' => $validated['details'],
+                'paid_at' => now(),
             ]);
 
-            // Create PayPal order
-            $paypalOrder = $this->paypalService->createOrder(
+            // Credit the wallet
+            $wallet = $this->walletService->getOrCreateWallet($user);
+
+            $this->walletService->deposit(
+                $user,
                 $validated['amount'],
-                config('paypal.currency'),
-                'Wallet Deposit - $' . $validated['amount'],
-                $merchantOrderId
+                'paypal_deposit',
+                $validated['note'] ?: 'Wallet deposit via PayPal',
+                [
+                    'paypal_order_id' => $validated['order_id'],
+                    'transaction_id' => $transactionId,
+                    'payment_transaction_id' => $paymentTransaction->id,
+                ]
             );
 
-            // Update transaction with PayPal order ID
-            $paymentTransaction->update([
-                'paypal_order_id' => $paypalOrder['id']
+            \Illuminate\Support\Facades\Log::info('Wallet Deposit Processed', [
+                'user_id' => $user->id,
+                'amount' => $validated['amount'],
+                'order_id' => $validated['order_id'],
+                'transaction_id' => $transactionId,
             ]);
 
-            // Get approval URL and redirect user to PayPal
-            $approvalUrl = $this->paypalService->getApprovalUrl($paypalOrder);
-
-            if (!$approvalUrl) {
-                throw new \Exception('Could not get PayPal approval URL');
-            }
-
-            return redirect($approvalUrl);
+            return response()->json([
+                'success' => true,
+                'message' => 'Wallet deposit successful',
+                'new_balance' => $wallet->fresh()->balance
+            ]);
 
         } catch (\Exception $e) {
-            return redirect()->route('wallet.index')
-                ->with('error', 'Failed to initiate PayPal payment: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Wallet Deposit Error', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process payment: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
