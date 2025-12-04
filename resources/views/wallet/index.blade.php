@@ -148,7 +148,7 @@
                                    class="form-control"
                                    id="deposit_amount"
                                    name="amount"
-                                   min="10"
+                                   min="5"
                                    max="10000"
                                    step="0.01"
                                    value="50"
@@ -156,7 +156,7 @@
                                    placeholder="0.00">
                         </div>
                         <small class="text-muted">
-                            {{ __('messages.minimum_deposit') }}: $10.00
+                            {{ __('messages.minimum_deposit') }}: $5.00
                         </small>
                     </div>
 
@@ -387,8 +387,8 @@
                 const amount = document.getElementById('deposit_amount').value;
 
                 // Validate amount
-                if (!amount || parseFloat(amount) < 10) {
-                    alert('{{ __('messages.minimum_deposit') }}: $10.00');
+                if (!amount || parseFloat(amount) < 5) {
+                    alert('{{ __('messages.minimum_deposit') }}: $5.00');
                     return false;
                 }
 

@@ -190,7 +190,7 @@ class WalletController extends Controller
     public function depositPayPal(Request $request)
     {
         $validated = $request->validate([
-            'amount' => 'required|numeric|min:10|max:10000',
+            'amount' => 'required|numeric|min:5|max:10000',
             'note' => 'nullable|string|max:500',
         ]);
 
