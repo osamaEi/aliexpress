@@ -148,7 +148,7 @@
                                    class="form-control"
                                    id="deposit_amount"
                                    name="amount"
-                                   min="5"
+                                   min="2"
                                    max="10000"
                                    step="0.01"
                                    value="50"
@@ -156,7 +156,7 @@
                                    placeholder="0.00">
                         </div>
                         <small class="text-muted">
-                            {{ __('messages.minimum_deposit') }}: $5.00
+                            {{ __('messages.minimum_deposit') }}: $2.00
                         </small>
                     </div>
 
@@ -317,7 +317,7 @@
     $paypalMode = config('paypal.mode', 'sandbox');
     $paypalClientId = config("paypal.{$paypalMode}.client_id");
 @endphp
-<script src="https://www.paypal.com/sdk/js?client-id={{ $paypalClientId }}&currency={{ config('paypal.currency', 'USD') }}"></script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ $paypalClientId }}&currency={{ config('paypal.currency', 'USD') }}&intent=capture"></script>
 
 <style>
     .quick-amount.active {
@@ -387,8 +387,8 @@
                 const amount = document.getElementById('deposit_amount').value;
 
                 // Validate amount
-                if (!amount || parseFloat(amount) < 5) {
-                    alert('{{ __('messages.minimum_deposit') }}: $5.00');
+                if (!amount || parseFloat(amount) < 2) {
+                    alert('{{ __('messages.minimum_deposit') }}: $2.00');
                     return false;
                 }
 
@@ -408,6 +408,19 @@
                         },
                         custom_id: 'WALLET-{{ auth()->id() }}-' + Date.now()
                     }],
+                    payer: {
+                        name: {
+                            given_name: '{{ auth()->user()->first_name ?? auth()->user()->name }}',
+                            surname: '{{ auth()->user()->last_name ?? "" }}'
+                        },
+                        email_address: '{{ auth()->user()->email }}',
+                        phone: {
+                            phone_type: 'MOBILE',
+                            phone_number: {
+                                national_number: '{{ auth()->user()->phone ?? "" }}'
+                            }
+                        }
+                    },
                     application_context: {
                         shipping_preference: 'NO_SHIPPING'
                     }

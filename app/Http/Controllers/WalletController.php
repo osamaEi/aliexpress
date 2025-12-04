@@ -190,7 +190,7 @@ class WalletController extends Controller
     public function depositPayPal(Request $request)
     {
         $validated = $request->validate([
-            'amount' => 'required|numeric|min:5|max:10000',
+            'amount' => 'required|numeric|min:2|max:10000',
             'note' => 'nullable|string|max:500',
             'order_id' => 'required|string',
             'payer_id' => 'nullable|string',
@@ -236,7 +236,6 @@ class WalletController extends Controller
             $this->walletService->deposit(
                 $user,
                 $validated['amount'],
-                'paypal_deposit',
                 $validated['note'] ?: 'Wallet deposit via PayPal',
                 [
                     'paypal_order_id' => $validated['order_id'],
