@@ -82,6 +82,17 @@ class PayPalService
                     'landing_page' => 'BILLING',
                     'user_action' => 'PAY_NOW',
                 ],
+                'payment_source' => [
+                    'paypal' => [
+                        'experience_context' => [
+                            'payment_method_preference' => 'IMMEDIATE_PAYMENT_REQUIRED',
+                            'brand_name' => config('app.name'),
+                            'locale' => 'en-US',
+                            'shipping_preference' => 'NO_SHIPPING',
+                            'user_action' => 'PAY_NOW'
+                        ]
+                    ]
+                ],
             ];
 
             $response = Http::withToken($accessToken)

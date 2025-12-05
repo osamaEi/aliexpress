@@ -213,14 +213,20 @@ class WalletController extends Controller
             // Create payment transaction record
             $merchantOrderId = 'WALLET-' . $user->id . '-' . time();
 
-            // Extract transaction ID from PayPal details
+            // Extract transaction ID and amounts from PayPal details
             $transactionId = $validated['details']['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+
+            // Get the gross amount (what customer paid) from PayPal response
+            $grossAmount = $validated['details']['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? $validated['amount'];
+
+            // Get PayPal fee if available
+            $paypalFee = $validated['details']['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['paypal_fee']['value'] ?? 0;
 
             $paymentTransaction = \App\Models\PaymentTransaction::create([
                 'user_id' => $user->id,
                 'merchant_order_id' => $merchantOrderId,
                 'type' => 'wallet_deposit',
-                'amount' => $validated['amount'],
+                'amount' => $grossAmount, // Use gross amount from PayPal
                 'currency' => config('paypal.currency'),
                 'status' => 'success',
                 'payment_method' => 'paypal',
@@ -230,23 +236,26 @@ class WalletController extends Controller
                 'paid_at' => now(),
             ]);
 
-            // Credit the wallet
+            // Credit the wallet with the FULL amount customer paid (absorb PayPal fees)
             $wallet = $this->walletService->getOrCreateWallet($user);
 
             $this->walletService->deposit(
                 $user,
-                $validated['amount'],
+                $grossAmount, // Credit full amount
                 $validated['note'] ?: 'Wallet deposit via PayPal',
                 [
                     'paypal_order_id' => $validated['order_id'],
                     'transaction_id' => $transactionId,
                     'payment_transaction_id' => $paymentTransaction->id,
+                    'paypal_fee' => $paypalFee,
+                    'gross_amount' => $grossAmount,
                 ]
             );
 
             \Illuminate\Support\Facades\Log::info('Wallet Deposit Processed', [
                 'user_id' => $user->id,
-                'amount' => $validated['amount'],
+                'amount' => $grossAmount,
+                'paypal_fee' => $paypalFee,
                 'order_id' => $validated['order_id'],
                 'transaction_id' => $transactionId,
             ]);
