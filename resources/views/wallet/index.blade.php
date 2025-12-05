@@ -417,7 +417,7 @@
                         phone: {
                             phone_type: 'MOBILE',
                             phone_number: {
-                                national_number: '{{ auth()->user()->phone ?? "" }}'
+                                national_number: '{{ auth()->user()->phone ?? "501774477" }}'
                             }
                         }
                     },
