@@ -1586,7 +1586,7 @@ class AliExpressService
 
     /**
      * Get order info
-     * API: aliexpress.ds.order.get
+     * API: aliexpress.trade.ds.order.get (Correct API for dropshipping orders)
      */
     public function getOrderInfo(string $orderId, ?string $accessToken = null)
     {
@@ -1594,18 +1594,50 @@ class AliExpressService
             $accessToken = $this->getAccessToken();
         }
 
-        $params = [
-            'access_token' => $accessToken,
-            'order_id' => $orderId
-        ];
+        try {
+            $params = [
+                'single_order_query' => json_encode([
+                    'order_id' => (int)$orderId,
+                ])
+            ];
 
-        $data = $this->makeRequest('aliexpress.ds.order.get', $params);
+            $data = $this->makeRequest('aliexpress.trade.ds.order.get', $params, true);
 
-        if (isset($data['aliexpress_ds_order_get_response']['result'])) {
-            return $data['aliexpress_ds_order_get_response']['result'];
+            Log::info('AliExpress Order Info Response', [
+                'order_id' => $orderId,
+                'response_keys' => array_keys($data ?? []),
+            ]);
+
+            if (isset($data['aliexpress_trade_ds_order_get_response']['result'])) {
+                $result = $data['aliexpress_trade_ds_order_get_response']['result'];
+
+                // Extract logistics info
+                $logisticsInfo = $result['logistics_info_list']['aeop_order_logistics_info'][0] ?? [];
+
+                // Extract and normalize the order data
+                return [
+                    'order_id' => $orderId,
+                    'order_status' => $result['order_status'] ?? null,
+                    'logistics_status' => $result['logistics_status'] ?? null,
+                    'logistics_no' => $logisticsInfo['logistics_no'] ?? null,
+                    'logistics_service' => $logisticsInfo['logistics_service'] ?? null,
+                    'logistics_service_name' => $logisticsInfo['logistics_service'] ?? null,
+                    'tracking_number' => $logisticsInfo['logistics_no'] ?? null,
+                    'gmt_create' => $result['gmt_create'] ?? null,
+                    'order_paidtime_string' => $result['order_paidtime_string'] ?? null,
+                    'raw_response' => $result,
+                ];
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Failed to get order info', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return null;
         }
-
-        return null;
     }
 
     /**
