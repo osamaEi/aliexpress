@@ -1502,14 +1502,24 @@ class AliExpressService
             'product_items' => $productItems
         ];
 
+        // Build ds_extend_request with payment configuration
+        $dsExtendRequest = [
+            'payment' => [
+                'pay_currency' => $orderData['pay_currency'] ?? 'USD',
+                'try_to_pay' => $orderData['try_to_pay'] ?? true,
+            ]
+        ];
+
         $params = [
             'access_token' => $accessToken,
-            'param_place_order_request4_open_api_d_t_o' => json_encode($orderRequest)
+            'param_place_order_request4_open_api_d_t_o' => json_encode($orderRequest),
+            'ds_extend_request' => json_encode($dsExtendRequest)
         ];
 
         Log::info('Creating AliExpress order', [
             'address' => $orderRequest['logistics_address'],
-            'product_items' => $orderRequest['product_items']
+            'product_items' => $orderRequest['product_items'],
+            'payment' => $dsExtendRequest['payment']
         ]);
 
         $data = $this->makeRequest('aliexpress.ds.order.create', $params);
