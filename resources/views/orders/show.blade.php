@@ -27,7 +27,7 @@
                         </form>
                     @endif
 
-                    @if($order->aliexpress_order_id && $order->status == 'placed')
+                    @if($order->aliexpress_order_id && in_array($order->status, ['placed', 'paid', 'shipped']))
                         <form action="{{ route('orders.update-tracking', $order) }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-info">

@@ -437,31 +437,183 @@ class OrderController extends Controller
         }
 
         try {
+            $oldStatus = $order->status;
+            $hasUpdates = false;
+
+            // Get order details with full timeline information
+            $orderDetails = $this->aliexpressService->getOrderDetails($order->aliexpress_order_id);
+
+            if ($orderDetails) {
+                $aliexpressStatus = $orderDetails['order_status'] ?? null;
+
+                if ($aliexpressStatus) {
+                    $newStatus = $this->mapAliExpressStatus($aliexpressStatus);
+
+                    if ($newStatus && $newStatus !== $oldStatus) {
+                        $order->status = $newStatus;
+                        $this->updateOrderTimestamps($order, $newStatus);
+                        $hasUpdates = true;
+
+                        // Dispatch event for status change
+                        event(new \App\Events\OrderStatusUpdated($order, $oldStatus, $newStatus));
+                    }
+                }
+
+                // Extract logistics information
+                if (isset($orderDetails['logistics_status'])) {
+                    $order->shipping_method = $orderDetails['logistics_service_name'] ?? $order->shipping_method;
+                    $hasUpdates = true;
+                }
+            }
+
+            // Get tracking info
             $trackingInfo = $this->aliexpressService->getTrackingInfo($order->aliexpress_order_id);
 
             if ($trackingInfo) {
-                $order->update([
-                    'tracking_number' => $trackingInfo['tracking_number'] ?? null,
-                    'shipping_method' => $trackingInfo['logistics_name'] ?? null,
-                    'status' => 'shipped',
-                    'shipped_at' => now(),
+                if (isset($trackingInfo['tracking_number'])) {
+                    $order->tracking_number = $trackingInfo['tracking_number'];
+                    $hasUpdates = true;
+                }
+
+                if (isset($trackingInfo['logistics_name'])) {
+                    $order->shipping_method = $trackingInfo['logistics_name'];
+                    $hasUpdates = true;
+                }
+            }
+
+            // Also get detailed shipping info
+            $shippingData = $this->aliexpressService->getOrderShippingInfo($order->aliexpress_order_id);
+
+            if ($shippingData) {
+                $order->tracking_number = $shippingData['tracking_number'] ?? $order->tracking_number;
+                $order->shipping_method = $shippingData['shipping_method'] ?? $order->shipping_method;
+
+                // Update status based on shipping status
+                if (isset($shippingData['status'])) {
+                    $shippingStatus = $shippingData['status'];
+                    $statusChanged = false;
+
+                    if ($shippingStatus === 'delivered' && $order->status !== 'delivered') {
+                        $order->status = 'delivered';
+                        if (empty($order->delivered_at)) {
+                            $order->delivered_at = now();
+                        }
+                        if (empty($order->shipped_at)) {
+                            $order->shipped_at = now()->subDays(3);
+                        }
+                        $statusChanged = true;
+                        $hasUpdates = true;
+                    } elseif (in_array($shippingStatus, ['in_transit', 'shipped']) && in_array($order->status, ['placed', 'paid'])) {
+                        $order->status = 'shipped';
+                        if (empty($order->shipped_at)) {
+                            $order->shipped_at = now();
+                        }
+                        $statusChanged = true;
+                        $hasUpdates = true;
+                    }
+
+                    if ($statusChanged && $oldStatus !== $order->status) {
+                        event(new \App\Events\OrderStatusUpdated($order, $oldStatus, $order->status));
+                    }
+                }
+
+                // Create or update Shipping record
+                \App\Models\Shipping::updateOrCreate(
+                    ['order_id' => $order->id],
+                    [
+                        'tracking_number' => $shippingData['tracking_number'] ?? null,
+                        'carrier_name' => $shippingData['carrier_name'] ?? null,
+                        'carrier_code' => $shippingData['carrier_code'] ?? null,
+                        'status' => $shippingData['status'] ?? 'pending',
+                        'tracking_events' => $shippingData['tracking_events'] ?? [],
+                        'shipped_at' => $order->shipped_at,
+                        'delivered_at' => $order->delivered_at,
+                        'last_synced_at' => now(),
+                    ]
+                );
+            }
+
+            if ($hasUpdates) {
+                $order->save();
+
+                Log::info('Order tracking and status updated', [
+                    'order_id' => $order->id,
+                    'old_status' => $oldStatus,
+                    'new_status' => $order->status,
+                    'tracking_number' => $order->tracking_number
                 ]);
 
                 return redirect()->back()
-                    ->with('success', 'Tracking information updated successfully!');
+                    ->with('success', 'Order status and tracking information updated successfully!');
             }
 
             return redirect()->back()
-                ->with('warning', 'No tracking information available yet.');
+                ->with('warning', 'No new tracking information available yet.');
 
         } catch (\Exception $e) {
             Log::error('Tracking Update Error', [
                 'order_id' => $order->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return redirect()->back()
-                ->with('error', 'Failed to update tracking information.');
+                ->with('error', 'Failed to update tracking information: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Map AliExpress order status to internal status
+     */
+    protected function mapAliExpressStatus(string $aliexpressStatus): ?string
+    {
+        $statusMap = [
+            'PLACE_ORDER_SUCCESS' => 'placed',
+            'IN_CANCEL' => 'processing',
+            'WAIT_SELLER_SEND_GOODS' => 'paid',
+            'SELLER_PART_SEND_GOODS' => 'paid',
+            'WAIT_BUYER_ACCEPT_GOODS' => 'shipped',
+            'FUND_PROCESSING' => 'delivered',
+            'FINISH' => 'delivered',
+            'ORDER_PLACED' => 'placed',
+            'ORDER_CONFIRMED' => 'paid',
+            'PAYMENT_CONFIRMED' => 'paid',
+            'ORDER_SHIPPED' => 'shipped',
+            'ORDER_DELIVERED' => 'delivered',
+            'SHIPPED' => 'shipped',
+            'DELIVERED' => 'delivered',
+        ];
+
+        return $statusMap[strtoupper($aliexpressStatus)] ?? null;
+    }
+
+    /**
+     * Update order timestamps based on status
+     */
+    protected function updateOrderTimestamps(Order $order, string $status): void
+    {
+        switch ($status) {
+            case 'placed':
+                if (empty($order->placed_at)) {
+                    $order->placed_at = now();
+                }
+                break;
+
+            case 'shipped':
+                if (empty($order->shipped_at)) {
+                    $order->shipped_at = now();
+                }
+                break;
+
+            case 'delivered':
+                if (empty($order->delivered_at)) {
+                    $order->delivered_at = now();
+                }
+                // Ensure shipped_at is set
+                if (empty($order->shipped_at)) {
+                    $order->shipped_at = now()->subDays(3);
+                }
+                break;
         }
     }
 

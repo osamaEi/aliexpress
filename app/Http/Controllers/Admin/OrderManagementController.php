@@ -74,7 +74,43 @@ class OrderManagementController extends Controller
             'status' => 'required|in:pending,placed,paid,shipped,delivered,cancelled',
         ]);
 
-        $order->update(['status' => $request->status]);
+        $oldStatus = $order->status;
+        $newStatus = $request->status;
+
+        // Update status
+        $order->status = $newStatus;
+
+        // Update timestamps based on new status
+        switch ($newStatus) {
+            case 'placed':
+                if (empty($order->placed_at)) {
+                    $order->placed_at = now();
+                }
+                break;
+
+            case 'shipped':
+                if (empty($order->shipped_at)) {
+                    $order->shipped_at = now();
+                }
+                break;
+
+            case 'delivered':
+                if (empty($order->delivered_at)) {
+                    $order->delivered_at = now();
+                }
+                // Ensure shipped_at is set if not already
+                if (empty($order->shipped_at)) {
+                    $order->shipped_at = now()->subDays(3);
+                }
+                break;
+        }
+
+        $order->save();
+
+        // Dispatch event for notifications if status changed
+        if ($oldStatus !== $newStatus) {
+            event(new \App\Events\OrderStatusUpdated($order, $oldStatus, $newStatus));
+        }
 
         return redirect()->back()
             ->with('success', __('messages.order_status_updated'));
