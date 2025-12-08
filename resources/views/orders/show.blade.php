@@ -161,8 +161,38 @@
                                 <div>
                                     <strong>Shipped</strong>
                                     <p class="text-muted small mb-0">{{ $order->shipped_at->format('d M Y, h:i A') }}</p>
+                                    @if($order->tracking_number)
+                                        <p class="small mb-0 mt-1">
+                                            <span class="badge bg-info">{{ $order->tracking_number }}</span>
+                                        </p>
+                                    @endif
+                                    @if($order->shipping_method)
+                                        <p class="text-muted small mb-0">{{ $order->shipping_method }}</p>
+                                    @endif
                                 </div>
                             </div>
+
+                            @php
+                                $shipping = $order->shipping;
+                                $trackingEvents = $shipping && $shipping->tracking_events ? $shipping->tracking_events : [];
+                            @endphp
+
+                            @if(!empty($trackingEvents))
+                                @foreach($trackingEvents as $event)
+                                    <div class="timeline-item">
+                                        <i class="ri-map-pin-line text-secondary" style="font-size: 14px;"></i>
+                                        <div>
+                                            <strong class="small">{{ $event['status'] ?? 'Update' }}</strong>
+                                            <p class="text-muted small mb-0">{{ $event['description'] ?? '' }}</p>
+                                            @if(isset($event['timestamp']))
+                                                <p class="text-muted small mb-0" style="font-size: 0.75rem;">
+                                                    {{ \Carbon\Carbon::createFromTimestampMs($event['timestamp'])->format('d M Y, h:i A') }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
                         @endif
 
                         @if($order->delivered_at)

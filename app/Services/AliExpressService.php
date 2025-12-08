@@ -1610,39 +1610,13 @@ class AliExpressService
 
     /**
      * Get order details with timeline information
-     * API: aliexpress.trade.order.get
-     * This returns full order details including logistics status
+     * Uses aliexpress.ds.order.get which is the most reliable for dropshipping
      */
     public function getOrderDetails(string $orderId, ?string $accessToken = null): ?array
     {
-        if (!$accessToken) {
-            $accessToken = $this->getAccessToken();
-        }
-
-        $params = [
-            'order_id' => $orderId,
-        ];
-
-        try {
-            $data = $this->makeRequest('aliexpress.trade.order.get', $params, true);
-
-            Log::info('AliExpress Order Details Response', [
-                'order_id' => $orderId,
-                'response_keys' => array_keys($data ?? []),
-            ]);
-
-            if (isset($data['aliexpress_trade_order_get_response']['result'])) {
-                return $data['aliexpress_trade_order_get_response']['result'];
-            }
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('Failed to get order details', [
-                'order_id' => $orderId,
-                'error' => $e->getMessage()
-            ]);
-            return null;
-        }
+        // For dropshipping, just use the regular order info API
+        // It contains all the necessary order status and logistics information
+        return $this->getOrderInfo($orderId, $accessToken);
     }
 
     /**

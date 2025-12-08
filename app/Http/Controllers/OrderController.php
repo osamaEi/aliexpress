@@ -466,7 +466,7 @@ class OrderController extends Controller
                 }
             }
 
-            // Get tracking info
+            // Get detailed tracking info with events
             $trackingInfo = $this->aliexpressService->getTrackingInfo($order->aliexpress_order_id);
 
             if ($trackingInfo) {
@@ -477,6 +477,21 @@ class OrderController extends Controller
 
                 if (isset($trackingInfo['logistics_name'])) {
                     $order->shipping_method = $trackingInfo['logistics_name'];
+                    $hasUpdates = true;
+                }
+
+                // If we got tracking events from the detailed tracking API, use them
+                if (!empty($trackingInfo['tracking_events'])) {
+                    \App\Models\Shipping::updateOrCreate(
+                        ['order_id' => $order->id],
+                        [
+                            'tracking_number' => $trackingInfo['tracking_number'] ?? null,
+                            'carrier_name' => $trackingInfo['carrier_name'] ?? null,
+                            'tracking_events' => $trackingInfo['tracking_events'],
+                            'shipped_at' => $order->shipped_at,
+                            'last_synced_at' => now(),
+                        ]
+                    );
                     $hasUpdates = true;
                 }
             }
