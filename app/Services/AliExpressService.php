@@ -1614,10 +1614,23 @@ class AliExpressService
                 // Extract logistics info
                 $logisticsInfo = $result['logistics_info_list']['aeop_order_logistics_info'][0] ?? [];
 
+                // Check if order was cancelled
+                $childOrders = $result['child_order_list']['aeop_child_order_info'] ?? [];
+                $endReason = null;
+                if (!empty($childOrders)) {
+                    $endReason = $childOrders[0]['end_reason'] ?? null;
+                }
+
+                // If order has end_reason = CANCELED, override the order_status
+                $orderStatus = $result['order_status'] ?? null;
+                if ($endReason === 'CANCELED') {
+                    $orderStatus = 'CANCELED';
+                }
+
                 // Extract and normalize the order data
                 return [
                     'order_id' => $orderId,
-                    'order_status' => $result['order_status'] ?? null,
+                    'order_status' => $orderStatus,
                     'logistics_status' => $result['logistics_status'] ?? null,
                     'logistics_no' => $logisticsInfo['logistics_no'] ?? null,
                     'logistics_service' => $logisticsInfo['logistics_service'] ?? null,
@@ -1625,6 +1638,7 @@ class AliExpressService
                     'tracking_number' => $logisticsInfo['logistics_no'] ?? null,
                     'gmt_create' => $result['gmt_create'] ?? null,
                     'order_paidtime_string' => $result['order_paidtime_string'] ?? null,
+                    'end_reason' => $endReason,
                     'raw_response' => $result,
                 ];
             }

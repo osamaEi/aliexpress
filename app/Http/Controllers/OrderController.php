@@ -584,7 +584,8 @@ class OrderController extends Controller
     {
         $statusMap = [
             'PLACE_ORDER_SUCCESS' => 'placed',
-            'IN_CANCEL' => 'processing',
+            'IN_CANCEL' => 'cancelled',
+            'CANCELED' => 'cancelled',
             'WAIT_SELLER_SEND_GOODS' => 'paid',
             'SELLER_PART_SEND_GOODS' => 'paid',
             'WAIT_BUYER_ACCEPT_GOODS' => 'shipped',
