@@ -1647,7 +1647,8 @@ class AliExpressService
 
     /**
      * Get tracking info
-     * API: aliexpress.ds.tracking.info.query
+     * API: aliexpress.ds.order.tracking.get
+     * This API gets logistics tracking information for dropshipping orders
      */
     public function getTrackingInfo(string $orderId, ?string $accessToken = null)
     {
@@ -1655,19 +1656,78 @@ class AliExpressService
             $accessToken = $this->getAccessToken();
         }
 
-        $params = [
-            'access_token' => $accessToken,
-            'order_id' => $orderId,
-            'logistics_type' => 'TRACKING_NO'
-        ];
+        try {
+            // Use the correct dropshipping tracking API
+            $params = [
+                'ae_order_id' => $orderId,
+                'language' => 'en_US',
+            ];
 
-        $data = $this->makeRequest('aliexpress.ds.tracking.info.query', $params);
+            $data = $this->makeRequest('aliexpress.ds.order.tracking.get', $params, true);
 
-        if (isset($data['aliexpress_ds_tracking_info_query_response']['result'])) {
-            return $data['aliexpress_ds_tracking_info_query_response']['result'];
+            Log::info('AliExpress Tracking API Response', [
+                'order_id' => $orderId,
+                'response_keys' => array_keys($data ?? []),
+            ]);
+
+            // Parse response
+            if (isset($data['aliexpress_ds_order_tracking_get_response']['result'])) {
+                $result = $data['aliexpress_ds_order_tracking_get_response']['result'];
+
+                // Check if successful
+                if (isset($result['ret']) && $result['ret'] === true && isset($result['data'])) {
+                    $trackingData = $result['data'];
+
+                    // Extract tracking details
+                    $trackingLines = $trackingData['tracking_detail_line_list']['tracking_detail'] ?? [];
+
+                    if (!empty($trackingLines)) {
+                        $firstLine = is_array($trackingLines) && isset($trackingLines[0]) ? $trackingLines[0] : $trackingLines;
+
+                        // Extract tracking events
+                        $trackingEvents = [];
+                        if (isset($firstLine['detail_node_list']['detail_node'])) {
+                            $nodes = $firstLine['detail_node_list']['detail_node'];
+                            foreach ($nodes as $node) {
+                                $trackingEvents[] = [
+                                    'timestamp' => $node['time_stamp'] ?? null,
+                                    'description' => $node['tracking_detail_desc'] ?? '',
+                                    'status' => $node['tracking_name'] ?? '',
+                                ];
+                            }
+                        }
+
+                        return [
+                            'tracking_number' => $firstLine['mail_no'] ?? null,
+                            'logistics_name' => $firstLine['carrier_name'] ?? null,
+                            'carrier_name' => $firstLine['carrier_name'] ?? null,
+                            'eta_timestamp' => $firstLine['eta_time_stamps'] ?? null,
+                            'tracking_events' => $trackingEvents,
+                            'package_items' => $firstLine['package_item_list']['package_item'] ?? [],
+                            'raw_response' => $result,
+                        ];
+                    }
+                }
+
+                // If tracking not found, return error info
+                if (isset($result['ret']) && $result['ret'] === false) {
+                    Log::info('Tracking data not available yet', [
+                        'order_id' => $orderId,
+                        'code' => $result['code'] ?? null,
+                        'msg' => $result['msg'] ?? 'No message',
+                    ]);
+                }
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Failed to get tracking info', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return null;
         }
-
-        return null;
     }
 
     /**
@@ -1897,13 +1957,44 @@ class AliExpressService
         }
 
         try {
-            // Try to get tracking info
-            $trackingData = $this->getTrackingInfo($aliexpressOrderId);
+            // First, try to get order info from ds.order.get (most reliable for dropshipping)
+            $orderInfo = $this->getOrderInfo($aliexpressOrderId);
 
-            if (!$trackingData) {
-                // Try alternative tracking method
-                $trackingData = $this->queryLogisticsTracking($aliexpressOrderId);
+            if ($orderInfo) {
+                $orderStatus = $orderInfo['order_status'] ?? 'WAIT_SELLER_SEND_GOODS';
+
+                return [
+                    'tracking_number' => $orderInfo['logistics_no'] ?? $orderInfo['tracking_number'] ?? null,
+                    'shipping_method' => $orderInfo['logistics_service_name'] ?? $orderInfo['logistics_service'] ?? null,
+                    'carrier_name' => $orderInfo['logistics_service_name'] ?? null,
+                    'carrier_code' => $orderInfo['logistics_service'] ?? null,
+                    'status' => $this->parseTrackingStatus($orderStatus),
+                    'tracking_events' => [],
+                    'order_status' => $orderStatus,
+                    'raw_response' => $orderInfo,
+                ];
             }
+
+            // Fallback: Try to get order details
+            $orderDetails = $this->getOrderDetails($aliexpressOrderId);
+
+            if ($orderDetails) {
+                $orderStatus = $orderDetails['order_status'] ?? 'WAIT_SELLER_SEND_GOODS';
+
+                return [
+                    'tracking_number' => $orderDetails['logistics_no'] ?? null,
+                    'shipping_method' => $orderDetails['logistics_service_name'] ?? null,
+                    'carrier_name' => $orderDetails['logistics_service_name'] ?? null,
+                    'carrier_code' => $orderDetails['logistics_service'] ?? null,
+                    'status' => $this->parseTrackingStatus($orderStatus),
+                    'tracking_events' => [],
+                    'order_status' => $orderStatus,
+                    'raw_response' => $orderDetails,
+                ];
+            }
+
+            // Last resort: Try tracking info API
+            $trackingData = $this->getTrackingInfo($aliexpressOrderId);
 
             if ($trackingData) {
                 return [
@@ -1919,7 +2010,8 @@ class AliExpressService
         } catch (\Exception $e) {
             Log::error('Failed to get order shipping info', [
                 'aliexpress_order_id' => $aliexpressOrderId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
         }
 
