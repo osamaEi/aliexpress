@@ -91,13 +91,17 @@
     <!-- Sync All Button -->
     <div class="row mb-3">
         <div class="col-12">
-            <form method="POST" action="{{ route('seller.shipping.sync-all') }}" class="d-inline">
+            <form method="POST" action="{{ route('seller.shipping.sync-all') }}" class="d-inline" id="sync-all-form">
                 @csrf
                 <button type="submit" class="btn btn-primary" id="sync-all-btn">
                     <i class="ri-refresh-line me-1"></i>
                     {{ __('messages.sync_all_from_aliexpress') }}
                 </button>
             </form>
+            <small class="text-muted ms-2">
+                <i class="ri-information-line"></i>
+                Updates order statuses and tracking information from AliExpress
+            </small>
         </div>
     </div>
 
@@ -278,5 +282,31 @@
         font-weight: 500;
         padding: 0.4em 0.6em;
     }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const syncAllForm = document.getElementById('sync-all-form');
+    const syncAllBtn = document.getElementById('sync-all-btn');
+
+    if (syncAllForm && syncAllBtn) {
+        syncAllForm.addEventListener('submit', function() {
+            syncAllBtn.disabled = true;
+            syncAllBtn.innerHTML = '<i class="ri-loader-4-line me-1 spinner"></i> Syncing...';
+        });
+    }
+});
+</script>
+
+<style>
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
 </style>
 @endsection

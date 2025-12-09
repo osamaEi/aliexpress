@@ -142,6 +142,7 @@ return [
     'order_information' => 'Order Information',
     'customer_information' => 'Customer Information',
     'sync_all_shipments_confirm' => 'Are you sure you want to sync all shipments? This may take a while.',
+    'sync_all_from_aliexpress' => 'Sync All from AliExpress',
     'total_shipments' => 'Total Shipments',
     'delivered_at' => 'Delivered At',
     'order_profits' => 'Order Profits',
