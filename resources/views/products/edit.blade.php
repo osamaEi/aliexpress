@@ -31,8 +31,8 @@
             @if($product->isAliexpressProduct())
                 <div class="alert alert-info">
                     <i class="ri-information-line me-2"></i>
-                    <strong>{{ __('messages.aliexpress_product') }}:</strong> {{ __('messages.product_imported_from_aliexpress') }}
-                    <a href="{{ $product->aliexpress_url }}" target="_blank">{{ __('messages.view_on_aliexpress') }}</a>
+                    <strong>{{ app()->getLocale() == 'ar' ? 'منتج من الصين 🇨🇳' : '🇨🇳 Product from China' }}</strong>
+                    <a href="{{ $product->aliexpress_url }}" target="_blank" class="ms-2">{{ app()->getLocale() == 'ar' ? 'عرض على الموقع' : 'View on Store' }}</a>
                     @if($product->last_synced_at)
                         <br><small>{{ __('messages.last_synced') }}: {{ $product->last_synced_at->diffForHumans() }}</small>
                     @endif

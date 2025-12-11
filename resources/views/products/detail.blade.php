@@ -71,9 +71,7 @@
                                     <i class="ri-global-line me-1"></i> {{ __('messages.dropshipping_product') }}
                                 </span>
                             @endif
-                            <span class="badge {{ $product->is_active ? 'bg-success' : 'bg-secondary' }} mb-2 px-3 py-2">
-                                {{ $product->is_active ? __('messages.available') : __('messages.unavailable') }}
-                            </span>
+                       
                         </div>
                         <a href="{{ route('products.index') }}" class="btn btn-outline-secondary btn-sm">
                             <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
@@ -245,7 +243,11 @@
         <div class="tab-pane fade show active" id="description">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    @if($product->description)
+                    @if($aliexpressData && isset($aliexpressData['ae_item_base_info_dto']['detail']))
+                        <div class="product-description">
+                            {!! $aliexpressData['ae_item_base_info_dto']['detail'] !!}
+                        </div>
+                    @elseif($product->description)
                         <div class="product-description">
                             {!! $product->description !!}
                         </div>
