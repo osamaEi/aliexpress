@@ -6,13 +6,13 @@
 
                             <!-- Bottom Row: BY EVORQ TECHNOLOGIES -->
                             <div class="d-flex justify-content-center align-items-center pt-3 border-top gap-2">
-                                <span style="color: #808080; font-size: 16px; font-weight: 400;">BY</span>
+                                <span style="color: #808080; font-size: 16px; font-weight: 400;">{{ app()->getLocale() == 'ar' ? 'بواسطة' : 'BY' }}</span>
                                 <img src="{{ asset('footer.png') }}"
                                      alt="EVORQ Logo"
-                                     style="height: 50px; opacity: 0.7; transition: opacity 0.3s;"
-                                     onmouseover="this.style.opacity='1'"
-                                     onmouseout="this.style.opacity='0.7'">
-                                <span style="color: #808080; font-size: 16px; font-weight: 400; letter-spacing: 2px;">EVORQ TECHNOLOGIES</span>
+                                     style="height: 50px; transition: opacity 0.3s;"
+                                     onmouseover="this.style.opacity='0.9'"
+                                     onmouseout="this.style.opacity='1'">
+                                <span style="color: #808080; font-size: 16px; font-weight: 400; letter-spacing: 2px;">{{ app()->getLocale() == 'ar' ? 'إيفورك للتقنية' : 'EVORQ TECHNOLOGIES' }}</span>
                             </div>
                         </div>
                     </div>

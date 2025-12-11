@@ -31,7 +31,37 @@ class SellerRegistrationController extends Controller
             'company_name' => 'required|string|max:255',
             'country' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
+            'g-recaptcha-response' => 'required',
+        ], [
+            'g-recaptcha-response.required' => app()->getLocale() == 'ar'
+                ? 'يرجى التحقق من أنك لست روبوت'
+                : 'Please verify that you are not a robot',
         ]);
+
+        // Verify reCAPTCHA v3 (skip in local development if needed)
+        if (env('APP_ENV') !== 'local' || env('RECAPTCHA_ENABLED', true)) {
+            $recaptchaResponse = $request->input('g-recaptcha-response');
+            $recaptchaSecret = env('RECAPTCHA_SECRET_KEY');
+
+            $response = file_get_contents(
+                "https://www.google.com/recaptcha/api/siteverify?secret={$recaptchaSecret}&response={$recaptchaResponse}"
+            );
+
+            $responseData = json_decode($response);
+
+            // For reCAPTCHA v3, check success and score (0.0 to 1.0, higher is better)
+            // Score of 0.5 or above is typically considered human
+            if (!$responseData->success || (isset($responseData->score) && $responseData->score < 0.5)) {
+                return back()->withErrors([
+                    'g-recaptcha-response' => app()->getLocale() == 'ar'
+                        ? 'فشل التحقق من reCAPTCHA. يرجى المحاولة مرة أخرى.'
+                        : 'reCAPTCHA verification failed. Please try again.'
+                ])->withInput();
+            }
+        }
+
+        // Remove reCAPTCHA from validated data
+        unset($validated['g-recaptcha-response']);
 
         // Store data in session
         Session::put('seller_registration', $validated);

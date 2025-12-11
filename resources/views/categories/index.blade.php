@@ -57,8 +57,6 @@
                             <th style="width: 60px;">{{ __('messages.image') }}</th>
                             <th>{{ __('messages.name') }}</th>
                             <th>{{ __('messages.arabic_name') }}</th>
-                            <th>{{ __('messages.slug') }}</th>
-                            <th>{{ __('messages.supplier_id') }}</th>
                             <th>{{ __('messages.products') }}</th>
                             <th>{{ __('messages.subcategories') }}</th>
                             <th>{{ __('messages.order') }}</th>
@@ -90,22 +88,12 @@
                                         <span class="text-muted">-</span>
                                     @endif
                                 </td>
-                                <td><code>{{ $category->slug }}</code></td>
-                                <td>
-                                    @if($category->aliexpress_category_id)
-                                        <span class="badge bg-info">{{ $category->aliexpress_category_id }}</span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
                                 <td>
                                     <span class="badge bg-secondary">{{ $category->products_count }}</span>
                                 </td>
                                 <td>
                                     @if($category->children_count > 0)
-                                        <a href="{{ route('categories.index', ['parent_id' => $category->id]) }}" class="badge bg-primary">
-                                            {{ $category->children_count }}
-                                        </a>
+                                        <span class="badge bg-primary">{{ $category->children_count }}</span>
                                     @else
                                         <span class="badge bg-light text-dark">0</span>
                                     @endif
@@ -150,7 +138,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center py-5">
+                                <td colspan="7" class="text-center py-5">
                                     <i class="ri-inbox-line" style="font-size: 3rem; color: #ccc;"></i>
                                     <p class="text-muted mt-2">
                                         @if($parentCategory)

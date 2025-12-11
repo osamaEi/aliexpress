@@ -108,7 +108,8 @@
                 @endif
             </form>
 
-            <!-- Debug Info (collapsible) -->
+            <!-- Debug Info (collapsible) - Only visible to admins -->
+            @if(auth()->user()->hasRole('admin'))
             <div class="mt-4">
                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo">
                     <i class="ri-bug-line me-1"></i> {{ __('messages.show_raw_api_response') }}
@@ -121,6 +122,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>

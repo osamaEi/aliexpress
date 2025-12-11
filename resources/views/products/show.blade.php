@@ -50,32 +50,32 @@
                 </div>
 
                 <!-- Product Info -->
-                <div class="col-md-6 p-4">
+                <div class="col-md-6 p-4" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             @if($product->isAliexpressProduct())
                                 <span class="badge bg-info mb-2">
-                                    <i class="ri-shopping-cart-line me-1"></i> Dropship
+                                    <i class="ri-shopping-cart-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}
                                 </span>
                             @endif
                             <span class="badge {{ $product->is_active ? 'bg-success' : 'bg-secondary' }} mb-2">
-                                {{ $product->is_active ? 'Active' : 'Inactive' }}
+                                {{ $product->is_active ? __('messages.active') : __('messages.inactive') }}
                             </span>
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createOrderModal">
-                                <i class="ri-shopping-bag-line me-1"></i> Create Order
+                                <i class="ri-shopping-bag-line me-1"></i> {{ __('messages.create_order') }}
                             </button>
                             <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-primary">
-                                <i class="ri-edit-line me-1"></i> Edit
+                                <i class="ri-edit-line me-1"></i> {{ __('messages.edit') }}
                             </a>
                             @if($product->isAliexpressProduct())
                                 <button type="button" class="btn btn-sm btn-info" id="syncProductBtn" onclick="syncProduct()">
-                                    <i class="ri-refresh-line me-1"></i> Sync from Supplier
+                                    <i class="ri-refresh-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'مزامنة من المورد' : 'Sync from Supplier' }}
                                 </button>
                             @endif
                             <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="ri-arrow-left-line me-1"></i> Back
+                                <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
                             </a>
                         </div>
                     </div>
@@ -133,8 +133,14 @@
                         <div class="col-6">
                             <div class="card border-0 bg-light">
                                 <div class="card-body text-center py-3">
-                                    <div class="fs-4 fw-bold text-primary">{{ $product->stock_quantity }}</div>
-                                    <small class="text-muted">Stock</small>
+                                    <div class="fs-4 fw-bold text-primary">
+                                        @if($product->track_inventory)
+                                            {{ $product->stock_quantity ?? 0 }}
+                                        @else
+                                            {{ __('messages.unlimited') }}
+                                        @endif
+                                    </div>
+                                    <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'المخزون' : 'Stock' }}</small>
                                 </div>
                             </div>
                         </div>
@@ -171,16 +177,12 @@
                         <table class="table table-sm">
                             <tbody>
                                 <tr>
-                                    <th style="width: 140px;">SKU:</th>
-                                    <td>{{ $product->sku ?? 'N/A' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Category:</th>
-                                    <td>{{ $product->category->name ?? 'Uncategorized' }}</td>
+                                    <th style="width: 140px;">{{ __('messages.category') }}:</th>
+                                    <td>{{ $product->category->name ?? __('messages.uncategorized') }}</td>
                                 </tr>
                                 @if($product->isAliexpressProduct())
                                     <tr>
-                                        <th>Product ID:</th>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'معرف المنتج' : 'Product ID' }}:</th>
                                         <td>
                                             <code>{{ $product->aliexpress_id }}</code>
                                             <a href="{{ $product->aliexpress_url }}" target="_blank" class="ms-2">
@@ -190,11 +192,11 @@
                                     </tr>
                                 @endif
                                 <tr>
-                                    <th>Created:</th>
+                                    <th>{{ app()->getLocale() == 'ar' ? 'تاريخ الإنشاء' : 'Created' }}:</th>
                                     <td>{{ $product->created_at->format('M d, Y') }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Last Updated:</th>
+                                    <th>{{ app()->getLocale() == 'ar' ? 'آخر تحديث' : 'Last Updated' }}:</th>
                                     <td>{{ $product->updated_at->diffForHumans() }}</td>
                                 </tr>
                             </tbody>

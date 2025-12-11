@@ -8,39 +8,55 @@
                 </div>
 
                 <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-                    <!-- Subscription Expiry Notice for Seller -->
+                    <!-- Subscription Info for Seller -->
                     @if(auth()->user()->user_type === 'seller')
                         @php
                             $activeSubscription = auth()->user()->activeSubscription;
                             $daysRemaining = null;
+                            $subscriptionName = __('messages.no_subscription');
 
-                            if ($activeSubscription && $activeSubscription->end_date) {
-                                $daysRemaining = now()->diffInDays($activeSubscription->end_date, false);
-                                $daysRemaining = floor($daysRemaining);
+                            if ($activeSubscription) {
+                                if ($activeSubscription->plan) {
+                                    $subscriptionName = $activeSubscription->plan->name;
+                                }
+
+                                if ($activeSubscription->end_date) {
+                                    $daysRemaining = now()->diffInDays($activeSubscription->end_date, false);
+                                    $daysRemaining = floor($daysRemaining);
+                                }
                             }
                         @endphp
 
-                        @if($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 20)
-                            <div class="navbar-nav align-items-center me-3">
-                                <div class="nav-item">
-                                    <a class="nav-link fw-medium px-3 py-2 rounded-pill"
-                                       href="{{ route('subscriptions.index') }}"
-                                       style="background: {{ $daysRemaining <= 5 ? '#fee2e2' : '#fef3c7' }};
-                                              color: {{ $daysRemaining <= 5 ? '#991b1b' : '#92400e' }};
-                                              border: 1px solid {{ $daysRemaining <= 5 ? '#fecaca' : '#fde68a' }};">
-                                        <i class="ri-error-warning-line ri-18px me-2"></i>
-                                        <span class="d-none d-md-inline-block">
-                                            {{ app()->getLocale() == 'ar' ? 'باقي ' . $daysRemaining . ' يوم لانتهاء الاشتراك' : $daysRemaining . ' days until subscription expires' }}
+                        <div class="navbar-nav align-items-center me-3">
+                            <div class="nav-item d-flex align-items-center gap-2">
+                                <!-- Subscription Type Badge -->
+                                <span class="badge bg-label-primary px-3 py-2">
+                                    <i class="ri-vip-crown-line me-1"></i>
+                                    {{ $subscriptionName }}
+                                </span>
+
+                                <!-- Days Remaining -->
+                                @if($daysRemaining !== null && $daysRemaining >= 0)
+                                    <span class="badge px-3 py-2" style="background: {{ $daysRemaining <= 5 ? '#fee2e2' : ($daysRemaining <= 10 ? '#fef3c7' : '#d1fae5') }}; color: {{ $daysRemaining <= 5 ? '#991b1b' : ($daysRemaining <= 10 ? '#92400e' : '#065f46') }};">
+                                        <i class="ri-time-line me-1"></i>
+                                        <span class="d-none d-lg-inline-block">
+                                            {{ app()->getLocale() == 'ar' ? $daysRemaining . ' يوم متبقي' : $daysRemaining . ' days left' }}
                                         </span>
-                                        <span class="d-inline-block d-md-none">
-                                            {{ $daysRemaining }}{{ app()->getLocale() == 'ar' ? ' يوم' : 'd' }}
+                                        <span class="d-inline-block d-lg-none">
+                                            {{ $daysRemaining }}{{ app()->getLocale() == 'ar' ? 'ي' : 'd' }}
                                         </span>
-                                    </a>
-                                </div>
+                                    </span>
+                                @endif
+
+                                <!-- Upgrade Button -->
+                                <a href="{{ route('subscriptions.index') }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                    <i class="ri-arrow-up-circle-line me-1"></i>
+                                    <span class="d-none d-lg-inline-block">{{ app()->getLocale() == 'ar' ? 'ترقية' : 'Upgrade' }}</span>
+                                </a>
                             </div>
-                        @endif
+                        </div>
                     @endif
-                    <!-- /Subscription Expiry Notice -->
+                    <!-- /Subscription Info -->
 
                     <ul class="navbar-nav flex-row align-items-center ms-auto">
                         <!-- Language Switcher -->
@@ -55,13 +71,15 @@
                                 <li>
                                     <a class="dropdown-item {{ app()->getLocale() == 'en' ? 'active' : '' }}"
                                        href="{{ route('lang.switch', 'en') }}">
-                                        <span class="align-middle">🇬🇧 English</span>
+                                        <img src="https://flagcdn.com/w20/gb.png" alt="English" style="width: 20px; height: 15px; margin-right: 8px; vertical-align: middle;">
+                                        <span class="align-middle">English</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item {{ app()->getLocale() == 'ar' ? 'active' : '' }}"
                                        href="{{ route('lang.switch', 'ar') }}">
-                                        <span class="align-middle">🇸🇦 العربية</span>
+                                        <img src="https://flagcdn.com/w20/ae.png" alt="العربية" style="width: 20px; height: 15px; margin-{{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 8px; vertical-align: middle;">
+                                        <span class="align-middle">العربية</span>
                                     </a>
                                 </li>
                             </ul>

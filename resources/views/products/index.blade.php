@@ -5,15 +5,6 @@
     <div class="card mb-6">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">{{ __('messages.product_management') }}</h5>
-            <div>
-                    <a href="{{ route('products.aliexpress.import') }}" class="btn btn-primary btn-sm me-2">
-                        <i class="ri-shopping-cart-line me-1"></i> {{ __('messages.import_from_aliexpress') }}
-                    </a>
-                    <a href="{{ route('products.create') }}" class="btn btn-success btn-sm">
-                        <i class="ri-add-line me-1"></i> {{ __('messages.add_product') }}
-                    </a>
-
-            </div>
         </div>
 
         <!-- Filters -->
@@ -36,7 +27,7 @@
                     <div class="col-md-2">
                         <select name="source" class="form-select">
                             <option value="">{{ __('messages.all_sources') }}</option>
-                            <option value="aliexpress" {{ request('source') == 'aliexpress' ? 'selected' : '' }}>AliExpress</option>
+                            <option value="aliexpress" {{ request('source') == 'aliexpress' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</option>
                             <option value="manual" {{ request('source') == 'manual' ? 'selected' : '' }}>{{ __('messages.manual') }}</option>
                         </select>
                     </div>
@@ -72,16 +63,12 @@
                 </div>
             @endif
 
-            <!-- AliExpress Actions -->
+            <!-- China Products Actions -->
             <div class="mb-3">
-                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#aliexpressSearchModal">
-                        <i class="ri-search-line me-1"></i> {{ __('messages.search_aliexpress') }}
-                    </button>
-
                     <form action="{{ route('products.sync-all') }}" method="POST" class="d-inline">
                         @csrf
-                        <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('{{ __('messages.sync_all_confirm') }}')">
-                            <i class="ri-refresh-line me-1"></i> {{ __('messages.sync_all') }}
+                        <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('{{ app()->getLocale() == 'ar' ? 'هل تريد مزامنة جميع المنتجات من الصين؟' : 'Do you want to sync all products from China?' }}')">
+                            <i class="ri-refresh-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'مزامنة الكل من الصين' : 'Sync All from China' }}
                         </button>
                     </form>
 
@@ -119,7 +106,7 @@
                             <td>
                                 <strong>{{ $product->name }}</strong>
                                 @if($product->aliexpress_id)
-                                    <br><small class="text-muted">AE ID: {{ $product->aliexpress_id }}</small>
+                                    <br><small class="text-muted">{{ app()->getLocale() == 'ar' ? 'معرف الصين' : 'China ID' }}: {{ $product->aliexpress_id }}</small>
                                 @endif
                             </td>
                             <td>{{ $product->sku ?? '-' }}</td>
@@ -142,7 +129,7 @@
                             <td>
                                 @if($product->isAliexpressProduct())
                                     <span class="badge bg-info">
-                                        <i class="ri-shopping-cart-line"></i> AliExpress
+                                        🇨🇳 {{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}
                                     </span>
                                 @else
                                     <span class="badge bg-secondary">{{ __('messages.manual') }}</span>
@@ -182,10 +169,10 @@
                                             @endif
 
                                             <div class="dropdown-divider"></div>
-                                            <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline">
+                                            <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline delete-product-form">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('{{ __('messages.confirm_delete_product') }}')">
+                                                <button type="button" class="dropdown-item text-danger delete-product-btn" data-product-name="{{ $product->name }}">
                                                     <i class="ri-delete-bin-line me-2"></i> {{ __('messages.delete') }}
                                                 </button>
                                             </form>
@@ -199,8 +186,6 @@
                             <td colspan="9" class="text-center py-4">
                                 <i class="ri-inbox-line" style="font-size: 48px; color: #ccc;"></i>
                                 <p class="text-muted mt-2">{{ __('messages.no_products_found') }}</p>
-                                    <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm mt-2">{{ __('messages.add_your_first_product') }}</a>
-
                             </td>
                         </tr>
                     @endforelse
@@ -217,250 +202,41 @@
     </div>
 </div>
 
-<!-- AliExpress Search Modal -->
-<div class="modal fade" id="aliexpressSearchModal" tabindex="-1" aria-labelledby="aliexpressSearchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="aliexpressSearchModalLabel">
-                    <i class="ri-shopping-cart-line me-2"></i>{{ __('messages.search_aliexpress_products') }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Search Form -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label for="searchKeyword" class="form-label">{{ __('messages.search_keyword') }}</label>
-                        <input type="text" class="form-control" id="searchKeyword" placeholder="{{ __('messages.enter_product_keywords') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="searchCategory" class="form-label">{{ __('messages.category') }}</label>
-                        <select class="form-select" id="searchCategory">
-                            <option value="">{{ __('messages.select_category_optional') }}</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="profitMargin" class="form-label">{{ __('messages.profit_margin') }} (%)</label>
-                        <input type="number" class="form-control" id="profitMargin" value="30" min="0" max="100">
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <button type="button" class="btn btn-primary" id="searchBtn">
-                            <i class="ri-search-line me-1"></i> {{ __('messages.search') }}
-                        </button>
-                        <button type="button" class="btn btn-secondary" id="clearSearchBtn">
-                            <i class="ri-refresh-line me-1"></i> {{ __('messages.clear') }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Loading Spinner -->
-                <div id="loadingSpinner" class="text-center py-5" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">{{ __('messages.loading') }}</span>
-                    </div>
-                    <p class="mt-2 text-muted">{{ __('messages.searching_aliexpress') }}</p>
-                </div>
-
-                <!-- Alert Messages -->
-                <div id="alertContainer"></div>
-
-                <!-- Results -->
-                <div id="searchResults"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('messages.close') }}</button>
-            </div>
-        </div>
-    </div>
-</div>
+@endsection
 
 @push('scripts')
+<link rel="stylesheet" href="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.css') }}" />
+<script src="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const searchBtn = document.getElementById('searchBtn');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-    const searchKeyword = document.getElementById('searchKeyword');
-    const searchCategory = document.getElementById('searchCategory');
-    const profitMargin = document.getElementById('profitMargin');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const searchResults = document.getElementById('searchResults');
-    const alertContainer = document.getElementById('alertContainer');
+    // Delete product confirmation with SweetAlert
+    document.querySelectorAll('.delete-product-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productName = this.dataset.productName;
+            const form = this.closest('form');
 
-    // Search functionality
-    searchBtn.addEventListener('click', function() {
-        const keyword = searchKeyword.value.trim();
-
-        if (!keyword) {
-            showAlert('Please enter a search keyword', 'warning');
-            return;
-        }
-
-        performSearch(keyword);
-    });
-
-    // Enter key to search
-    searchKeyword.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchBtn.click();
-        }
-    });
-
-    // Clear search
-    clearSearchBtn.addEventListener('click', function() {
-        searchKeyword.value = '';
-        searchCategory.value = '';
-        profitMargin.value = '30';
-        searchResults.innerHTML = '';
-        alertContainer.innerHTML = '';
-    });
-
-    // Perform search
-    function performSearch(keyword) {
-        loadingSpinner.style.display = 'block';
-        searchResults.innerHTML = '';
-        alertContainer.innerHTML = '';
-
-        fetch('{{ route('products.aliexpress.search') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                keyword: keyword
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingSpinner.style.display = 'none';
-
-            if (data.success && data.products && data.products.length > 0) {
-                displayResults(data.products);
-            } else {
-                showAlert('No products found. Please try different keywords.', 'info');
-            }
-        })
-        .catch(error => {
-            loadingSpinner.style.display = 'none';
-            showAlert('Error searching products. Please check your API credentials and try again.', 'danger');
-            console.error('Search error:', error);
-        });
-    }
-
-    // Display search results
-    function displayResults(products) {
-        let html = '<div class="row g-3">';
-
-        products.forEach(product => {
-            const price = parseFloat(product.price || 0);
-            const margin = parseFloat(profitMargin.value || 30);
-            const sellingPrice = price * (1 + (margin / 100));
-
-            html += `
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <img src="${product.image_url || '/images/placeholder.png'}" class="card-img-top" alt="${product.name}" style="height: 200px; object-fit: cover;">
-                        <div class="card-body">
-                            <h6 class="card-title">${product.name}</h6>
-                            <p class="card-text">
-                                <small class="text-muted">AliExpress Price: $${price.toFixed(2)}</small><br>
-                                <strong class="text-primary">Your Price: $${sellingPrice.toFixed(2)}</strong><br>
-                                <small class="text-success">Profit: $${(sellingPrice - price).toFixed(2)} (${margin}%)</small>
-                            </p>
-                        </div>
-                        <div class="card-footer">
-                            <button type="button" class="btn btn-primary btn-sm w-100 import-btn"
-                                    data-product-id="${product.product_id}"
-                                    data-product-name="${product.name}">
-                                <i class="ri-download-line me-1"></i> Import Product
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        html += '</div>';
-        searchResults.innerHTML = html;
-
-        // Attach import event handlers
-        document.querySelectorAll('.import-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                importProduct(this.dataset.productId, this.dataset.productName, this);
+            Swal.fire({
+                title: '{{ app()->getLocale() == 'ar' ? 'هل أنت متأكد؟' : 'Are you sure?' }}',
+                html: '{{ app()->getLocale() == 'ar' ? 'سيتم حذف المنتج' : 'You are about to delete the product' }}<br><strong>"' + productName + '"</strong><br>{{ app()->getLocale() == 'ar' ? 'لا يمكن التراجع عن هذا الإجراء!' : 'This action cannot be undone!' }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '{{ app()->getLocale() == 'ar' ? 'نعم، احذف!' : 'Yes, delete it!' }}',
+                cancelButtonText: '{{ app()->getLocale() == 'ar' ? 'إلغاء' : 'Cancel' }}',
+                customClass: {
+                    confirmButton: 'btn btn-danger me-2',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
             });
         });
-    }
-
-    // Import product
-    function importProduct(productId, productName, button) {
-        const originalHtml = button.innerHTML;
-        button.disabled = true;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Importing...';
-
-        fetch('{{ route('products.aliexpress.import-product') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                aliexpress_id: productId,
-                category_id: searchCategory.value || null,
-                profit_margin: parseFloat(profitMargin.value || 30)
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                button.innerHTML = '<i class="ri-check-line me-1"></i> Imported!';
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-success');
-                showAlert(`Product "${productName}" imported successfully!`, 'success');
-
-                // Reload page after 2 seconds to show new product
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-            } else {
-                button.disabled = false;
-                button.innerHTML = originalHtml;
-                showAlert(data.message || 'Failed to import product. Please try again.', 'danger');
-            }
-        })
-        .catch(error => {
-            button.disabled = false;
-            button.innerHTML = originalHtml;
-            showAlert('Error importing product. Please try again.', 'danger');
-            console.error('Import error:', error);
-        });
-    }
-
-    // Show alert message
-    function showAlert(message, type) {
-        const alert = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-        alertContainer.innerHTML = alert;
-
-        // Auto dismiss after 5 seconds
-        setTimeout(() => {
-            const alertElement = alertContainer.querySelector('.alert');
-            if (alertElement) {
-                alertElement.remove();
-            }
-        }, 5000);
-    }
+    });
 });
 </script>
 @endpush
-
-@endsection

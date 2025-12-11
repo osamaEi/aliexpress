@@ -9,11 +9,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    @if(app()->getLocale() == 'ar')
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    @else
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    @endif
     <style>
         :root {
             --primary-color: #561C04;
@@ -28,7 +24,7 @@
         }
 
         body {
-            font-family: {{ app()->getLocale() == 'ar' ? "'Cairo'" : "'Inter'" }}, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to bottom right, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             display: flex;
@@ -101,7 +97,6 @@
         .logo-wrapper img {
             max-width: 160px;
             height: auto;
-            filter: brightness(0) invert(1);
             margin-bottom: 20px;
         }
 
@@ -512,11 +507,11 @@
     <!-- Language Switcher -->
     <div class="language-switcher">
         <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
-            <span>🇬🇧</span>
+            <img src="https://flagcdn.com/w20/gb.png" alt="English" style="width: 20px; height: 15px;">
             <span>English</span>
         </a>
         <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
-            <span>🇸🇦</span>
+            <img src="https://flagcdn.com/w20/ae.png" alt="العربية" style="width: 20px; height: 15px;">
             <span>العربية</span>
         </a>
     </div>
@@ -524,7 +519,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-wrapper">
-                <img src="{{ asset('logo/logo.png') }}" alt="Logo">
+                <img src="{{ asset('images/white-logo.png') }}" alt="Logo">
                 <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل البائع' : 'Seller Registration' }}</h3>
             </div>
 
@@ -650,15 +645,13 @@
         </div>
     </div>
 
-    <!-- Footer with EVORQ Logo -->
-    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
-        <span style="color: #808080; font-size: 14px; font-weight: 400;">BY</span>
+      <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
+        <span style="color: #808080; font-size: 14px; font-weight: 400;">{{ app()->getLocale() == 'ar' ? 'بواسطة' : 'BY' }}</span>
         <img src="{{ asset('footer.png') }}"
              alt="EVORQ Logo"
-             style="height: 50px; opacity: 0.75; transition: opacity 0.3s;"
-             onmouseover="this.style.opacity='1'"
-             onmouseout="this.style.opacity='0.75'">
-        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">EVORQ TECHNOLOGIES</span>
+             style="height: 45px;"
+           >
+        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">{{ app()->getLocale() == 'ar' ? 'إيفورك للتقنية' : 'EVORQ TECHNOLOGIES' }}</span>
     </div>
 
     <script>

@@ -9,11 +9,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    @if(app()->getLocale() == 'ar')
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    @else
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    @endif
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LeO8CUsAAAAAPT7tfbRUiQd0Jzy_QGTCJB7Rzj3"></script>
     <style>
         :root {
             --primary-color: #561C04;
@@ -28,7 +26,7 @@
         }
 
         body {
-            font-family: {{ app()->getLocale() == 'ar' ? "'Cairo'" : "'Inter'" }}, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to bottom right, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             display: flex;
@@ -101,7 +99,6 @@
         .logo-wrapper img {
             max-width: 160px;
             height: auto;
-            filter: brightness(0) invert(1);
             margin-bottom: 20px;
         }
 
@@ -389,11 +386,11 @@
     <!-- Language Switcher -->
     <div class="language-switcher">
         <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
-            <span>🇬🇧</span>
+            <img src="https://flagcdn.com/w20/gb.png" alt="English" style="width: 20px; height: 15px;">
             <span>English</span>
         </a>
         <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
-            <span>🇸🇦</span>
+            <img src="https://flagcdn.com/w20/ae.png" alt="العربية" style="width: 20px; height: 15px;">
             <span>العربية</span>
         </a>
     </div>
@@ -401,7 +398,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-wrapper">
-                <img src="{{ asset('logo/logo.png') }}" alt="Logo">
+                <img src="{{ asset('images/white-logo.png') }}" alt="Logo">
                 <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل البائع' : 'Seller Registration' }}</h3>
             </div>
 
@@ -545,7 +542,13 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-continue">
+                <!-- Hidden reCAPTCHA v3 token field -->
+                <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+                @error('g-recaptcha-response')
+                    <div class="text-danger text-center mb-3">{{ $message }}</div>
+                @enderror
+
+                <button type="submit" class="btn-continue" id="submitBtn">
                     <span>{{ app()->getLocale() == 'ar' ? 'التالي' : 'Next' }}</span>
                     <i class="{{ app()->getLocale() == 'ar' ? 'ri-arrow-left-line' : 'ri-arrow-right-line' }}"></i>
                 </button>
@@ -559,16 +562,29 @@
     </div>
 
     <!-- Footer with EVORQ Logo -->
-    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
-        <span style="color: #808080; font-size: 14px; font-weight: 400;">BY</span>
+   <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
+        <span style="color: #808080; font-size: 14px; font-weight: 400;">{{ app()->getLocale() == 'ar' ? 'بواسطة' : 'BY' }}</span>
         <img src="{{ asset('footer.png') }}"
              alt="EVORQ Logo"
-             style="height: 50px; opacity: 0.75; transition: opacity 0.3s;"
-             onmouseover="this.style.opacity='1'"
-             onmouseout="this.style.opacity='0.75'">
-        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">EVORQ TECHNOLOGIES</span>
+             style="height: 45px;"
+           >
+        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">{{ app()->getLocale() == 'ar' ? 'إيفورك للتقنية' : 'EVORQ TECHNOLOGIES' }}</span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- reCAPTCHA v3 Script -->
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            grecaptcha.ready(function() {
+                grecaptcha.execute('6LeO8CUsAAAAAPT7tfbRUiQd0Jzy_QGTCJB7Rzj3', {action: 'submit'}).then(function(token) {
+                    document.getElementById('g-recaptcha-response').value = token;
+                    document.querySelector('form').submit();
+                });
+            });
+        });
+    </script>
 </body>
 </html>

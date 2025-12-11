@@ -885,7 +885,7 @@ class ProductController extends Controller
                 // Make a single API call with the optimized keyword
                 // Determine locale based on app language
                 $appLocale = app()->getLocale();
-                $aliexpressLocale = $appLocale === 'ar' ? 'ar_SA' : 'en_US';
+                $aliexpressLocale = $appLocale === 'ar' ? 'ar_MA' : 'en_US';
 
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $categoryKeyword,
@@ -916,7 +916,7 @@ class ProductController extends Controller
 
                 // Determine locale based on app language
                 $appLocale = app()->getLocale();
-                $aliexpressLocale = $appLocale === 'ar' ? 'ar_SA' : 'en_US';
+                $aliexpressLocale = $appLocale === 'ar' ? 'ar_MA' : 'en_US';
 
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $keyword,

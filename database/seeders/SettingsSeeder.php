@@ -325,6 +325,18 @@ class SettingsSeeder extends Seeder
                 'type' => 'select',
                 'description' => 'Theme style: light or dark',
             ],
+            [
+                'key' => 'site_language',
+                'value' => 'ar',
+                'type' => 'select',
+                'description' => 'Default site language',
+            ],
+            [
+                'key' => 'site_currency',
+                'value' => 'AED',
+                'type' => 'select',
+                'description' => 'Default site currency',
+            ],
         ];
 
         foreach ($settings as $setting) {
