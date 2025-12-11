@@ -11,6 +11,42 @@
         </div>
 
         <div class="card-body">
+            <!-- Orders Statistics - Moved to Top -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ App\Models\Order::pending()->count() }}</h3>
+                            <small>{{ __('messages.pending_orders') }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ App\Models\Order::placed()->count() }}</h3>
+                            <small>{{ __('messages.placed_orders') }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ App\Models\Order::shipped()->count() }}</h3>
+                            <small>{{ __('messages.shipped_orders') }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h3 class="mb-0">{{ App\Models\Order::where('status', 'delivered')->count() }}</h3>
+                            <small>{{ app()->getLocale() == 'ar' ? 'طلبات موصلة' : 'Delivered Orders' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Search and Filter Form -->
             <form method="GET" action="{{ route('orders.index') }}" class="mb-4">
                 <div class="row g-3">
@@ -63,28 +99,75 @@
                         </thead>
                         <tbody>
                             @foreach($orders as $order)
+                                @php
+                                    // Get country flag
+                                    $countryFlags = [
+                                        'AE' => '🇦🇪',
+                                        'SA' => '🇸🇦',
+                                        'US' => '🇺🇸',
+                                        'GB' => '🇬🇧',
+                                        'EG' => '🇪🇬',
+                                        'KW' => '🇰🇼',
+                                        'QA' => '🇶🇦',
+                                        'BH' => '🇧🇭',
+                                        'OM' => '🇴🇲',
+                                        'JO' => '🇯🇴',
+                                        'LB' => '🇱🇧',
+                                    ];
+                                    $customerCountry = strtoupper($order->shipping_country ?? 'AE');
+                                    $customerFlag = $countryFlags[$customerCountry] ?? '🌍';
+
+                                    // Convert currency if needed (AED to current session currency)
+                                    $displayCurrency = session('currency_code', 'AED');
+                                    $displayAmount = $order->total_price;
+
+                                    if ($order->currency !== $displayCurrency) {
+                                        $currencyModel = \App\Models\Currency::where('code', $displayCurrency)->first();
+                                        if ($currencyModel) {
+                                            // Convert from order currency to AED, then to display currency
+                                            if ($order->currency === 'USD') {
+                                                $inAED = $order->total_price * 3.67; // USD to AED
+                                            } elseif ($order->currency === 'SAR') {
+                                                $inAED = $order->total_price * 0.98; // SAR to AED
+                                            } else {
+                                                $inAED = $order->total_price;
+                                            }
+                                            $displayAmount = $inAED * $currencyModel->rate;
+                                        }
+                                    }
+                                @endphp
                                 <tr>
                                     <td>
                                         <a href="{{ route('orders.show', $order) }}" class="text-primary fw-semibold">
                                             {{ $order->order_number }}
                                         </a>
-                                        @if($order->aliexpress_order_id)
-                                            <br>
-                                            <small class="text-muted">Supplier ID: {{ $order->aliexpress_order_id }}</small>
-                                        @endif
                                     </td>
                                     <td>
-                                        <div>{{ $order->customer_name }}</div>
+                                        <div>
+                                            {{ $order->customer_name }}
+                                            <span class="ms-1">{{ $customerFlag }}</span>
+                                        </div>
                                         <small class="text-muted">{{ $order->customer_phone }}</small>
                                     </td>
                                     <td>
                                         <a href="{{ route('products.show', $order->product) }}" class="text-decoration-none">
                                             {{ $order->product->name }}
                                         </a>
+                                        @if($order->product->isAliexpressProduct())
+                                            <br><small class="text-muted">🇨🇳 {{ app()->getLocale() == 'ar' ? 'من الصين' : 'From China' }}</small>
+                                        @endif
                                     </td>
                                     <td>{{ $order->quantity }}</td>
                                     <td>
-                                        <strong>{{ $order->currency }} {{ number_format($order->total_price, 2) }}</strong>
+                                        @php
+                                            $currencySymbols = [
+                                                'AED' => 'د.إ',
+                                                'SAR' => 'ر.س',
+                                                'USD' => '$',
+                                            ];
+                                            $symbol = $currencySymbols[$displayCurrency] ?? $displayCurrency;
+                                        @endphp
+                                        <strong>{{ $symbol }} {{ number_format($displayAmount, 2) }}</strong>
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $order->getStatusBadgeColor() }}">
@@ -97,15 +180,15 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-info" title="View Details">
+                                            <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-info" title="{{ __('messages.view') }}">
                                                 <i class="ri-eye-line"></i>
                                             </a>
 
                                             @if($order->canBePlaced())
                                                 <form action="{{ route('orders.place-on-aliexpress', $order) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success" title="Place on Supplier"
-                                                            onclick="return confirm('Place this order with supplier?')">
+                                                    <button type="submit" class="btn btn-sm btn-success" title="{{ app()->getLocale() == 'ar' ? 'طلب من المورد' : 'Place on Supplier' }}"
+                                                            onclick="return confirm('{{ app()->getLocale() == 'ar' ? 'هل تريد طلب هذا المنتج من المورد؟' : 'Place this order with supplier?' }}')">
                                                         <i class="ri-shopping-cart-line"></i>
                                                     </button>
                                                 </form>
@@ -114,8 +197,8 @@
                                             @if($order->canBeCancelled())
                                                 <form action="{{ route('orders.cancel', $order) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-warning" title="Cancel Order"
-                                                            onclick="return confirm('Cancel this order?')">
+                                                    <button type="submit" class="btn btn-sm btn-warning" title="{{ app()->getLocale() == 'ar' ? 'إلغاء الطلب' : 'Cancel Order' }}"
+                                                            onclick="return confirm('{{ app()->getLocale() == 'ar' ? 'هل تريد إلغاء هذا الطلب؟' : 'Cancel this order?' }}')">
                                                         <i class="ri-close-circle-line"></i>
                                                     </button>
                                                 </form>
@@ -135,55 +218,19 @@
             @else
                 <div class="text-center py-5">
                     <i class="ri-inbox-line" style="font-size: 4rem; color: #ccc;"></i>
-                    <h5 class="mt-3">No Orders Found</h5>
+                    <h5 class="mt-3">{{ __('messages.no_orders_found') }}</h5>
                     <p class="text-muted">
                         @if(request('search') || request('status') != 'all')
-                            No orders match your search criteria.
+                            {{ app()->getLocale() == 'ar' ? 'لا توجد طلبات تطابق معايير البحث' : 'No orders match your search criteria' }}
                         @else
-                            Start by creating your first order.
+                            {{ app()->getLocale() == 'ar' ? 'ابدأ بإنشاء طلبك الأول' : 'Start by creating your first order' }}
                         @endif
                     </p>
                     <a href="{{ route('orders.create') }}" class="btn btn-primary">
-                        <i class="ri-add-line me-1"></i> Create New Order
+                        <i class="ri-add-line me-1"></i> {{ __('messages.create_order') }}
                     </a>
                 </div>
             @endif
-        </div>
-    </div>
-
-    <!-- Orders Statistics -->
-    <div class="row mt-4">
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <h3 class="mb-0">{{ App\Models\Order::pending()->count() }}</h3>
-                    <small>Pending Orders</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h3 class="mb-0">{{ App\Models\Order::placed()->count() }}</h3>
-                    <small>Placed Orders</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h3 class="mb-0">{{ App\Models\Order::shipped()->count() }}</h3>
-                    <small>Shipped Orders</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h3 class="mb-0">{{ App\Models\Order::where('status', 'delivered')->count() }}</h3>
-                    <small>Delivered Orders</small>
-                </div>
-            </div>
         </div>
     </div>
 </div>
