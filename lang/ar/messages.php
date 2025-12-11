@@ -1188,4 +1188,17 @@ return [
     'profit_breakdown' => 'تفصيل الربح',
     'supplier_price' => 'سعر المورد',
     'your_profit' => 'ربحك',
+
+    // Profile Page - Additional Fields
+    'phone' => 'رقم الهاتف',
+    'select_activity' => 'اختر النشاط',
+    'select_sub_activity' => 'اختر النشاط الفرعي',
+    'financial_information' => 'المعلومات المالية',
+    'withdrawal_method' => 'طريقة السحب',
+    'select_withdrawal_method' => 'اختر طريقة السحب',
+    'marketing_code' => 'الرمز التسويقي',
+    'enter_marketing_code' => 'أدخل رمزك التسويقي',
+    'marketing_code_pending' => 'رمزك التسويقي في انتظار موافقة المسؤول',
+    'marketing_code_approved' => 'تمت موافقة رمزك التسويقي',
+    'marketing_code_note' => 'بمجرد إدخال الرمز، لا يمكن تغييره إلا بعد موافقة المسؤول',
 ];

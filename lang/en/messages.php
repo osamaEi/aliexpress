@@ -879,4 +879,17 @@ return [
     'profit_breakdown' => 'Profit Breakdown',
     'supplier_price' => 'Supplier Price',
     'your_profit' => 'Your Profit',
+
+    // Profile Page - Additional Fields
+    'phone' => 'Phone',
+    'select_activity' => 'Select Activity',
+    'select_sub_activity' => 'Select Sub Activity',
+    'financial_information' => 'Financial Information',
+    'withdrawal_method' => 'Withdrawal Method',
+    'select_withdrawal_method' => 'Select Withdrawal Method',
+    'marketing_code' => 'Marketing Code',
+    'enter_marketing_code' => 'Enter your marketing code',
+    'marketing_code_pending' => 'Your marketing code is pending admin approval',
+    'marketing_code_approved' => 'Your marketing code has been approved',
+    'marketing_code_note' => 'Once entered, the code can only be changed after admin approval',
 ];

@@ -88,23 +88,6 @@
         </div>
     </div>
 
-    <!-- Sync All Button -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <form method="POST" action="{{ route('seller.shipping.sync-all') }}" class="d-inline" id="sync-all-form">
-                @csrf
-                <button type="submit" class="btn btn-primary" id="sync-all-btn">
-                    <i class="ri-refresh-line me-1"></i>
-                    {{ __('messages.sync_all_from_aliexpress') }}
-                </button>
-            </form>
-            <small class="text-muted ms-2">
-                <i class="ri-information-line"></i>
-                Updates order statuses and tracking information from AliExpress
-            </small>
-        </div>
-    </div>
-
     <!-- Filters -->
     <div class="row mb-4">
         <div class="col-12">
@@ -161,7 +144,6 @@
                                     <th>{{ __('messages.product') }}</th>
                                     <th>{{ __('messages.order_date') }}</th>
                                     <th>{{ __('messages.status') }}</th>
-                                    <th>{{ __('messages.tracking_number') }}</th>
                                     <th>{{ __('messages.shipping_method') }}</th>
                                     <th>{{ __('messages.last_update') }}</th>
                                     <th class="text-center">{{ __('messages.actions') }}</th>
@@ -169,20 +151,39 @@
                             </thead>
                             <tbody>
                                 @forelse($orders as $order)
+                                @php
+                                    $countryFlags = [
+                                        'AE' => '🇦🇪', 'SA' => '🇸🇦', 'US' => '🇺🇸', 'GB' => '🇬🇧',
+                                        'EG' => '🇪🇬', 'JO' => '🇯🇴', 'KW' => '🇰🇼', 'BH' => '🇧🇭',
+                                        'OM' => '🇴🇲', 'QA' => '🇶🇦', 'IQ' => '🇮🇶', 'LB' => '🇱🇧',
+                                        'SY' => '🇸🇾', 'YE' => '🇾🇪', 'PS' => '🇵🇸', 'MA' => '🇲🇦',
+                                        'DZ' => '🇩🇿', 'TN' => '🇹🇳', 'LY' => '🇱🇾', 'SD' => '🇸🇩',
+                                        'CN' => '🇨🇳'
+                                    ];
+                                    $customerCountry = strtoupper($order->shipping_country ?? 'AE');
+                                    $customerFlag = $countryFlags[$customerCountry] ?? '🌍';
+                                @endphp
                                 <tr>
                                     <td>
                                         <strong>{{ $order->order_number }}</strong>
-                                        @if($order->aliexpress_order_id)
-                                            <br><small class="text-muted">AE: {{ $order->aliexpress_order_id }}</small>
-                                        @endif
                                     </td>
                                     <td>
-                                        {{ $order->customer_name }}<br>
+                                        <div>
+                                            {{ $order->customer_name }}
+                                            <span class="ms-1">{{ $customerFlag }}</span>
+                                        </div>
                                         <small class="text-muted">{{ $order->customer_phone }}</small>
                                     </td>
                                     <td>
                                         @if($order->product)
-                                            {{ Str::limit($order->product->name, 30) }}
+                                            <a href="{{ route('products.show', $order->product) }}">
+                                                {{ Str::limit($order->product->name, 30) }}
+                                            </a>
+                                            @if($order->product->isAliexpressProduct())
+                                                <br><small class="text-muted">
+                                                    🇨🇳 {{ app()->getLocale() == 'ar' ? 'من الصين' : 'From China' }}
+                                                </small>
+                                            @endif
                                         @else
                                             <span class="text-muted">N/A</span>
                                         @endif
@@ -195,13 +196,6 @@
                                         <span class="badge bg-{{ $order->getStatusBadgeColor() }}">
                                             {{ $order->getStatusName() }}
                                         </span>
-                                    </td>
-                                    <td>
-                                        @if($order->tracking_number)
-                                            <code>{{ $order->tracking_number }}</code>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
                                     </td>
                                     <td>
                                         @if($order->shipping_method)
@@ -235,7 +229,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="text-center py-4">
+                                    <td colspan="8" class="text-center py-4">
                                         <i class="ri-inbox-line" style="font-size: 3rem; color: #ccc;"></i>
                                         <p class="text-muted mt-2">{{ __('messages.no_orders_found') }}</p>
                                     </td>
@@ -284,29 +278,4 @@
     }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const syncAllForm = document.getElementById('sync-all-form');
-    const syncAllBtn = document.getElementById('sync-all-btn');
-
-    if (syncAllForm && syncAllBtn) {
-        syncAllForm.addEventListener('submit', function() {
-            syncAllBtn.disabled = true;
-            syncAllBtn.innerHTML = '<i class="ri-loader-4-line me-1 spinner"></i> Syncing...';
-        });
-    }
-});
-</script>
-
-<style>
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.spinner {
-    animation: spin 1s linear infinite;
-    display: inline-block;
-}
-</style>
 @endsection
