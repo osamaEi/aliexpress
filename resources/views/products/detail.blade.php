@@ -200,7 +200,7 @@
                     @if($product->isAliexpressProduct() && $product->aliexpress_url)
                         <div class="mt-3 text-center">
                             <a href="{{ $product->aliexpress_url }}" target="_blank" class="text-muted text-decoration-none">
-                                <i class="ri-external-link-line me-1"></i> View on AliExpress
+                                <i class="ri-external-link-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض على موقع الصين' : 'View on China Store' }}
                             </a>
                         </div>
                     @endif
@@ -332,7 +332,7 @@
                     <div class="card-body p-4">
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <h5 class="mb-3"><i class="ri-box-3-line me-2 text-primary"></i>Package Dimensions</h5>
+                                <h5 class="mb-3"><i class="ri-box-3-line me-2 text-primary"></i>{{ __('messages.package_dimensions') }}</h5>
                                 <div class="table-responsive">
                                     <table class="table">
                                         <tr>
@@ -356,7 +356,7 @@
                             </div>
                             @if(isset($aliexpressData['logistics_info_dto']))
                                 <div class="col-md-6">
-                                    <h5 class="mb-3"><i class="ri-truck-line me-2 text-success"></i>Delivery Information</h5>
+                                    <h5 class="mb-3"><i class="ri-truck-line me-2 text-success"></i>{{ __('messages.delivery_information') }}</h5>
                                     <div class="table-responsive">
                                         <table class="table">
                                             <tr>
@@ -386,7 +386,7 @@
         <div class="modal-content" style="border-radius: 20px; border: none;">
             <div class="modal-header bg-primary text-white" style="border-radius: 20px 20px 0 0;">
                 <h5 class="modal-title">
-                    <i class="ri-ship-line me-2"></i>Calculate Shipping Cost
+                    <i class="ri-ship-line me-2"></i>{{ __('messages.calculate_shipping') }}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -396,17 +396,17 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="step-indicator active" id="step-1">
                             <div class="step-circle">1</div>
-                            <small>Variant</small>
+                            <small>{{ __('messages.variant') }}</small>
                         </div>
                         <div class="step-line"></div>
                         <div class="step-indicator" id="step-2">
                             <div class="step-circle">2</div>
-                            <small>Destination</small>
+                            <small>{{ __('messages.destination') }}</small>
                         </div>
                         <div class="step-line"></div>
                         <div class="step-indicator" id="step-3">
                             <div class="step-circle">3</div>
-                            <small>Result</small>
+                            <small>{{ __('messages.result') }}</small>
                         </div>
                     </div>
                 </div>
@@ -414,7 +414,7 @@
                 <!-- Step 1: Select Variant & Quantity -->
                 <div id="shipping-step-1">
                     @if($aliexpressData && isset($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']))
-                        <h6 class="mb-3"><i class="ri-palette-line me-2"></i>Select Product Variant</h6>
+                        <h6 class="mb-3"><i class="ri-palette-line me-2"></i>{{ __('messages.select_product_variant') }}</h6>
                         <div class="row g-3 mb-4" id="shipping-variants-list">
                             @foreach($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'] as $index => $sku)
                                 <div class="col-md-6">
@@ -457,45 +457,45 @@
                     @endif
 
                     <div class="mb-4">
-                        <label class="form-label fw-semibold"><i class="ri-shopping-cart-line me-2"></i>Quantity</label>
+                        <label class="form-label fw-semibold"><i class="ri-shopping-cart-line me-2"></i>{{ __('messages.quantity') }}</label>
                         <input type="number" class="form-control form-control-lg" id="shipping-quantity" value="1" min="1" max="999">
                     </div>
 
                     <button type="button" class="btn btn-primary btn-lg w-100" onclick="goToStep(2)" id="continueToDestination">
-                        Continue to Destination <i class="ri-arrow-right-line ms-2"></i>
+                        {{ __('messages.continue_to_destination') }} <i class="ri-arrow-right-line ms-2"></i>
                     </button>
                 </div>
 
                 <!-- Step 2: Destination -->
                 <div id="shipping-step-2" style="display: none;">
-                    <h6 class="mb-3"><i class="ri-map-pin-line me-2"></i>Enter Shipping Destination</h6>
+                    <h6 class="mb-3"><i class="ri-map-pin-line me-2"></i>{{ __('messages.enter_shipping_destination') }}</h6>
 
                     <div class="mb-3">
-                        <label class="form-label">Country</label>
+                        <label class="form-label">{{ __('messages.country') }}</label>
                         <select class="form-select form-select-lg" id="shipping-country">
-                            <option value="AE">United Arab Emirates</option>
-                            <option value="SA">Saudi Arabia</option>
+                            <option value="AE">{{ __('messages.united_arab_emirates') }}</option>
+                            <option value="SA">{{ __('messages.saudi_arabia') }}</option>
                             <option value="US">United States</option>
                             <option value="GB">United Kingdom</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">City</label>
+                        <label class="form-label">{{ __('messages.city') }}</label>
                         <input type="text" class="form-control form-control-lg" id="shipping-city" placeholder="e.g., Dubai">
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label">Province/State</label>
+                        <label class="form-label">{{ __('messages.province_state') }}</label>
                         <input type="text" class="form-control form-control-lg" id="shipping-province" placeholder="e.g., Dubai">
                     </div>
 
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-outline-secondary btn-lg" onclick="goToStep(1)">
-                            <i class="ri-arrow-left-line me-2"></i>Back
+                            <i class="ri-arrow-left-line me-2"></i>{{ __('messages.back') }}
                         </button>
                         <button type="button" class="btn btn-primary btn-lg flex-grow-1" onclick="calculateShipping()">
-                            <i class="ri-calculator-line me-2"></i>Calculate Shipping
+                            <i class="ri-calculator-line me-2"></i>{{ __('messages.calculate_shipping') }}
                         </button>
                     </div>
                 </div>
@@ -506,7 +506,7 @@
                         <!-- Loading State -->
                         <div id="shipping-loading" class="text-center py-5">
                             <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
-                            <p class="text-muted">Calculating shipping cost...</p>
+                            <p class="text-muted">{{ __('messages.calculating_shipping_cost') }}</p>
                         </div>
 
                         <!-- Success State -->
@@ -1039,14 +1039,15 @@ function calculateShipping() {
 
 function displayShippingSuccess(data) {
     const container = document.getElementById('shipping-success');
+    const isArabic = '{{ app()->getLocale() }}' === 'ar';
 
     let html = `
         <div class="text-center mb-4">
             <div class="mb-3">
                 <i class="ri-checkbox-circle-fill text-success" style="font-size: 64px;"></i>
             </div>
-            <h4 class="text-success mb-2">Shipping Available!</h4>
-            <p class="text-muted">We can ship this product to your destination</p>
+            <h4 class="text-success mb-2">{{ __('messages.shipping_available') }}</h4>
+            <p class="text-muted">{{ __('messages.we_can_ship_to_destination') }}</p>
         </div>
 
         <div class="row g-3 mb-4">
@@ -1055,7 +1056,7 @@ function displayShippingSuccess(data) {
                     <div class="card-body">
                         <i class="ri-money-dollar-circle-line text-primary mb-2" style="font-size: 32px;"></i>
                         <h3 class="text-primary mb-1">${data.freight_currency} ${parseFloat(data.freight_amount).toFixed(2)}</h3>
-                        <small class="text-muted">Shipping Cost</small>
+                        <small class="text-muted">{{ __('messages.shipping_cost') }}</small>
                     </div>
                 </div>
             </div>
@@ -1064,7 +1065,7 @@ function displayShippingSuccess(data) {
                     <div class="card-body">
                         <i class="ri-time-line text-info mb-2" style="font-size: 32px;"></i>
                         <h5 class="mb-1">${data.delivery_time || 'N/A'}</h5>
-                        <small class="text-muted">Delivery Time</small>
+                        <small class="text-muted">{{ __('messages.delivery_time') }}</small>
                     </div>
                 </div>
             </div>
@@ -1072,15 +1073,15 @@ function displayShippingSuccess(data) {
                 <div class="card border-0 bg-light text-center h-100">
                     <div class="card-body">
                         <i class="ri-truck-line text-success mb-2" style="font-size: 32px;"></i>
-                        <h6 class="mb-1">${data.service_name || 'Standard'}</h6>
-                        <small class="text-muted">Carrier</small>
+                        <h6 class="mb-1">${data.service_name || '{{ __('messages.standard') }}'}</h6>
+                        <small class="text-muted">{{ __('messages.carrier') }}</small>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="alert alert-info border-0">
-            <strong>Note:</strong> Shipping cost will be added to your order total. The final price will be calculated during checkout.
+            <strong>{{ __('messages.note') }}:</strong> {{ __('messages.shipping_cost_note') }}
         </div>
     `;
 
@@ -1092,13 +1093,13 @@ function displayShippingSuccess(data) {
 function displayShippingError(data) {
     const container = document.getElementById('shipping-error');
 
-    let errorMsg = data.error || 'Failed to calculate shipping cost';
+    let errorMsg = data.error || '{{ __('messages.shipping_calculation_failed') }}';
 
     container.innerHTML = `
         <div class="text-center mb-3">
             <i class="ri-error-warning-line" style="font-size: 48px;"></i>
         </div>
-        <h6 class="alert-heading">Shipping Calculation Failed</h6>
+        <h6 class="alert-heading">{{ __('messages.shipping_calculation_failed') }}</h6>
         <p class="mb-0">${errorMsg}</p>
     `;
 

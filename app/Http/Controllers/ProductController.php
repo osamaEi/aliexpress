@@ -180,10 +180,14 @@ class ProductController extends Controller
         $aliexpressData = null;
         if ($product->isAliexpressProduct()) {
             try {
+                // Get country from session or use default based on locale
+                $defaultCountry = app()->getLocale() == 'ar' ? 'AE' : 'AE';
+                $country = session('shipping_country', $defaultCountry);
+
                 $result = $this->aliexpressService->getProductDetails(
                     $product->aliexpress_id,
                     [
-                        'country' => 'US',
+                        'country' => $country,
                         'currency' => 'USD',
                         'language' => $apiLanguage,
                     ]
