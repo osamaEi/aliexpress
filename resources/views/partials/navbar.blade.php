@@ -29,29 +29,37 @@
 
                         <div class="navbar-nav align-items-center me-3">
                             <div class="nav-item d-flex align-items-center gap-2">
-                                <!-- Subscription Type Badge -->
-                                <span class="badge bg-label-primary px-3 py-2">
-                                    <i class="ri-vip-crown-line me-1"></i>
-                                    {{ $subscriptionName }}
-                                </span>
+                                @if($activeSubscription && $activeSubscription->plan)
+                                    <!-- Subscription Type Badge -->
+                                    <span class="badge bg-label-primary px-3 py-2">
+                                        <i class="ri-vip-crown-line me-1"></i>
+                                        {{ $subscriptionName }}
+                                    </span>
 
-                                <!-- Days Remaining -->
-                                @if($daysRemaining !== null && $daysRemaining >= 0)
-                                    <span class="badge px-3 py-2" style="background: {{ $daysRemaining <= 5 ? '#fee2e2' : ($daysRemaining <= 10 ? '#fef3c7' : '#d1fae5') }}; color: {{ $daysRemaining <= 5 ? '#991b1b' : ($daysRemaining <= 10 ? '#92400e' : '#065f46') }};">
-                                        <i class="ri-time-line me-1"></i>
-                                        <span class="d-none d-lg-inline-block">
-                                            {{ app()->getLocale() == 'ar' ? $daysRemaining . ' يوم متبقي' : $daysRemaining . ' days left' }}
+                                    <!-- Days Remaining -->
+                                    @if($daysRemaining !== null && $daysRemaining >= 0)
+                                        <span class="badge px-3 py-2" style="background: {{ $daysRemaining <= 5 ? '#fee2e2' : ($daysRemaining <= 10 ? '#fef3c7' : '#d1fae5') }}; color: {{ $daysRemaining <= 5 ? '#991b1b' : ($daysRemaining <= 10 ? '#92400e' : '#065f46') }};">
+                                            <i class="ri-time-line me-1"></i>
+                                            <span class="d-none d-lg-inline-block">
+                                                {{ app()->getLocale() == 'ar' ? $daysRemaining . ' يوم متبقي' : $daysRemaining . ' days left' }}
+                                            </span>
+                                            <span class="d-inline-block d-lg-none">
+                                                {{ $daysRemaining }}{{ app()->getLocale() == 'ar' ? 'ي' : 'd' }}
+                                            </span>
                                         </span>
-                                        <span class="d-inline-block d-lg-none">
-                                            {{ $daysRemaining }}{{ app()->getLocale() == 'ar' ? 'ي' : 'd' }}
-                                        </span>
+                                    @endif
+                                @else
+                                    <!-- No Subscription Badge -->
+                                    <span class="badge bg-label-warning px-3 py-2">
+                                        <i class="ri-error-warning-line me-1"></i>
+                                        {{ __('messages.no_subscription') }}
                                     </span>
                                 @endif
 
                                 <!-- Upgrade Button -->
                                 <a href="{{ route('subscriptions.index') }}" class="btn btn-sm btn-primary rounded-pill px-3">
                                     <i class="ri-arrow-up-circle-line me-1"></i>
-                                    <span class="d-none d-lg-inline-block">{{ app()->getLocale() == 'ar' ? 'ترقية' : 'Upgrade' }}</span>
+                                    <span class="d-none d-lg-inline-block">{{ $activeSubscription ? (app()->getLocale() == 'ar' ? 'ترقية' : 'Upgrade') : (app()->getLocale() == 'ar' ? 'اشترك الآن' : 'Subscribe') }}</span>
                                 </a>
                             </div>
                         </div>
