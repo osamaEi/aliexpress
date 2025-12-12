@@ -157,14 +157,7 @@
 
                     <!-- Free Shipping Filter -->
                     <div class="col-md-4">
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" type="checkbox" id="freeShipping"
-                                   name="free_shipping" value="1" {{ request('free_shipping') ? 'checked' : '' }}>
-                            <label class="form-check-label" for="freeShipping">
-                                <i class="ri-ship-line me-1"></i>
-                                {{ app()->getLocale() == 'ar' ? 'شحن مجاني فقط' : 'Free Shipping Only' }}
-                            </label>
-                        </div>
+                      
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="minOrders"
                                    name="min_orders" value="100" {{ request('min_orders') ? 'checked' : '' }}>

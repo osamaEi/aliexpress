@@ -107,15 +107,6 @@
                                 $convertedPrice = $currentCurrency->convertFrom($product->price, $product->currency ?? 'USD');
                                 $convertedComparePrice = $product->compare_price ? $currentCurrency->convertFrom($product->compare_price, $product->currency ?? 'USD') : null;
                                 $convertedOriginalPrice = $product->original_price ? $currentCurrency->convertFrom($product->original_price, $product->currency ?? 'USD') : null;
-
-                                // Check if this is a Choice product
-                                $isChoiceProduct = false;
-                                if (auth()->check()) {
-                                    $pivot = auth()->user()->assignedProducts()
-                                        ->where('products.id', $product->id)
-                                        ->first();
-                                    $isChoiceProduct = $pivot && $pivot->pivot && $pivot->pivot->is_choice;
-                                }
                             @endphp
                             <div class="d-flex align-items-baseline mb-2">
                                 <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px; color:white;" >{{ $currentCurrency->format($convertedPrice) }}</h2>
@@ -126,19 +117,6 @@
                                     </span>
                                 @endif
                             </div>
-
-                            @if($isChoiceProduct)
-                                {{-- Choice Product: Show Free Shipping Badge --}}
-                                <div class="mt-3 pt-3 border-top border-white border-opacity-25">
-                                    <div class="d-flex align-items-center justify-content-center bg-white bg-opacity-25 rounded p-3">
-                                        <i class="ri-vip-crown-fill me-2" style="font-size: 24px; color: #ffc107;"></i>
-                                        <div>
-                                            <strong style="font-size: 18px;">{{ app()->getLocale() == 'ar' ? 'منتج Choice - شحن مجاني!' : 'Choice Product - FREE Shipping!' }}</strong>
-                                            <p class="mb-0 small">{{ app()->getLocale() == 'ar' ? 'لا حاجة لحساب الشحن' : 'No shipping calculation needed' }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
 
                             @if($convertedOriginalPrice && $convertedOriginalPrice > 0)
                                 <div class="mt-3 pt-3 border-top border-white border-opacity-25">
@@ -158,53 +136,13 @@
                         </div>
                     </div>
 
-                    <!-- Shipping Information -->
-                    @if($product->isAliexpressProduct())
-                        <div class="alert {{ $isChoiceProduct ? 'alert-success' : 'alert-info' }} border-0 mb-4" style="border-radius: 12px;">
-                            <div class="d-flex align-items-center">
-                                @if($isChoiceProduct)
-                                    <i class="ri-truck-fill me-3" style="font-size: 32px;"></i>
-                                    <div>
-                                        <strong class="d-block">{{ app()->getLocale() == 'ar' ? '✓ شحن مجاني' : '✓ FREE Shipping' }}</strong>
-                                        <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'منتج Choice - الشحن مجاني لجميع الوجهات' : 'Choice Product - Free shipping to all destinations' }}</small>
-                                    </div>
-                                @else
-                                    <i class="ri-calculator-line me-3" style="font-size: 32px;"></i>
-                                    <div>
-                                        <strong class="d-block">{{ app()->getLocale() == 'ar' ? 'حساب تكلفة الشحن' : 'Shipping Cost Calculation Required' }}</strong>
-                                        <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'سيتم حساب تكلفة الشحن بناءً على وجهتك' : 'Shipping cost will be calculated based on your destination' }}</small>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
-
                     <!-- Action Buttons -->
                     <div class="d-grid gap-3">
                         @if($product->isAliexpressProduct())
-                            @php
-                                // Check if this product is a Choice product
-                                $isChoice = false;
-                                if (auth()->check()) {
-                                    $pivot = auth()->user()->assignedProducts()
-                                        ->where('products.id', $product->id)
-                                        ->first();
-                                    $isChoice = $pivot && $pivot->pivot && $pivot->pivot->is_choice;
-                                }
-                            @endphp
-
-                            @if($isChoice)
-                                {{-- Choice products: Create order directly --}}
-                                <button type="button" class="btn btn-lg btn-success shadow-sm" onclick="openDirectOrderForm()" style="border-radius: 12px; padding: 16px;">
-                                    <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
-                                    <span class="badge bg-warning ms-2">Choice</span>
-                                </button>
-                            @else
-                                {{-- Regular products: Calculate shipping first --}}
-                                <button type="button" class="btn btn-lg btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#shippingCalculatorModal" style="border-radius: 12px; padding: 16px;">
-                                    <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
-                                </button>
-                            @endif
+                            {{-- All AliExpress products: Calculate shipping first --}}
+                            <button type="button" class="btn btn-lg btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#shippingCalculatorModal" style="border-radius: 12px; padding: 16px;">
+                                <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
+                            </button>
                         @else
                             <a href="{{ route('orders.create', ['product_id' => $product->id]) }}" class="btn btn-lg btn-success shadow-sm" style="border-radius: 12px; padding: 16px;">
                                 <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
