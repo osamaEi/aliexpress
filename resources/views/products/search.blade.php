@@ -331,9 +331,19 @@
                                         style="height: 280px; object-fit: contain; padding: 15px;"
                                         onerror="this.src='https://via.placeholder.com/280x280?text=No+Image'"
                                     >
+
+                                    <!-- Choice Badge -->
+                                    @if(request('choice_only'))
+                                        <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 shadow-sm choice-badge"
+                                              style="font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: 2px solid white;">
+                                            <i class="ri-vip-crown-fill me-1"></i>{{ app()->getLocale() == 'ar' ? 'Choice' : 'Choice' }}
+                                        </span>
+                                    @endif
+
+                                    <!-- Discount Badge -->
                                     @if($product['discount'])
-                                        <span class="badge bg-danger position-absolute top-0 end-0 m-3 px-3 py-2 shadow-sm"
-                                              style="font-size: 0.85rem; border-radius: 8px;">
+                                        <span class="badge bg-danger position-absolute {{ request('choice_only') ? 'top-0' : 'top-0' }} end-0 m-3 px-3 py-2 shadow-sm"
+                                              style="font-size: 0.85rem; border-radius: 8px; {{ request('choice_only') ? 'margin-top: 3.5rem !important;' : '' }}">
                                             <i class="ri-percent-line me-1"></i>{{ $product['discount'] }} OFF
                                         </span>
                                     @endif
@@ -342,6 +352,11 @@
                                 <div class="card-body d-flex flex-column">
                                     <!-- Product Title -->
                                     <h6 class="card-title" style="height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                        @if(request('choice_only'))
+                                            <span class="badge me-1" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); font-size: 0.65rem; vertical-align: middle;">
+                                                <i class="ri-vip-crown-fill"></i>
+                                            </span>
+                                        @endif
                                         {{ $product['title'] }}
                                     </h6>
 
@@ -354,6 +369,12 @@
                                                 AED {{ number_format((float)$product['sale_price'], 2) }}
                                             @endif
                                         </h5>
+                                        @if(request('choice_only'))
+                                            <small class="d-block" style="color: #f5576c;">
+                                                <i class="ri-rocket-line"></i>
+                                                {{ app()->getLocale() == 'ar' ? 'شحن سريع 3-7 أيام' : 'Fast shipping 3-7 days' }}
+                                            </small>
+                                        @endif
                                         @if(isset($product['admin_profit']) && $product['admin_profit'] > 0)
                                             <small class="text-success d-block">
                                                 <i class="ri-money-dollar-circle-line"></i>
@@ -387,7 +408,16 @@
 
                                     <!-- Actions -->
                                     <div class="mt-auto">
-                                      
+                                        <!-- AliExpress Link -->
+                                        @if(!empty($product['item_url']))
+                                            <a href="{{ $product['item_url'] }}"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               class="btn btn-sm btn-outline-primary w-100 mb-2">
+                                                <i class="ri-external-link-line me-1"></i>
+                                                {{ app()->getLocale() == 'ar' ? 'عرض على AliExpress' : 'View on AliExpress' }}
+                                            </a>
+                                        @endif
 
                                         @auth
                                             @if(auth()->user()->user_type === 'seller')
@@ -1017,6 +1047,62 @@
         background-repeat: no-repeat;
         background-position: right 10px center;
         padding-right: 35px;
+    }
+
+    /* Choice Filter Styling */
+    .form-check-input:checked {
+        background-color: #f5576c;
+        border-color: #f5576c;
+    }
+
+    .form-check-input:focus {
+        border-color: #f5576c;
+        box-shadow: 0 0 0 0.25rem rgba(245, 87, 108, 0.25);
+    }
+
+    .badge.bg-gradient {
+        transition: all 0.3s ease;
+    }
+
+    .badge.bg-gradient:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+    }
+
+    /* Choice Badge Animation */
+    .choice-badge {
+        animation: choicePulse 2s ease-in-out infinite;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4) !important;
+    }
+
+    @keyframes choicePulse {
+        0%, 100% {
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+        50% {
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+            transform: scale(1.02);
+        }
+    }
+
+    .choice-badge i {
+        animation: crownSpin 3s ease-in-out infinite;
+        display: inline-block;
+    }
+
+    @keyframes crownSpin {
+        0%, 100% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(-10deg);
+        }
+        75% {
+            transform: rotate(10deg);
+        }
     }
 </style>
 
