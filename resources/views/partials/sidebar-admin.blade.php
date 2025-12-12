@@ -181,11 +181,11 @@
             </a>
         </li>
 
-        <!-- AliExpress Product Search -->
+        <!-- China Product Search -->
         <li class="menu-item {{ request()->routeIs('products.search-*') ? 'active' : '' }}">
             <a href="{{ route('products.search-page') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-search-2-line"></i>
-                <div>{{ __('messages.search_products') }}</div>
+                <div>🇨🇳 {{ __('messages.search_products') }}</div>
             </a>
         </li>
 

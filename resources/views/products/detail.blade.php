@@ -65,14 +65,7 @@
                 <div class="col-lg-7 p-4">
                     <!-- Header -->
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            @if($product->isAliexpressProduct())
-                                <span class="badge bg-gradient-info text-white mb-2 px-3 py-2">
-                                    <i class="ri-global-line me-1"></i> {{ __('messages.dropshipping_product') }}
-                                </span>
-                            @endif
-                       
-                        </div>
+                   
                         <a href="{{ route('products.index') }}" class="btn btn-outline-secondary btn-sm">
                             <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
                         </a>
@@ -118,7 +111,7 @@
                                 $convertedOriginalPrice = $product->original_price ? $currentCurrency->convertFrom($product->original_price, $product->currency ?? 'USD') : null;
                             @endphp
                             <div class="d-flex align-items-baseline mb-2">
-                                <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px;">{{ $currentCurrency->format($convertedPrice) }}</h2>
+                                <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px; color:white;" >{{ $currentCurrency->format($convertedPrice) }}</h2>
                                 @if($convertedComparePrice && $convertedComparePrice > $convertedPrice)
                                     <span class="text-white-50 text-decoration-line-through me-2" style="font-size: 20px;">{{ $currentCurrency->format($convertedComparePrice) }}</span>
                                     <span class="badge bg-danger" style="font-size: 14px;">
@@ -197,7 +190,7 @@
                     @if($product->isAliexpressProduct() && $product->aliexpress_url)
                         <div class="mt-3 text-center">
                             <a href="{{ $product->aliexpress_url }}" target="_blank" class="text-muted text-decoration-none">
-                                <i class="ri-external-link-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض على موقع الصين' : 'View on China Store' }}
+                                <i class="ri-external-link-line me-1"></i> 🇨🇳 {{ app()->getLocale() == 'ar' ? 'عرض على موقع الصين' : 'View on China Store' }}
                             </a>
                         </div>
                     @endif
@@ -1174,7 +1167,7 @@ function calculateShipping() {
     console.log('Selected Variant Data:', selectedVariantData);
     console.log('SKU ID:', skuId);
     console.log('Product ID:', {{ $product->id }});
-    console.log('AliExpress Product ID:', '{{ $product->aliexpress_id }}');
+    console.log('🇨🇳 China Product ID:', '{{ $product->aliexpress_id }}');
     console.log('Quantity:', quantity);
     console.log('Country:', country);
     console.log('City:', city);
@@ -1590,7 +1583,7 @@ function syncProduct() {
     const btn = document.getElementById('syncProductBtn');
     const originalContent = btn.innerHTML;
 
-    if (!confirm('Sync this product with latest AliExpress data?')) {
+    if (!confirm('Sync this product with latest China data? 🇨🇳')) {
         return;
     }
 

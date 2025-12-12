@@ -474,7 +474,7 @@
                                                    rel="noopener noreferrer"
                                                    class="btn btn-sm btn-outline-primary w-100 mb-2">
                                                     <i class="ri-external-link-line me-1"></i>
-                                                    {{ app()->getLocale() == 'ar' ? 'عرض على AliExpress' : 'View on AliExpress' }}
+                                                    {{ app()->getLocale() == 'ar' ? 'عرض على الصين 🇨🇳' : 'View on China 🇨🇳' }}
                                                 </a>
                                             @endif
                                         @endauth
