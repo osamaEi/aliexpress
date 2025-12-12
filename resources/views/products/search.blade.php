@@ -114,7 +114,7 @@
                                     {{ request('choice_only') ? 'checked' : '' }}
                                     style="width: 50px; height: 25px; cursor: pointer;">
                                 <label class="form-check-label fw-semibold ms-2" for="choiceFilter" style="cursor: pointer;">
-                                    <span class="badge bg-gradient text-white px-3 py-2" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%); font-size: 0.9rem;">
+                                    <span class="badge bg-gradient px-3 py-2" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%); font-size: 0.9rem;">
                                         <i class="ri-vip-crown-line me-1"></i>
                                         {{ app()->getLocale() == 'ar' ? 'منتجات Choice فقط' : 'Choice Products Only' }}
                                     </span>
