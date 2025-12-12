@@ -4,10 +4,10 @@
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card mb-6 shadow-sm border-0">
         <div class="card-header bg-gradient d-flex justify-content-between align-items-center py-3"
-             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+             style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%);" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
             <div class="d-flex align-items-center">
                 <div class="bg-white rounded-circle p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
-                    <i class="ri-search-2-line" style="font-size: 24px; color: #667eea;"></i>
+                    <i class="ri-search-2-line" style="font-size: 24px; color: #561C04;"></i>
                 </div>
                 <div>
                     <h5 class="mb-0 text-white fw-bold">{{ __('messages.product_search') }}</h5>
@@ -102,27 +102,50 @@
                 <!-- Choice Filter Row -->
                 <div class="row g-3 mt-2">
                     <div class="col-12">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="form-check form-switch">
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    role="switch"
-                                    id="choiceFilter"
-                                    name="choice_only"
-                                    value="1"
-                                    {{ request('choice_only') ? 'checked' : '' }}
-                                    style="width: 50px; height: 25px; cursor: pointer;">
-                                <label class="form-check-label fw-semibold ms-2" for="choiceFilter" style="cursor: pointer;">
-                                    <span class="badge bg-gradient text-white px-3 py-2" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%); font-size: 0.9rem;">
-                                        <i class="ri-vip-crown-line me-1"></i>
-                                        {{ app()->getLocale() == 'ar' ? 'منتجات Choice فقط' : 'Choice Products Only' }}
-                                    </span>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <label class="form-label fw-semibold mb-0">
+                                <i class="ri-filter-3-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'نوع المنتج:' : 'Product Type:' }}
+                            </label>
+
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="product_type" id="allProducts" value="all"
+                                       {{ !request('choice_only') && !request('non_choice') ? 'checked' : '' }}>
+                                <label class="btn btn-outline-secondary" for="allProducts">
+                                    <i class="ri-apps-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}
+                                </label>
+
+                                <input type="radio" class="btn-check" name="product_type" id="choiceOnly" value="choice"
+                                       {{ request('choice_only') ? 'checked' : '' }}>
+                                <label class="btn btn-outline-secondary" for="choiceOnly">
+                                    <i class="ri-vip-crown-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'Choice فقط' : 'Choice Only' }}
+                                </label>
+
+                                <input type="radio" class="btn-check" name="product_type" id="nonChoice" value="non-choice"
+                                       {{ request('non_choice') ? 'checked' : '' }}>
+                                <label class="btn btn-outline-secondary" for="nonChoice">
+                                    <i class="ri-store-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'عادية فقط' : 'Regular Only' }}
                                 </label>
                             </div>
-                            <small class="text-muted">
+
+                            <!-- Hidden inputs for form submission -->
+                            <input type="hidden" name="choice_only" id="choiceOnlyInput" value="{{ request('choice_only') ? '1' : '' }}">
+                            <input type="hidden" name="non_choice" id="nonChoiceInput" value="{{ request('non_choice') ? '1' : '' }}">
+
+                            <small class="text-muted w-100 mt-2">
                                 <i class="ri-information-line"></i>
-                                {{ app()->getLocale() == 'ar' ? 'منتجات مميزة بشحن أسرع وجودة مضمونة' : 'Premium products with faster shipping and guaranteed quality' }}
+                                <span id="filterDescription">
+                                    @if(request('choice_only'))
+                                        {{ app()->getLocale() == 'ar' ? 'منتجات مميزة بشحن أسرع وجودة مضمونة' : 'Premium products with faster shipping and guaranteed quality' }}
+                                    @elseif(request('non_choice'))
+                                        {{ app()->getLocale() == 'ar' ? 'منتجات عادية من البائعين' : 'Regular products from sellers' }}
+                                    @else
+                                        {{ app()->getLocale() == 'ar' ? 'جميع المنتجات (Choice والعادية)' : 'All products (Choice and Regular)' }}
+                                    @endif
+                                </span>
                             </small>
                         </div>
                     </div>
@@ -211,7 +234,7 @@
 
             <!-- Results Count -->
             @if(isset($products) && count($products) > 0)
-                <!-- Choice Filter Notice -->
+                <!-- Product Type Filter Notice -->
                 @if(request('choice_only'))
                     <div class="alert mb-3 d-flex align-items-center" style="background: linear-gradient(135deg, #561C0420 0%, #e5630020 100%); border: 2px solid #e56300;">
                         <i class="ri-vip-crown-line me-2" style="font-size: 1.5rem; color: #e56300;"></i>
@@ -220,6 +243,16 @@
                             {{ app()->getLocale() == 'ar' ? 'يتم عرض منتجات Choice المميزة فقط' : 'Showing premium Choice products only' }}
                             <br>
                             <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'منتجات بشحن أسرع (3-7 أيام)، جودة مضمونة، وإرجاع أسهل' : 'Fast shipping (3-7 days), guaranteed quality, and easier returns' }}</small>
+                        </div>
+                    </div>
+                @elseif(request('non_choice'))
+                    <div class="alert mb-3 d-flex align-items-center" style="background: linear-gradient(135deg, #17a2b820 0%, #00897b20 100%); border: 2px solid #00897b;">
+                        <i class="ri-store-line me-2" style="font-size: 1.5rem; color: #00897b;"></i>
+                        <div>
+                            <strong style="color: #00695c;">{{ app()->getLocale() == 'ar' ? 'فلتر المنتجات العادية نشط:' : 'Regular Products Filter Active:' }}</strong>
+                            {{ app()->getLocale() == 'ar' ? 'يتم عرض منتجات عادية من البائعين' : 'Showing regular products from sellers' }}
+                            <br>
+                            <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'منتجات بأسعار تنافسية وخيارات متنوعة' : 'Competitive prices and diverse options' }}</small>
                         </div>
                     </div>
                 @endif
@@ -688,7 +721,7 @@
             product_image: productImage,
             product_price: productPrice,
             currency: currency,
-            is_choice: document.getElementById('choiceFilter')?.checked || false
+            is_choice: document.getElementById('choiceOnlyInput')?.value === '1'
         };
 
         // Add category_id only if it's provided and not empty
@@ -775,6 +808,36 @@
         document.getElementById('loadingSpinner').style.display = 'block';
     });
 
+    // Handle product type filter changes
+    document.querySelectorAll('input[name="product_type"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const choiceOnlyInput = document.getElementById('choiceOnlyInput');
+            const nonChoiceInput = document.getElementById('nonChoiceInput');
+            const filterDescription = document.getElementById('filterDescription');
+            const isArabic = '{{ app()->getLocale() }}' === 'ar';
+
+            if (this.value === 'choice') {
+                choiceOnlyInput.value = '1';
+                nonChoiceInput.value = '';
+                filterDescription.textContent = isArabic
+                    ? 'منتجات مميزة بشحن أسرع وجودة مضمونة'
+                    : 'Premium products with faster shipping and guaranteed quality';
+            } else if (this.value === 'non-choice') {
+                choiceOnlyInput.value = '';
+                nonChoiceInput.value = '1';
+                filterDescription.textContent = isArabic
+                    ? 'منتجات عادية من البائعين'
+                    : 'Regular products from sellers';
+            } else {
+                choiceOnlyInput.value = '';
+                nonChoiceInput.value = '';
+                filterDescription.textContent = isArabic
+                    ? 'جميع المنتجات (Choice والعادية)'
+                    : 'All products (Choice and Regular)';
+            }
+        });
+    });
+
     // Bulk selection functionality
     document.addEventListener('DOMContentLoaded', function() {
         const checkboxes = document.querySelectorAll('.product-checkbox');
@@ -850,7 +913,7 @@
                 bulkAssignBtn.innerHTML = '<i class="ri-loader-4-line me-1 spinner-border spinner-border-sm"></i> Assigning...';
 
                 // Prepare products data
-                const isChoiceFilter = document.getElementById('choiceFilter')?.checked || false;
+                const isChoiceFilter = document.getElementById('choiceOnlyInput')?.value === '1';
                 const products = Array.from(selectedCheckboxes).map(checkbox => {
                     const productData = {
                         aliexpress_product_id: checkbox.value,
@@ -959,7 +1022,7 @@
     .product-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-        border-color: #667eea;
+        border-color: #e56300;
     }
 
     .product-card img {
@@ -977,25 +1040,27 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #561C04;
         border: none;
         transition: all 0.3s ease;
     }
 
     .btn-primary:hover {
+        background: #e56300;
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
     }
 
     .btn-outline-primary {
-        border-color: #667eea;
-        color: #667eea;
+        border-color: #561C04;
+        color: #561C04;
         transition: all 0.3s ease;
     }
 
     .btn-outline-primary:hover {
-        background: #667eea;
-        border-color: #667eea;
+        background: #561C04;
+        border-color: #561C04;
+        color: white;
         transform: translateY(-2px);
     }
 
@@ -1106,6 +1171,44 @@
         75% {
             transform: rotate(10deg);
         }
+    }
+
+    /* Pagination Styling */
+    .pagination .page-item.active .page-link {
+        background-color: #561C04;
+        border-color: #561C04;
+    }
+
+    .pagination .page-link {
+        color: #561C04;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #e56300;
+        border-color: #e56300;
+        color: white;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+    }
+
+    /* Product Type Filter Buttons */
+    .btn-check:checked + .btn-outline-secondary {
+        background-color: #561C04;
+        border-color: #561C04;
+        color: white;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #e56300;
+        border-color: #e56300;
+        color: white;
+    }
+
+    .btn-group .btn {
+        transition: all 0.3s ease;
     }
 </style>
 
