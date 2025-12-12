@@ -114,7 +114,7 @@
                                     {{ request('choice_only') ? 'checked' : '' }}
                                     style="width: 50px; height: 25px; cursor: pointer;">
                                 <label class="form-check-label fw-semibold ms-2" for="choiceFilter" style="cursor: pointer;">
-                                    <span class="badge bg-gradient text-white px-3 py-2" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); font-size: 0.9rem;">
+                                    <span class="badge bg-gradient text-white px-3 py-2" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%); font-size: 0.9rem;">
                                         <i class="ri-vip-crown-line me-1"></i>
                                         {{ app()->getLocale() == 'ar' ? 'منتجات Choice فقط' : 'Choice Products Only' }}
                                     </span>
@@ -213,10 +213,10 @@
             @if(isset($products) && count($products) > 0)
                 <!-- Choice Filter Notice -->
                 @if(request('choice_only'))
-                    <div class="alert mb-3 d-flex align-items-center" style="background: linear-gradient(135deg, #f093fb20 0%, #f5576c20 100%); border: 2px solid #f5576c;">
-                        <i class="ri-vip-crown-line me-2" style="font-size: 1.5rem; color: #f5576c;"></i>
+                    <div class="alert mb-3 d-flex align-items-center" style="background: linear-gradient(135deg, #561C0420 0%, #e5630020 100%); border: 2px solid #e56300;">
+                        <i class="ri-vip-crown-line me-2" style="font-size: 1.5rem; color: #e56300;"></i>
                         <div>
-                            <strong style="color: #f5576c;">{{ app()->getLocale() == 'ar' ? 'فلتر Choice نشط:' : 'Choice Filter Active:' }}</strong>
+                            <strong style="color: #561C04;">{{ app()->getLocale() == 'ar' ? 'فلتر Choice نشط:' : 'Choice Filter Active:' }}</strong>
                             {{ app()->getLocale() == 'ar' ? 'يتم عرض منتجات Choice المميزة فقط' : 'Showing premium Choice products only' }}
                             <br>
                             <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'منتجات بشحن أسرع (3-7 أيام)، جودة مضمونة، وإرجاع أسهل' : 'Fast shipping (3-7 days), guaranteed quality, and easier returns' }}</small>
@@ -335,7 +335,7 @@
                                     <!-- Choice Badge -->
                                     @if(request('choice_only'))
                                         <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 shadow-sm choice-badge"
-                                              style="font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: 2px solid white;">
+                                              style="font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #561C04 0%, #e56300 100%); border: 2px solid white;">
                                             <i class="ri-vip-crown-fill me-1"></i>{{ app()->getLocale() == 'ar' ? 'Choice' : 'Choice' }}
                                         </span>
                                     @endif
@@ -353,7 +353,7 @@
                                     <!-- Product Title -->
                                     <h6 class="card-title" style="height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                                         @if(request('choice_only'))
-                                            <span class="badge me-1" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); font-size: 0.65rem; vertical-align: middle;">
+                                            <span class="badge me-1" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%); font-size: 0.65rem; vertical-align: middle;">
                                                 <i class="ri-vip-crown-fill"></i>
                                             </span>
                                         @endif
@@ -370,7 +370,7 @@
                                             @endif
                                         </h5>
                                         @if(request('choice_only'))
-                                            <small class="d-block" style="color: #f5576c;">
+                                            <small class="d-block" style="color: #e56300;">
                                                 <i class="ri-rocket-line"></i>
                                                 {{ app()->getLocale() == 'ar' ? 'شحن سريع 3-7 أيام' : 'Fast shipping 3-7 days' }}
                                             </small>
@@ -687,7 +687,8 @@
             product_title: productTitle,
             product_image: productImage,
             product_price: productPrice,
-            currency: currency
+            currency: currency,
+            is_choice: document.getElementById('choiceFilter')?.checked || false
         };
 
         // Add category_id only if it's provided and not empty
@@ -849,13 +850,15 @@
                 bulkAssignBtn.innerHTML = '<i class="ri-loader-4-line me-1 spinner-border spinner-border-sm"></i> Assigning...';
 
                 // Prepare products data
+                const isChoiceFilter = document.getElementById('choiceFilter')?.checked || false;
                 const products = Array.from(selectedCheckboxes).map(checkbox => {
                     const productData = {
                         aliexpress_product_id: checkbox.value,
                         product_title: checkbox.dataset.title,
                         product_image: checkbox.dataset.image,
                         product_price: checkbox.dataset.price,
-                        currency: checkbox.dataset.currency
+                        currency: checkbox.dataset.currency,
+                        is_choice: isChoiceFilter
                     };
 
                     // Add category_id if available
@@ -1051,13 +1054,13 @@
 
     /* Choice Filter Styling */
     .form-check-input:checked {
-        background-color: #f5576c;
-        border-color: #f5576c;
+        background-color: #e56300;
+        border-color: #e56300;
     }
 
     .form-check-input:focus {
-        border-color: #f5576c;
-        box-shadow: 0 0 0 0.25rem rgba(245, 87, 108, 0.25);
+        border-color: #e56300;
+        box-shadow: 0 0 0 0.25rem rgba(229, 99, 0, 0.25);
     }
 
     .badge.bg-gradient {
@@ -1066,7 +1069,7 @@
 
     .badge.bg-gradient:hover {
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+        box-shadow: 0 4px 12px rgba(229, 99, 0, 0.4);
     }
 
     /* Choice Badge Animation */
@@ -1075,15 +1078,15 @@
         font-weight: 600;
         letter-spacing: 0.5px;
         text-transform: uppercase;
-        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4) !important;
+        box-shadow: 0 4px 15px rgba(229, 99, 0, 0.4) !important;
     }
 
     @keyframes choicePulse {
         0%, 100% {
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+            box-shadow: 0 4px 15px rgba(229, 99, 0, 0.4);
         }
         50% {
-            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+            box-shadow: 0 6px 20px rgba(229, 99, 0, 0.6);
             transform: scale(1.02);
         }
     }

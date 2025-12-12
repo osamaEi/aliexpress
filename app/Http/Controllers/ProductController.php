@@ -1223,10 +1223,14 @@ class ProductController extends Controller
             ]);
         }
 
+        // Determine if this is a Choice product based on the current search filter
+        $isChoice = $request->get('is_choice', false) || request()->get('choice_only', false);
+
         // Assign product to user via pivot table
         $user->assignedProducts()->attach($product->id, [
             'aliexpress_product_id' => $aliexpressProductId,
-            'status' => 'assigned'
+            'status' => 'assigned',
+            'is_choice' => $isChoice
         ]);
 
         return response()->json([
@@ -1350,10 +1354,14 @@ class ProductController extends Controller
                     ]);
                 }
 
+                // Determine if this is a Choice product
+                $isChoice = $request->get('is_choice', false) || request()->get('choice_only', false);
+
                 // Assign to user
                 $user->assignedProducts()->attach($product->id, [
                     'aliexpress_product_id' => $aliexpressProductId,
-                    'status' => 'assigned'
+                    'status' => 'assigned',
+                    'is_choice' => $isChoice
                 ]);
 
                 $assignedCount++;
