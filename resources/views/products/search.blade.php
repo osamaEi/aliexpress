@@ -99,6 +99,35 @@
                     </div>
                 </div>
 
+                <!-- Choice Filter Row -->
+                <div class="row g-3 mt-2">
+                    <div class="col-12">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    role="switch"
+                                    id="choiceFilter"
+                                    name="choice_only"
+                                    value="1"
+                                    {{ request('choice_only') ? 'checked' : '' }}
+                                    style="width: 50px; height: 25px; cursor: pointer;">
+                                <label class="form-check-label fw-semibold ms-2" for="choiceFilter" style="cursor: pointer;">
+                                    <span class="badge bg-gradient text-white px-3 py-2" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); font-size: 0.9rem;">
+                                        <i class="ri-vip-crown-line me-1"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'منتجات Choice فقط' : 'Choice Products Only' }}
+                                    </span>
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                <i class="ri-information-line"></i>
+                                {{ app()->getLocale() == 'ar' ? 'منتجات مميزة بشحن أسرع وجودة مضمونة' : 'Premium products with faster shipping and guaranteed quality' }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Advanced Filters - Collapsible -->
                 <!-- <div class="mt-3">
                     <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
@@ -182,8 +211,19 @@
 
             <!-- Results Count -->
             @if(isset($products) && count($products) > 0)
-                <!-- Admin Profit Notice -->
-    
+                <!-- Choice Filter Notice -->
+                @if(request('choice_only'))
+                    <div class="alert mb-3 d-flex align-items-center" style="background: linear-gradient(135deg, #f093fb20 0%, #f5576c20 100%); border: 2px solid #f5576c;">
+                        <i class="ri-vip-crown-line me-2" style="font-size: 1.5rem; color: #f5576c;"></i>
+                        <div>
+                            <strong style="color: #f5576c;">{{ app()->getLocale() == 'ar' ? 'فلتر Choice نشط:' : 'Choice Filter Active:' }}</strong>
+                            {{ app()->getLocale() == 'ar' ? 'يتم عرض منتجات Choice المميزة فقط' : 'Showing premium Choice products only' }}
+                            <br>
+                            <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'منتجات بشحن أسرع (3-7 أيام)، جودة مضمونة، وإرجاع أسهل' : 'Fast shipping (3-7 days), guaranteed quality, and easier returns' }}</small>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Shipping Filter Notice -->
                 <div class="alert alert-success mb-3 d-flex align-items-center">
                     <i class="ri-ship-line me-2" style="font-size: 1.5rem;"></i>

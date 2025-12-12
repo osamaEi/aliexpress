@@ -20,12 +20,29 @@ class AdminController extends Controller
         $stats = [
             'total_users' => User::count(),
             'total_sellers' => User::where('user_type', 'seller')->count(),
+            'total_merchants' => User::where('user_type', 'buyer')->count(), // عدد التجار
             'total_products' => Product::count(),
             'total_categories' => Category::count(),
             'total_orders' => Order::count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'active_subscriptions' => UserSubscription::where('status', 'active')->count(),
             'total_revenue' => UserSubscription::where('status', 'active')->sum('amount_paid'),
+
+            // عدد المنتجات حسب البلد
+            'products_by_country' => Product::selectRaw('country, COUNT(*) as count')
+                ->whereNotNull('country')
+                ->groupBy('country')
+                ->get()
+                ->pluck('count', 'country'),
+
+            // عدد المنتجات بالعمولة
+            'commission_products' => Product::where('pricing_type', 'commission')->count(),
+
+            // عدد المنتجات بالكوبون
+            'coupon_products' => Product::where('pricing_type', 'coupon')->count(),
+
+            // المبالغ المتوفرة في PayPal (الإجمالي في المحافظ)
+            'available_paypal_balance' => User::sum('wallet_balance'),
         ];
 
         $recentOrders = Order::with(['user', 'product'])

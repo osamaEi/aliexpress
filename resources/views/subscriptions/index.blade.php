@@ -47,7 +47,13 @@
                                 <span class="badge mb-2" style="background-color: {{ $subscription->color }}; font-size: 1.1rem;">
                                     {{ $subscription->localized_name }}
                                 </span>
-                                <h2 class="mb-0">{{ number_format($subscription->price, 2) }} AED</h2>
+                                @if($currentSubscription && $currentSubscription->subscription_id == $subscription->id)
+                                    <div class="badge bg-success mb-2">
+                                        <i class="ri-checkbox-circle-line me-1"></i>
+                                        {{ __('messages.active_now') }}
+                                    </div>
+                                @endif
+                                <h2 class="mb-0">{{ number_format($subscription->price, 2) }} {{ app()->getLocale() == 'ar' ? 'د.إ' : 'AED' }}</h2>
                                 <small class="text-muted">{{ __('messages.per_month') }}</small>
                             </div>
 

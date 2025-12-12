@@ -892,4 +892,29 @@ return [
     'marketing_code_pending' => 'Your marketing code is pending admin approval',
     'marketing_code_approved' => 'Your marketing code has been approved',
     'marketing_code_note' => 'Once entered, the code can only be changed after admin approval',
+
+    // Subscriptions
+    'active_now' => 'Active Now',
+    'subscription_history' => 'Subscription History',
+    'view_all_subscriptions' => 'View all your subscription records',
+    'back_to_plans' => 'Back to Plans',
+    'start_date' => 'Start Date',
+    'payment_method' => 'Payment Method',
+    'invoice' => 'Invoice',
+    'view_invoice' => 'View Invoice',
+    'no_subscription_history' => 'No subscription history',
+    'start_subscription_now' => 'Start your subscription now to access all features',
+    'view_plans' => 'View Plans',
+    'error_loading_invoice' => 'Error loading invoice',
+    'print' => 'Print',
+    'close' => 'Close',
+    'expired' => 'Expired',
+    'cancelled' => 'Cancelled',
+
+    // Admin Dashboard
+    'total_merchants' => 'Total Merchants',
+    'commission_products' => 'Commission Products',
+    'coupon_products' => 'Coupon Products',
+    'available_wallet_balance' => 'Available Wallet Balance',
+    'products_by_country' => 'Products by Country',
 ];

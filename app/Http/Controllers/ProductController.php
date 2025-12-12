@@ -891,23 +891,32 @@ class ProductController extends Controller
                 $appLocale = app()->getLocale();
                 $aliexpressLocale = $appLocale === 'ar' ? 'ar_MA' : 'en_US';
 
+                // Prepare API options
+                $apiOptions = [
+                    'page' => $request->get('page', 1),
+                    'limit' => $request->get('per_page', 50), // Get 50 products per page
+                    'category_id' => $aliexpressCategoryId,
+                    'sort_by' => $sortBy,
+                    'country' => $request->get('country', 'AE'),
+                    'currency' => $request->get('currency', 'AED'),
+                    'locale' => $request->get('locale', $aliexpressLocale),
+                ];
+
+                // Add Choice filter if requested
+                if ($request->get('choice_only')) {
+                    $apiOptions['item_tag'] = 'choice';
+                }
+
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $categoryKeyword,
-                    [
-                        'page' => $request->get('page', 1),
-                        'limit' => $request->get('per_page', 50), // Get 50 products per page
-                        'category_id' => $aliexpressCategoryId,
-                        'sort_by' => $sortBy,
-                        'country' => $request->get('country', 'AE'),
-                        'currency' => $request->get('currency', 'AED'),
-                        'locale' => $request->get('locale', $aliexpressLocale),
-                    ]
+                    $apiOptions
                 );
 
                 Log::info('Category search result', [
                     'requested_category_id' => $requestedCategoryId,
                     'aliexpress_category_id' => $aliexpressCategoryId,
                     'keyword_used' => $categoryKeyword,
+                    'choice_filter' => $request->get('choice_only') ? 'enabled' : 'disabled',
                     'products_returned' => count($result['products'] ?? []),
                     'total_count' => $result['total_count'] ?? 0
                 ]);
@@ -915,23 +924,32 @@ class ProductController extends Controller
                 // Keyword search - search products by keyword only
                 Log::info('Searching products by keyword', [
                     'keyword' => $keyword,
-                    'sort_filter' => $sortFilter
+                    'sort_filter' => $sortFilter,
+                    'choice_filter' => $request->get('choice_only') ? 'enabled' : 'disabled'
                 ]);
 
                 // Determine locale based on app language
                 $appLocale = app()->getLocale();
                 $aliexpressLocale = $appLocale === 'ar' ? 'ar_MA' : 'en_US';
 
+                // Prepare API options
+                $apiOptions = [
+                    'page' => $request->get('page', 1),
+                    'limit' => $request->get('per_page', 10),
+                    'sort_by' => $sortBy, // Use mapped sort parameter
+                    'country' => $request->get('country', 'AE'),
+                    'currency' => $request->get('currency', 'AED'),
+                    'locale' => $request->get('locale', $aliexpressLocale),
+                ];
+
+                // Add Choice filter if requested
+                if ($request->get('choice_only')) {
+                    $apiOptions['item_tag'] = 'choice';
+                }
+
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $keyword,
-                    [
-                        'page' => $request->get('page', 1),
-                        'limit' => $request->get('per_page', 10),
-                        'sort_by' => $sortBy, // Use mapped sort parameter
-                        'country' => $request->get('country', 'AE'),
-                        'currency' => $request->get('currency', 'AED'),
-                        'locale' => $request->get('locale', $aliexpressLocale),
-                    ]
+                    $apiOptions
                 );
             } else {
                 // No category and no keyword selected

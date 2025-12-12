@@ -1201,4 +1201,29 @@ return [
     'marketing_code_pending' => 'رمزك التسويقي في انتظار موافقة المسؤول',
     'marketing_code_approved' => 'تمت موافقة رمزك التسويقي',
     'marketing_code_note' => 'بمجرد إدخال الرمز، لا يمكن تغييره إلا بعد موافقة المسؤول',
+
+    // Subscriptions
+    'active_now' => 'نشط الآن',
+    'subscription_history' => 'سجل الاشتراكات',
+    'view_all_subscriptions' => 'عرض جميع سجلات اشتراكاتك',
+    'back_to_plans' => 'العودة إلى الخطط',
+    'start_date' => 'تاريخ البدء',
+    'payment_method' => 'طريقة الدفع',
+    'invoice' => 'الفاتورة',
+    'view_invoice' => 'عرض الفاتورة',
+    'no_subscription_history' => 'لا يوجد سجل اشتراكات',
+    'start_subscription_now' => 'ابدأ اشتراكك الآن للوصول إلى جميع الميزات',
+    'view_plans' => 'عرض الخطط',
+    'error_loading_invoice' => 'خطأ في تحميل الفاتورة',
+    'print' => 'طباعة',
+    'close' => 'إغلاق',
+    'expired' => 'منتهي',
+    'cancelled' => 'ملغي',
+
+    // Admin Dashboard
+    'total_merchants' => 'عدد التجار',
+    'commission_products' => 'منتجات بالعمولة',
+    'coupon_products' => 'منتجات بالكوبون',
+    'available_wallet_balance' => 'الرصيد المتاح في المحافظ',
+    'products_by_country' => 'المنتجات حسب البلد',
 ];

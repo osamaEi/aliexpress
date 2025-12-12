@@ -138,14 +138,134 @@
                             <i class="ri-money-dollar-circle-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">${{ number_format($stats['total_revenue'], 2) }}</h5>
+                            <h5 class="mb-0">{{ number_format($stats['total_revenue'], 2) }} {{ app()->getLocale() == 'ar' ? 'د.إ' : 'AED' }}</h5>
                             <small>{{ __('messages.total_revenue') }}</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Total Merchants -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="badge rounded-pill bg-label-primary me-3 p-2">
+                            <i class="ri-shopping-cart-line ri-24px"></i>
+                        </div>
+                        <div class="card-info">
+                            <h5 class="mb-0">{{ $stats['total_merchants'] }}</h5>
+                            <small>{{ __('messages.total_merchants') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commission Products -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="badge rounded-pill bg-label-info me-3 p-2">
+                            <i class="ri-percent-line ri-24px"></i>
+                        </div>
+                        <div class="card-info">
+                            <h5 class="mb-0">{{ $stats['commission_products'] }}</h5>
+                            <small>{{ __('messages.commission_products') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coupon Products -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="badge rounded-pill bg-label-info me-3 p-2">
+                            <i class="ri-coupon-line ri-24px"></i>
+                        </div>
+                        <div class="card-info">
+                            <h5 class="mb-0">{{ $stats['coupon_products'] }}</h5>
+                            <small>{{ __('messages.coupon_products') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available PayPal Balance -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
+                            <i class="ri-wallet-3-line ri-24px"></i>
+                        </div>
+                        <div class="card-info">
+                            <h5 class="mb-0">{{ number_format($stats['available_paypal_balance'], 2) }} {{ app()->getLocale() == 'ar' ? 'د.إ' : 'AED' }}</h5>
+                            <small>{{ __('messages.available_wallet_balance') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Products by Country -->
+    @if($stats['products_by_country']->count() > 0)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ri-global-line me-2"></i>
+                        {{ __('messages.products_by_country') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @php
+                            $countryFlags = [
+                                'AE' => ['flag' => '🇦🇪', 'name_ar' => 'الإمارات', 'name_en' => 'UAE'],
+                                'SA' => ['flag' => '🇸🇦', 'name_ar' => 'السعودية', 'name_en' => 'Saudi Arabia'],
+                                'EG' => ['flag' => '🇪🇬', 'name_ar' => 'مصر', 'name_en' => 'Egypt'],
+                                'KW' => ['flag' => '🇰🇼', 'name_ar' => 'الكويت', 'name_en' => 'Kuwait'],
+                                'QA' => ['flag' => '🇶🇦', 'name_ar' => 'قطر', 'name_en' => 'Qatar'],
+                                'BH' => ['flag' => '🇧🇭', 'name_ar' => 'البحرين', 'name_en' => 'Bahrain'],
+                                'OM' => ['flag' => '🇴🇲', 'name_ar' => 'عمان', 'name_en' => 'Oman'],
+                                'JO' => ['flag' => '🇯🇴', 'name_ar' => 'الأردن', 'name_en' => 'Jordan'],
+                                'LB' => ['flag' => '🇱🇧', 'name_ar' => 'لبنان', 'name_en' => 'Lebanon'],
+                                'CN' => ['flag' => '🇨🇳', 'name_ar' => 'الصين', 'name_en' => 'China'],
+                                'US' => ['flag' => '🇺🇸', 'name_ar' => 'أمريكا', 'name_en' => 'USA'],
+                            ];
+                        @endphp
+                        @foreach($stats['products_by_country'] as $country => $count)
+                            @php
+                                $countryData = $countryFlags[strtoupper($country)] ?? ['flag' => '🌍', 'name_ar' => $country, 'name_en' => $country];
+                            @endphp
+                            <div class="col-sm-6 col-md-4 col-lg-3">
+                                <div class="card border">
+                                    <div class="card-body text-center">
+                                        <div class="fs-1 mb-2">{{ $countryData['flag'] }}</div>
+                                        <h5 class="mb-1">{{ $count }}</h5>
+                                        <small class="text-muted">
+                                            {{ app()->getLocale() == 'ar' ? $countryData['name_ar'] : $countryData['name_en'] }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
 
     <!-- Quick Actions -->
     <div class="row g-4 mb-4">

@@ -91,6 +91,31 @@ class AliexpressTextService
             $params['sortBy'] = $options['sort_by'];
         }
 
+        // Add search extend filters
+        if (!empty($options['item_tag'])) {
+            $params['itemTag'] = $options['item_tag']; // 'choice' for Choice products
+        }
+
+        if (!empty($options['free_ship_to'])) {
+            $params['freeShipTo'] = $options['free_ship_to'];
+        }
+
+        if (!empty($options['seller_level'])) {
+            $params['sellerLevel'] = $options['seller_level']; // 'GOLD' or 'SILVER'
+        }
+
+        if (!empty($options['ship_from'])) {
+            $params['shipFrom'] = $options['ship_from'];
+        }
+
+        if (!empty($options['seller_online'])) {
+            $params['sellerOnline'] = $options['seller_online']; // '48' or '72'
+        }
+
+        if (!empty($options['hot_area'])) {
+            $params['hotArea'] = $options['hot_area'];
+        }
+
         // Generate signature
         $params['sign'] = $this->generateSignature($params);
 
