@@ -909,6 +909,24 @@ class ProductController extends Controller
                     $apiOptions['item_tag'] = 'choice';
                 }
 
+                // Add price range filters
+                if ($request->filled('min_price')) {
+                    $apiOptions['min_price'] = $request->get('min_price');
+                }
+                if ($request->filled('max_price')) {
+                    $apiOptions['max_price'] = $request->get('max_price');
+                }
+
+                // Add free shipping filter
+                if ($request->get('free_shipping')) {
+                    $apiOptions['free_ship_to'] = $request->get('country', 'AE');
+                }
+
+                // Add minimum orders filter
+                if ($request->get('min_orders')) {
+                    $apiOptions['min_orders'] = $request->get('min_orders');
+                }
+
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $categoryKeyword,
                     $apiOptions
@@ -947,6 +965,24 @@ class ProductController extends Controller
                 // Add Choice filter if requested
                 if ($request->get('choice_only')) {
                     $apiOptions['item_tag'] = 'choice';
+                }
+
+                // Add price range filters
+                if ($request->filled('min_price')) {
+                    $apiOptions['min_price'] = $request->get('min_price');
+                }
+                if ($request->filled('max_price')) {
+                    $apiOptions['max_price'] = $request->get('max_price');
+                }
+
+                // Add free shipping filter
+                if ($request->get('free_shipping')) {
+                    $apiOptions['free_ship_to'] = $request->get('country', 'AE');
+                }
+
+                // Add minimum orders filter
+                if ($request->get('min_orders')) {
+                    $apiOptions['min_orders'] = $request->get('min_orders');
                 }
 
                 $result = $this->aliexpressTextService->searchProductsByText(

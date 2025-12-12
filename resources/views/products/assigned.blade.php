@@ -146,7 +146,7 @@
                                            class="btn btn-sm btn-primary mb-1">
                                             <i class="ri-ship-line me-1"></i> View & Ship
                                         </a>
-                                        <a href="{{ route('products.show', $assignedProduct->id) }}"
+                                        <!-- <a href="{{ route('products.show', $assignedProduct->id) }}"
                                            class="btn btn-sm btn-outline-primary mb-1">
                                             <i class="ri-eye-line me-1"></i> Details
                                         </a>
@@ -158,7 +158,7 @@
                                            target="_blank"
                                            class="btn btn-sm btn-outline-info mb-1">
                                             <i class="ri-external-link-line me-1"></i> View Source
-                                        </a>
+                                        </a> -->
                                     </td>
                                 </tr>
                             @endforeach

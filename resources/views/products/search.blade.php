@@ -99,31 +99,67 @@
                     </div>
                 </div>
 
-                <!-- Choice Filter Row -->
+                <!-- Filters Row -->
                 <div class="row g-3 mt-2">
-                    <div class="col-12">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="form-check form-switch">
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    role="switch"
-                                    id="choiceFilter"
-                                    name="choice_only"
-                                    value="1"
-                                    {{ request('choice_only') ? 'checked' : '' }}
-                                    style="width: 50px; height: 25px; cursor: pointer;">
-                                <label class="form-check-label fw-semibold ms-2" for="choiceFilter" style="cursor: pointer;">
-                                    <span class="badge bg-gradient px-3 py-2" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%); font-size: 0.9rem;">
-                                        <i class="ri-vip-crown-line me-1"></i>
-                                        {{ app()->getLocale() == 'ar' ? 'منتجات Choice فقط' : 'Choice Products Only' }}
-                                    </span>
-                                </label>
-                            </div>
-                            <small class="text-muted">
-                                <i class="ri-information-line"></i>
-                                {{ app()->getLocale() == 'ar' ? 'منتجات مميزة بشحن أسرع وجودة مضمونة' : 'Premium products with faster shipping and guaranteed quality' }}
-                            </small>
+                    <!-- Choice Filter -->
+                    <div class="col-md-4">
+                        <div class="form-check form-switch">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                role="switch"
+                                id="choiceFilter"
+                                name="choice_only"
+                                value="1"
+                                {{ request('choice_only') ? 'checked' : '' }}
+                                style="width: 50px; height: 25px; cursor: pointer;">
+                            <label class="form-check-label fw-semibold ms-2" for="choiceFilter" style="cursor: pointer; white-space: nowrap;">
+                                <span class="badge choice-filter-badge px-3 py-2" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%) !important; font-size: 0.9rem; color: white;">
+                                    <i class="ri-vip-crown-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'منتجات Choice فقط' : 'Choice Products Only' }}
+                                </span>
+                            </label>
+                        </div>
+                        <small class="text-muted d-block mt-1">
+                            <i class="ri-information-line"></i>
+                            {{ app()->getLocale() == 'ar' ? 'منتجات مميزة بشحن أسرع وجودة مضمونة' : 'Premium products with faster shipping' }}
+                        </small>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">
+                            <i class="ri-money-dollar-circle-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'نطاق السعر' : 'Price Range' }}
+                        </label>
+                        <div class="input-group">
+                            <input type="number" name="min_price" class="form-control"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'من' : 'Min' }}"
+                                   value="{{ request('min_price') }}" min="0" step="0.01">
+                            <span class="input-group-text">-</span>
+                            <input type="number" name="max_price" class="form-control"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'إلى' : 'Max' }}"
+                                   value="{{ request('max_price') }}" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <!-- Free Shipping Filter -->
+                    <div class="col-md-4">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="freeShipping"
+                                   name="free_shipping" value="1" {{ request('free_shipping') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="freeShipping">
+                                <i class="ri-ship-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'شحن مجاني فقط' : 'Free Shipping Only' }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="minOrders"
+                                   name="min_orders" value="100" {{ request('min_orders') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="minOrders">
+                                <i class="ri-shopping-cart-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'الأكثر مبيعاً (100+ طلب)' : 'Best Sellers (100+ orders)' }}
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -819,12 +855,19 @@
 
     // Bulk selection functionality
     document.addEventListener('DOMContentLoaded', function() {
-        const checkboxes = document.querySelectorAll('.product-checkbox');
         const bulkActionsBar = document.getElementById('bulkActionsBar');
         const selectedCountSpan = document.getElementById('selectedCount');
         const selectAllBtn = document.getElementById('selectAllBtn');
         const deselectAllBtn = document.getElementById('deselectAllBtn');
         const bulkAssignBtn = document.getElementById('bulkAssignBtn');
+
+        console.log('Bulk selection initialized:', {
+            bulkActionsBar: !!bulkActionsBar,
+            selectAllBtn: !!selectAllBtn,
+            deselectAllBtn: !!deselectAllBtn,
+            bulkAssignBtn: !!bulkAssignBtn,
+            checkboxCount: document.querySelectorAll('.product-checkbox').length
+        });
 
         // Update selected count and show/hide bulk actions bar
         function updateSelectionUI() {
@@ -850,16 +893,22 @@
             });
         }
 
-        // Checkbox change event
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateSelectionUI);
+        // Checkbox change event - use event delegation
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('product-checkbox')) {
+                updateSelectionUI();
+            }
         });
 
         // Select all button
         if (selectAllBtn) {
             selectAllBtn.addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('.product-checkbox');
+                console.log('Select All clicked, found checkboxes:', checkboxes.length);
                 checkboxes.forEach(checkbox => {
-                    if (!checkbox.disabled) checkbox.checked = true;
+                    if (!checkbox.disabled) {
+                        checkbox.checked = true;
+                    }
                 });
                 updateSelectionUI();
             });
@@ -868,7 +917,10 @@
         // Deselect all button
         if (deselectAllBtn) {
             deselectAllBtn.addEventListener('click', function() {
-                checkboxes.forEach(checkbox => checkbox.checked = false);
+                const checkboxes = document.querySelectorAll('.product-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
                 updateSelectionUI();
             });
         }
@@ -877,22 +929,34 @@
         if (bulkAssignBtn) {
             bulkAssignBtn.addEventListener('click', function() {
                 const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+                console.log('Bulk Assign clicked, selected checkboxes:', selectedCheckboxes.length);
 
                 if (selectedCheckboxes.length === 0) {
-                    showToast('error', 'Please select at least one product');
+                    const isArabic = '{{ app()->getLocale() }}' === 'ar';
+                    const errorMessage = isArabic ? 'يرجى اختيار منتج واحد على الأقل' : 'Please select at least one product';
+                    showToast('error', errorMessage);
                     return;
                 }
 
-                if (!confirm(`Assign ${selectedCheckboxes.length} product(s) to your account?`)) {
+                const isArabic = '{{ app()->getLocale() }}' === 'ar';
+                const confirmMessage = isArabic
+                    ? `هل تريد إسناد ${selectedCheckboxes.length} منتج(منتجات) إلى حسابك؟`
+                    : `Assign ${selectedCheckboxes.length} product(s) to your account?`;
+
+                if (!confirm(confirmMessage)) {
                     return;
                 }
 
                 // Disable button and show loading
                 bulkAssignBtn.disabled = true;
-                bulkAssignBtn.innerHTML = '<i class="ri-loader-4-line me-1 spinner-border spinner-border-sm"></i> Assigning...';
+                const loadingText = isArabic ? 'جاري الإسناد...' : 'Assigning...';
+                bulkAssignBtn.innerHTML = `<i class="ri-loader-4-line me-1 spinner-border spinner-border-sm"></i> ${loadingText}`;
 
                 // Prepare products data
-                const isChoiceFilter = document.getElementById('choiceOnlyInput')?.value === '1';
+                // Check if we're on choice filter by checking the URL parameter or checkbox
+                const urlParams = new URLSearchParams(window.location.search);
+                const isChoiceFilter = urlParams.get('choice_only') === '1' || document.getElementById('choiceFilter')?.checked;
+
                 const products = Array.from(selectedCheckboxes).map(checkbox => {
                     const productData = {
                         aliexpress_product_id: checkbox.value,
@@ -942,7 +1006,8 @@
                             if (assignBtn) {
                                 assignBtn.classList.remove('btn-warning');
                                 assignBtn.classList.add('btn-secondary');
-                                assignBtn.innerHTML = '<i class="ri-check-line me-1"></i> Already Assigned';
+                                const assignedText = isArabic ? 'تم الإسناد' : 'Already Assigned';
+                                assignBtn.innerHTML = `<i class="ri-check-line me-1"></i> ${assignedText}`;
                                 assignBtn.disabled = true;
                             }
 
@@ -953,16 +1018,18 @@
 
                         updateSelectionUI();
                     } else {
-                        showToast('error', data.message || 'Failed to assign products');
+                        showToast('error', data.message || (isArabic ? 'فشل إسناد المنتجات' : 'Failed to assign products'));
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showToast('error', 'An error occurred. Please try again.');
+                    const errorMessage = isArabic ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.';
+                    showToast('error', errorMessage);
                 })
                 .finally(() => {
                     bulkAssignBtn.disabled = false;
-                    bulkAssignBtn.innerHTML = '<i class="ri-pushpin-2-line me-1"></i> Assign Selected Products';
+                    const buttonText = isArabic ? 'إسناد المنتجات المحددة' : 'Assign Selected Products';
+                    bulkAssignBtn.innerHTML = `<i class="ri-pushpin-2-line me-1"></i> ${buttonText}`;
                 });
             });
         }
@@ -1001,7 +1068,7 @@
     .product-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-        border-color: #e56300;
+        border-color: #561C04;
     }
 
     .product-card img {
@@ -1014,8 +1081,8 @@
 
     .form-control:focus,
     .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        border-color: #561C04;
+        box-shadow: 0 0 0 0.2rem rgba(86, 28, 4, 0.25);
     }
 
     .btn-primary {
@@ -1025,7 +1092,7 @@
     }
 
     .btn-primary:hover {
-        background: #e56300;
+        background: #561C04;
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
     }
@@ -1048,8 +1115,10 @@
     }
 
     .quick-search:hover {
+        background: #561C04;
+        color: white;
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(86, 28, 4, 0.3);
     }
 
     .shadow-sm {
@@ -1098,13 +1167,13 @@
 
     /* Choice Filter Styling */
     .form-check-input:checked {
-        background-color: #e56300;
-        border-color: #e56300;
+        background-color: #561C04;
+        border-color: #561C04;
     }
 
     .form-check-input:focus {
-        border-color: #e56300;
-        box-shadow: 0 0 0 0.25rem rgba(229, 99, 0, 0.25);
+        border-color: #561C04;
+        box-shadow: 0 0 0 0.25rem rgba(86, 28, 4, 0.25);
     }
 
     .badge.bg-gradient {
@@ -1113,7 +1182,7 @@
 
     .badge.bg-gradient:hover {
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(229, 99, 0, 0.4);
+        box-shadow: 0 4px 12px rgba(86, 28, 4, 0.4);
     }
 
     /* Choice Badge Animation */
@@ -1164,8 +1233,8 @@
     }
 
     .pagination .page-link:hover {
-        background-color: #e56300;
-        border-color: #e56300;
+        background-color: #561C04;
+        border-color: #561C04;
         color: white;
     }
 
@@ -1181,13 +1250,44 @@
     }
 
     .btn-outline-secondary:hover {
-        background-color: #e56300;
-        border-color: #e56300;
+        background-color: #561C04;
+        border-color: #561C04;
         color: white;
     }
 
     .btn-group .btn {
         transition: all 0.3s ease;
+    }
+
+    /* Additional Button Hover Styles */
+    .btn-warning:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    .btn-info:hover,
+    .btn-outline-info:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    .btn-secondary:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    .btn-success:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    /* Link Hover */
+    a:hover {
+        color: #561C04 !important;
     }
 </style>
 

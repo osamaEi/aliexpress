@@ -116,6 +116,20 @@ class AliexpressTextService
             $params['hotArea'] = $options['hot_area'];
         }
 
+        // Add price range filters
+        if (!empty($options['min_price'])) {
+            $params['minPrice'] = $options['min_price'];
+        }
+
+        if (!empty($options['max_price'])) {
+            $params['maxPrice'] = $options['max_price'];
+        }
+
+        // Add minimum orders filter
+        if (!empty($options['min_orders'])) {
+            $params['minOrders'] = $options['min_orders'];
+        }
+
         // Generate signature
         $params['sign'] = $this->generateSignature($params);
 
