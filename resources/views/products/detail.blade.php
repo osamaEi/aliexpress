@@ -129,15 +129,15 @@
 
                             @if($convertedOriginalPrice && $convertedOriginalPrice > 0)
                                 <div class="mt-3 pt-3 border-top border-white border-opacity-25">
-                                    <small class="d-block mb-2 text-white-50">💰 {{ __('messages.profit_breakdown') }}</small>
+                                    <small class="d-block mb-2 text-white">💰 {{ __('messages.profit_breakdown') }}</small>
                                     <div class="row g-2">
                                         <div class="col-6">
-                                            <small class="text-white-50">{{ __('messages.supplier_price') }}</small>
-                                            <div class="fw-bold">{{ $currentCurrency->format($convertedOriginalPrice) }}</div>
+                                            <small class="text-white">{{ __('messages.supplier_price') }}</small>
+                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedOriginalPrice) }}</div>
                                         </div>
                                         <div class="col-6 text-end">
-                                            <small class="text-white-50">{{ __('messages.your_profit') }}</small>
-                                            <div class="fw-bold text-warning">{{ $currentCurrency->format($convertedPrice - $convertedOriginalPrice) }}</div>
+                                            <small class="text-white">{{ __('messages.your_profit') }}</small>
+                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedPrice - $convertedOriginalPrice) }}</div>
                                         </div>
                                     </div>
                                 </div>
