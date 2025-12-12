@@ -719,6 +719,11 @@
     // Trigger change on page load to populate subcategories if main category is selected
     document.addEventListener('DOMContentLoaded', function() {
         const mainCategorySelect = document.getElementById('main_category');
+
+        // Debug: Log category hierarchy
+        console.log('Category Hierarchy loaded:', categoryHierarchy);
+        console.log('Main category select value:', mainCategorySelect.value);
+
         if (mainCategorySelect.value) {
             mainCategorySelect.dispatchEvent(new Event('change'));
         }
