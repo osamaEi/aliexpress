@@ -349,7 +349,7 @@
 <body>
     @auth
         @php
-            $redirectUrl = auth()->user()->hasRole('admin')
+            $redirectUrl = auth()->user()->user_type === 'admin'
                 ? route('admin.dashboard')
                 : route('seller.dashboard');
         @endphp
