@@ -66,9 +66,7 @@
                     <!-- Header -->
                     <div class="d-flex justify-content-between align-items-start mb-3">
                    
-                        <a href="{{ route('products.index') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
-                        </a>
+                    
                     </div>
 
                     <h1 class="mb-3 fw-bold" style="font-size: 28px; line-height: 1.4;">{{ $product->name }}</h1>
