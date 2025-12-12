@@ -86,12 +86,24 @@
                             <i class="ri-ship-line me-1"></i>{{ __('messages.ship_to') }}
                         </label>
                         <select name="country" id="country" class="form-select form-select-lg shadow-sm">
-                            <option value="AE" {{ request('country') == 'AE' ? 'selected' : '' }} data-flag="ae">{{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}</option>
+                            <option value="AE" {{ request('country') == 'AE' || !request('country') ? 'selected' : '' }} data-flag="ae">{{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}</option>
                             <option value="SA" {{ request('country') == 'SA' ? 'selected' : '' }} data-flag="sa">{{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi Arabia' }}</option>
+                            <option value="US" {{ request('country') == 'US' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الولايات المتحدة' : 'USA' }}</option>
                         </select>
                     </div>
 
-                    <div class="col-md-2">
+                    <div class="col-md-1">
+                        <label for="currency" class="form-label fw-semibold">
+                            <i class="ri-money-dollar-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العملة' : 'Currency' }}
+                        </label>
+                        <select name="currency" id="currency" class="form-select form-select-lg shadow-sm">
+                            <option value="AED" {{ request('currency') == 'AED' || !request('currency') ? 'selected' : '' }}>AED</option>
+                            <option value="USD" {{ request('currency') == 'USD' ? 'selected' : '' }}>USD</option>
+                            <option value="SAR" {{ request('currency') == 'SAR' ? 'selected' : '' }}>SAR</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1">
                         <label class="form-label fw-semibold d-block">&nbsp;</label>
                         <button type="submit" class="btn btn-primary btn-lg w-100 shadow">
                             <i class="ri-search-line me-1"></i> {{ __('messages.search') }}

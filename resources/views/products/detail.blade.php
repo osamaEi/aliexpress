@@ -145,34 +145,33 @@
                         </div>
                     </div>
 
-                    <!-- SKU & Stock -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-6">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body text-center">
-                                    <i class="ri-box-3-line text-primary mb-2" style="font-size: 28px;"></i>
-                                    <div class="fs-3 fw-bold text-dark">{{ $product->stock_quantity }}</div>
-                                    <small class="text-muted">{{ __('messages.units_in_stock') }}</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body text-center">
-                                    <i class="ri-price-tag-3-line text-success mb-2" style="font-size: 28px;"></i>
-                                    <div class="fs-6 fw-bold text-dark">{{ $product->sku ?? 'N/A' }}</div>
-                                    <small class="text-muted">{{ __('messages.product_sku') }}</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Action Buttons -->
                     <div class="d-grid gap-3">
                         @if($product->isAliexpressProduct())
-                            <button type="button" class="btn btn-lg btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#shippingCalculatorModal" style="border-radius: 12px; padding: 16px;">
-                                <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
-                            </button>
+                            @php
+                                // Check if this product is a Choice product
+                                $isChoice = false;
+                                if (auth()->check()) {
+                                    $pivot = auth()->user()->assignedProducts()
+                                        ->where('products.id', $product->id)
+                                        ->first();
+                                    $isChoice = $pivot && $pivot->pivot && $pivot->pivot->is_choice;
+                                }
+                            @endphp
+
+                            @if($isChoice)
+                                {{-- Choice products: Create order directly --}}
+                                <button type="button" class="btn btn-lg btn-success shadow-sm" onclick="openDirectOrderForm()" style="border-radius: 12px; padding: 16px;">
+                                    <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
+                                    <span class="badge bg-warning ms-2">Choice</span>
+                                </button>
+                            @else
+                                {{-- Regular products: Calculate shipping first --}}
+                                <button type="button" class="btn btn-lg btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#shippingCalculatorModal" style="border-radius: 12px; padding: 16px;">
+                                    <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
+                                </button>
+                            @endif
                         @else
                             <a href="{{ route('orders.create', ['product_id' => $product->id]) }}" class="btn btn-lg btn-success shadow-sm" style="border-radius: 12px; padding: 16px;">
                                 <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
@@ -386,7 +385,7 @@
 <div class="modal fade" id="shippingCalculatorModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content" style="border-radius: 20px; border: none;">
-            <div class="modal-header bg-primary text-white" style="border-radius: 20px 20px 0 0;">
+            <div class="modal-header  text-white" style="border-radius: 20px 20px 0 0;">
                 <h5 class="modal-title">
                     <i class="ri-ship-line me-2"></i>{{ __('messages.calculate_shipping') }}
                 </h5>
@@ -645,13 +644,161 @@
 </div>
 @endif
 
+<!-- Direct Order Modal for Choice Products -->
+<div class="modal fade" id="directOrderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; border: none;">
+            <div class="modal-header text-white" style="border-radius: 20px 20px 0 0; background: linear-gradient(135deg, #561C04 0%, #e56300 100%);">
+                <h5 class="modal-title">
+                    <i class="ri-vip-crown-fill me-2"></i>{{ __('messages.create_order') }} - Choice Product
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Choice Product Notice -->
+                <div class="alert alert-success border-0 mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="ri-vip-crown-line me-2" style="font-size: 24px;"></i>
+                        <div>
+                            <strong>{{ app()->getLocale() == 'ar' ? 'منتج Choice - شحن مجاني!' : 'Choice Product - Free Shipping!' }}</strong>
+                            <p class="mb-0 small">{{ app()->getLocale() == 'ar' ? 'منتجات Choice تأتي بشحن مجاني وسريع' : 'Choice products come with free and fast shipping' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Form -->
+                <form id="directOrderForm">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <input type="hidden" name="is_choice" value="1">
+                    <input type="hidden" name="freight_amount" value="0">
+
+                    <!-- Quantity -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="ri-shopping-cart-line me-1"></i>{{ __('messages.quantity') }} <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" class="form-control form-control-lg" name="quantity" value="1" min="1" max="999" required>
+                    </div>
+
+                    <!-- Product Variant (if available) -->
+                    @if($aliexpressData && isset($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']) && count($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']) > 0)
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="ri-palette-line me-1"></i>{{ __('messages.select_product_variant') }} <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" name="variant_index" id="directVariantSelect" required>
+                                <option value="">{{ app()->getLocale() == 'ar' ? 'اختر النوع' : 'Select Variant' }}</option>
+                                @foreach($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'] as $index => $sku)
+                                    <option value="{{ $index }}"
+                                            data-price="{{ $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 0 }}"
+                                            data-stock="{{ $sku['sku_available_stock'] ?? 0 }}">
+                                        @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
+                                            {{ $property['sku_property_name'] }}: {{ $property['sku_property_value'] }}
+                                        @endforeach
+                                        - ${{ $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 'N/A' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+
+                    <hr class="my-4">
+
+                    <!-- Customer Information -->
+                    <h6 class="mb-3">{{ __('messages.customer_information') }}</h6>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'الاسم الكامل' : 'Full Name' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="customer_name" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'البريد الإلكتروني' : 'Email' }}</label>
+                            <input type="email" class="form-control" name="customer_email">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'كود الهاتف' : 'Phone Code' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="phone_country" placeholder="+971" required>
+                        </div>
+
+                        <div class="col-md-9">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone Number' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="customer_phone" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }} <span class="text-danger">*</span></label>
+                            <select class="form-select" name="shipping_country" required>
+                                <option value="AE">{{ __('messages.united_arab_emirates') }}</option>
+                                <option value="SA">{{ __('messages.saudi_arabia') }}</option>
+                                <option value="US">United States</option>
+                                <option value="GB">United Kingdom</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'المدينة' : 'City' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="shipping_city" placeholder="e.g., Dubai" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'العنوان' : 'Street Address' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="shipping_address" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'شقة/جناح (اختياري)' : 'Apartment, Suite, etc. (Optional)' }}</label>
+                            <input type="text" class="form-control" name="shipping_address2">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'المقاطعة/الولاية' : 'Province/State' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="shipping_province" placeholder="e.g., Dubai" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'الرمز البريدي' : 'Postal/ZIP Code' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="shipping_zip" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'ملاحظات الطلب (اختياري)' : 'Order Notes (Optional)' }}</label>
+                            <textarea class="form-control" name="customer_notes" rows="3" placeholder="{{ app()->getLocale() == 'ar' ? 'أي تعليمات خاصة؟' : 'Any special instructions?' }}"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="ri-shopping-bag-line me-2"></i>{{ app()->getLocale() == 'ar' ? 'تأكيد وإنشاء الطلب' : 'Confirm & Create Order' }}
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Order Result -->
+                <div id="direct-order-result" style="display: none;">
+                    <div id="direct-order-loading" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;"></div>
+                        <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'جاري إنشاء طلبك...' : 'Creating your order...' }}</p>
+                    </div>
+
+                    <div id="direct-order-success" style="display: none;" class="alert alert-success"></div>
+                    <div id="direct-order-error" style="display: none;" class="alert alert-danger"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
 }
 
 .bg-gradient-info {
-    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+    background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
 }
 
 .thumbnail-hover {
@@ -694,8 +841,8 @@
 }
 
 .nav-tabs .nav-link.active {
-    border-bottom-color: #667eea;
-    color: #667eea;
+    border-bottom-color: #561C04;
+    color: #561C04;
     background: none;
 }
 
@@ -706,20 +853,20 @@
 }
 
 .variant-option:hover {
-    border-color: #667eea !important;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    border-color: #561C04 !important;
+    box-shadow: 0 4px 12px rgba(86, 28, 4, 0.2);
     transform: translateY(-2px);
 }
 
 .variant-option.selected {
-    border-color: #667eea !important;
-    background-color: #f8f9ff;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    border-color: #561C04 !important;
+    background-color: #fff9f5;
+    box-shadow: 0 0 0 3px rgba(86, 28, 4, 0.2);
 }
 
 .variant-option .form-check-input:checked {
-    background-color: #667eea;
-    border-color: #667eea;
+    background-color: #561C04;
+    border-color: #561C04;
 }
 
 /* Step Indicator */
@@ -747,7 +894,7 @@
 }
 
 .step-indicator.active .step-circle {
-    background: #667eea;
+    background: #561C04;
     color: white;
 }
 
@@ -758,6 +905,54 @@
     margin: 0 10px;
     align-self: center;
     margin-bottom: 28px;
+}
+
+/* Button Hover Styles */
+.btn-primary {
+    background-color: #561C04;
+    border-color: #561C04;
+}
+
+.btn-primary:hover {
+    background-color: #561C04 !important;
+    border-color: #561C04 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
+}
+
+.btn-outline-primary:hover {
+    background-color: #561C04 !important;
+    border-color: #561C04 !important;
+    color: white !important;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #561C04 !important;
+    border-color: #561C04 !important;
+    color: white !important;
+}
+
+.btn-outline-info:hover {
+    background-color: #561C04 !important;
+    border-color: #561C04 !important;
+    color: white !important;
+}
+
+.btn-success:hover {
+    background-color: #e56300 !important;
+    border-color: #e56300 !important;
+    color: white !important;
+}
+
+/* Text Colors */
+.text-primary {
+    color: #561C04 !important;
+}
+
+.ri-box-3-line.text-primary,
+.ri-money-dollar-circle-line.text-primary,
+.ri-truck-line.text-success {
+    color: #561C04 !important;
 }
 </style>
 
@@ -1244,6 +1439,151 @@ function displayOrderError(data) {
 function retryOrder() {
     document.getElementById('order-creation-result').style.display = 'none';
     document.getElementById('orderForm').style.display = 'block';
+}
+
+// Open direct order modal for Choice products
+function openDirectOrderForm() {
+    const modal = new bootstrap.Modal(document.getElementById('directOrderModal'));
+    modal.show();
+}
+
+// Handle direct order form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const directOrderForm = document.getElementById('directOrderForm');
+    if (directOrderForm) {
+        directOrderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitDirectOrder();
+        });
+    }
+});
+
+function submitDirectOrder() {
+    const isArabic = document.documentElement.lang === 'ar';
+
+    // Hide form and show loading
+    document.getElementById('directOrderForm').style.display = 'none';
+    document.getElementById('direct-order-result').style.display = 'block';
+    document.getElementById('direct-order-loading').style.display = 'block';
+    document.getElementById('direct-order-success').style.display = 'none';
+    document.getElementById('direct-order-error').style.display = 'none';
+
+    // Collect form data
+    const formData = new FormData(document.getElementById('directOrderForm'));
+    const orderData = {};
+    formData.forEach((value, key) => {
+        orderData[key] = value;
+    });
+
+    // Add SKU attributes if variant is selected
+    const variantSelect = document.getElementById('directVariantSelect');
+    if (variantSelect && variantSelect.value !== '') {
+        const variantIndex = parseInt(variantSelect.value);
+        const selectedVariant = variantsData[variantIndex];
+
+        if (selectedVariant && selectedVariant.ae_sku_property_dtos && selectedVariant.ae_sku_property_dtos.ae_sku_property_d_t_o) {
+            const skuAttr = selectedVariant.ae_sku_property_dtos.ae_sku_property_d_t_o.map(prop => {
+                return `${prop.sku_property_id}:${prop.property_value_id}`;
+            }).join(';');
+            orderData.selected_sku_attr = skuAttr;
+        }
+    }
+
+    console.log('Direct Order Data:', orderData);
+
+    // Submit order
+    fetch('{{ route("orders.store") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(async response => {
+        const data = await response.json();
+        return { response, data };
+    })
+    .then(({ response, data }) => {
+        document.getElementById('direct-order-loading').style.display = 'none';
+
+        if (response.ok && (data.success || data.order)) {
+            displayDirectOrderSuccess(data);
+        } else {
+            displayDirectOrderError(data);
+        }
+    })
+    .catch(error => {
+        console.error('Direct Order Error:', error);
+        document.getElementById('direct-order-loading').style.display = 'none';
+        displayDirectOrderError({ error: error.message });
+    });
+}
+
+function displayDirectOrderSuccess(data) {
+    const container = document.getElementById('direct-order-success');
+    const order = data.order || data;
+    const isArabic = document.documentElement.lang === 'ar';
+
+    container.innerHTML = `
+        <div class="text-center mb-3">
+            <i class="ri-checkbox-circle-fill text-success" style="font-size: 64px;"></i>
+        </div>
+        <h4 class="alert-heading text-center mb-3">${isArabic ? 'تم إنشاء الطلب بنجاح!' : 'Order Created Successfully!'}</h4>
+        <div class="mb-3">
+            <strong>${isArabic ? 'رقم الطلب:' : 'Order Number:'}</strong> ${order.order_number || 'N/A'}<br>
+            <strong>${isArabic ? 'الحالة:' : 'Status:'}</strong> <span class="badge bg-warning">${order.status || 'Pending'}</span><br>
+            <strong>${isArabic ? 'المبلغ الإجمالي:' : 'Total Amount:'}</strong> ${order.currency || 'USD'} ${parseFloat(order.total_price || 0).toFixed(2)}<br>
+            <strong class="text-success">${isArabic ? 'الشحن: مجاني (منتج Choice)' : 'Shipping: Free (Choice Product)'}</strong>
+        </div>
+        <p class="mb-3">${data.message || (isArabic ? 'تم إنشاء طلبك بنجاح وسيتم معالجته قريباً.' : 'Your order has been placed successfully and will be processed shortly.')}</p>
+        <div class="d-grid gap-2">
+            <a href="{{ route('seller.dashboard') }}" class="btn btn-primary">
+                <i class="ri-dashboard-line me-2"></i>${isArabic ? 'عرض لوحة التحكم' : 'View Dashboard'}
+            </a>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                <i class="ri-close-line me-2"></i>${isArabic ? 'إغلاق' : 'Close'}
+            </button>
+        </div>
+    `;
+    container.style.display = 'block';
+}
+
+function displayDirectOrderError(data) {
+    const container = document.getElementById('direct-order-error');
+    const isArabic = document.documentElement.lang === 'ar';
+    let errorMsg = data.error || data.message || (isArabic ? 'فشل إنشاء الطلب. يرجى المحاولة مرة أخرى.' : 'Failed to create order. Please try again.');
+
+    if (data.errors) {
+        errorMsg = '<ul class="mb-0">';
+        Object.values(data.errors).forEach(errors => {
+            errors.forEach(error => {
+                errorMsg += `<li>${error}</li>`;
+            });
+        });
+        errorMsg += '</ul>';
+    }
+
+    container.innerHTML = `
+        <div class="text-center mb-3">
+            <i class="ri-error-warning-line text-danger" style="font-size: 48px;"></i>
+        </div>
+        <h6 class="alert-heading">${isArabic ? 'فشل إنشاء الطلب' : 'Order Creation Failed'}</h6>
+        <div>${errorMsg}</div>
+        <div class="d-grid gap-2 mt-3">
+            <button type="button" class="btn btn-outline-secondary" onclick="retryDirectOrder()">
+                <i class="ri-refresh-line me-2"></i>${isArabic ? 'حاول مرة أخرى' : 'Try Again'}
+            </button>
+        </div>
+    `;
+    container.style.display = 'block';
+}
+
+function retryDirectOrder() {
+    document.getElementById('direct-order-result').style.display = 'none';
+    document.getElementById('directOrderForm').style.display = 'block';
 }
 
 function syncProduct() {

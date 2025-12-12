@@ -384,4 +384,101 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Primary and Info Background Colors */
+    .bg-label-warning,
+    .bg-label-success,
+    .bg-label-danger {
+        transition: all 0.3s ease;
+    }
+
+    /* Card Hover Effects */
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(86, 28, 4, 0.3);
+    }
+
+    /* Button Hover Styles - All Primary and Info */
+    .btn-warning,
+    .btn-danger,
+    .btn-dark,
+    .btn-secondary,
+    .btn-primary,
+    .btn-info {
+        transition: all 0.3s ease;
+    }
+
+    .btn-success {
+        transition: all 0.3s ease;
+    }
+
+    .btn-warning:hover,
+    .btn-danger:hover,
+    .btn-dark:hover,
+    .btn-secondary:hover,
+    .btn-info:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
+    }
+
+    .btn-success:hover {
+        background-color: #e56300 !important;
+        border-color: #e56300 !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(229, 99, 0, 0.4);
+    }
+
+    .btn-primary:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
+    }
+
+    .btn-outline-success:hover {
+        background-color: #e56300 !important;
+        border-color: #e56300 !important;
+        color: white !important;
+    }
+
+    /* Badge Hover */
+    .badge {
+        transition: all 0.3s ease;
+    }
+
+    .badge:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Success Badge to #e56300 */
+    .badge.bg-success:hover {
+        background-color: #e56300 !important;
+        box-shadow: 0 4px 10px rgba(229, 99, 0, 0.3);
+    }
+
+    /* Subscription Card Hover */
+    .card[style*="linear-gradient"]:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(86, 28, 4, 0.4);
+    }
+
+    /* Table Row Hover */
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(86, 28, 4, 0.05);
+    }
+</style>
 @endsection

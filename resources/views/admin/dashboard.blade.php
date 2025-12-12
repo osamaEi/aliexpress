@@ -393,4 +393,76 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Card Hover Effects */
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(86, 28, 4, 0.3);
+    }
+
+    /* Button Hover Styles - Primary and Info to #561C04 */
+    .btn-primary:hover,
+    .btn-info:hover,
+    .btn-warning:hover,
+    .btn-danger:hover,
+    .btn-secondary:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
+    }
+
+    /* Success buttons to #e56300 */
+    .btn-success:hover {
+        background-color: #e56300 !important;
+        border-color: #e56300 !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(229, 99, 0, 0.4);
+    }
+
+    .btn-outline-primary:hover,
+    .btn-outline-info:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    .btn-outline-success:hover {
+        background-color: #e56300 !important;
+        border-color: #e56300 !important;
+        color: white !important;
+    }
+
+    /* Badge Hover */
+    .badge {
+        transition: all 0.3s ease;
+    }
+
+    .badge:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Success Badge to #e56300 */
+    .badge.bg-success:hover {
+        background-color: #e56300 !important;
+        box-shadow: 0 4px 10px rgba(229, 99, 0, 0.3);
+    }
+
+    /* Table Row Hover */
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(86, 28, 4, 0.05);
+    }
+</style>
 @endsection

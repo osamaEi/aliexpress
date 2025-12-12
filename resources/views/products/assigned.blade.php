@@ -36,7 +36,7 @@
                 <!-- Stats Cards -->
                 <div class="row mb-4">
                     <div class="col-md-3">
-                        <div class="card bg-primary text-white">
+                        <div class="card text-white" style="background-color: #561C04;">
                             <div class="card-body">
                                 <h3 class="mb-0">{{ $assignedProducts->total() }}</h3>
                                 <small>Total Assigned</small>
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card bg-info text-white">
+                        <div class="card text-white" style="background-color: #561C04;">
                             <div class="card-body">
                                 <h3 class="mb-0">{{ $assignedProducts->where('pivot.status', 'imported')->count() }}</h3>
                                 <small>Imported</small>
@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card bg-success text-white">
+                        <div class="card text-white" style="background-color: #e56300;">
                             <div class="card-body">
                                 <h3 class="mb-0">{{ $assignedProducts->where('pivot.status', 'published')->count() }}</h3>
                                 <small>Published</small>
@@ -113,7 +113,7 @@
                                         <strong>{{ $assignedProduct->name }}</strong>
                                         <br>
                                         @if($assignedProduct->price)
-                                            <span class="text-primary fw-bold">AED {{ number_format($assignedProduct->price, 2) }}</span>
+                                            <span class="fw-bold" style="color: #561C04;">AED {{ number_format($assignedProduct->price, 2) }}</span>
                                         @endif
                                     </td>
                                     <td>
@@ -125,11 +125,11 @@
                                                 <i class="ri-time-line me-1"></i> Assigned
                                             </span>
                                         @elseif($status === 'imported')
-                                            <span class="badge bg-info">
+                                            <span class="badge" style="background-color: #561C04;">
                                                 <i class="ri-download-line me-1"></i> Imported
                                             </span>
                                         @elseif($status === 'published')
-                                            <span class="badge bg-success">
+                                            <span class="badge" style="background-color: #e56300;">
                                                 <i class="ri-check-line me-1"></i> Published
                                             </span>
                                         @endif
@@ -206,6 +206,57 @@
 
     .table tbody tr:hover {
         background-color: #f8f9fa;
+    }
+
+    /* Stats Cards Hover */
+    .row .card {
+        transition: all 0.3s ease;
+    }
+
+    .row .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(86, 28, 4, 0.3);
+    }
+
+    /* Button Hover Styles */
+    .btn-primary {
+        background-color: #561C04;
+        border-color: #561C04;
+    }
+
+    .btn-primary:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    /* Badge Hover */
+    .badge {
+        transition: all 0.3s ease;
+    }
+
+    .badge:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 </style>
 @endsection
