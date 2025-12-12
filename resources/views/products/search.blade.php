@@ -102,50 +102,27 @@
                 <!-- Choice Filter Row -->
                 <div class="row g-3 mt-2">
                     <div class="col-12">
-                        <div class="d-flex align-items-center gap-3 flex-wrap">
-                            <label class="form-label fw-semibold mb-0">
-                                <i class="ri-filter-3-line me-1"></i>
-                                {{ app()->getLocale() == 'ar' ? 'نوع المنتج:' : 'Product Type:' }}
-                            </label>
-
-                            <div class="btn-group" role="group">
-                                <input type="radio" class="btn-check" name="product_type" id="allProducts" value="all"
-                                       {{ !request('choice_only') && !request('non_choice') ? 'checked' : '' }}>
-                                <label class="btn btn-outline-secondary" for="allProducts">
-                                    <i class="ri-apps-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}
-                                </label>
-
-                                <input type="radio" class="btn-check" name="product_type" id="choiceOnly" value="choice"
-                                       {{ request('choice_only') ? 'checked' : '' }}>
-                                <label class="btn btn-outline-secondary" for="choiceOnly">
-                                    <i class="ri-vip-crown-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'Choice فقط' : 'Choice Only' }}
-                                </label>
-
-                                <input type="radio" class="btn-check" name="product_type" id="nonChoice" value="non-choice"
-                                       {{ request('non_choice') ? 'checked' : '' }}>
-                                <label class="btn btn-outline-secondary" for="nonChoice">
-                                    <i class="ri-store-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'عادية فقط' : 'Regular Only' }}
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    role="switch"
+                                    id="choiceFilter"
+                                    name="choice_only"
+                                    value="1"
+                                    {{ request('choice_only') ? 'checked' : '' }}
+                                    style="width: 50px; height: 25px; cursor: pointer;">
+                                <label class="form-check-label fw-semibold ms-2" for="choiceFilter" style="cursor: pointer;">
+                                    <span class="badge bg-gradient text-white px-3 py-2" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%); font-size: 0.9rem;">
+                                        <i class="ri-vip-crown-line me-1"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'منتجات Choice فقط' : 'Choice Products Only' }}
+                                    </span>
                                 </label>
                             </div>
-
-                            <!-- Hidden inputs for form submission -->
-                            <input type="hidden" name="choice_only" id="choiceOnlyInput" value="{{ request('choice_only') ? '1' : '' }}">
-                            <input type="hidden" name="non_choice" id="nonChoiceInput" value="{{ request('non_choice') ? '1' : '' }}">
-
-                            <small class="text-muted w-100 mt-2">
+                            <small class="text-muted">
                                 <i class="ri-information-line"></i>
-                                <span id="filterDescription">
-                                    @if(request('choice_only'))
-                                        {{ app()->getLocale() == 'ar' ? 'منتجات مميزة بشحن أسرع وجودة مضمونة' : 'Premium products with faster shipping and guaranteed quality' }}
-                                    @elseif(request('non_choice'))
-                                        {{ app()->getLocale() == 'ar' ? 'منتجات عادية من البائعين' : 'Regular products from sellers' }}
-                                    @else
-                                        {{ app()->getLocale() == 'ar' ? 'جميع المنتجات (Choice والعادية)' : 'All products (Choice and Regular)' }}
-                                    @endif
-                                </span>
+                                {{ app()->getLocale() == 'ar' ? 'منتجات مميزة بشحن أسرع وجودة مضمونة' : 'Premium products with faster shipping and guaranteed quality' }}
                             </small>
                         </div>
                     </div>
@@ -441,16 +418,18 @@
 
                                     <!-- Actions -->
                                     <div class="mt-auto">
-                                        <!-- AliExpress Link -->
-                                        @if(!empty($product['item_url']))
-                                            <a href="{{ $product['item_url'] }}"
-                                               target="_blank"
-                                               rel="noopener noreferrer"
-                                               class="btn btn-sm btn-outline-primary w-100 mb-2">
-                                                <i class="ri-external-link-line me-1"></i>
-                                                {{ app()->getLocale() == 'ar' ? 'عرض على AliExpress' : 'View on AliExpress' }}
-                                            </a>
-                                        @endif
+                                        <!-- AliExpress Link (Admin Only) -->
+                                        @auth
+                                            @if(auth()->user()->user_type === 'admin' && !empty($product['item_url']))
+                                                <a href="{{ $product['item_url'] }}"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
+                                                   class="btn btn-sm btn-outline-primary w-100 mb-2">
+                                                    <i class="ri-external-link-line me-1"></i>
+                                                    {{ app()->getLocale() == 'ar' ? 'عرض على AliExpress' : 'View on AliExpress' }}
+                                                </a>
+                                            @endif
+                                        @endauth
 
                                         @auth
                                             @if(auth()->user()->user_type === 'seller')

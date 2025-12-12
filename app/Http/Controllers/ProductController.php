@@ -744,6 +744,7 @@ class ProductController extends Controller
             ->where('is_active', true);
 
         // Filter categories for sellers based on their selected categories
+        // Admins can see all categories
         $user = auth()->user();
         if ($user && $user->user_type === 'seller') {
             // Decode the seller's selected categories
@@ -761,6 +762,7 @@ class ProductController extends Controller
                 $query->whereRaw('1 = 0');
             }
         }
+        // Admin can see all categories - no filtering needed
 
         $allCategories = $query->orderBy('order')->get();
 

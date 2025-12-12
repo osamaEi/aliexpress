@@ -174,10 +174,18 @@
         </li>
 
         <!-- Product Management -->
-        <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('admin.*') ? 'active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('admin.*') && !request()->routeIs('products.search-*') ? 'active' : '' }}">
             <a href="{{ route('products.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-shopping-bag-3-line"></i>
                 <div>{{ __('messages.product_management') }}</div>
+            </a>
+        </li>
+
+        <!-- AliExpress Product Search -->
+        <li class="menu-item {{ request()->routeIs('products.search-*') ? 'active' : '' }}">
+            <a href="{{ route('products.search-page') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-search-2-line"></i>
+                <div>{{ __('messages.search_products') }}</div>
             </a>
         </li>
 
