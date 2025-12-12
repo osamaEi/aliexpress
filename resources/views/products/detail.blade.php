@@ -110,7 +110,7 @@
                     @endif
 
                     <!-- Pricing -->
-                    <div class="card bg-gradient-primary text-white mb-4 border-0" style="border-radius: 16px;">
+                    <div class="card text-white mb-4 border-0" style="border-radius: 16px; background: linear-gradient(135deg, #561C04 0%, #e56300 100%);">
                         <div class="card-body p-4">
                             @php
                                 $convertedPrice = $currentCurrency->convertFrom($product->price, $product->currency ?? 'USD');

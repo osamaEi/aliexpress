@@ -97,8 +97,8 @@
                             <i class="ri-money-dollar-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العملة' : 'Currency' }}
                         </label>
                         <select name="currency" id="currency" class="form-select form-select-lg shadow-sm">
-                            <option value="AED" {{ request('currency') == 'AED' || !request('currency') ? 'selected' : '' }}>AED</option>
-                            <option value="USD" {{ request('currency') == 'USD' ? 'selected' : '' }}>USD</option>
+                            <option value="AED" {{ request('currency') == 'AED' ? 'selected' : '' }}>AED</option>
+                            <option value="USD" {{ request('currency') == 'USD' || !request('currency') ? 'selected' : '' }}>USD</option>
                             <option value="SAR" {{ request('currency') == 'SAR' ? 'selected' : '' }}>SAR</option>
                         </select>
                     </div>
