@@ -162,23 +162,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Available PayPal Balance -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
-                            <i class="ri-wallet-3-line ri-24px"></i>
-                        </div>
-                        <div class="card-info">
-                            <h5 class="mb-0">{{ number_format($stats['available_paypal_balance'], 2) }} {{ app()->getLocale() == 'ar' ? 'د.إ' : 'AED' }}</h5>
-                            <small>{{ __('messages.available_wallet_balance') }}</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Quick Actions -->
