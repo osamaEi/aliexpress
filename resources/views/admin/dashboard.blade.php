@@ -215,58 +215,6 @@
         </div>
     </div>
 
-    <!-- Products by Country -->
-    @if($stats['products_by_country']->count() > 0)
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="ri-global-line me-2"></i>
-                        {{ __('messages.products_by_country') }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        @php
-                            $countryFlags = [
-                                'AE' => ['flag' => '🇦🇪', 'name_ar' => 'الإمارات', 'name_en' => 'UAE'],
-                                'SA' => ['flag' => '🇸🇦', 'name_ar' => 'السعودية', 'name_en' => 'Saudi Arabia'],
-                                'EG' => ['flag' => '🇪🇬', 'name_ar' => 'مصر', 'name_en' => 'Egypt'],
-                                'KW' => ['flag' => '🇰🇼', 'name_ar' => 'الكويت', 'name_en' => 'Kuwait'],
-                                'QA' => ['flag' => '🇶🇦', 'name_ar' => 'قطر', 'name_en' => 'Qatar'],
-                                'BH' => ['flag' => '🇧🇭', 'name_ar' => 'البحرين', 'name_en' => 'Bahrain'],
-                                'OM' => ['flag' => '🇴🇲', 'name_ar' => 'عمان', 'name_en' => 'Oman'],
-                                'JO' => ['flag' => '🇯🇴', 'name_ar' => 'الأردن', 'name_en' => 'Jordan'],
-                                'LB' => ['flag' => '🇱🇧', 'name_ar' => 'لبنان', 'name_en' => 'Lebanon'],
-                                'CN' => ['flag' => '🇨🇳', 'name_ar' => 'الصين', 'name_en' => 'China'],
-                                'US' => ['flag' => '🇺🇸', 'name_ar' => 'أمريكا', 'name_en' => 'USA'],
-                            ];
-                        @endphp
-                        @foreach($stats['products_by_country'] as $country => $count)
-                            @php
-                                $countryData = $countryFlags[strtoupper($country)] ?? ['flag' => '🌍', 'name_ar' => $country, 'name_en' => $country];
-                            @endphp
-                            <div class="col-sm-6 col-md-4 col-lg-3">
-                                <div class="card border">
-                                    <div class="card-body text-center">
-                                        <div class="fs-1 mb-2">{{ $countryData['flag'] }}</div>
-                                        <h5 class="mb-1">{{ $count }}</h5>
-                                        <small class="text-muted">
-                                            {{ app()->getLocale() == 'ar' ? $countryData['name_ar'] : $countryData['name_en'] }}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
-
-
     <!-- Quick Actions -->
     <div class="row g-4 mb-4">
         <div class="col-12">
