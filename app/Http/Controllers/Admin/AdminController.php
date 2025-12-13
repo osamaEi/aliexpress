@@ -27,9 +27,6 @@ class AdminController extends Controller
             'pending_orders' => Order::where('status', 'pending')->count(),
             'active_subscriptions' => UserSubscription::where('status', 'active')->count(),
             'total_revenue' => UserSubscription::where('status', 'active')->sum('amount_paid'),
-
-            // المبالغ المتوفرة في PayPal (الإجمالي في المحافظ)
-            'available_paypal_balance' => User::sum('wallet_balance'),
         ];
 
         $recentOrders = Order::with(['user', 'product'])
