@@ -28,12 +28,6 @@ class AdminController extends Controller
             'active_subscriptions' => UserSubscription::where('status', 'active')->count(),
             'total_revenue' => UserSubscription::where('status', 'active')->sum('amount_paid'),
 
-            // عدد المنتجات بالعمولة
-            'commission_products' => Product::where('pricing_type', 'commission')->count(),
-
-            // عدد المنتجات بالكوبون
-            'coupon_products' => Product::where('pricing_type', 'coupon')->count(),
-
             // المبالغ المتوفرة في PayPal (الإجمالي في المحافظ)
             'available_paypal_balance' => User::sum('wallet_balance'),
         ];

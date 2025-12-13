@@ -163,40 +163,6 @@
             </div>
         </div>
 
-        <!-- Commission Products -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-info me-3 p-2">
-                            <i class="ri-percent-line ri-24px"></i>
-                        </div>
-                        <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['commission_products'] }}</h5>
-                            <small>{{ __('messages.commission_products') }}</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Coupon Products -->
-        <div class="col-sm-6 col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-info me-3 p-2">
-                            <i class="ri-coupon-line ri-24px"></i>
-                        </div>
-                        <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['coupon_products'] }}</h5>
-                            <small>{{ __('messages.coupon_products') }}</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Available PayPal Balance -->
         <div class="col-sm-6 col-lg-3">
             <div class="card">
