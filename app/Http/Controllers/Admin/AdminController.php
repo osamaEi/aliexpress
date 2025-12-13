@@ -28,13 +28,6 @@ class AdminController extends Controller
             'active_subscriptions' => UserSubscription::where('status', 'active')->count(),
             'total_revenue' => UserSubscription::where('status', 'active')->sum('amount_paid'),
 
-            // عدد المنتجات حسب البلد
-            'products_by_country' => Product::selectRaw('country, COUNT(*) as count')
-                ->whereNotNull('country')
-                ->groupBy('country')
-                ->get()
-                ->pluck('count', 'country'),
-
             // عدد المنتجات بالعمولة
             'commission_products' => Product::where('pricing_type', 'commission')->count(),
 
