@@ -87,15 +87,15 @@ class SellerSubcategoryProfitController extends Controller
      */
     public function bulkUpdate(Request $request)
     {
-        $validated = $request->validate([
-            'profits' => 'required|array',
-            'profits.*.category_id' => 'required|exists:categories,id',
-            'profits.*.profit_type' => 'required|in:percentage,fixed',
-            'profits.*.profit_value' => 'required|numeric|min:0',
-            'profits.*.is_active' => 'boolean',
-        ]);
-
         try {
+            $validated = $request->validate([
+                'profits' => 'required|array',
+                'profits.*.category_id' => 'required|exists:categories,id',
+                'profits.*.profit_type' => 'required|in:percentage,fixed',
+                'profits.*.profit_value' => 'required|numeric|min:0',
+                'profits.*.is_active' => 'nullable|boolean',
+            ]);
+
             $seller = Auth::user();
 
             DB::transaction(function () use ($seller, $validated) {
@@ -115,7 +115,7 @@ class SellerSubcategoryProfitController extends Controller
                             'profit_type' => $profitData['profit_type'],
                             'profit_value' => $profitData['profit_value'],
                             'currency' => 'AED',
-                            'is_active' => $profitData['is_active'] ?? true,
+                            'is_active' => isset($profitData['is_active']) && $profitData['is_active'] == 1 ? true : false,
                         ]
                     );
                 }
@@ -123,13 +123,19 @@ class SellerSubcategoryProfitController extends Controller
 
             return redirect()->route('seller.profit-settings.index')->with('success', __('messages.all_profit_settings_saved'));
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('seller.profit-settings.index')
+                ->withErrors($e->validator)
+                ->withInput();
         } catch (\Exception $e) {
             Log::error('Bulk Profit Update Error', [
                 'seller_id' => Auth::id(),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
-            return back()->with('error', __('messages.profit_settings_failed'));
+            return redirect()->route('seller.profit-settings.index')
+                ->with('error', __('messages.profit_settings_failed') . ': ' . $e->getMessage());
         }
     }
 
