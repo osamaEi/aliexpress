@@ -685,6 +685,7 @@ return [
     'inactive_only' => 'Inactive Only',
     'configured_only' => 'Configured Only',
     'all_types' => 'All Types',
+    'profit_settings_validation_failed' => 'Validation failed. Please check your inputs and try again.',
 
     // Theme Settings
     'theme_settings' => 'Theme Settings',

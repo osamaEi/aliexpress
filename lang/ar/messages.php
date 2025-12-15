@@ -688,6 +688,7 @@ return [
     'inactive_only' => 'غير النشطة فقط',
     'configured_only' => 'المُعدّة فقط',
     'all_types' => 'كل الأنواع',
+    'profit_settings_validation_failed' => 'فشل التحقق من البيانات. يرجى التحقق من المدخلات والمحاولة مرة أخرى.',
 
     // Theme Settings
     'theme_settings' => 'إعدادات المظهر',

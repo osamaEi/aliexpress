@@ -135,7 +135,6 @@
                                     <!-- Status -->
                                     <td>
                                         <div class="form-check form-switch">
-                                            <input type="hidden" name="profits[{{ $index }}][is_active]" value="0">
                                             <input class="form-check-input status-checkbox"
                                                    type="checkbox"
                                                    name="profits[{{ $index }}][is_active]"
@@ -301,7 +300,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle save all button
     document.getElementById('saveAllBtn').addEventListener('click', function() {
         if (confirm('{{ __("messages.confirm_save_all_profits") }}')) {
-            document.getElementById('profitForm').submit();
+            const form = document.getElementById('profitForm');
+
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+
+            // Disable all inputs in hidden rows to prevent them from being submitted
+            const rows = profitTable.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                if (row.style.display === 'none') {
+                    // Disable all inputs in hidden row
+                    row.querySelectorAll('input, select').forEach(input => {
+                        input.disabled = true;
+                    });
+                }
+            });
+
+            // Log form data for debugging
+            const formData = new FormData(form);
+            console.log('Form data entries:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, '=', value);
+            }
+
+            form.submit();
         }
     });
 

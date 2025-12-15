@@ -87,6 +87,13 @@ class SellerSubcategoryProfitController extends Controller
      */
     public function bulkUpdate(Request $request)
     {
+        // Log the incoming request for debugging
+        Log::info('Bulk Update Request Started', [
+            'user_id' => Auth::id(),
+            'has_profits' => $request->has('profits'),
+            'profits_count' => is_array($request->input('profits')) ? count($request->input('profits')) : 0,
+        ]);
+
         try {
             $validated = $request->validate([
                 'profits' => 'required|array',
@@ -106,6 +113,9 @@ class SellerSubcategoryProfitController extends Controller
                         continue;
                     }
 
+                    // Handle is_active: checkbox sends "1" when checked, nothing when unchecked
+                    $isActive = isset($profitData['is_active']) && $profitData['is_active'] == 1;
+
                     SellerSubcategoryProfit::updateOrCreate(
                         [
                             'user_id' => $seller->id,
@@ -115,22 +125,35 @@ class SellerSubcategoryProfitController extends Controller
                             'profit_type' => $profitData['profit_type'],
                             'profit_value' => $profitData['profit_value'],
                             'currency' => 'AED',
-                            'is_active' => isset($profitData['is_active']) && $profitData['is_active'] == 1 ? true : false,
+                            'is_active' => $isActive,
                         ]
                     );
                 }
             });
 
+            Log::info('Bulk Update Success', [
+                'user_id' => $seller->id,
+                'profits_updated' => count($validated['profits'])
+            ]);
+
             return redirect()->route('seller.profit-settings.index')->with('success', __('messages.all_profit_settings_saved'));
 
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Validation Failed in Bulk Update', [
+                'errors' => $e->errors(),
+                'user_id' => Auth::id()
+            ]);
+
             return redirect()->route('seller.profit-settings.index')
                 ->withErrors($e->validator)
-                ->withInput();
-        } catch (\Exception $e) {
+                ->withInput()
+                ->with('error', __('messages.profit_settings_validation_failed'));
+        } catch (\Throwable $e) {
             Log::error('Bulk Profit Update Error', [
                 'seller_id' => Auth::id(),
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
