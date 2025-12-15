@@ -1,4 +1,4 @@
-@props(['width' => '25 'height' => '25 'class' => ''])
+@props(['width' => '20', 'height' => '20', 'class' => ''])
 
 <svg xmlns="http://www.w3.org/2000/svg" width="{{ $width }}" height="{{ $height }}" viewBox="0 0 24 24" fill="none" class="inline-block {{ $class }}" style="vertical-align: middle;">
     <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
