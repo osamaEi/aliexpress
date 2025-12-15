@@ -77,10 +77,16 @@ if (!function_exists('currency_symbol')) {
      * Get currency symbol based on locale
      *
      * @param string $currency
+     * @param bool $asHtml Return as HTML (with SVG icon for AED)
      * @return string
      */
-    function currency_symbol(string $currency = 'AED'): string
+    function currency_symbol(string $currency = 'AED', bool $asHtml = false): string
     {
+        // For AED, use SVG icon
+        if ($currency === 'AED' && $asHtml) {
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+        }
+
         $symbols = [
             'AED' => app()->getLocale() == 'ar' ? 'د.إ' : 'AED',
             'USD' => '$',
@@ -100,12 +106,13 @@ if (!function_exists('format_currency')) {
      * @param float $amount
      * @param string $currency
      * @param int $decimals
+     * @param bool $useIcon Use SVG icon for AED currency
      * @return string
      */
-    function format_currency(float $amount, string $currency = 'AED', int $decimals = 2): string
+    function format_currency(float $amount, string $currency = 'AED', int $decimals = 2, bool $useIcon = true): string
     {
         $formattedAmount = number_format($amount, $decimals);
-        $symbol = currency_symbol($currency);
+        $symbol = currency_symbol($currency, $useIcon);
 
         // For Arabic, put symbol after amount; for English, before
         return app()->getLocale() == 'ar'

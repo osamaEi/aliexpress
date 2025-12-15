@@ -138,7 +138,7 @@
                             <i class="ri-money-dollar-circle-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ number_format($stats['total_revenue'], 2) }} {{ app()->getLocale() == 'ar' ? 'د.إ' : 'AED' }}</h5>
+                            <h5 class="mb-0">{!! format_currency($stats['total_revenue'], 'AED', 2, true) !!}</h5>
                             <small>{{ __('messages.total_revenue') }}</small>
                         </div>
                     </div>

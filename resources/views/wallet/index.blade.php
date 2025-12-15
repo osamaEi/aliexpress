@@ -145,7 +145,7 @@
                                 <span class="text-danger">*</span>
                             </label>
                             <div class="input-group input-group-lg">
-                                <span class="input-group-text">{{ currency_symbol('AED') }}</span>
+                                <span class="input-group-text">{!! currency_symbol('AED', true) !!}</span>
                                 <input type="number"
                                        class="form-control"
                                        id="deposit_amount"
@@ -188,16 +188,16 @@
                                     <h6 class="mb-3">{{ __('messages.fee_breakdown') }}</h6>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>{{ __('messages.you_will_receive') }}:</span>
-                                        <strong id="net-amount">0.00 {{ currency_symbol('AED') }}</strong>
+                                        <strong id="net-amount">0.00 {!! currency_symbol('AED', true) !!}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2 text-muted">
                                         <span>{{ __('messages.processing_fee') }}:</span>
-                                        <span id="fee-amount">0.00 {{ currency_symbol('AED') }}</span>
+                                        <span id="fee-amount">0.00 {!! currency_symbol('AED', true) !!}</span>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between">
                                         <h6 class="mb-0">{{ __('messages.total_to_pay') }}:</h6>
-                                        <h6 class="mb-0 text-primary" id="gross-amount">0.00 {{ currency_symbol('AED') }}</h6>
+                                        <h6 class="mb-0 text-primary" id="gross-amount">0.00 {!! currency_symbol('AED', true) !!}</h6>
                                     </div>
                                 </div>
                             </div>
@@ -379,9 +379,9 @@
             .then(data => {
                 if (data.success) {
                     // Update fee breakdown
-                    document.getElementById('net-amount').textContent = data.data.net_amount.toFixed(2) + ' {{ currency_symbol("AED") }}';
-                    document.getElementById('fee-amount').textContent = data.data.fee.toFixed(2) + ' {{ currency_symbol("AED") }}';
-                    document.getElementById('gross-amount').textContent = data.data.gross_amount.toFixed(2) + ' {{ currency_symbol("AED") }}';
+                    document.getElementById('net-amount').innerHTML = data.data.net_amount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+                    document.getElementById('fee-amount').innerHTML = data.data.fee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+                    document.getElementById('gross-amount').innerHTML = data.data.gross_amount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
 
                     // Show fee breakdown
                     feeBreakdown.style.display = 'block';

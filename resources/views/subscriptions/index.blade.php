@@ -53,7 +53,7 @@
                                         {{ __('messages.active_now') }}
                                     </div>
                                 @endif
-                                <h2 class="mb-0">{{ number_format($subscription->price, 2) }} {{ app()->getLocale() == 'ar' ? 'د.إ' : 'AED' }}</h2>
+                                <h2 class="mb-0">{!! format_currency($subscription->price, 'AED', 2, true) !!}</h2>
                                 <small class="text-muted">{{ __('messages.per_month') }}</small>
                             </div>
 
