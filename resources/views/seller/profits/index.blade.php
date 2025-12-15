@@ -157,13 +157,13 @@
                                                 <i class="ri-calculator-line"></i>
                                             </button>
                                             @if($existingProfit)
-                                            <form method="POST" action="{{ route('seller.profit-settings.destroy', $existingProfit->id) }}" class="d-inline" onsubmit="return confirm('{{ __('messages.confirm_delete') }}')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="{{ __('messages.delete') }}">
-                                                    <i class="ri-delete-bin-line"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="btn btn-outline-danger btn-sm delete-profit"
+                                                    data-profit-id="{{ $existingProfit->id }}"
+                                                    data-delete-url="{{ route('seller.profit-settings.destroy', $existingProfit->id) }}"
+                                                    title="{{ __('messages.delete') }}">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
                                             @endif
                                         </div>
                                     </td>
@@ -371,6 +371,42 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatCurrency(amount) {
         return `{!! currency_symbol("AED", true) !!} ${amount.toFixed(2)}`;
     }
+
+    // Handle delete profit setting
+    document.querySelectorAll('.delete-profit').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!confirm('{{ __("messages.confirm_delete") }}')) {
+                return;
+            }
+
+            const deleteUrl = this.dataset.deleteUrl;
+            const profitId = this.dataset.profitId;
+
+            // Create a temporary form for DELETE request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = deleteUrl;
+            form.style.display = 'none';
+
+            // Add CSRF token
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = '{{ csrf_token() }}';
+            form.appendChild(csrfInput);
+
+            // Add DELETE method
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+
+            // Append form to body and submit
+            document.body.appendChild(form);
+            form.submit();
+        });
+    });
 });
 </script>
 @endpush
