@@ -16,8 +16,10 @@
                             $subscriptionName = __('messages.no_subscription');
 
                             if ($activeSubscription) {
-                                if ($activeSubscription->plan) {
-                                    $subscriptionName = $activeSubscription->plan->name;
+                                if ($activeSubscription->subscription) {
+                                    $subscriptionName = app()->getLocale() == 'ar' && $activeSubscription->subscription->name_ar
+                                        ? $activeSubscription->subscription->name_ar
+                                        : $activeSubscription->subscription->name;
                                 }
 
                                 if ($activeSubscription->end_date) {
@@ -29,7 +31,7 @@
 
                         <div class="navbar-nav align-items-center me-3">
                             <div class="nav-item d-flex align-items-center gap-2">
-                                @if($activeSubscription && $activeSubscription->plan)
+                                @if($activeSubscription && $activeSubscription->subscription)
                                     <!-- Subscription Type Badge -->
                                     <span class="badge bg-label-primary px-3 py-2">
                                         <i class="ri-vip-crown-line me-1"></i>
