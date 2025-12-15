@@ -655,7 +655,7 @@ return [
     'fixed_profit_amount' => 'مبلغ الربح الثابت',
 
     // Seller Profit Settings
-    'profit_settings' => 'إعدادات الربح',
+    'profit_settings' => 'إعدادات الأرباح',
     'subcategory_profit_settings' => 'إعدادات ربح الفئات الفرعية',
     'set_profit_for_each_subcategory' => 'حدد هامش الربح لكل فئة فرعية',
     'parent_category' => 'الفئة الرئيسية',
@@ -670,13 +670,24 @@ return [
     'profit_setting_updated' => 'تم تحديث إعداد الربح بنجاح',
     'profit_setting_deleted' => 'تم حذف إعداد الربح بنجاح',
     'profit_preview' => 'معاينة الربح',
+    'profit_calculation_preview' => 'معاينة حساب الربح',
     'example_base_price' => 'سعر الأساس كمثال',
     'base_price' => 'السعر الأساسي',
     'profit_amount' => 'مبلغ الربح',
     'final_price' => 'السعر النهائي',
+    'final_selling_price' => 'سعر البيع النهائي',
+    'profit_calculation_note' => 'هذه المعاينة توضح كيفية حساب الربح على المنتجات في هذه الفئة',
     'close' => 'إغلاق',
     'preview' => 'معاينة',
+    'preview_calculation' => 'معاينة الحساب',
     'confirm_delete' => 'هل أنت متأكد أنك تريد حذف هذا؟',
+    'confirm_save_all_profits' => 'هل تريد حفظ جميع إعدادات الأرباح؟',
+    'search_by_category' => 'البحث بالفئة',
+    'all_status' => 'كل الحالات',
+    'active_only' => 'النشطة فقط',
+    'inactive_only' => 'غير النشطة فقط',
+    'configured_only' => 'المُعدّة فقط',
+    'all_types' => 'كل الأنواع',
 
     // Theme Settings
     'theme_settings' => 'إعدادات المظهر',
