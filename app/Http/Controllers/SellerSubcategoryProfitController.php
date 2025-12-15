@@ -121,7 +121,7 @@ class SellerSubcategoryProfitController extends Controller
                 }
             });
 
-            return back()->with('success', __('messages.all_profit_settings_saved'));
+            return redirect()->route('seller.profit-settings.index')->with('success', __('messages.all_profit_settings_saved'));
 
         } catch (\Exception $e) {
             Log::error('Bulk Profit Update Error', [

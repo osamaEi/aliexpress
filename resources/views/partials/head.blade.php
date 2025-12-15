@@ -197,7 +197,7 @@
         /* Use light primary color for label badges and subtle backgrounds */
         .badge.bg-label-primary {
             background-color: {{ $primaryLightColor }} !important;
-            color: {{ $primaryColor }} !important;
+            color:  white !important;
         }
 
         .btn-outline-primary {
