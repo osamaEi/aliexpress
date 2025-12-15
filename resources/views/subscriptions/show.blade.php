@@ -75,8 +75,11 @@
                                     </li>
                                     <li class="mb-2">
                                         <i class="ri-{{ $subscription->api_access ? 'check' : 'close' }}-line {{ $subscription->api_access ? 'text-success' : 'text-muted' }} me-2"></i>
+                                         <img src="{{ asset('vector.png') }}" alt="Taif" style="height: 18px; vertical-align: middle;" class="{{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}">
+
                                         {{ __('messages.api_access') }}
                                     </li>
+                             
                                 </ul>
                             </div>
                         </div>
@@ -110,6 +113,16 @@
                 </div>
             </div>
             @endif
+
+            <!-- Subscription History Button -->
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <a href="https://i.selaa.ae/subscriptions-history" class="btn btn-outline-primary w-100">
+                        <i class="ri-history-line me-2"></i>
+                        {{ __('messages.view_subscription_history') }}
+                    </a>
+                </div>
+            </div>
 
             <!-- Subscribe Button -->
             <div class="card">

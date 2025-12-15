@@ -22,10 +22,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        @php
-                            $convertedBalance = $currentCurrency->convertFrom($wallet->balance, $wallet->currency);
-                        @endphp
-                        <h5 class="mb-1">{{ $currentCurrency->format($convertedBalance) }}</h5>
+                        <h5 class="mb-1">{!! format_currency($wallet->balance, 'AED', 2, true) !!}</h5>
                         <small class="text-muted">{{ __('messages.total_balance') }}</small>
                     </div>
                 </div>
@@ -44,10 +41,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        @php
-                            $convertedAvailable = $currentCurrency->convertFrom($wallet->available_balance, $wallet->currency);
-                        @endphp
-                        <h5 class="mb-1">{{ $currentCurrency->format($convertedAvailable) }}</h5>
+                        <h5 class="mb-1">{!! format_currency($wallet->available_balance, 'AED', 2, true) !!}</h5>
                         <small class="text-muted">{{ __('messages.available_balance') }}</small>
                     </div>
                 </div>
@@ -66,10 +60,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        @php
-                            $convertedPending = $currentCurrency->convertFrom($wallet->pending_balance, $wallet->currency);
-                        @endphp
-                        <h5 class="mb-1">{{ $currentCurrency->format($convertedPending) }}</h5>
+                        <h5 class="mb-1">{!! format_currency($wallet->pending_balance, 'AED', 2, true) !!}</h5>
                         <small class="text-muted">{{ __('messages.pending_balance') }}</small>
                     </div>
                 </div>
@@ -276,18 +267,12 @@
                                 </div>
                             </td>
                             <td>
-                                @php
-                                    $convertedAmount = $currentCurrency->convertFrom($transaction->amount, $transaction->currency);
-                                @endphp
                                 <span class="{{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
-                                    {{ ($transaction->type === 'credit' ? '+' : '-') . $currentCurrency->format(abs($convertedAmount)) }}
+                                    {!! ($transaction->type === 'credit' ? '+' : '-') . ' ' . format_currency(abs($transaction->amount), 'AED', 2, true) !!}
                                 </span>
                             </td>
                             <td>
-                                @php
-                                    $convertedBalanceAfter = $currentCurrency->convertFrom($transaction->balance_after, $transaction->currency);
-                                @endphp
-                                {{ $currentCurrency->format($convertedBalanceAfter) }}
+                                {!! format_currency($transaction->balance_after, 'AED', 2, true) !!}
                             </td>
                             <td>
                                 @if($transaction->status === 'completed')
@@ -327,6 +312,21 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         transition: all 0.3s ease;
     }
+
+    /* AED Currency SVG Icon Styling */
+    svg.inline-block {
+        display: inline-block;
+        vertical-align: middle;
+        margin: 0 4px;
+    }
+
+    [dir="rtl"] svg.inline-block {
+        margin: 0 4px 0 0;
+    }
+
+    [dir="ltr"] svg.inline-block {
+        margin: 0 0 0 4px;
+    }
 </style>
 
 <script>
@@ -364,7 +364,7 @@
             }
         });
 
-        // Function to calculate fees via AJAX
+        // Function to calculate fees via AJAXa
         function calculateFees(amount) {
             fetch('{{ route("wallet.deposit.calculate-fees") }}', {
                 method: 'POST',

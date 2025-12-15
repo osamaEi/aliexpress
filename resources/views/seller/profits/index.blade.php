@@ -3,9 +3,9 @@
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="mb-0">{{ __('messages.subcategory_profit_settings') }}</h5>
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+            <div class="mb-2 mb-md-0">
+                <h5 class="mb-0">{{ __('messages.profit_settings') }}</h5>
                 <p class="text-muted mb-0 small">{{ __('messages.set_profit_for_each_subcategory') }}</p>
             </div>
             <button type="button" class="btn btn-primary" id="saveAllBtn">
@@ -29,11 +29,36 @@
                 </div>
             @endif
 
+            <!-- Search and Filter Section -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="ri-search-line"></i></span>
+                        <input type="text" class="form-control" id="searchInput" placeholder="{{ __('messages.search_by_category') }}...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">{{ __('messages.all_status') }}</option>
+                        <option value="active">{{ __('messages.active_only') }}</option>
+                        <option value="inactive">{{ __('messages.inactive_only') }}</option>
+                        <option value="configured">{{ __('messages.configured_only') }}</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="typeFilter">
+                        <option value="">{{ __('messages.all_types') }}</option>
+                        <option value="percentage">{{ __('messages.percentage') }}</option>
+                        <option value="fixed">{{ __('messages.fixed_amount') }}</option>
+                    </select>
+                </div>
+            </div>
+
             <form id="profitForm" method="POST" action="{{ route('seller.profit-settings.bulk-update') }}">
                 @csrf
 
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="profitTable">
                         <thead>
                             <tr>
                                 <th>{{ __('messages.parent_category') }}</th>
@@ -55,9 +80,14 @@
                                     $profitType = $existingProfit ? $existingProfit->profit_type : 'percentage';
                                     $profitValue = $existingProfit ? $existingProfit->profit_value : 0;
                                     $isActive = $existingProfit ? $existingProfit->is_active : true;
+                                    $hasConfig = $existingProfit ? 'configured' : 'not-configured';
                                 @endphp
 
-                                <tr>
+                                <tr data-status="{{ $isActive ? 'active' : 'inactive' }}"
+                                    data-type="{{ $profitType }}"
+                                    data-config="{{ $hasConfig }}"
+                                    data-parent="{{ app()->getLocale() == 'ar' && $subcategory->parent->name_ar ? $subcategory->parent->name_ar : $subcategory->parent->name }}"
+                                    data-subcategory="{{ app()->getLocale() == 'ar' && $subcategory->name_ar ? $subcategory->name_ar : $subcategory->name }}">
                                     <!-- Parent Category -->
                                     <td>
                                         @if($currentParent != $subcategory->parent_id)
@@ -97,7 +127,7 @@
                                                    step="0.01"
                                                    required>
                                             <span class="input-group-text profit-unit" data-index="{{ $index }}">
-                                                {{ $profitType == 'percentage' ? '%' : '$' }}
+                                                {{ $profitType == 'percentage' ? '%' : currency_symbol('AED', false) }}
                                             </span>
                                         </div>
                                     </td>
@@ -106,11 +136,12 @@
                                     <td>
                                         <div class="form-check form-switch">
                                             <input type="hidden" name="profits[{{ $index }}][is_active]" value="0">
-                                            <input class="form-check-input"
+                                            <input class="form-check-input status-checkbox"
                                                    type="checkbox"
                                                    name="profits[{{ $index }}][is_active]"
                                                    value="1"
-                                                   {{ $isActive ? 'checked' : '' }}>
+                                                   {{ $isActive ? 'checked' : '' }}
+                                                   data-row-index="{{ $index }}">
                                             <label class="form-check-label">
                                                 {{ __('messages.active') }}
                                             </label>
@@ -123,8 +154,8 @@
                                             <button type="button"
                                                     class="btn btn-outline-info preview-profit"
                                                     data-index="{{ $index }}"
-                                                    title="{{ __('messages.preview') }}">
-                                                <i class="ri-eye-line"></i>
+                                                    title="{{ __('messages.preview_calculation') }}">
+                                                <i class="ri-calculator-line"></i>
                                             </button>
                                             @if($existingProfit)
                                             <form method="POST" action="{{ route('seller.profit-settings.destroy', $existingProfit->id) }}" class="d-inline" onsubmit="return confirm('{{ __('messages.confirm_delete') }}')">
@@ -149,29 +180,36 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">{{ __('messages.profit_preview') }}</h5>
+                            <h5 class="modal-title">{{ __('messages.profit_calculation_preview') }}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label">{{ __('messages.example_base_price') }}</label>
-                                <input type="number" class="form-control" id="previewBasePrice" value="100" min="0" step="0.01">
+                                <label class="form-label">{{ __('messages.example_base_price') }} ({!! currency_symbol('AED', true) !!})</label>
+                                <input type="number" class="form-control form-control-lg" id="previewBasePrice" value="100" min="0" step="0.01">
                             </div>
-                            <div class="alert alert-info">
-                                <div class="row">
+                            <div class="alert alert-light border">
+                                <div class="row g-3">
                                     <div class="col-6">
-                                        <strong>{{ __('messages.base_price') }}:</strong>
-                                        <p class="mb-0" id="previewBasePriceDisplay">$100.00</p>
+                                        <small class="text-muted d-block mb-1">{{ __('messages.base_price') }}</small>
+                                        <h6 class="mb-0" id="previewBasePriceDisplay">{!! format_currency(100, 'AED', 2, true) !!}</h6>
                                     </div>
                                     <div class="col-6">
-                                        <strong>{{ __('messages.profit_amount') }}:</strong>
-                                        <p class="mb-0 text-success" id="previewProfitAmount">$0.00</p>
+                                        <small class="text-muted d-block mb-1">{{ __('messages.profit_amount') }}</small>
+                                        <h6 class="mb-0 text-success" id="previewProfitAmount">{!! format_currency(0, 'AED', 2, true) !!}</h6>
                                     </div>
-                                    <div class="col-12 mt-2 pt-2 border-top">
-                                        <strong>{{ __('messages.final_price') }}:</strong>
-                                        <h4 class="mb-0 text-primary" id="previewFinalPrice">$100.00</h4>
+                                    <div class="col-12">
+                                        <hr>
+                                        <small class="text-muted d-block mb-2">{{ __('messages.final_selling_price') }}</small>
+                                        <h4 class="mb-0 text-primary" id="previewFinalPrice">{!! format_currency(100, 'AED', 2, true) !!}</h4>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="alert alert-info mb-0">
+                                <small>
+                                    <i class="ri-information-line me-1"></i>
+                                    {{ __('messages.profit_calculation_note') }}
+                                </small>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -187,18 +225,84 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const profitTable = document.getElementById('profitTable');
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const typeFilter = document.getElementById('typeFilter');
+
+    // Search functionality
+    searchInput.addEventListener('input', filterTable);
+    statusFilter.addEventListener('change', filterTable);
+    typeFilter.addEventListener('change', filterTable);
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        const typeValue = typeFilter.value;
+        const rows = profitTable.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const parent = row.dataset.parent.toLowerCase();
+            const subcategory = row.dataset.subcategory.toLowerCase();
+            const status = row.dataset.status;
+            const type = row.dataset.type;
+            const config = row.dataset.config;
+
+            let showRow = true;
+
+            // Search filter
+            if (searchTerm && !parent.includes(searchTerm) && !subcategory.includes(searchTerm)) {
+                showRow = false;
+            }
+
+            // Status filter
+            if (statusValue) {
+                if (statusValue === 'configured' && config !== 'configured') {
+                    showRow = false;
+                } else if (statusValue !== 'configured' && status !== statusValue) {
+                    showRow = false;
+                }
+            }
+
+            // Type filter
+            if (typeValue && type !== typeValue) {
+                showRow = false;
+            }
+
+            row.style.display = showRow ? '' : 'none';
+        });
+    }
+
+    // Handle status checkbox changes
+    document.querySelectorAll('.status-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const row = this.closest('tr');
+            row.dataset.status = this.checked ? 'active' : 'inactive';
+        });
+    });
+
     // Handle profit type change
     document.querySelectorAll('.profit-type').forEach(function(select) {
         select.addEventListener('change', function() {
             const index = this.dataset.index;
             const unit = document.querySelector(`.profit-unit[data-index="${index}"]`);
-            unit.textContent = this.value === 'percentage' ? '%' : '$';
+            const row = this.closest('tr');
+
+            if (this.value === 'percentage') {
+                unit.textContent = '%';
+            } else {
+                unit.innerHTML = '{!! currency_symbol("AED", false) !!}';
+            }
+
+            row.dataset.type = this.value;
         });
     });
 
     // Handle save all button
     document.getElementById('saveAllBtn').addEventListener('click', function() {
-        document.getElementById('profitForm').submit();
+        if (confirm('{{ __("messages.confirm_save_all_profits") }}')) {
+            document.getElementById('profitForm').submit();
+        }
     });
 
     // Handle preview
@@ -237,9 +341,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const finalPrice = basePrice + profitAmount;
 
-        document.getElementById('previewBasePriceDisplay').textContent = '$' + basePrice.toFixed(2);
-        document.getElementById('previewProfitAmount').textContent = '$' + profitAmount.toFixed(2);
-        document.getElementById('previewFinalPrice').textContent = '$' + finalPrice.toFixed(2);
+        document.getElementById('previewBasePriceDisplay').innerHTML = formatCurrency(basePrice);
+        document.getElementById('previewProfitAmount').innerHTML = formatCurrency(profitAmount);
+        document.getElementById('previewFinalPrice').innerHTML = formatCurrency(finalPrice);
+    }
+
+    function formatCurrency(amount) {
+        return `{!! currency_symbol("AED", true) !!} ${amount.toFixed(2)}`;
     }
 });
 </script>

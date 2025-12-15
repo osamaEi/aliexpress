@@ -82,7 +82,8 @@ class SubscriptionController extends Controller
         }
 
         try {
-            \DB::transaction(function () use ($user, $subscription, $wallet, $currentSubscription) {
+            $userSubscription = null;
+            \DB::transaction(function () use ($user, $subscription, $wallet, $currentSubscription, &$userSubscription) {
                 // Deduct from wallet
                 $wallet->debit(
                     $subscription->price,
@@ -106,7 +107,7 @@ class SubscriptionController extends Controller
                 }
 
                 // Create user subscription
-                UserSubscription::create([
+                $userSubscription = UserSubscription::create([
                     'user_id' => $user->id,
                     'subscription_id' => $subscription->id,
                     'start_date' => $startDate,
@@ -116,6 +117,15 @@ class SubscriptionController extends Controller
                     'payment_method' => 'wallet',
                 ]);
             });
+
+            // Send email notification to admin
+            if ($userSubscription) {
+                $userSubscription->load(['user', 'subscription']);
+                $adminEmail = env('ADMIN_EMAIL', env('MAIL_FROM_ADDRESS'));
+                if ($adminEmail) {
+                    \Mail::to($adminEmail)->send(new \App\Mail\NewSubscriptionNotification($userSubscription));
+                }
+            }
 
             return redirect()->route('subscriptions.index')
                 ->with('success', __('messages.subscription_successful'));

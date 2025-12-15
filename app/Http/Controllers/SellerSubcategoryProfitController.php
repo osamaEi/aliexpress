@@ -65,7 +65,7 @@ class SellerSubcategoryProfitController extends Controller
                 [
                     'profit_type' => $validated['profit_type'],
                     'profit_value' => $validated['profit_value'],
-                    'currency' => config('paypal.currency', 'USD'),
+                    'currency' => 'AED',
                     'is_active' => $validated['is_active'] ?? true,
                 ]
             );
@@ -114,7 +114,7 @@ class SellerSubcategoryProfitController extends Controller
                         [
                             'profit_type' => $profitData['profit_type'],
                             'profit_value' => $profitData['profit_value'],
-                            'currency' => config('paypal.currency', 'USD'),
+                            'currency' => 'AED',
                             'is_active' => $profitData['is_active'] ?? true,
                         ]
                     );

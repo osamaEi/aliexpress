@@ -338,7 +338,8 @@ class PaymobController extends Controller
                         }
 
                         // Create user subscription with upgrade logic
-                        \DB::transaction(function () use ($userId, $subscription, $orderId, $merchantOrderId, $totalDays, $currentSubscriptionId) {
+                        $userSubscription = null;
+                        \DB::transaction(function () use ($userId, $subscription, $orderId, $merchantOrderId, $totalDays, $currentSubscriptionId, &$userSubscription) {
                             // Cancel current subscription if exists
                             if ($currentSubscriptionId) {
                                 $current = UserSubscription::find($currentSubscriptionId);
@@ -351,7 +352,7 @@ class PaymobController extends Controller
                                 }
                             }
 
-                            UserSubscription::create([
+                            $userSubscription = UserSubscription::create([
                                 'user_id' => $userId,
                                 'subscription_id' => $subscription->id,
                                 'start_date' => now()->toDateString(),
@@ -376,6 +377,15 @@ class PaymobController extends Controller
                                 'paid_at' => now(),
                             ]);
                         });
+
+                        // Send email notification to admin
+                        if ($userSubscription) {
+                            $userSubscription->load(['user', 'subscription']);
+                            $adminEmail = env('ADMIN_EMAIL', env('MAIL_FROM_ADDRESS'));
+                            if ($adminEmail) {
+                                \Mail::to($adminEmail)->send(new \App\Mail\NewSubscriptionNotification($userSubscription));
+                            }
+                        }
 
                         // Clear session data
                         session()->forget('paymob_subscription');

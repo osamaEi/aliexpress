@@ -93,10 +93,11 @@
                                 </li>
                                 @endif
                                 @if($subscription->api_access)
-                                <li class="mb-2">
-                                    <i class="ri-check-line text-success me-2"></i>
-                                    {{ __('messages.api_access') }}
-                                </li>
+                                  <li class="mb-2">
+                                <i class="ri-check-line text-success me-2"></i>
+                                <img src="{{ asset('vector.png') }}" alt="Taif" style="height: 18px; vertical-align: middle;" class="{{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}">
+                                {{ __('messages.api_access') }}
+                            </li>
                                 @endif
                             </ul>
 

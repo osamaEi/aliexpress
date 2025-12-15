@@ -425,6 +425,7 @@
                         @enderror
                     </div>
 
+                    @if(auth()->user()->hasActiveSubscription())
                     <div class="col-md-6">
                         <label for="marketing_code" class="form-label">{{ __('messages.marketing_code') }}</label>
                         <input type="text" class="form-control @error('marketing_code') is-invalid @enderror"
@@ -448,6 +449,7 @@
                             </small>
                         @endif
                     </div>
+                    @endif
 
                     <!-- Action Buttons -->
                     <div class="col-12 mt-4">

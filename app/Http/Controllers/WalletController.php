@@ -431,9 +431,10 @@ class WalletController extends Controller
             $user = \App\Models\User::findOrFail($sessionData['user_id']);
 
             // Process wallet deposit
-            \DB::transaction(function () use ($user, $sessionData, $paymentIntentId) {
+            $transaction = null;
+            \DB::transaction(function () use ($user, $sessionData, $paymentIntentId, &$transaction) {
                 // Credit the wallet with the NET amount (customer's intended deposit)
-                $this->walletService->deposit(
+                $transaction = $this->walletService->deposit(
                     $user,
                     $sessionData['net_amount'],
                     'Wallet deposit via Ziina',
@@ -445,6 +446,15 @@ class WalletController extends Controller
                     ]
                 );
             });
+
+            // Send email notification to admin
+            if ($transaction) {
+                $transaction->load('wallet.user');
+                $adminEmail = env('ADMIN_EMAIL', env('MAIL_FROM_ADDRESS'));
+                if ($adminEmail) {
+                    \Mail::to($adminEmail)->send(new \App\Mail\WalletDepositNotification($transaction));
+                }
+            }
 
             // Clear session data
             session()->forget('ziina_wallet_deposit');
