@@ -45,17 +45,17 @@
                                 </span>
                             </td>
                             <td>
-                                <strong>{{ number_format($subscription->price, 2) }} {{ app()->getLocale() == 'ar' ? 'د.إ' : 'AED' }}</strong>
+                                <strong>{{ format_currency($subscription->amount_paid) }}</strong>
                             </td>
                             <td>{{ $subscription->start_date->format('Y-m-d') }}</td>
                             <td>{{ $subscription->end_date->format('Y-m-d') }}</td>
                             <td>
-                                @if($subscription->is_active)
+                                @if($subscription->status === 'active' && $subscription->end_date >= now())
                                     <span class="badge bg-success">
                                         <i class="ri-checkbox-circle-line me-1"></i>
                                         {{ __('messages.active') }}
                                     </span>
-                                @elseif($subscription->end_date < now())
+                                @elseif($subscription->status === 'expired' || $subscription->end_date < now())
                                     <span class="badge bg-danger">
                                         <i class="ri-close-circle-line me-1"></i>
                                         {{ __('messages.expired') }}
@@ -69,13 +69,23 @@
                             </td>
                             <td>
                                 @if($subscription->payment_method)
-                                    {{ $subscription->payment_method }}
+                                    <span class="badge bg-info">
+                                        @if($subscription->payment_method === 'ziina')
+                                            <i class="ri-secure-payment-line me-1"></i>Ziina
+                                        @elseif($subscription->payment_method === 'wallet')
+                                            <i class="ri-wallet-line me-1"></i>{{ __('messages.wallet') }}
+                                        @elseif($subscription->payment_method === 'paymob')
+                                            <i class="ri-bank-card-line me-1"></i>Paymob
+                                        @else
+                                            {{ ucfirst($subscription->payment_method) }}
+                                        @endif
+                                    </span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
                             <td>
-                                @if($subscription->payment_id)
+                                @if($subscription->transaction_id)
                                     <button class="btn btn-sm btn-outline-primary" onclick="viewInvoice({{ $subscription->id }})">
                                         <i class="ri-file-text-line me-1"></i>
                                         {{ __('messages.view_invoice') }}

@@ -160,11 +160,24 @@ class Order extends Model
     }
 
     /**
-     * Get status display name
+     * Get status display name (bilingual)
      */
-    public function getStatusName(): string
+    public function getStatusName(?string $locale = null): string
     {
-        return ucfirst($this->status);
+        $locale = $locale ?? app()->getLocale();
+
+        $statusNames = [
+            'pending' => ['en' => 'Pending', 'ar' => 'قيد الانتظار'],
+            'processing' => ['en' => 'Processing', 'ar' => 'قيد المعالجة'],
+            'placed' => ['en' => 'Placed', 'ar' => 'تم التقديم'],
+            'paid' => ['en' => 'Paid', 'ar' => 'مدفوع'],
+            'shipped' => ['en' => 'Shipped', 'ar' => 'تم الشحن'],
+            'delivered' => ['en' => 'Delivered', 'ar' => 'تم التسليم'],
+            'cancelled' => ['en' => 'Cancelled', 'ar' => 'ملغي'],
+            'failed' => ['en' => 'Failed', 'ar' => 'فشل'],
+        ];
+
+        return $statusNames[$this->status][$locale] ?? ucfirst($this->status);
     }
 
     /**
@@ -182,11 +195,20 @@ class Order extends Model
     }
 
     /**
-     * Get payment status display name
+     * Get payment status display name (bilingual)
      */
-    public function getPaymentStatusName(): string
+    public function getPaymentStatusName(?string $locale = null): string
     {
-        return ucfirst($this->payment_status);
+        $locale = $locale ?? app()->getLocale();
+
+        $statusNames = [
+            'pending' => ['en' => 'Pending', 'ar' => 'قيد الانتظار'],
+            'paid' => ['en' => 'Paid', 'ar' => 'مدفوع'],
+            'failed' => ['en' => 'Failed', 'ar' => 'فشل'],
+            'refunded' => ['en' => 'Refunded', 'ar' => 'مسترد'],
+        ];
+
+        return $statusNames[$this->payment_status][$locale] ?? ucfirst($this->payment_status);
     }
 
     /**
@@ -268,5 +290,253 @@ class Order extends Model
         $this->aliexpress_profit = round($aliexpressProfit, 2);
         $this->admin_category_profit = round($adminCategoryProfit, 2);
         $this->seller_profit = round($sellerProfit, 2);
+    }
+
+    /**
+     * Map AliExpress order status to local status
+     */
+    public static function mapAliExpressStatus(string $aliexpressStatus): string
+    {
+        return match($aliexpressStatus) {
+            'PLACE_ORDER_SUCCESS' => 'placed',
+            'PAYMENT_PROCESSING' => 'processing',
+            'WAIT_SELLER_EXAMINE_MONEY' => 'processing',
+            'RISK_CONTROL' => 'processing',
+            'RISK_CONTROL_HOLD' => 'processing',
+            'WAIT_SELLER_SEND_GOODS' => 'placed',
+            'SELLER_PART_SEND_GOODS' => 'shipped',
+            'WAIT_BUYER_ACCEPT_GOODS' => 'shipped',
+            'FINISH' => 'delivered',
+            'IN_CANCEL' => 'cancelled',
+            'WAIT_GROUP' => 'pending',
+            'WAIT_COMPLETE_ADDRESS' => 'pending',
+            default => 'processing',
+        };
+    }
+
+    /**
+     * Get AliExpress order status display name (multilingual)
+     */
+    public static function getAliExpressStatusDisplay(string $aliexpressStatus, string $locale = 'en'): string
+    {
+        $statusMap = [
+            'PLACE_ORDER_SUCCESS' => [
+                'en' => 'Order Placed Successfully',
+                'ar' => 'تم تقديم الطلب بنجاح'
+            ],
+            'PAYMENT_PROCESSING' => [
+                'en' => 'Payment Processing',
+                'ar' => 'معالجة الدفع'
+            ],
+            'WAIT_SELLER_EXAMINE_MONEY' => [
+                'en' => 'Waiting for Seller to Confirm Amount',
+                'ar' => 'في انتظار تأكيد البائع للمبلغ'
+            ],
+            'RISK_CONTROL' => [
+                'en' => 'Risk Control in Progress',
+                'ar' => 'مراقبة المخاطر جارية'
+            ],
+            'RISK_CONTROL_HOLD' => [
+                'en' => 'Ongoing Risk Control',
+                'ar' => 'مراقبة المخاطر مستمرة'
+            ],
+            'WAIT_SELLER_SEND_GOODS' => [
+                'en' => 'Waiting for Seller to Ship',
+                'ar' => 'في انتظار شحن البائع'
+            ],
+            'SELLER_PART_SEND_GOODS' => [
+                'en' => 'Partial Shipment',
+                'ar' => 'شحن جزئي'
+            ],
+            'WAIT_BUYER_ACCEPT_GOODS' => [
+                'en' => 'Waiting for Buyer to Receive Goods',
+                'ar' => 'في انتظار استلام المشتري'
+            ],
+            'FINISH' => [
+                'en' => 'Order Completed',
+                'ar' => 'اكتمل الطلب'
+            ],
+            'IN_CANCEL' => [
+                'en' => 'Cancel Order',
+                'ar' => 'إلغاء الطلب'
+            ],
+            'WAIT_GROUP' => [
+                'en' => 'Waiting for Group Formation',
+                'ar' => 'في انتظار تشكيل المجموعة'
+            ],
+            'WAIT_COMPLETE_ADDRESS' => [
+                'en' => 'Waiting to Supplement Shipping Address',
+                'ar' => 'في انتظار استكمال عنوان الشحن'
+            ],
+        ];
+
+        return $statusMap[$aliexpressStatus][$locale] ?? $aliexpressStatus;
+    }
+
+    /**
+     * Get AliExpress logistics status display name
+     */
+    public static function getLogisticsStatusDisplay(string $logisticsStatus, string $locale = 'en'): string
+    {
+        $statusMap = [
+            'NO_LOGISTICS' => [
+                'en' => 'Not Shipped',
+                'ar' => 'لم يتم الشحن'
+            ],
+            'SELLER_SEND_GOODS' => [
+                'en' => 'Shipped',
+                'ar' => 'تم الشحن'
+            ],
+            'BUYER_ACCEPT_GOODS' => [
+                'en' => 'Delivered',
+                'ar' => 'تم التسليم'
+            ],
+        ];
+
+        return $statusMap[$logisticsStatus][$locale] ?? $logisticsStatus;
+    }
+
+    /**
+     * Update order from AliExpress API response
+     */
+    public function updateFromAliExpressResponse(array $responseData): void
+    {
+        $result = $responseData['result'] ?? $responseData;
+
+        // Map and update order status
+        if (isset($result['order_status'])) {
+            $newStatus = self::mapAliExpressStatus($result['order_status']);
+
+            // Only update if status changed
+            if ($this->status !== $newStatus) {
+                $this->status = $newStatus;
+            }
+        }
+
+        // Update logistics status and tracking
+        if (isset($result['logistics_status'])) {
+            $logisticsStatus = $result['logistics_status'];
+
+            // Update shipped_at if seller sent goods
+            if ($logisticsStatus === 'SELLER_SEND_GOODS' && !$this->shipped_at) {
+                $this->shipped_at = now();
+                if ($this->status !== 'delivered') {
+                    $this->status = 'shipped';
+                }
+            }
+
+            // Update delivered_at if buyer accepted goods
+            if ($logisticsStatus === 'BUYER_ACCEPT_GOODS' && !$this->delivered_at) {
+                $this->delivered_at = now();
+                $this->status = 'delivered';
+            }
+        }
+
+        // Update tracking number from logistics info
+        if (isset($result['logistics_info_list']['aeop_order_logistics_info'][0]['logistics_no'])) {
+            $this->tracking_number = $result['logistics_info_list']['aeop_order_logistics_info'][0]['logistics_no'];
+        }
+
+        // Update shipping method
+        if (isset($result['logistics_info_list']['aeop_order_logistics_info'][0]['logistics_service'])) {
+            $this->shipping_method = $result['logistics_info_list']['aeop_order_logistics_info'][0]['logistics_service'];
+        }
+
+        // Store full response
+        $this->aliexpress_response = $responseData;
+
+        $this->save();
+    }
+
+    /**
+     * Get AliExpress order status from stored response
+     */
+    public function getAliExpressOrderStatus(): ?string
+    {
+        if (!$this->aliexpress_response) {
+            return null;
+        }
+
+        return $this->aliexpress_response['result']['order_status'] ?? null;
+    }
+
+    /**
+     * Get AliExpress logistics status from stored response
+     */
+    public function getAliExpressLogisticsStatus(): ?string
+    {
+        if (!$this->aliexpress_response) {
+            return null;
+        }
+
+        return $this->aliexpress_response['result']['logistics_status'] ?? null;
+    }
+
+    /**
+     * Get formatted status badge with icon
+     */
+    public function getStatusBadgeHtml(string $locale = 'en'): string
+    {
+        $aliexpressStatus = $this->getAliExpressOrderStatus();
+        $statusName = $aliexpressStatus
+            ? self::getAliExpressStatusDisplay($aliexpressStatus, $locale)
+            : $this->getStatusName();
+
+        $badgeColor = $this->getStatusBadgeColor();
+        $icon = $this->getStatusIcon();
+
+        return sprintf(
+            '<span class="badge bg-%s"><i class="%s me-1"></i>%s</span>',
+            $badgeColor,
+            $icon,
+            $statusName
+        );
+    }
+
+    /**
+     * Get status icon
+     */
+    public function getStatusIcon(): string
+    {
+        return match($this->status) {
+            'pending' => 'ri-time-line',
+            'processing' => 'ri-loader-4-line',
+            'placed' => 'ri-check-line',
+            'paid' => 'ri-money-dollar-circle-line',
+            'shipped' => 'ri-ship-line',
+            'delivered' => 'ri-checkbox-circle-line',
+            'cancelled' => 'ri-close-circle-line',
+            'failed' => 'ri-error-warning-line',
+            default => 'ri-information-line',
+        };
+    }
+
+    /**
+     * Get full status display with all information
+     */
+    public function getFullStatusDisplay(string $locale = 'en'): array
+    {
+        $aliexpressOrderStatus = $this->getAliExpressOrderStatus();
+        $aliexpressLogisticsStatus = $this->getAliExpressLogisticsStatus();
+
+        return [
+            'local_status' => $this->status,
+            'local_status_name' => $this->getStatusName(),
+            'local_status_color' => $this->getStatusBadgeColor(),
+            'local_status_icon' => $this->getStatusIcon(),
+            'aliexpress_order_status' => $aliexpressOrderStatus,
+            'aliexpress_order_status_name' => $aliexpressOrderStatus
+                ? self::getAliExpressStatusDisplay($aliexpressOrderStatus, $locale)
+                : null,
+            'aliexpress_logistics_status' => $aliexpressLogisticsStatus,
+            'aliexpress_logistics_status_name' => $aliexpressLogisticsStatus
+                ? self::getLogisticsStatusDisplay($aliexpressLogisticsStatus, $locale)
+                : null,
+            'tracking_number' => $this->tracking_number,
+            'shipping_method' => $this->shipping_method,
+            'placed_at' => $this->placed_at,
+            'shipped_at' => $this->shipped_at,
+            'delivered_at' => $this->delivered_at,
+        ];
     }
 }

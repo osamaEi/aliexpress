@@ -71,3 +71,45 @@ if (!function_exists('calculate_price_with_profit')) {
         return $basePrice + admin_profit($basePrice);
     }
 }
+
+if (!function_exists('currency_symbol')) {
+    /**
+     * Get currency symbol based on locale
+     *
+     * @param string $currency
+     * @return string
+     */
+    function currency_symbol(string $currency = 'AED'): string
+    {
+        $symbols = [
+            'AED' => app()->getLocale() == 'ar' ? 'د.إ' : 'AED',
+            'USD' => '$',
+            'EUR' => '€',
+            'GBP' => '£',
+            'SAR' => app()->getLocale() == 'ar' ? 'ر.س' : 'SAR',
+        ];
+
+        return $symbols[$currency] ?? $currency;
+    }
+}
+
+if (!function_exists('format_currency')) {
+    /**
+     * Format amount with currency symbol
+     *
+     * @param float $amount
+     * @param string $currency
+     * @param int $decimals
+     * @return string
+     */
+    function format_currency(float $amount, string $currency = 'AED', int $decimals = 2): string
+    {
+        $formattedAmount = number_format($amount, $decimals);
+        $symbol = currency_symbol($currency);
+
+        // For Arabic, put symbol after amount; for English, before
+        return app()->getLocale() == 'ar'
+            ? $formattedAmount . ' ' . $symbol
+            : $symbol . ' ' . $formattedAmount;
+    }
+}

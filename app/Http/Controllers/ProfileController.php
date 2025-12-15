@@ -30,10 +30,13 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
             'full_name' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:2'],
             'main_activity' => ['nullable', 'string', 'max:255'],
             'sub_activity' => ['nullable', 'string', 'max:255'],
+            'withdrawal_method' => ['nullable', 'string', 'in:paypal,e_wallet,uae_bank'],
+            'marketing_code' => ['nullable', 'string', 'max:100'],
             'avatar' => ['nullable', 'image', 'max:2048'], // 2MB max
         ]);
 
@@ -49,6 +52,17 @@ class ProfileController extends Controller
             // Store new avatar
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
             $validated['avatar'] = $avatarPath;
+        }
+
+        // Handle marketing code - can only be entered once and requires approval
+        if (isset($validated['marketing_code'])) {
+            if ($user->marketing_code && $user->marketing_code_approved) {
+                // If already approved, don't allow changes
+                unset($validated['marketing_code']);
+            } elseif ($user->marketing_code !== $validated['marketing_code']) {
+                // New or changed code - set to pending approval
+                $validated['marketing_code_approved'] = false;
+            }
         }
 
         // Fill user data

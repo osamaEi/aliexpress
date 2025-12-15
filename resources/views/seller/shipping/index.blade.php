@@ -257,6 +257,163 @@
 </div>
 
 <style>
+    /* Primary Color Override */
+    .bg-primary,
+    .btn-primary,
+    .text-primary,
+    .border-primary {
+        background-color: #561C04 !important;
+        color: white !important;
+        border-color: #561C04 !important;
+    }
+
+    /* Info Color Override - Same as Primary */
+    .bg-info,
+    .btn-info,
+    .text-info,
+    .border-info {
+        background-color: #561C04 !important;
+        color: white !important;
+        border-color: #561C04 !important;
+    }
+
+    /* Success Color Override - Orange */
+    .bg-success,
+    .btn-success,
+    .text-success,
+    .border-success {
+        background-color: #e56300 !important;
+        color: white !important;
+        border-color: #e56300 !important;
+    }
+
+    /* Warning Color Override - Orange */
+    .bg-warning,
+    .btn-warning,
+    .text-warning,
+    .border-warning {
+        background-color: #e56300 !important;
+        color: white !important;
+        border-color: #e56300 !important;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active,
+    .btn-primary.active,
+    .btn-info:hover,
+    .btn-info:focus,
+    .btn-info:active,
+    .btn-info.active {
+        background-color: #7a2805 !important;
+        border-color: #7a2805 !important;
+        color: white !important;
+    }
+
+    .btn-success:hover,
+    .btn-success:focus,
+    .btn-success:active,
+    .btn-success.active,
+    .btn-warning:hover,
+    .btn-warning:focus,
+    .btn-warning:active,
+    .btn-warning.active {
+        background-color: #c75400 !important;
+        border-color: #c75400 !important;
+        color: white !important;
+    }
+
+    /* All Outline Buttons */
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-info,
+    .btn-outline-warning,
+    .btn-outline-success,
+    .btn-outline-danger {
+        color: #561C04 !important;
+        border-color: #561C04 !important;
+        background-color: transparent !important;
+    }
+
+    .btn-outline-primary:hover,
+    .btn-outline-primary:focus,
+    .btn-outline-primary:active,
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus,
+    .btn-outline-secondary:active,
+    .btn-outline-info:hover,
+    .btn-outline-info:focus,
+    .btn-outline-info:active,
+    .btn-outline-warning:hover,
+    .btn-outline-warning:focus,
+    .btn-outline-warning:active,
+    .btn-outline-success:hover,
+    .btn-outline-success:focus,
+    .btn-outline-success:active,
+    .btn-outline-danger:hover,
+    .btn-outline-danger:focus,
+    .btn-outline-danger:active {
+        background-color: #561C04 !important;
+        color: white !important;
+        border-color: #561C04 !important;
+    }
+
+    /* All Regular Buttons Hover */
+    .btn-secondary:hover,
+    .btn-danger:hover {
+        background-color: #561C04 !important;
+        border-color: #561C04 !important;
+        color: white !important;
+    }
+
+    /* Form Controls */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #561C04 !important;
+        box-shadow: 0 0 0 0.2rem rgba(86, 28, 4, 0.25) !important;
+    }
+
+    /* Links */
+    a {
+        color: #561C04 !important;
+    }
+
+    a:hover,
+    a:focus {
+        color: #7a2805 !important;
+    }
+
+    /* Card Hover */
+    .card:hover {
+        border-color: #561C04 !important;
+    }
+
+    /* Table Row Hover */
+    .table-hover tbody tr:hover {
+        background-color: rgba(86, 28, 4, 0.05) !important;
+    }
+
+    /* Badge Hover */
+    .badge:hover {
+        opacity: 0.85;
+        cursor: pointer;
+    }
+
+    /* Badge Info */
+    .badge.bg-info {
+        background-color: #561C04 !important;
+    }
+
+    /* Badge Success */
+    .badge.bg-success {
+        background-color: #e56300 !important;
+    }
+
+    /* Badge Warning */
+    .badge.bg-warning {
+        background-color: #e56300 !important;
+    }
+
     .border-4 {
         border-width: 4px !important;
     }

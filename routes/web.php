@@ -103,11 +103,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
     Route::get('/subscriptions/{subscription}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe.show');
     Route::post('/subscriptions/{subscription}/pay-wallet', [SubscriptionController::class, 'payWithWallet'])->name('subscriptions.pay-with-wallet');
+    Route::post('/subscriptions/{subscription}/pay-ziina', [SubscriptionController::class, 'payWithZiina'])->name('subscriptions.pay-with-ziina');
+    Route::get('/subscriptions/payment/success', [SubscriptionController::class, 'ziinaPaymentSuccess'])->name('subscriptions.payment.success');
+    Route::get('/subscriptions/payment/cancel', [SubscriptionController::class, 'ziinaPaymentCancel'])->name('subscriptions.payment.cancel');
     Route::post('/subscriptions/{subscription}/pay-paymob', [SubscriptionController::class, 'payWithPaymob'])->name('subscriptions.pay-with-paymob');
     Route::post('/subscriptions/{subscription}/initialize-paymob', [SubscriptionController::class, 'initializePaymobPayment'])->name('subscriptions.initialize-paymob');
-    Route::post('/subscriptions/{subscription}/process-payment', [SubscriptionController::class, 'processPayment'])->name('subscriptions.process-payment');
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     Route::get('/subscriptions-history', [SubscriptionController::class, 'history'])->name('subscriptions.history');
+    Route::get('/subscriptions/{userSubscription}/invoice', [SubscriptionController::class, 'invoice'])->name('subscriptions.invoice');
 
     // Paymob subscription payment routes
     Route::post('/paymob/initiate-subscription/{subscription}', [App\Http\Controllers\PaymobController::class, 'initiateSubscriptionPayment'])->name('paymob.initiate-subscription');
@@ -166,11 +169,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/deposit', [App\Http\Controllers\WalletController::class, 'depositForm'])->name('deposit');
         Route::post('/deposit', [App\Http\Controllers\WalletController::class, 'deposit'])->name('deposit.process');
         Route::post('/deposit/paypal', [App\Http\Controllers\WalletController::class, 'depositPayPal'])->name('deposit.paypal');
+
+        // Ziina deposit routes
+        Route::post('/deposit/ziina', [App\Http\Controllers\WalletController::class, 'depositZiina'])->name('deposit.ziina');
+        Route::get('/deposit/success', [App\Http\Controllers\WalletController::class, 'depositZiinaSuccess'])->name('deposit.success');
+        Route::get('/deposit/cancel', [App\Http\Controllers\WalletController::class, 'depositZiinaCancel'])->name('deposit.cancel');
+        Route::post('/deposit/calculate-fees', [App\Http\Controllers\WalletController::class, 'calculateDepositFees'])->name('deposit.calculate-fees');
+
         Route::get('/transactions', [App\Http\Controllers\WalletController::class, 'transactions'])->name('transactions');
         Route::get('/transfer', [App\Http\Controllers\WalletController::class, 'transferForm'])->name('transfer');
         Route::post('/transfer', [App\Http\Controllers\WalletController::class, 'transfer'])->name('transfer.process');
 
-        // Withdrawal routes (PayPal)
+        // Withdrawal routes
         Route::get('/withdrawal/create', [App\Http\Controllers\WithdrawalController::class, 'create'])->name('withdrawal.create');
         Route::post('/withdrawal', [App\Http\Controllers\WithdrawalController::class, 'store'])->name('withdrawal.store');
         Route::get('/withdrawal/history', [App\Http\Controllers\WithdrawalController::class, 'history'])->name('withdrawal.history');

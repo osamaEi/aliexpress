@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subscription;
+use App\Models\User;
 use App\Models\UserSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -132,48 +133,114 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Process PayPal payment
+     * Pay with Ziina - Initiate payment
      */
-    public function processPayment(Request $request, Subscription $subscription)
+    public function payWithZiina(Request $request, Subscription $subscription)
     {
         $user = Auth::user();
         $currentSubscription = $user->activeSubscription;
 
         // Check if user already has an active subscription to the same plan
         if ($currentSubscription && $currentSubscription->subscription_id == $subscription->id) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.already_have_active_subscription')
-            ], 400);
+            return redirect()->route('subscriptions.index')
+                ->with('error', __('messages.already_have_active_subscription'));
         }
 
         try {
-            $validated = $request->validate([
-                'order_id' => 'required|string',
-                'payer_id' => 'required|string',
-                'details' => 'required|array',
+            $ziinaService = app(\App\Services\ZiinaPaymentService::class);
+
+            // Calculate remaining days if upgrading
+            $remainingDays = $currentSubscription ? $currentSubscription->days_remaining : 0;
+            $totalDays = $subscription->duration_days + $remainingDays;
+
+            // Prepare metadata
+            $metadata = [
+                'subscription_id' => $subscription->id,
+                'user_id' => $user->id,
+                'payment_type' => 'subscription',
+                'remaining_days' => $remainingDays,
+                'total_days' => $totalDays,
+                'current_subscription_id' => $currentSubscription ? $currentSubscription->id : '',
+            ];
+
+            // Create payment intent
+            $description = __('messages.subscription_payment') . ': ' . $subscription->localized_name;
+            $paymentIntent = $ziinaService->createSubscriptionPayment(
+                $subscription->price,
+                $description,
+                $metadata
+            );
+
+            // Store payment intent ID in session
+            session([
+                'ziina_subscription_payment' => [
+                    'payment_intent_id' => $paymentIntent['id'],
+                    'subscription_id' => $subscription->id,
+                    'user_id' => $user->id,
+                    'amount' => $subscription->price,
+                    'remaining_days' => $remainingDays,
+                    'total_days' => $totalDays,
+                    'current_subscription_id' => $currentSubscription ? $currentSubscription->id : null,
+                ]
             ]);
 
-            // Verify payment amount and status from PayPal details
-            $captureStatus = $validated['details']['status'] ?? '';
-            $paidAmount = $validated['details']['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? 0;
+            // Redirect to Ziina payment page
+            return redirect($paymentIntent['redirect_url']);
 
-            if ($captureStatus !== 'COMPLETED') {
+        } catch (\Exception $e) {
+            \Log::error('Ziina subscription payment initiation failed', [
+                'user_id' => $user->id,
+                'subscription_id' => $subscription->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->with('error', __('messages.payment_failed') . ': ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle successful Ziina payment
+     */
+    public function ziinaPaymentSuccess(Request $request)
+    {
+        $paymentIntentId = $request->query('payment_intent_id');
+
+        if (!$paymentIntentId) {
+            return redirect()->route('subscriptions.index')
+                ->with('error', __('messages.invalid_payment_data'));
+        }
+
+        try {
+            // Get payment session data
+            $sessionData = session('ziina_subscription_payment');
+
+            if (!$sessionData || $sessionData['payment_intent_id'] !== $paymentIntentId) {
+                throw new \Exception('Invalid payment session');
+            }
+
+            // Verify payment with Ziina
+            $ziinaService = app(\App\Services\ZiinaPaymentService::class);
+            $paymentIntent = $ziinaService->getPaymentIntent($paymentIntentId);
+
+            // Check payment status
+            if (!in_array($paymentIntent['status'], ['completed', 'succeeded'])) {
                 throw new \Exception('Payment not completed');
             }
 
-            if (abs($paidAmount - $subscription->price) > 0.01) {
-                throw new \Exception('Payment amount mismatch');
-            }
+            // Get subscription
+            $subscription = Subscription::findOrFail($sessionData['subscription_id']);
+            $user = User::findOrFail($sessionData['user_id']);
+            $currentSubscription = $sessionData['current_subscription_id']
+                ? UserSubscription::find($sessionData['current_subscription_id'])
+                : null;
 
-            // Calculate end date (add remaining days if upgrading)
+            // Calculate end date
             $startDate = now()->toDateString();
-            $remainingDays = $currentSubscription ? $currentSubscription->days_remaining : 0;
-            $totalDays = $subscription->duration_days + $remainingDays;
-            $endDate = now()->addDays($totalDays)->toDateString();
+            $endDate = now()->addDays($sessionData['total_days'])->toDateString();
 
             // Create user subscription
-            \DB::transaction(function () use ($user, $subscription, $validated, $currentSubscription, $startDate, $endDate) {
+            \DB::transaction(function () use ($user, $subscription, $paymentIntentId, $currentSubscription, $startDate, $endDate, $sessionData) {
                 // Cancel current subscription if exists
                 if ($currentSubscription) {
                     $currentSubscription->update([
@@ -190,50 +257,44 @@ class SubscriptionController extends Controller
                     'end_date' => $endDate,
                     'status' => 'active',
                     'amount_paid' => $subscription->price,
-                    'payment_method' => 'paypal',
-                    'transaction_id' => $validated['order_id'],
-                ]);
-
-                // Optional: Save payment transaction record
-                \App\Models\PaymentTransaction::create([
-                    'user_id' => $user->id,
-                    'merchant_order_id' => 'SUB-' . $subscription->id . '-' . time(),
-                    'paypal_order_id' => $validated['order_id'],
-                    'transaction_id' => $validated['details']['purchase_units'][0]['payments']['captures'][0]['id'] ?? null,
-                    'type' => 'subscription',
-                    'amount' => $subscription->price,
-                    'currency' => config('paypal.currency'),
-                    'status' => 'success',
-                    'payment_method' => 'paypal',
-                    'callback_data' => $validated['details'],
-                    'paid_at' => now(),
+                    'payment_method' => 'ziina',
+                    'transaction_id' => $paymentIntentId,
                 ]);
             });
 
-            \Log::info('PayPal subscription payment successful', [
+            // Clear session data
+            session()->forget('ziina_subscription_payment');
+
+            \Log::info('Ziina subscription payment successful', [
                 'user_id' => $user->id,
                 'subscription_id' => $subscription->id,
-                'order_id' => $validated['order_id']
+                'payment_intent_id' => $paymentIntentId
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => __('messages.subscription_successful')
-            ]);
+            return redirect()->route('subscriptions.index')
+                ->with('success', __('messages.subscription_successful'));
 
         } catch (\Exception $e) {
-            \Log::error('PayPal subscription payment failed', [
-                'user_id' => $user->id,
-                'subscription_id' => $subscription->id,
-                'error' => $e->getMessage(),
-                'request' => $request->all()
+            \Log::error('Ziina subscription payment verification failed', [
+                'payment_intent_id' => $paymentIntentId,
+                'error' => $e->getMessage()
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.payment_failed')
-            ], 500);
+            return redirect()->route('subscriptions.index')
+                ->with('error', __('messages.payment_verification_failed'));
         }
+    }
+
+    /**
+     * Handle cancelled Ziina payment
+     */
+    public function ziinaPaymentCancel(Request $request)
+    {
+        // Clear session data
+        session()->forget('ziina_subscription_payment');
+
+        return redirect()->route('subscriptions.index')
+            ->with('info', __('messages.payment_cancelled'));
     }
 
     /**
@@ -331,5 +392,21 @@ class SubscriptionController extends Controller
             ->paginate(10);
 
         return view('subscriptions.history', compact('subscriptions'));
+    }
+
+    /**
+     * Display invoice for a subscription
+     */
+    public function invoice(UserSubscription $userSubscription)
+    {
+        // Ensure user can only view their own invoices
+        if ($userSubscription->user_id !== Auth::id()) {
+            abort(403, __('messages.unauthorized_access'));
+        }
+
+        // Load subscription relationship
+        $userSubscription->load('subscription');
+
+        return view('subscriptions.invoice', compact('userSubscription'));
     }
 }

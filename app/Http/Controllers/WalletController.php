@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\WalletService;
 use App\Services\PayPalService;
+use App\Services\ZiinaPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,11 +12,13 @@ class WalletController extends Controller
 {
     protected $walletService;
     protected $paypalService;
+    protected $ziinaService;
 
-    public function __construct(WalletService $walletService, PayPalService $paypalService)
+    public function __construct(WalletService $walletService, PayPalService $paypalService, ZiinaPaymentService $ziinaService)
     {
         $this->walletService = $walletService;
         $this->paypalService = $paypalService;
+        $this->ziinaService = $ziinaService;
     }
 
     /**
@@ -127,14 +130,84 @@ class WalletController extends Controller
     }
 
     /**
-     * Show transaction history
+     * Show transaction history with filters
      */
-    public function transactions()
+    public function transactions(Request $request)
     {
         $user = Auth::user();
-        $transactions = $this->walletService->getTransactionHistory($user, 20);
+        $wallet = $this->walletService->getOrCreateWallet($user);
 
-        return view('wallet.transactions', compact('transactions'));
+        // Build query with filters
+        $query = $wallet->transactions()->with('reference');
+
+        // Filter by type (credit/debit)
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // Filter by transaction type (deposit, withdrawal, etc.)
+        if ($request->filled('transaction_type')) {
+            $query->where('transaction_type', $request->transaction_type);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by date range
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        // Get paginated results
+        $transactions = $query->latest()->paginate(20)->withQueryString();
+
+        // Calculate commission statistics for sellers
+        $commissionStats = null;
+        if ($user->user_type === 'seller') {
+            $commissionStats = $this->getCommissionStatistics($user);
+        }
+
+        return view('wallet.transactions', compact('transactions', 'commissionStats'));
+    }
+
+    /**
+     * Get commission statistics for seller
+     */
+    private function getCommissionStatistics($user)
+    {
+        $wallet = $this->walletService->getOrCreateWallet($user);
+
+        // Total commissions earned
+        $totalCommissions = $wallet->transactions()
+            ->where('transaction_type', 'commission')
+            ->where('type', 'credit')
+            ->sum('amount');
+
+        // Paid commissions (completed and available)
+        $paidCommissions = $wallet->transactions()
+            ->where('transaction_type', 'commission')
+            ->where('type', 'credit')
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        // Unpaid commissions (pending)
+        $unpaidCommissions = $wallet->transactions()
+            ->where('transaction_type', 'commission')
+            ->where('type', 'credit')
+            ->where('status', 'pending')
+            ->sum('amount');
+
+        return [
+            'total' => $totalCommissions,
+            'paid' => $paidCommissions,
+            'unpaid' => $unpaidCommissions,
+        ];
     }
 
     /**
@@ -277,6 +350,160 @@ class WalletController extends Controller
                 'success' => false,
                 'message' => 'Failed to process payment: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Initiate Ziina wallet deposit
+     */
+    public function depositZiina(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:2|max:100000',
+        ]);
+
+        try {
+            $user = Auth::user();
+            $amount = $validated['amount'];
+
+            // Calculate fees and gross amount
+            $feeCalculation = $this->ziinaService->calculateFees($amount);
+
+            // Create payment intent with Ziina
+            $paymentIntent = $this->ziinaService->createWalletDepositPayment(
+                $feeCalculation['gross_amount'],
+                $user->id
+            );
+
+            // Store payment data in session
+            session([
+                'ziina_wallet_deposit' => [
+                    'payment_intent_id' => $paymentIntent['id'],
+                    'user_id' => $user->id,
+                    'net_amount' => $feeCalculation['net_amount'],
+                    'fee' => $feeCalculation['fee'],
+                    'gross_amount' => $feeCalculation['gross_amount'],
+                ]
+            ]);
+
+            // Redirect to Ziina payment page
+            return redirect($paymentIntent['redirect_url']);
+
+        } catch (\Exception $e) {
+            \Log::error('Ziina wallet deposit initiation failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->with('error', __('messages.payment_failed') . ': ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle successful Ziina deposit payment
+     */
+    public function depositZiinaSuccess(Request $request)
+    {
+        $paymentIntentId = $request->query('payment_intent_id');
+
+        if (!$paymentIntentId) {
+            return redirect()->route('wallet.index')
+                ->with('error', __('messages.invalid_payment_data'));
+        }
+
+        try {
+            // Get payment session data
+            $sessionData = session('ziina_wallet_deposit');
+
+            if (!$sessionData || $sessionData['payment_intent_id'] !== $paymentIntentId) {
+                throw new \Exception('Invalid payment session');
+            }
+
+            // Verify payment with Ziina
+            $paymentIntent = $this->ziinaService->getPaymentIntent($paymentIntentId);
+
+            // Check payment status
+            if (!in_array($paymentIntent['status'], ['completed', 'succeeded'])) {
+                throw new \Exception('Payment not completed');
+            }
+
+            $user = \App\Models\User::findOrFail($sessionData['user_id']);
+
+            // Process wallet deposit
+            \DB::transaction(function () use ($user, $sessionData, $paymentIntentId) {
+                // Credit the wallet with the NET amount (customer's intended deposit)
+                $this->walletService->deposit(
+                    $user,
+                    $sessionData['net_amount'],
+                    'Wallet deposit via Ziina',
+                    [
+                        'payment_intent_id' => $paymentIntentId,
+                        'payment_method' => 'ziina',
+                        'gross_amount' => $sessionData['gross_amount'],
+                        'gateway_fee' => $sessionData['fee'],
+                    ]
+                );
+            });
+
+            // Clear session data
+            session()->forget('ziina_wallet_deposit');
+
+            \Log::info('Ziina wallet deposit successful', [
+                'user_id' => $user->id,
+                'net_amount' => $sessionData['net_amount'],
+                'gross_amount' => $sessionData['gross_amount'],
+                'fee' => $sessionData['fee'],
+                'payment_intent_id' => $paymentIntentId
+            ]);
+
+            return redirect()->route('wallet.index')
+                ->with('success', __('messages.wallet_deposit_successful'));
+
+        } catch (\Exception $e) {
+            \Log::error('Ziina wallet deposit verification failed', [
+                'payment_intent_id' => $paymentIntentId,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('wallet.index')
+                ->with('error', __('messages.payment_verification_failed'));
+        }
+    }
+
+    /**
+     * Handle cancelled Ziina deposit payment
+     */
+    public function depositZiinaCancel(Request $request)
+    {
+        // Clear session data
+        session()->forget('ziina_wallet_deposit');
+
+        return redirect()->route('wallet.index')
+            ->with('info', __('messages.payment_cancelled'));
+    }
+
+    /**
+     * Calculate fees for wallet deposit (AJAX)
+     */
+    public function calculateDepositFees(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:2|max:100000',
+        ]);
+
+        try {
+            $feeCalculation = $this->ziinaService->calculateFees($validated['amount']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $feeCalculation
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 }
