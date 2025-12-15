@@ -45,7 +45,7 @@
                                 </span>
                             </td>
                             <td>
-                                <strong>{{ format_currency($subscription->amount_paid) }}</strong>
+                                <strong>{!! format_currency($subscription->amount_paid) !!}</strong>
                             </td>
                             <td>{{ $subscription->start_date->format('Y-m-d') }}</td>
                             <td>{{ $subscription->end_date->format('Y-m-d') }}</td>

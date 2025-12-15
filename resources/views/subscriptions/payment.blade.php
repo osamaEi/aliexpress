@@ -18,7 +18,7 @@
                             <span class="badge mb-3" style="background-color: {{ $subscription->color }}; font-size: 1.3rem; padding: 10px 20px;">
                                 {{ $subscription->localized_name }}
                             </span>
-                            <h1 class="mb-1">{{ format_currency($subscription->price) }}</h1>
+                            <h1 class="mb-1">{!! format_currency($subscription->price) !!}</h1>
                             <p class="text-muted">{{ __('messages.per_month') }}</p>
                         </div>
                     </div>
@@ -121,12 +121,12 @@
                                     @endif
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>{{ __('messages.price') }}:</span>
-                                        <strong>{{ format_currency($subscription->price) }}</strong>
+                                        <strong>{!! format_currency($subscription->price) !!}</strong>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between">
                                         <h5 class="mb-0">{{ __('messages.total') }}:</h5>
-                                        <h5 class="mb-0 text-primary">{{ format_currency($subscription->price) }}</h5>
+                                        <h5 class="mb-0 text-primary">{!! format_currency($subscription->price) !!}</h5>
                                     </div>
                                 </div>
                             </div>
@@ -174,7 +174,7 @@
                                     <div class="d-flex align-items-center justify-content-center">
                                         <i class="ri-wallet-3-line fs-4 me-2"></i>
                                         <span class="fs-5">{{ __('messages.pay_with_wallet') }}</span>
-                                        <span class="badge bg-success ms-2">{{ format_currency(auth()->user()->wallet->balance) }}</span>
+                                        <span class="badge bg-success ms-2">{!! format_currency(auth()->user()->wallet->balance) !!}</span>
                                     </div>
                                 </button>
                             </form>

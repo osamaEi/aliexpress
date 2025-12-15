@@ -83,7 +83,7 @@
                         {{ $userSubscription->end_date->format('Y-m-d') }}
                     </td>
                     <td style="padding: 15px; text-align: {{ $isRtl ? 'left' : 'right' }}; border: 1px solid #ddd;">
-                        <strong style="font-size: 16px;">{{ format_currency($userSubscription->amount_paid) }}</strong>
+                        <strong style="font-size: 16px;">{!! format_currency($userSubscription->amount_paid) !!}</strong>
                     </td>
                 </tr>
             </tbody>
@@ -132,7 +132,7 @@
     <div class="total-section" style="margin-bottom: 30px; text-align: {{ $isRtl ? 'left' : 'right' }};">
         <div style="display: inline-block; background-color: #561C04; color: white; padding: 20px 40px; border-radius: 8px;">
             <p style="margin: 0; font-size: 14px; opacity: 0.9;">{{ __('messages.total_amount') }}</p>
-            <p style="margin: 5px 0 0 0; font-size: 32px; font-weight: bold;">{{ format_currency($userSubscription->amount_paid) }}</p>
+            <p style="margin: 5px 0 0 0; font-size: 32px; font-weight: bold;">{!! format_currency($userSubscription->amount_paid) !!}</p>
         </div>
     </div>
 

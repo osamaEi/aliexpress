@@ -28,7 +28,7 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <h6 class="text-muted mb-2">{{ __('messages.total_commissions') }}</h6>
-                            <h3 class="mb-0" style="color: #561C04;">{{ format_currency($commissionStats['total'] ?? 0) }}</h3>
+                            <h3 class="mb-0" style="color: #561C04;">{!! format_currency($commissionStats['total'] ?? 0) !!}</h3>
                         </div>
                         <div class="avatar flex-shrink-0">
                             <span class="avatar-initial rounded" style="background-color: rgba(86, 28, 4, 0.1); color: #561C04;">
@@ -46,7 +46,7 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <h6 class="text-muted mb-2">{{ __('messages.paid_commissions') }}</h6>
-                            <h3 class="mb-0 text-success">{{ format_currency($commissionStats['paid'] ?? 0) }}</h3>
+                            <h3 class="mb-0 text-success">{!! format_currency($commissionStats['paid'] ?? 0) !!}</h3>
                         </div>
                         <div class="avatar flex-shrink-0">
                             <span class="avatar-initial rounded bg-label-success">
@@ -64,7 +64,7 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <h6 class="text-muted mb-2">{{ __('messages.unpaid_commissions') }}</h6>
-                            <h3 class="mb-0 text-warning">{{ format_currency($commissionStats['unpaid'] ?? 0) }}</h3>
+                            <h3 class="mb-0 text-warning">{!! format_currency($commissionStats['unpaid'] ?? 0) !!}</h3>
                         </div>
                         <div class="avatar flex-shrink-0">
                             <span class="avatar-initial rounded bg-label-warning">
@@ -197,11 +197,11 @@
                             </td>
                             <td class="text-end">
                                 <strong class="{{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
-                                    {{ ($transaction->type === 'credit' ? '+' : '-') . format_currency(abs($transaction->amount)) }}
+                                    {!! ($transaction->type === 'credit' ? '+' : '-') . ' ' . format_currency(abs($transaction->amount)) !!}
                                 </strong>
                             </td>
                             <td class="text-end">
-                                {{ format_currency($transaction->balance_after) }}
+                                {!! format_currency($transaction->balance_after) !!}
                             </td>
                             <td>
                                 @if($transaction->status === 'completed')
