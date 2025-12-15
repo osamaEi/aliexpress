@@ -1229,6 +1229,8 @@ return [
     'payment_verification_failed' => 'فشل التحقق من الدفع',
     'payment_cancelled' => 'تم إلغاء الدفع',
     'invalid_payment_data' => 'بيانات دفع غير صالحة',
+    'pay_with_ziina' => 'الدفع عبر زينة',
+    'secure_payment_gateway' => 'بوابة دفع آمنة للإمارات',
 
     // Invoice
     'invoice_number' => 'رقم الفاتورة',
@@ -1304,6 +1306,9 @@ return [
     'deposit_with_ziina' => 'الإيداع عبر زينة',
     'ziina_deposit_info' => 'قم بشحن محفظتك بأمان عبر بوابة زينة للدفع. سيتم حساب وعرض الرسوم قبل الدفع.',
     'minimum_deposit_aed' => 'الحد الأدنى للإيداع: 2 د.إ',
+    'proceed_to_payment' => 'المتابعة للدفع',
+    'ziina_secure_notice' => 'يتم معالجة دفعتك بشكل آمن عبر بوابة زينة للدفع. جميع المعاملات مشفرة ومحمية.',
+    'quick_amounts' => 'مبالغ سريعة',
 
     // Admin Dashboard
     'total_merchants' => 'عدد التجار',

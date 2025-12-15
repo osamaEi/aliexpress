@@ -18,7 +18,7 @@
                             <span class="badge mb-3" style="background-color: {{ $subscription->color }}; font-size: 1.3rem; padding: 10px 20px;">
                                 {{ $subscription->localized_name }}
                             </span>
-                            <h1 class="mb-1">{{ number_format($subscription->price, 2) }} AED</h1>
+                            <h1 class="mb-1">{{ format_currency($subscription->price) }}</h1>
                             <p class="text-muted">{{ __('messages.per_month') }}</p>
                         </div>
                     </div>
@@ -121,12 +121,12 @@
                                     @endif
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>{{ __('messages.price') }}:</span>
-                                        <strong>{{ number_format($subscription->price, 2) }} AED</strong>
+                                        <strong>{{ format_currency($subscription->price) }}</strong>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between">
                                         <h5 class="mb-0">{{ __('messages.total') }}:</h5>
-                                        <h5 class="mb-0 text-primary">{{ number_format($subscription->price, 2) }} AED</h5>
+                                        <h5 class="mb-0 text-primary">{{ format_currency($subscription->price) }}</h5>
                                     </div>
                                 </div>
                             </div>
@@ -138,14 +138,15 @@
                         <div class="col-12">
                             <h5 class="mb-3">{{ __('messages.select_payment_method') }}</h5>
 
-                            <!-- Paymob Payment Button -->
-                            <form action="{{ route('subscriptions.pay-with-paymob', $subscription) }}" method="POST" id="paymob-form">
+                            <!-- Ziina Payment Button -->
+                            <form action="{{ route('subscriptions.pay-with-ziina', $subscription) }}" method="POST" id="ziina-form">
                                 @csrf
-                                <button type="submit" class="btn btn-lg btn-primary w-100 mb-4" id="paymob-button">
+                                <button type="submit" class="btn btn-lg w-100 mb-4" id="ziina-button" style="background-color: #561C04; color: white; border: none;">
                                     <div class="d-flex align-items-center justify-content-center">
-                                        <i class="ri-bank-card-line fs-4 me-2"></i>
-                                        <span class="fs-5">{{ __('messages.pay_with_card_paymob') }}</span>
+                                        <i class="ri-secure-payment-line fs-4 me-2"></i>
+                                        <span class="fs-5">{{ __('messages.pay_with_ziina') }}</span>
                                     </div>
+                                    <div class="small mt-1 opacity-75">{{ __('messages.secure_payment_gateway') }}</div>
                                 </button>
                             </form>
 
@@ -173,7 +174,7 @@
                                     <div class="d-flex align-items-center justify-content-center">
                                         <i class="ri-wallet-3-line fs-4 me-2"></i>
                                         <span class="fs-5">{{ __('messages.pay_with_wallet') }}</span>
-                                        <span class="badge bg-success ms-2">${{ number_format(auth()->user()->wallet->balance, 2) }}</span>
+                                        <span class="badge bg-success ms-2">{{ format_currency(auth()->user()->wallet->balance) }}</span>
                                     </div>
                                 </button>
                             </form>
@@ -232,10 +233,10 @@
 </style>
 
 <script>
-    // Show loading on Paymob form submission
-    document.getElementById('paymob-form').addEventListener('submit', function() {
+    // Show loading on Ziina form submission
+    document.getElementById('ziina-form').addEventListener('submit', function() {
         document.getElementById('payment-loading').style.display = 'block';
-        document.getElementById('paymob-button').disabled = true;
+        document.getElementById('ziina-button').disabled = true;
     });
 </script>
 @endsection

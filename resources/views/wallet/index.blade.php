@@ -84,10 +84,10 @@
         </div>
         <div class="card-body">
             <div class="row g-3">
-                <!-- Load Balance with PayPal -->
+                <!-- Load Balance with Ziina -->
                 <div class="col-md-3">
-                    <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#loadBalanceModal">
-                        <i class="ri-paypal-line me-1"></i>
+                    <button type="button" class="btn w-100" data-bs-toggle="modal" data-bs-target="#loadBalanceModal" style="background-color: #561C04; color: white;">
+                        <i class="ri-secure-payment-line me-1"></i>
                         {{ __('messages.load_balance') }}
                     </button>
                 </div>
@@ -123,108 +123,111 @@
     <div class="modal fade" id="loadBalanceModal" tabindex="-1" aria-labelledby="loadBalanceModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-success text-white">
+                <div class="modal-header text-white" style="background-color: #561C04;">
                     <h5 class="modal-title" id="loadBalanceModalLabel">
-                        <i class="ri-paypal-line me-2"></i>
-                        {{ __('messages.load_balance_with_paypal') }}
+                        <i class="ri-secure-payment-line me-2"></i>
+                        {{ __('messages.deposit_with_ziina') }}
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info">
                         <i class="ri-information-line me-2"></i>
-                        {{ __('messages.paypal_deposit_info') }}
+                        {{ __('messages.ziina_deposit_info') }}
                     </div>
 
-                    <!-- Amount Selection -->
-                    <div class="mb-4">
-                        <label for="deposit_amount" class="form-label">
-                            {{ __('messages.amount_to_deposit') }}
-                            <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text">{{ $currentCurrency->symbol }}</span>
-                            <input type="number"
-                                   class="form-control"
-                                   id="deposit_amount"
-                                   name="amount"
-                                   min="2"
-                                   max="10000"
-                                   step="0.01"
-                                   value="50"
-                                   required
-                                   placeholder="0.00">
+                    <form action="{{ route('wallet.deposit.ziina') }}" method="POST" id="ziina-deposit-form">
+                        @csrf
+                        <!-- Amount Selection -->
+                        <div class="mb-4">
+                            <label for="deposit_amount" class="form-label">
+                                {{ __('messages.amount_to_deposit') }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">{{ currency_symbol('AED') }}</span>
+                                <input type="number"
+                                       class="form-control"
+                                       id="deposit_amount"
+                                       name="amount"
+                                       min="2"
+                                       max="100000"
+                                       step="0.01"
+                                       value="50"
+                                       required
+                                       placeholder="0.00">
+                            </div>
+                            <small class="text-muted">
+                                {{ __('messages.minimum_deposit_aed') }}
+                            </small>
                         </div>
-                        <small class="text-muted">
-                            {{ __('messages.minimum_deposit') }}: $2.00
-                        </small>
-                    </div>
 
-                    <!-- Quick Amount Buttons -->
-                    <div class="mb-4">
-                        <label class="form-label">{{ __('messages.quick_amounts') }}</label>
-                        <div class="row g-2">
-                            <div class="col-3">
-                                <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="25">$25</button>
-                            </div>
-                            <div class="col-3">
-                                <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="50">$50</button>
-                            </div>
-                            <div class="col-3">
-                                <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="100">$100</button>
-                            </div>
-                            <div class="col-3">
-                                <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="200">$200</button>
+                        <!-- Quick Amount Buttons -->
+                        <div class="mb-4">
+                            <label class="form-label">{{ __('messages.quick_amounts') }}</label>
+                            <div class="row g-2">
+                                <div class="col-3">
+                                    <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="50">50</button>
+                                </div>
+                                <div class="col-3">
+                                    <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="100">100</button>
+                                </div>
+                                <div class="col-3">
+                                    <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="200">200</button>
+                                </div>
+                                <div class="col-3">
+                                    <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="500">500</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Note Field -->
-                    <div class="mb-4">
-                        <label for="deposit_note" class="form-label">
-                            {{ __('messages.note') }}
-                            <small class="text-muted">({{ __('messages.optional') }})</small>
-                        </label>
-                        <textarea class="form-control"
-                                  id="deposit_note"
-                                  name="note"
-                                  rows="2"
-                                  maxlength="500"
-                                  placeholder="{{ __('messages.add_note_optional') }}"></textarea>
-                    </div>
-
-                    <!-- PayPal Smart Payment Buttons Container -->
-                    <div class="mb-4">
-                        <h6 class="mb-3">{{ __('messages.select_payment_method') }}</h6>
-                        <div id="paypal-button-container" style="min-height: 150px;"></div>
-                    </div>
-
-                    <!-- Loading State -->
-                    <div id="paypal-loading" class="text-center mb-3" style="display: none;">
-                        <div class="spinner-border text-success" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                        <!-- Fee Breakdown -->
+                        <div class="mb-4" id="fee-breakdown" style="display: none;">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="mb-3">{{ __('messages.fee_breakdown') }}</h6>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>{{ __('messages.you_will_receive') }}:</span>
+                                        <strong id="net-amount">0.00 {{ currency_symbol('AED') }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2 text-muted">
+                                        <span>{{ __('messages.processing_fee') }}:</span>
+                                        <span id="fee-amount">0.00 {{ currency_symbol('AED') }}</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-0">{{ __('messages.total_to_pay') }}:</h6>
+                                        <h6 class="mb-0 text-primary" id="gross-amount">0.00 {{ currency_symbol('AED') }}</h6>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <p class="mt-2 text-muted">{{ __('messages.processing_payment') }}...</p>
-                    </div>
+
+                        <!-- Payment Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-lg text-white" style="background-color: #561C04;" id="ziina-pay-button">
+                                <i class="ri-secure-payment-line me-2"></i>
+                                {{ __('messages.proceed_to_payment') }}
+                            </button>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="ziina-loading" class="text-center mt-3" style="display: none;">
+                            <div class="spinner-border" style="color: #561C04;" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">{{ __('messages.processing_payment') }}...</p>
+                        </div>
+                    </form>
 
                     <!-- Security Notice -->
-                    <div class="alert alert-warning mb-0">
+                    <div class="alert alert-success mt-4 mb-0">
                         <h6 class="alert-heading">
                             <i class="ri-shield-check-line me-2"></i>
                             {{ __('messages.secure_payment') }}
                         </h6>
-                        <ul class="mb-0 ps-3">
-                            <li>{{ __('messages.paypal_secure_note_1') }}</li>
-                            <li>{{ __('messages.paypal_secure_note_2') }}</li>
-                            <li>{{ __('messages.paypal_secure_note_3') }}</li>
-                        </ul>
+                        <p class="mb-0 small">{{ __('messages.ziina_secure_notice') }}</p>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="ri-close-line me-1"></i>
-                        {{ __('messages.cancel') }}
-                    </button>
                 </div>
             </div>
         </div>
@@ -312,13 +315,6 @@
     </div>
 </div>
 
-<!-- PayPal SDK -->
-@php
-    $paypalMode = config('paypal.mode', 'sandbox');
-    $paypalClientId = config("paypal.{$paypalMode}.client_id");
-@endphp
-<script src="https://www.paypal.com/sdk/js?client-id={{ $paypalClientId }}&currency={{ config('paypal.currency', 'USD') }}&intent=capture"></script>
-
 <style>
     .quick-amount.active {
         background-color: var(--bs-primary);
@@ -331,18 +327,16 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         transition: all 0.3s ease;
     }
-
-    #paypal-button-container {
-        min-height: 150px;
-    }
 </style>
 
 <script>
-    // Quick amount buttons functionality
     document.addEventListener('DOMContentLoaded', function() {
         const quickAmountButtons = document.querySelectorAll('.quick-amount');
         const amountInput = document.getElementById('deposit_amount');
+        const feeBreakdown = document.getElementById('fee-breakdown');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
+        // Quick amount buttons functionality
         quickAmountButtons.forEach(button => {
             button.addEventListener('click', function() {
                 // Remove active class from all buttons
@@ -354,157 +348,54 @@
                 // Set the amount in the input field
                 const amount = this.getAttribute('data-amount');
                 amountInput.value = amount;
+
+                // Calculate fees
+                calculateFees(amount);
             });
         });
-    });
 
-    // Initialize PayPal Buttons when modal is shown
-    document.getElementById('loadBalanceModal').addEventListener('shown.bs.modal', function () {
-        // Clear any existing PayPal buttons
-        document.getElementById('paypal-button-container').innerHTML = '';
+        // Calculate fees when amount changes
+        amountInput.addEventListener('input', function() {
+            const amount = parseFloat(this.value);
+            if (amount >= 2) {
+                calculateFees(amount);
+            } else {
+                feeBreakdown.style.display = 'none';
+            }
+        });
 
-        // Check if PayPal SDK is loaded
-        if (typeof paypal === 'undefined') {
-            console.error('PayPal SDK failed to load. Please check your internet connection and PayPal credentials.');
-            document.getElementById('paypal-button-container').innerHTML = '<div class="alert alert-danger"><i class="ri-error-warning-line me-2"></i>Failed to load PayPal. Please refresh the page and try again.</div>';
-            return;
+        // Function to calculate fees via AJAX
+        function calculateFees(amount) {
+            fetch('{{ route("wallet.deposit.calculate-fees") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ amount: amount })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update fee breakdown
+                    document.getElementById('net-amount').textContent = data.data.net_amount.toFixed(2) + ' {{ currency_symbol("AED") }}';
+                    document.getElementById('fee-amount').textContent = data.data.fee.toFixed(2) + ' {{ currency_symbol("AED") }}';
+                    document.getElementById('gross-amount').textContent = data.data.gross_amount.toFixed(2) + ' {{ currency_symbol("AED") }}';
+
+                    // Show fee breakdown
+                    feeBreakdown.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error calculating fees:', error);
+            });
         }
 
-        console.log('PayPal SDK loaded successfully');
-
-        // Initialize PayPal Smart Payment Buttons
-        paypal.Buttons({
-            style: {
-                layout: 'vertical',
-                color: 'gold',
-                shape: 'rect',
-                label: 'paypal',
-                height: 55
-            },
-
-            // Create order directly using PayPal SDK
-            createOrder: function(data, actions) {
-                const amount = document.getElementById('deposit_amount').value;
-
-                // Validate amount
-                if (!amount || parseFloat(amount) < 2) {
-                    alert('{{ __('messages.minimum_deposit') }}: $2.00');
-                    return false;
-                }
-
-                if (parseFloat(amount) > 10000) {
-                    alert('{{ __('messages.maximum_deposit') }}: $10,000.00');
-                    return false;
-                }
-
-                console.log('Creating PayPal order for amount:', amount);
-
-                return actions.order.create({
-                    purchase_units: [{
-                        description: 'Wallet Deposit - Balance Top-up',
-                        amount: {
-                            currency_code: '{{ config("paypal.currency", "USD") }}',
-                            value: parseFloat(amount).toFixed(2)
-                        },
-                        custom_id: 'WALLET-{{ auth()->id() }}-' + Date.now()
-                    }],
-                    payer: {
-                        name: {
-                            given_name: '{{ auth()->user()->first_name ?? auth()->user()->name }}',
-                            surname: '{{ auth()->user()->last_name ?? "" }}'
-                        },
-                        email_address: '{{ auth()->user()->email }}',
-                        phone: {
-                            phone_type: 'MOBILE',
-                            phone_number: {
-                                national_number: '{{ auth()->user()->phone ?? "501774477" }}'
-                            }
-                        }
-                    },
-                    application_context: {
-                        shipping_preference: 'NO_SHIPPING'
-                    }
-                }).then(function(orderId) {
-                    console.log('PayPal order created:', orderId);
-                    return orderId;
-                });
-            },
-
-            // Approve order - Capture payment
-            onApprove: function(data, actions) {
-                console.log('Payment approved:', data);
-                document.getElementById('paypal-loading').style.display = 'block';
-
-                // Capture the payment
-                return actions.order.capture().then(function(details) {
-                    console.log('Payment captured:', details);
-
-                    // Get the amount and note
-                    const amount = document.getElementById('deposit_amount').value;
-                    const note = document.getElementById('deposit_note').value;
-
-                    // Send payment details to our backend
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
-                    return fetch('{{ route("wallet.deposit.paypal") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            amount: amount,
-                            note: note,
-                            order_id: data.orderID,
-                            payer_id: data.payerID,
-                            details: details
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        document.getElementById('paypal-loading').style.display = 'none';
-
-                        if (result.success) {
-                            // Close modal
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('loadBalanceModal'));
-                            modal.hide();
-
-                            // Show success message and reload page
-                            alert('{{ __('messages.payment_successful') }}! {{ __('messages.wallet_updated') }}');
-                            window.location.reload();
-                        } else {
-                            throw new Error(result.message || 'Payment processing failed');
-                        }
-                    })
-                    .catch(error => {
-                        document.getElementById('paypal-loading').style.display = 'none';
-                        console.error('Backend processing error:', error);
-                        alert('Failed to process payment on our server. Please contact support if the amount was debited.');
-                        throw error;
-                    });
-                });
-            },
-
-            // Handle errors
-            onError: function(err) {
-                console.error('PayPal Error:', err);
-                document.getElementById('paypal-loading').style.display = 'none';
-                alert('An error occurred with PayPal. Please try again or contact support.');
-            },
-
-            // Handle cancellation
-            onCancel: function(data) {
-                document.getElementById('paypal-loading').style.display = 'none';
-                console.log('Payment cancelled');
-            }
-        }).render('#paypal-button-container')
-        .then(function() {
-            console.log('PayPal buttons rendered successfully');
-        })
-        .catch(function(error) {
-            console.error('Failed to render PayPal buttons:', error);
-            document.getElementById('paypal-button-container').innerHTML = '<div class="alert alert-danger"><i class="ri-error-warning-line me-2"></i>Failed to load PayPal buttons. Please refresh the page and try again.</div>';
+        // Handle form submission
+        document.getElementById('ziina-deposit-form').addEventListener('submit', function() {
+            document.getElementById('ziina-loading').style.display = 'block';
+            document.getElementById('ziina-pay-button').disabled = true;
         });
     });
 </script>

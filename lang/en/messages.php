@@ -920,6 +920,8 @@ return [
     'payment_verification_failed' => 'Payment verification failed',
     'payment_cancelled' => 'Payment was cancelled',
     'invalid_payment_data' => 'Invalid payment data',
+    'pay_with_ziina' => 'Pay with Ziina',
+    'secure_payment_gateway' => 'Secure payment gateway for UAE',
 
     // Invoice
     'invoice_number' => 'Invoice Number',
@@ -994,6 +996,9 @@ return [
     'deposit_with_ziina' => 'Deposit with Ziina',
     'ziina_deposit_info' => 'Securely deposit funds to your wallet using Ziina payment gateway. Fees will be calculated and shown before payment.',
     'minimum_deposit_aed' => 'Minimum deposit: 2 AED',
+    'proceed_to_payment' => 'Proceed to Payment',
+    'ziina_secure_notice' => 'Your payment is processed securely through Ziina payment gateway. All transactions are encrypted and protected.',
+    'quick_amounts' => 'Quick Amounts',
 
     // Admin Dashboard
     'total_merchants' => 'Total Merchants',
