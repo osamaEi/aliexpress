@@ -268,7 +268,6 @@
                     </a>
                 </div>
                 @endunless
-                @endif
             </form>
         </div>
     </div>

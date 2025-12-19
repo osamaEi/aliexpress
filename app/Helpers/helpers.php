@@ -2,6 +2,7 @@
 
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 if (!function_exists('setting')) {
     /**
@@ -123,6 +124,16 @@ if (!function_exists('format_currency')) {
     {
         $formattedAmount = number_format($amount, $decimals);
         $symbol = currency_symbol($currency, $useIcon);
+        // If symbol contains HTML (SVG), return an HtmlString so Blade won't double-escape
+        $containsHtml = is_string($symbol) && stripos($symbol, '<svg') !== false;
+
+        if ($containsHtml) {
+            if (app()->getLocale() == 'ar') {
+                return new HtmlString($formattedAmount . ' ' . $symbol);
+            }
+
+            return new HtmlString($symbol . ' ' . $formattedAmount);
+        }
 
         // For Arabic, put symbol after amount; for English, before
         return app()->getLocale() == 'ar'
