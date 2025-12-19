@@ -174,20 +174,26 @@ class SubscriptionController extends Controller
             $remainingDays = $currentSubscription ? $currentSubscription->days_remaining : 0;
             $totalDays = $subscription->duration_days + $remainingDays;
 
+            // Calculate payment gateway fees
+            $feeBreakdown = $ziinaService->calculateFees($subscription->price);
+
             // Prepare metadata
             $metadata = [
                 'subscription_id' => $subscription->id,
                 'user_id' => $user->id,
                 'payment_type' => 'subscription',
+                'subscription_price' => $subscription->price,
+                'gateway_fee' => $feeBreakdown['fee'],
+                'total_amount' => $feeBreakdown['gross_amount'],
                 'remaining_days' => $remainingDays,
                 'total_days' => $totalDays,
                 'current_subscription_id' => $currentSubscription ? $currentSubscription->id : '',
             ];
 
-            // Create payment intent
+            // Create payment intent with total amount (subscription price + gateway fees)
             $description = __('messages.subscription_payment') . ': ' . $subscription->localized_name;
             $paymentIntent = $ziinaService->createSubscriptionPayment(
-                $subscription->price,
+                $feeBreakdown['gross_amount'],
                 $description,
                 $metadata
             );
@@ -198,7 +204,9 @@ class SubscriptionController extends Controller
                     'payment_intent_id' => $paymentIntent['id'],
                     'subscription_id' => $subscription->id,
                     'user_id' => $user->id,
-                    'amount' => $subscription->price,
+                    'subscription_price' => $subscription->price,
+                    'gateway_fee' => $feeBreakdown['fee'],
+                    'total_amount' => $feeBreakdown['gross_amount'],
                     'remaining_days' => $remainingDays,
                     'total_days' => $totalDays,
                     'current_subscription_id' => $currentSubscription ? $currentSubscription->id : null,
@@ -261,7 +269,8 @@ class SubscriptionController extends Controller
             $endDate = now()->addDays($sessionData['total_days'])->toDateString();
 
             // Create user subscription
-            \DB::transaction(function () use ($user, $subscription, $paymentIntentId, $currentSubscription, $startDate, $endDate, $sessionData) {
+            $userSubscription = null;
+            \DB::transaction(function () use ($user, $subscription, $paymentIntentId, $currentSubscription, $startDate, $endDate, $sessionData, &$userSubscription) {
                 // Cancel current subscription if exists
                 if ($currentSubscription) {
                     $currentSubscription->update([
@@ -271,17 +280,26 @@ class SubscriptionController extends Controller
                     ]);
                 }
 
-                UserSubscription::create([
+                $userSubscription = UserSubscription::create([
                     'user_id' => $user->id,
                     'subscription_id' => $subscription->id,
                     'start_date' => $startDate,
                     'end_date' => $endDate,
                     'status' => 'active',
-                    'amount_paid' => $subscription->price,
+                    'amount_paid' => $sessionData['total_amount'], // Total amount including gateway fees
                     'payment_method' => 'ziina',
                     'transaction_id' => $paymentIntentId,
                 ]);
             });
+
+            // Send email notification to admin
+            if ($userSubscription) {
+                $userSubscription->load(['user', 'subscription']);
+                $adminEmail = env('ADMIN_EMAIL', env('MAIL_FROM_ADDRESS'));
+                if ($adminEmail) {
+                    \Mail::to($adminEmail)->send(new \App\Mail\NewSubscriptionNotification($userSubscription));
+                }
+            }
 
             // Clear session data
             session()->forget('ziina_subscription_payment');
@@ -289,6 +307,9 @@ class SubscriptionController extends Controller
             \Log::info('Ziina subscription payment successful', [
                 'user_id' => $user->id,
                 'subscription_id' => $subscription->id,
+                'subscription_price' => $sessionData['subscription_price'],
+                'gateway_fee' => $sessionData['gateway_fee'],
+                'total_amount_paid' => $sessionData['total_amount'],
                 'payment_intent_id' => $paymentIntentId
             ]);
 
