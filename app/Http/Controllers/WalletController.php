@@ -381,6 +381,8 @@ class WalletController extends Controller
                     'payment_intent_id' => $paymentIntent['id'],
                     'user_id' => $user->id,
                     'net_amount' => $feeCalculation['net_amount'],
+                    'fixed_fee' => $feeCalculation['fixed_fee'],
+                    'percentage_fee' => $feeCalculation['percentage_fee'],
                     'fee' => $feeCalculation['fee'],
                     'gross_amount' => $feeCalculation['gross_amount'],
                 ]
@@ -462,8 +464,10 @@ class WalletController extends Controller
             \Log::info('Ziina wallet deposit successful', [
                 'user_id' => $user->id,
                 'net_amount' => $sessionData['net_amount'],
+                'fixed_fee' => $sessionData['fixed_fee'] ?? 0,
+                'percentage_fee' => $sessionData['percentage_fee'] ?? 0,
+                'total_fee' => $sessionData['fee'],
                 'gross_amount' => $sessionData['gross_amount'],
-                'fee' => $sessionData['fee'],
                 'payment_intent_id' => $paymentIntentId
             ]);
 

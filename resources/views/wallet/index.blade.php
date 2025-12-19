@@ -174,20 +174,43 @@
 
                         <!-- Fee Breakdown -->
                         <div class="mb-4" id="fee-breakdown" style="display: none;">
-                            <div class="card bg-light">
+                            <div class="card" style="background-color: #f8f9fa; border: 1px solid #dee2e6;">
                                 <div class="card-body">
-                                    <h6 class="mb-3">{{ __('messages.fee_breakdown') }}</h6>
+                                    <h6 class="mb-3">
+                                        <i class="ri-calculator-line me-1"></i>{{ __('messages.fee_breakdown') }}
+                                    </h6>
+
+                                    <!-- Amount to receive -->
                                     <div class="d-flex justify-content-between mb-2">
-                                        <span>{{ __('messages.you_will_receive') }}:</span>
+                                        <span>{{ __('messages.amount_to_deposit') }}:</span>
                                         <strong id="net-amount">0.00 {!! currency_symbol('AED', true) !!}</strong>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-2 text-muted">
-                                        <span>{{ __('messages.processing_fee') }}:</span>
-                                        <span id="fee-amount">0.00 {!! currency_symbol('AED', true) !!}</span>
+
+                                    <!-- Gateway Fees Details -->
+                                    <div class="mb-3 p-3" style="background-color: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                        <h6 class="mb-2 text-warning small">
+                                            <i class="ri-information-line me-1"></i>{{ __('messages.total_gateway_fees') }}
+                                        </h6>
+                                        <div class="d-flex justify-content-between mb-1 small">
+                                            <span class="text-muted">{{ __('messages.fixed_gateway_fee') }}:</span>
+                                            <span id="fixed-fee">0.00 {!! currency_symbol('AED', true) !!}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1 small">
+                                            <span class="text-muted">{{ __('messages.percentage_gateway_fee') }} (7.9%):</span>
+                                            <span id="percentage-fee">0.00 {!! currency_symbol('AED', true) !!}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between pt-2 border-top">
+                                            <strong class="small">{{ __('messages.total_gateway_fees') }}:</strong>
+                                            <strong class="text-warning small" id="total-fee">0.00 {!! currency_symbol('AED', true) !!}</strong>
+                                        </div>
+                                        <p class="mb-0 mt-2 small text-muted">
+                                            <i class="ri-shield-check-line me-1"></i>{{ __('messages.gateway_fee_note') }}
+                                        </p>
                                     </div>
+
                                     <hr>
                                     <div class="d-flex justify-content-between">
-                                        <h6 class="mb-0">{{ __('messages.total_to_pay') }}:</h6>
+                                        <h6 class="mb-0">{{ __('messages.final_amount_to_pay') }}:</h6>
                                         <h6 class="mb-0 text-primary" id="gross-amount">0.00 {!! currency_symbol('AED', true) !!}</h6>
                                     </div>
                                 </div>
@@ -364,7 +387,7 @@
             }
         });
 
-        // Function to calculate fees via AJAXa
+        // Function to calculate fees via AJAX
         function calculateFees(amount) {
             fetch('{{ route("wallet.deposit.calculate-fees") }}', {
                 method: 'POST',
@@ -378,9 +401,11 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update fee breakdown
+                    // Update fee breakdown with detailed information
                     document.getElementById('net-amount').innerHTML = data.data.net_amount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-                    document.getElementById('fee-amount').innerHTML = data.data.fee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+                    document.getElementById('fixed-fee').innerHTML = data.data.fixed_fee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+                    document.getElementById('percentage-fee').innerHTML = data.data.percentage_fee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+                    document.getElementById('total-fee').innerHTML = data.data.fee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
                     document.getElementById('gross-amount').innerHTML = data.data.gross_amount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
 
                     // Show fee breakdown

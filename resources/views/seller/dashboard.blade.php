@@ -259,14 +259,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ route('products.create') }}" class="btn btn-success">
-                            <i class="ri-add-line me-1"></i>
-                            {{ __('messages.add_product') }}
-                        </a>
-                        <a href="{{ route('products.index') }}" class="btn btn-warning">
-                            <i class="ri-shopping-bag-3-line me-1"></i>
-                            {{ __('messages.my_products') }}
-                        </a>
+                    
                         <a href="{{ route('orders.index') }}" class="btn btn-danger">
                             <i class="ri-file-list-3-line me-1"></i>
                             {{ __('messages.my_orders') }}
