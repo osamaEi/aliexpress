@@ -1173,6 +1173,7 @@ class ProductController extends Controller
         $request->validate([
             'aliexpress_product_id' => 'required|string',
             'product_title' => 'required|string',
+            'product_title_ar' => 'nullable|string',
             'product_image' => 'nullable|string',
             'product_price' => 'nullable|numeric',
             'currency' => 'nullable|string|max:3',
@@ -1243,12 +1244,17 @@ class ProductController extends Controller
             }
         }
 
+        // Get Arabic title from request or fallback to English
+        $arabicTitle = $request->product_title_ar;
+
         if (!$product) {
             // Create the product in products table
             $product = Product::create([
                 'name' => $request->product_title,
+                'name_ar' => $arabicTitle,
                 'slug' => \Str::slug($request->product_title) . '-' . $aliexpressProductId,
                 'description' => 'Product imported from AliExpress',
+                'description_ar' => null,
                 'price' => $finalPrice,
                 'currency' => $request->currency ?? 'AED',
                 'original_price' => $basePrice,
@@ -1268,6 +1274,7 @@ class ProductController extends Controller
                 'seller_amount' => $sellerAmount,
                 'admin_amount' => $adminAmount,
                 'category_id' => $request->category_id ?? $product->category_id,
+                'name_ar' => $arabicTitle ?? $product->name_ar,
             ]);
         }
 
@@ -1299,6 +1306,7 @@ class ProductController extends Controller
             'products' => 'required|array|min:1',
             'products.*.aliexpress_product_id' => 'required|string',
             'products.*.product_title' => 'required|string',
+            'products.*.product_title_ar' => 'nullable|string',
             'products.*.product_image' => 'nullable|string',
             'products.*.product_price' => 'nullable|numeric',
             'products.*.currency' => 'nullable|string|max:3',
@@ -1378,6 +1386,7 @@ class ProductController extends Controller
                     // Create new product
                     $product = Product::create([
                         'name' => $productData['product_title'],
+                        'name_ar' => $productData['product_title_ar'] ?? null,
                         'slug' => \Str::slug($productData['product_title']) . '-' . $aliexpressProductId,
                         'description' => 'Product imported from AliExpress',
                         'price' => $finalPrice,
@@ -1399,6 +1408,7 @@ class ProductController extends Controller
                         'seller_amount' => $sellerAmount,
                         'admin_amount' => $adminAmount,
                         'category_id' => $categoryId ?? $product->category_id,
+                        'name_ar' => $productData['product_title_ar'] ?? $product->name_ar,
                     ]);
                 }
 

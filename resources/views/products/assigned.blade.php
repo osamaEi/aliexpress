@@ -3,14 +3,14 @@
 @section('content')
 <div class="col-12">
     <div class="card mb-6">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
             <div>
-                <h5 class="mb-0">My Assigned Products</h5>
-                <small class="text-muted">Products you have assigned for dropshipping</small>
+                <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'المنتجات المخصصة لي' : 'My Assigned Products' }}</h5>
+                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'المنتجات التي قمت بتخصيصها للدروبشيبينج' : 'Products you have assigned for dropshipping' }}</small>
             </div>
             <div>
                 <a href="{{ route('products.search-page') }}" class="btn btn-primary btn-sm">
-                    <i class="ri-search-line me-1"></i> Search More Products
+                    <i class="ri-search-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'البحث عن المزيد من المنتجات' : 'Search More Products' }}
                 </a>
             </div>
         </div>
@@ -34,52 +34,52 @@
 
             @if($assignedProducts->count() > 0)
                 <!-- Stats Cards -->
-                <div class="row mb-4">
+                <div class="row mb-4" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
                     <div class="col-md-3">
                         <div class="card text-white" style="background-color: #561C04;">
                             <div class="card-body">
-                                <h3 class="mb-0">{{ $assignedProducts->total() }}</h3>
-                                <small>Total Assigned</small>
+                                <h3 class="mb-0" style="color: white;">{{ $assignedProducts->total() }}</h3>
+                                <small style="color: white;">{{ app()->getLocale() == 'ar' ? 'إجمالي المخصص' : 'Total Assigned' }}</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card bg-warning text-white">
                             <div class="card-body">
-                                <h3 class="mb-0">{{ $assignedProducts->where('pivot.status', 'assigned')->count() }}</h3>
-                                <small>Pending Import</small>
+                                <h3 class="mb-0" style="color: white;">{{ $assignedProducts->where('pivot.status', 'assigned')->count() }}</h3>
+                                <small style="color: white;">{{ app()->getLocale() == 'ar' ? 'بانتظار الاستيراد' : 'Pending Import' }}</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card text-white" style="background-color: #561C04;">
                             <div class="card-body">
-                                <h3 class="mb-0">{{ $assignedProducts->where('pivot.status', 'imported')->count() }}</h3>
-                                <small>Imported</small>
+                                <h3 class="mb-0" style="color: white;">{{ $assignedProducts->where('pivot.status', 'imported')->count() }}</h3>
+                                <small style="color: white;">{{ app()->getLocale() == 'ar' ? 'تم الاستيراد' : 'Imported' }}</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card text-white" style="background-color: #e56300;">
                             <div class="card-body">
-                                <h3 class="mb-0">{{ $assignedProducts->where('pivot.status', 'published')->count() }}</h3>
-                                <small>Published</small>
+                                <h3 class="mb-0" style="color: white;">{{ $assignedProducts->where('pivot.status', 'published')->count() }}</h3>
+                                <small style="color: white;">{{ app()->getLocale() == 'ar' ? 'تم النشر' : 'Published' }}</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Products Table -->
-                <div class="table-responsive">
+                <div class="table-responsive" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th style="width: 80px;">Image</th>
-                                <th>Product Info</th>
-                                <th style="width: 200px;">Product ID</th>
-                                <th style="width: 120px;">Status</th>
-                                <th style="width: 150px;">Assigned Date</th>
-                                <th style="width: 180px;">Actions</th>
+                                <th style="width: 80px;">{{ app()->getLocale() == 'ar' ? 'الصورة' : 'Image' }}</th>
+                                <th>{{ app()->getLocale() == 'ar' ? 'معلومات المنتج' : 'Product Info' }}</th>
+                                <th style="width: 200px;">{{ app()->getLocale() == 'ar' ? 'رقم المنتج' : 'Product ID' }}</th>
+                                <th style="width: 120px;">{{ app()->getLocale() == 'ar' ? 'الحالة' : 'Status' }}</th>
+                                <th style="width: 150px;">{{ app()->getLocale() == 'ar' ? 'تاريخ التخصيص' : 'Assigned Date' }}</th>
+                                <th style="width: 180px;">{{ app()->getLocale() == 'ar' ? 'الإجراءات' : 'Actions' }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,10 +110,17 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <strong>{{ $assignedProduct->name }}</strong>
+                                        <strong>{{ $assignedProduct->localized_name }}</strong>
                                         <br>
                                         @if($assignedProduct->price)
-                                            <span class="fw-bold" style="color: #561C04;">AED {{ number_format($assignedProduct->price, 2) }}</span>
+                                            <span class="fw-bold d-flex align-items-center" style="color: #561C04;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
+                                                    <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                                {{ number_format($assignedProduct->price, 2) }}
+                                            </span>
                                         @endif
                                     </td>
                                     <td>
@@ -121,16 +128,16 @@
                                     </td>
                                     <td>
                                         @if($status === 'assigned')
-                                            <span class="badge bg-warning">
-                                                <i class="ri-time-line me-1"></i> Assigned
+                                            <span class="badge bg-warning text-white">
+                                                <i class="ri-time-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'مخصص' : 'Assigned' }}
                                             </span>
                                         @elseif($status === 'imported')
-                                            <span class="badge" style="background-color: #561C04;">
-                                                <i class="ri-download-line me-1"></i> Imported
+                                            <span class="badge text-white" style="background-color: #561C04;">
+                                                <i class="ri-download-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'تم الاستيراد' : 'Imported' }}
                                             </span>
                                         @elseif($status === 'published')
-                                            <span class="badge" style="background-color: #e56300;">
-                                                <i class="ri-check-line me-1"></i> Published
+                                            <span class="badge text-white" style="background-color: #e56300;">
+                                                <i class="ri-check-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'تم النشر' : 'Published' }}
                                             </span>
                                         @endif
                                     </td>
@@ -144,7 +151,7 @@
                                     <td>
                                         <a href="{{ route('products.detail', $assignedProduct->id) }}"
                                            class="btn btn-sm btn-primary mb-1">
-                                            <i class="ri-ship-line me-1"></i> View & Ship
+                                            <i class="ri-ship-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن' : 'View & Ship' }}
                                         </a>
                                         <!-- <a href="{{ route('products.show', $assignedProduct->id) }}"
                                            class="btn btn-sm btn-outline-primary mb-1">
@@ -172,12 +179,12 @@
                 </div>
             @else
                 <!-- Empty State -->
-                <div class="text-center py-5">
+                <div class="text-center py-5" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
                     <i class="ri-inbox-line" style="font-size: 4rem; color: #ccc;"></i>
-                    <h5 class="mt-3">No Assigned Products Yet</h5>
-                    <p class="text-muted">Start by searching products and assigning them to your account.</p>
+                    <h5 class="mt-3">{{ app()->getLocale() == 'ar' ? 'لا توجد منتجات مخصصة بعد' : 'No Assigned Products Yet' }}</h5>
+                    <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'ابدأ بالبحث عن المنتجات وتخصيصها لحسابك.' : 'Start by searching products and assigning them to your account.' }}</p>
                     <a href="{{ route('products.search-page') }}" class="btn btn-primary mt-3">
-                        <i class="ri-search-line me-1"></i> Search Products
+                        <i class="ri-search-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'البحث عن المنتجات' : 'Search Products' }}
                     </a>
                 </div>
             @endif

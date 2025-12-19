@@ -12,9 +12,12 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'name_ar',
         'slug',
         'description',
+        'description_ar',
         'short_description',
+        'short_description_ar',
         'price',
         'currency',
         'original_price',
@@ -131,5 +134,35 @@ class Product extends Model
     public function getPrimaryImage(): ?string
     {
         return $this->images[0] ?? null;
+    }
+
+    /**
+     * Get the localized name based on current app locale.
+     */
+    public function getLocalizedNameAttribute(): string
+    {
+        return app()->getLocale() === 'ar' && !empty($this->name_ar)
+            ? $this->name_ar
+            : $this->name;
+    }
+
+    /**
+     * Get the localized description based on current app locale.
+     */
+    public function getLocalizedDescriptionAttribute(): ?string
+    {
+        return app()->getLocale() === 'ar' && !empty($this->description_ar)
+            ? $this->description_ar
+            : $this->description;
+    }
+
+    /**
+     * Get the localized short description based on current app locale.
+     */
+    public function getLocalizedShortDescriptionAttribute(): ?string
+    {
+        return app()->getLocale() === 'ar' && !empty($this->short_description_ar)
+            ? $this->short_description_ar
+            : $this->short_description;
     }
 }

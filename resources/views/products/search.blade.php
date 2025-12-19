@@ -251,17 +251,7 @@
             <!-- Results Count -->
             @if(isset($products) && count($products) > 0)
                 <!-- Product Type Filter Notice -->
-                @if(request('choice_only'))
-                    <div class="alert mb-3 d-flex align-items-center" style="background: linear-gradient(135deg, #561C0420 0%, #e5630020 100%); border: 2px solid #e56300;">
-                        <i class="ri-vip-crown-line me-2" style="font-size: 1.5rem; color: #e56300;"></i>
-                        <div>
-                            <strong style="color: #561C04;">{{ app()->getLocale() == 'ar' ? 'فلتر Choice نشط:' : 'Choice Filter Active:' }}</strong>
-                            {{ app()->getLocale() == 'ar' ? 'يتم عرض منتجات Choice المميزة فقط' : 'Showing premium Choice products only' }}
-                            <br>
-                            <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'منتجات بشحن أسرع (3-7 أيام)، جودة مضمونة، وإرجاع أسهل' : 'Fast shipping (3-7 days), guaranteed quality, and easier returns' }}</small>
-                        </div>
-                    </div>
-                @elseif(request('non_choice'))
+             
                     <div class="alert mb-3 d-flex align-items-center" style="background: linear-gradient(135deg, #17a2b820 0%, #00897b20 100%); border: 2px solid #00897b;">
                         <i class="ri-store-line me-2" style="font-size: 1.5rem; color: #00897b;"></i>
                         <div>
@@ -271,7 +261,7 @@
                             <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'منتجات بأسعار تنافسية وخيارات متنوعة' : 'Competitive prices and diverse options' }}</small>
                         </div>
                     </div>
-                @endif
+          
 
                 <!-- Shipping Filter Notice -->
                 <div class="alert alert-success mb-3 d-flex align-items-center">
@@ -363,6 +353,7 @@
                                                         type="checkbox"
                                                         value="{{ $product['item_id'] }}"
                                                         data-title="{{ addslashes($product['title']) }}"
+                                                        data-title-ar="{{ addslashes($product['title_ar'] ?? $product['title']) }}"
                                                         data-image="{{ $product['item_main_pic'] }}"
                                                         data-price="{{ $product['original_sale_price'] ?? $product['sale_price'] }}"
                                                         data-currency="{{ request('currency', 'AED') }}"
@@ -400,9 +391,10 @@
 
                                     <!-- Choice Badge -->
                                     @if(request('choice_only'))
-                                        <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 shadow-sm choice-badge"
-                                              style="font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #561C04 0%, #e56300 100%); border: 2px solid white;">
-                                            <i class="ri-vip-crown-fill me-1"></i>{{ app()->getLocale() == 'ar' ? 'Choice' : 'Choice' }}
+                                        <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 shadow choice-badge"
+                                              style="font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; font-weight: 700; border: 2px solid white; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);">
+                                            <i class="ri-vip-crown-fill me-1" style="color: #8B4513;"></i>
+                                            <span style="letter-spacing: 0.5px;">Premium</span>
                                         </span>
                                     @endif
 
@@ -419,8 +411,8 @@
                                     <!-- Product Title -->
                                     <h6 class="card-title" style="height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                                         @if(request('choice_only'))
-                                            <span class="badge me-1" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%); font-size: 0.65rem; vertical-align: middle;">
-                                                <i class="ri-vip-crown-fill"></i>
+                                            <span class="badge me-1" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; font-size: 0.65rem; vertical-align: middle; font-weight: 700;">
+                                                <i class="ri-vip-crown-fill" style="color: #8B4513;"></i>
                                             </span>
                                         @endif
                                         {{ $product['title'] }}
@@ -428,31 +420,45 @@
 
                                     <!-- Price -->
                                     <div class="mb-2">
-                                        <h5 class="text-primary mb-0">
+                                        <h5 class="text-primary mb-0 d-flex align-items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
+                                                <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                <path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            </svg>
                                             @if($product['sale_price_format'])
-                                                {{ $product['sale_price_format'] }}
+                                                {{ str_replace('AED', '', $product['sale_price_format']) }}
                                             @else
-                                                AED {{ number_format((float)$product['sale_price'], 2) }}
+                                                {{ number_format((float)$product['sale_price'], 2) }}
                                             @endif
                                         </h5>
                                         @if(request('choice_only'))
-                                            <small class="d-block" style="color: #e56300;">
-                                                <i class="ri-rocket-line"></i>
+                                            <small class="d-block mt-1" style="color: #FFD700; font-weight: 600;">
+                                                <i class="ri-vip-crown-fill"></i>
                                                 {{ app()->getLocale() == 'ar' ? 'شحن سريع 3-7 أيام' : 'Fast shipping 3-7 days' }}
                                             </small>
                                         @endif
                                         @if(isset($product['admin_profit']) && $product['admin_profit'] > 0)
-                                            <small class="text-success d-block">
-                                                <i class="ri-money-dollar-circle-line"></i>
-                                                {{ app()->getLocale() == 'ar' ? 'تشمل' : 'Includes' }} {{ setting('currency', 'AED') }} {{ number_format($product['admin_profit'], 2) }} {{ app()->getLocale() == 'ar' ? 'عمولة' : 'profit' }}
+                                            <small class="text-success d-block d-flex align-items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
+                                                    <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                                {{ app()->getLocale() == 'ar' ? 'تشمل' : 'Includes' }} {{ number_format($product['admin_profit'], 2) }} {{ app()->getLocale() == 'ar' ? 'عمولة' : 'profit' }}
                                             </small>
                                         @endif
                                         @if($product['original_price'] > $product['sale_price'])
-                                            <small class="text-muted text-decoration-line-through">
+                                            <small class="text-muted text-decoration-line-through d-flex align-items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
+                                                    <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
                                                 @if($product['original_price_format'])
-                                                    {{ $product['original_price_format'] }}
+                                                    {{ str_replace('AED', '', $product['original_price_format']) }}
                                                 @else
-                                                    AED {{ number_format((float)$product['original_price'], 2) }}
+                                                    {{ number_format((float)$product['original_price'], 2) }}
                                                 @endif
                                             </small>
                                         @endif
@@ -461,8 +467,8 @@
                                     <!-- Stats -->
                                     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                                         @if($product['evaluate_rate'])
-                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">
-                                                <i class="ri-star-fill"></i> {{ $product['evaluate_rate'] }}
+                                            <span class="badge px-3 py-1" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; font-weight: 600; box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);">
+                                                <i class="ri-star-fill" style="color: #8B4513;"></i> {{ $product['evaluate_rate'] }}
                                             </span>
                                         @endif
                                         @if($product['orders'])
@@ -515,8 +521,10 @@
                                                     <button
                                                         type="button"
                                                         class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
-                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', 'AED') }}', '{{ $localCategoryId ?? '' }}', this)"
+                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ addslashes($product['title_ar'] ?? $product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', 'AED') }}', '{{ $localCategoryId ?? '' }}', this)"
                                                         data-product-id="{{ $product['item_id'] }}"
+                                                        data-title-en="{{ addslashes($product['title']) }}"
+                                                        data-title-ar="{{ addslashes($product['title_ar'] ?? $product['title']) }}"
                                                     >
                                                         <i class="ri-pushpin-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'إسناد لي' : 'Assign to Me' }}
                                                     </button>
@@ -726,7 +734,7 @@
     });
 
     // Assign product to seller function
-    function assignProduct(productId, productTitle, productImage, productPrice, currency, categoryId, buttonElement) {
+    function assignProduct(productId, productTitle, productTitleAr, productImage, productPrice, currency, categoryId, buttonElement) {
         // Show loading state
         const originalHtml = buttonElement.innerHTML;
         buttonElement.disabled = true;
@@ -739,6 +747,7 @@
         const requestData = {
             aliexpress_product_id: productId,
             product_title: productTitle,
+            product_title_ar: productTitleAr,
             product_image: productImage,
             product_price: productPrice,
             currency: currency,
@@ -973,6 +982,7 @@
                     const productData = {
                         aliexpress_product_id: checkbox.value,
                         product_title: checkbox.dataset.title,
+                        product_title_ar: checkbox.dataset.titleAr || checkbox.dataset.title,
                         product_image: checkbox.dataset.image,
                         product_price: checkbox.dataset.price,
                         currency: checkbox.dataset.currency,
