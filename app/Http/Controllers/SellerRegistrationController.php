@@ -31,11 +31,21 @@ class SellerRegistrationController extends Controller
             'company_name' => 'required|string|max:255',
             'country' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
+            'logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'g-recaptcha-response' => 'required',
         ], [
             'g-recaptcha-response.required' => app()->getLocale() == 'ar'
                 ? 'يرجى التحقق من أنك لست روبوت'
                 : 'Please verify that you are not a robot',
+            'logo.image' => app()->getLocale() == 'ar'
+                ? 'يجب أن يكون الملف صورة'
+                : 'The file must be an image',
+            'logo.mimes' => app()->getLocale() == 'ar'
+                ? 'يجب أن تكون الصورة بصيغة: jpeg, jpg, png'
+                : 'The image must be a file of type: jpeg, jpg, png',
+            'logo.max' => app()->getLocale() == 'ar'
+                ? 'يجب أن يكون حجم الصورة أقل من 2 ميجابايت'
+                : 'The image size must be less than 2MB',
         ]);
 
         // Verify reCAPTCHA v3 (skip in local development if needed)
@@ -60,8 +70,21 @@ class SellerRegistrationController extends Controller
             }
         }
 
+        // Handle logo upload
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logo = $request->file('logo');
+            $logoName = time() . '_' . Str::slug($validated['company_name']) . '.' . $logo->getClientOriginalExtension();
+            $logoPath = $logo->storeAs('logos/sellers', $logoName, 'public');
+        }
+
         // Remove reCAPTCHA from validated data
         unset($validated['g-recaptcha-response']);
+
+        // Add logo path to validated data
+        if ($logoPath) {
+            $validated['logo_path'] = $logoPath;
+        }
 
         // Store data in session
         Session::put('seller_registration', $validated);
@@ -174,6 +197,7 @@ class SellerRegistrationController extends Controller
             'user_type' => 'seller',
             'main_activity' => json_encode($data['main_categories']),
             'sub_activity' => json_encode($data['sub_categories']),
+            'logo' => $data['logo_path'] ?? null,
             'is_verified' => true,
             'verified_at' => now(),
             'email_verified_at' => now(),

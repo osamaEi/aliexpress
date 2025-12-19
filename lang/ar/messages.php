@@ -381,7 +381,7 @@ return [
     'priority_support' => 'دعم أولوية',
     'analytics_access' => 'لوحة التحليلات',
     'bulk_import' => 'استيراد جماعي',
-    'api_access' => 'الوصول لـ Taif',
+    'api_access' => 'الوصول لـ Tayf',
     'subscribe_now' => 'اشترك الآن',
     'upgrade_plan' => 'ترقية الخطة',
     'view_subscription_history' => 'عرض سجل الاشتراكات',

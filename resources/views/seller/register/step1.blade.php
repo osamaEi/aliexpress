@@ -380,6 +380,94 @@
             width: 20px;
             height: 20px;
         }
+
+        /* Logo Upload Styles */
+        .logo-upload-wrapper {
+            margin-bottom: 25px;
+        }
+
+        .logo-upload-area {
+            border: 2px dashed #e5e7eb;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f9fafb;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .logo-upload-area:hover {
+            border-color: var(--primary-color);
+            background: #fef3f2;
+        }
+
+        .logo-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: #fef3f2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-text h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .upload-text p {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+
+        .logo-preview {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .logo-preview.active {
+            display: block;
+        }
+
+        .logo-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            padding: 10px;
+            background: white;
+        }
+
+        .remove-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .remove-logo:hover {
+            background: #dc2626;
+        }
+
+        #logo_file {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -448,8 +536,37 @@
                 </div>
             @endif
 
-            <form action="{{ route('seller.register.step1.process') }}" method="POST">
+            <form action="{{ route('seller.register.step1.process') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+
+                <!-- Logo Upload Section -->
+                <div class="logo-upload-wrapper">
+                    <label class="form-label">
+                        <i class="ri-image-line"></i> {{ app()->getLocale() == 'ar' ? 'شعار الشركة (اختياري)' : 'Company Logo (Optional)' }}
+                    </label>
+                    <div class="logo-upload-area" id="logoUploadArea">
+                        <i class="ri-upload-cloud-2-line upload-icon"></i>
+                        <div class="upload-text">
+                            <h4>{{ app()->getLocale() == 'ar' ? 'اضغط لرفع الشعار أو اسحبه هنا' : 'Click to upload logo or drag it here' }}</h4>
+                            <p>{{ app()->getLocale() == 'ar' ? 'PNG, JPG, JPEG حتى 2MB' : 'PNG, JPG, JPEG up to 2MB' }}</p>
+                        </div>
+                        <input type="file"
+                               id="logo_file"
+                               name="logo"
+                               accept="image/png,image/jpeg,image/jpg">
+                    </div>
+                    <div class="logo-preview" id="logoPreview">
+                        <img id="logoImage" src="" alt="Logo Preview">
+                        <br>
+                        <button type="button" class="remove-logo" id="removeLogo">
+                            <i class="ri-delete-bin-line"></i>
+                            <span>{{ app()->getLocale() == 'ar' ? 'إزالة الشعار' : 'Remove Logo' }}</span>
+                        </button>
+                    </div>
+                    @error('logo')
+                        <div class="text-danger mt-2">{{ $message }}</div>
+                    @enderror
+                </div>
 
                 <div class="row g-4">
                     <div class="col-md-6">
@@ -572,6 +689,81 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Logo Upload Script -->
+    <script>
+        const logoUploadArea = document.getElementById('logoUploadArea');
+        const logoFile = document.getElementById('logo_file');
+        const logoPreview = document.getElementById('logoPreview');
+        const logoImage = document.getElementById('logoImage');
+        const removeLogo = document.getElementById('removeLogo');
+
+        // Click to upload
+        logoUploadArea.addEventListener('click', () => {
+            logoFile.click();
+        });
+
+        // File input change
+        logoFile.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        // Drag and drop
+        logoUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            logoUploadArea.classList.add('dragover');
+        });
+
+        logoUploadArea.addEventListener('dragleave', () => {
+            logoUploadArea.classList.remove('dragover');
+        });
+
+        logoUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            logoUploadArea.classList.remove('dragover');
+
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                logoFile.files = e.dataTransfer.files;
+                handleFile(file);
+            }
+        });
+
+        // Remove logo
+        removeLogo.addEventListener('click', () => {
+            logoFile.value = '';
+            logoPreview.classList.remove('active');
+            logoUploadArea.style.display = 'block';
+        });
+
+        // Handle file preview
+        function handleFile(file) {
+            if (!file) return;
+
+            // Check file size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('{{ app()->getLocale() == 'ar' ? 'حجم الملف يجب أن يكون أقل من 2 ميجابايت' : 'File size must be less than 2MB' }}');
+                logoFile.value = '';
+                return;
+            }
+
+            // Check file type
+            if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+                alert('{{ app()->getLocale() == 'ar' ? 'يرجى اختيار صورة بصيغة PNG أو JPG' : 'Please select a PNG or JPG image' }}');
+                logoFile.value = '';
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                logoImage.src = e.target.result;
+                logoPreview.classList.add('active');
+                logoUploadArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
 
     <!-- reCAPTCHA v3 Script -->
     <script>

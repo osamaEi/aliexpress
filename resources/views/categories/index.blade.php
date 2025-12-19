@@ -2,6 +2,28 @@
 
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+    <style>
+        .assigned-category {
+            background-color: #f0f9ff !important;
+        }
+        [dir="ltr"] .assigned-category {
+            border-left: 4px solid #3b82f6;
+        }
+        [dir="rtl"] .assigned-category {
+            border-right: 4px solid #3b82f6;
+        }
+        .assigned-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+    </style>
     <div class="card">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -13,6 +35,23 @@
                     @endif
                 </h5>
             </div>
+
+            @if(auth()->user() && auth()->user()->user_type === 'seller')
+                <div class="d-flex gap-2 align-items-center mb-3">
+                    @if(!empty($assignedCategoryIds))
+                        <div class="alert alert-info mb-0 flex-grow-1">
+                            <i class="ri-information-line me-2"></i>
+                            {{ app()->getLocale() == 'ar'
+                                ? 'الفئات المميزة باللون الأزرق هي الفئات المخصصة لك'
+                                : 'Categories highlighted in blue are assigned to you' }}
+                        </div>
+                    @endif
+                    <a href="{{ route('seller.request-category-assignment') }}" class="btn btn-primary">
+                        <i class="ri-add-circle-line me-2"></i>
+                        {{ app()->getLocale() == 'ar' ? 'طلب تعيين فئة جديدة' : 'Request New Category Assignment' }}
+                    </a>
+                </div>
+            @endif
 
             @if($parentCategory)
                 <div class="mb-2">
@@ -66,7 +105,7 @@
                     </thead>
                     <tbody>
                         @forelse($categories as $category)
-                            <tr>
+                            <tr class="{{ in_array($category->id, $assignedCategoryIds) ? 'assigned-category' : '' }}">
                                 <td>
                                     @if($category->photo)
                                         <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name }}" style="width: 40px; height: 40px; object-fit: contain;">
@@ -80,6 +119,12 @@
                                 </td>
                                 <td>
                                     <strong>{{ $category->name }}</strong>
+                                    @if(in_array($category->id, $assignedCategoryIds))
+                                        <span class="assigned-badge ms-2">
+                                            <i class="ri-check-line"></i>
+                                            {{ app()->getLocale() == 'ar' ? 'مخصصة' : 'Assigned' }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($category->name_ar)
@@ -114,25 +159,39 @@
                                 <td>
                                     <div class="d-flex gap-1">
                                         @if($category->children_count > 0)
-                                        <a href="{{ route('categories.index', ['parent_id' => $category->id]) }}" class="btn btn-sm btn-icon btn-info" title="View Subcategories">
+                                        <a href="{{ route('categories.index', ['parent_id' => $category->id]) }}" class="btn btn-sm btn-icon btn-info" title="{{ app()->getLocale() == 'ar' ? 'عرض الفئات الفرعية' : 'View Subcategories' }}">
                                             <i class="ri-folder-open-line"></i>
                                         </a>
                                         @endif
-                                        @if($category->aliexpress_category_id)
-                                        <a href="{{ route('categories.fetch-subcategories', $category) }}" class="btn btn-sm btn-icon btn-success" title="Fetch Subcategories">
-                                            <i class="ri-download-cloud-line"></i>
-                                        </a>
+
+                                        @if(auth()->user() && auth()->user()->user_type !== 'seller')
+                                            @if($category->aliexpress_category_id)
+                                            <a href="{{ route('categories.fetch-subcategories', $category) }}" class="btn btn-sm btn-icon btn-success" title="Fetch Subcategories">
+                                                <i class="ri-download-cloud-line"></i>
+                                            </a>
+                                            @endif
+                                            <a href="{{ route('categories.edit', $category) }}" class="btn btn-sm btn-icon btn-primary" title="{{ app()->getLocale() == 'ar' ? 'تعديل' : 'Edit' }}">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                            <form action="{{ route('categories.destroy', $category) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ app()->getLocale() == 'ar' ? 'هل أنت متأكد من حذف هذه الفئة؟' : 'Are you sure you want to delete this category?' }}');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-icon btn-danger" title="{{ app()->getLocale() == 'ar' ? 'حذف' : 'Delete' }}">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            @if(in_array($category->id, $assignedCategoryIds))
+                                                <span class="badge bg-success">
+                                                    <i class="ri-check-double-line"></i>
+                                                    {{ app()->getLocale() == 'ar' ? 'مخصصة لك' : 'Assigned to you' }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted small">
+                                                    {{ app()->getLocale() == 'ar' ? 'غير مخصصة' : 'Not assigned' }}
+                                                </span>
+                                            @endif
                                         @endif
-                                        <a href="{{ route('categories.edit', $category) }}" class="btn btn-sm btn-icon btn-primary" title="Edit">
-                                            <i class="ri-edit-line"></i>
-                                        </a>
-                                        <form action="{{ route('categories.destroy', $category) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-icon btn-danger" title="Delete">
-                                                <i class="ri-delete-bin-line"></i>
-                                            </button>
-                                        </form>
                                     </div>
                                 </td>
                             </tr>

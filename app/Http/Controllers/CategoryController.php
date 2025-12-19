@@ -27,23 +27,17 @@ class CategoryController extends Controller
 
         $query = Category::withCount('products', 'children');
 
-        // Filter categories for sellers based on their selected categories
+        // Get seller's assigned categories if user is a seller
         $user = auth()->user();
+        $assignedCategoryIds = [];
+
         if ($user && $user->user_type === 'seller') {
             // Decode the seller's selected categories
             $mainActivities = json_decode($user->main_activity, true) ?? [];
             $subActivities = json_decode($user->sub_activity, true) ?? [];
 
             // Combine both main and sub category IDs
-            $allowedCategoryIds = array_merge($mainActivities, $subActivities);
-
-            // Filter query to only show allowed categories
-            if (!empty($allowedCategoryIds)) {
-                $query->whereIn('id', $allowedCategoryIds);
-            } else {
-                // If no categories selected, show nothing
-                $query->whereRaw('1 = 0');
-            }
+            $assignedCategoryIds = array_merge($mainActivities, $subActivities);
         }
 
         if ($parentId) {
@@ -58,7 +52,7 @@ class CategoryController extends Controller
 
         $categories = $query->orderBy('order')->paginate(20);
 
-        return view('categories.index', compact('categories', 'parentCategory'));
+        return view('categories.index', compact('categories', 'parentCategory', 'assignedCategoryIds'));
     }
 
     /**
@@ -622,5 +616,75 @@ class CategoryController extends Controller
 
             $seller->save();
         }
+    }
+
+    /**
+     * Show request category assignment page for seller
+     */
+    public function requestCategoryAssignment()
+    {
+        $user = auth()->user();
+
+        if ($user->user_type !== 'seller') {
+            abort(403, 'Only sellers can request category assignments.');
+        }
+
+        // Get seller's currently assigned categories
+        $mainActivities = json_decode($user->main_activity, true) ?? [];
+        $subActivities = json_decode($user->sub_activity, true) ?? [];
+        $assignedCategoryIds = array_merge($mainActivities, $subActivities);
+
+        // Get all categories
+        $mainCategories = Category::whereNull('parent_id')
+            ->active()
+            ->orderBy('order')
+            ->orderBy('name')
+            ->get();
+
+        // Get all subcategories grouped by parent
+        $subCategories = [];
+        foreach ($mainCategories as $category) {
+            $subCategories[$category->id] = $category->children()
+                ->active()
+                ->orderBy('order')
+                ->orderBy('name')
+                ->get();
+        }
+
+        return view('seller.request-category-assignment', compact('mainCategories', 'subCategories', 'assignedCategoryIds'));
+    }
+
+    /**
+     * Submit category assignment request
+     */
+    public function submitCategoryRequest(Request $request)
+    {
+        $user = auth()->user();
+
+        if ($user->user_type !== 'seller') {
+            abort(403, 'Only sellers can request category assignments.');
+        }
+
+        $validated = $request->validate([
+            'main_categories' => 'required|array|min:1',
+            'main_categories.*' => 'exists:categories,id',
+            'sub_categories' => 'nullable|array',
+            'sub_categories.*' => 'exists:categories,id',
+            'reason' => 'nullable|string|max:1000',
+        ]);
+
+        // Create notification/request for admin (you can implement this)
+        // For now, we'll just update the user's categories directly
+
+        // Update user's categories
+        $user->main_activity = json_encode($validated['main_categories']);
+        $user->sub_activity = json_encode($validated['sub_categories'] ?? []);
+        $user->save();
+
+        return redirect()->route('categories.index')->with('success',
+            app()->getLocale() == 'ar'
+                ? 'تم تحديث الفئات الخاصة بك بنجاح'
+                : 'Your categories have been updated successfully'
+        );
     }
 }

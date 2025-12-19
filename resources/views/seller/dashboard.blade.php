@@ -22,7 +22,7 @@
         @if($daysRemaining >= 0)
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card" style="background: linear-gradient(135deg, {{ $daysRemaining <= 5 ? '#dc2626' : ($daysRemaining <= 10 ? '#ea580c' : '#10b981') }} 0%, {{ $daysRemaining <= 5 ? '#991b1b' : ($daysRemaining <= 10 ? '#c2410c' : '#059669') }} 100%);">
+                    <div class="card" style="background: black;">
                         <div class="card-body text-white">
                             <div class="row align-items-center">
                                 <div class="col-md-8">

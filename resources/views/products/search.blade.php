@@ -17,10 +17,31 @@
         </div>
 
         <div class="card-body">
+            @if(auth()->user() && auth()->user()->user_type === 'seller' && (!isset($categories) || count($categories) == 0))
+                <div class="alert alert-warning d-flex align-items-start mb-4" role="alert">
+                    <i class="ri-information-line me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <h6 class="alert-heading mb-1">
+                            {{ app()->getLocale() == 'ar' ? 'لا توجد فئات مخصصة لك' : 'No Categories Assigned' }}
+                        </h6>
+                        <p class="mb-2">
+                            {{ app()->getLocale() == 'ar'
+                                ? 'لم يتم تعيين أي فئات لحسابك بعد. لاستخدام مرشح الفئات، يرجى طلب تعيين فئة من صفحة الفئات.'
+                                : 'No categories have been assigned to your account yet. To use the category filter, please request a category assignment from the Categories page.' }}
+                        </p>
+                        <a href="{{ route('seller.request-category-assignment') }}" class="btn btn-sm btn-warning">
+                            <i class="ri-add-circle-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'طلب تعيين فئة' : 'Request Category Assignment' }}
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <!-- Search Form -->
             <form id="searchForm" method="GET" action="{{ route('products.search-text') }}" class="mb-4">
-                <div class="row g-3">
-                    <div class="col-md-4">
+                <!-- Row 1: Main Search -->
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
                         <label for="keyword" class="form-label fw-semibold">
                             <i class="ri-search-line me-1"></i>{{ __('messages.search_keyword') }}
                         </label>
@@ -35,10 +56,52 @@
                     </div>
 
                     <div class="col-md-2">
+                        <label for="country" class="form-label fw-semibold">
+                            <i class="ri-ship-line me-1"></i>{{ __('messages.ship_to') }}
+                        </label>
+                        <select name="country" id="country" class="form-select form-select-lg shadow-sm">
+                            <option value="AE" {{ request('country') == 'AE' || !request('country') ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? '🇦🇪 الإمارات' : '🇦🇪 UAE' }}</option>
+                            <option value="SA" {{ request('country') == 'SA' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? '🇸🇦 السعودية' : '🇸🇦 Saudi Arabia' }}</option>
+                            <option value="US" {{ request('country') == 'US' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? '🇺🇸 الولايات المتحدة' : '🇺🇸 USA' }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="ship_from" class="form-label fw-semibold">
+                            <i class="ri-plane-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الشحن من' : 'Ship From' }}
+                        </label>
+                        <select name="ship_from" id="ship_from" class="form-select form-select-lg shadow-sm">
+                            <option value="">{{ app()->getLocale() == 'ar' ? 'جميع الدول' : 'All Countries' }}</option>
+                            <option value="AE" {{ request('ship_from') == 'AE' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? '🇦🇪 الإمارات' : '🇦🇪 UAE' }}</option>
+                            <option value="SA" {{ request('ship_from') == 'SA' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? '🇸🇦 السعودية' : '🇸🇦 Saudi Arabia' }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="currency" class="form-label fw-semibold">
+                            <i class="ri-money-dollar-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العملة' : 'Currency' }}
+                        </label>
+                        <select name="currency" id="currency" class="form-select form-select-lg shadow-sm">
+                            <option value="AED" {{ request('currency') == 'AED' ? 'selected' : '' }}>AED</option>
+                            <option value="USD" {{ request('currency') == 'USD' || !request('currency') ? 'selected' : '' }}>USD</option>
+                            <option value="SAR" {{ request('currency') == 'SAR' ? 'selected' : '' }}>SAR</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow">
+                            <i class="ri-search-line"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Row 2: Categories -->
+                <div class="row g-3 mt-2">
+                    <div class="col-md-3">
                         <label for="main_category" class="form-label fw-semibold">
                             <i class="ri-folder-line me-1"></i>{{ __('messages.main_category') }}
                         </label>
-                        <select id="main_category" class="form-select form-select-lg shadow-sm">
+                        <select id="main_category" class="form-select shadow-sm">
                             <option value="">{{ __('messages.all_categories') }}</option>
                             @if(isset($categories) && count($categories) > 0)
                                 @foreach($categories as $category)
@@ -72,49 +135,16 @@
                         </select>
                     </div>
 
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label for="sub_category" class="form-label fw-semibold">
                             <i class="ri-folder-open-line me-1"></i>{{ __('messages.sub_category') }}
                         </label>
-                        <select name="category_id" id="sub_category" class="form-select form-select-lg shadow-sm" disabled>
+                        <select name="category_id" id="sub_category" class="form-select shadow-sm" disabled>
                             <option value="">{{ __('messages.select_main_category_first') }}</option>
                         </select>
                     </div>
 
-                    <div class="col-md-2">
-                        <label for="country" class="form-label fw-semibold">
-                            <i class="ri-ship-line me-1"></i>{{ __('messages.ship_to') }}
-                        </label>
-                        <select name="country" id="country" class="form-select form-select-lg shadow-sm">
-                            <option value="AE" {{ request('country') == 'AE' || !request('country') ? 'selected' : '' }} data-flag="ae">{{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}</option>
-                            <option value="SA" {{ request('country') == 'SA' ? 'selected' : '' }} data-flag="sa">{{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi Arabia' }}</option>
-                            <option value="US" {{ request('country') == 'US' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الولايات المتحدة' : 'USA' }}</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-1">
-                        <label for="currency" class="form-label fw-semibold">
-                            <i class="ri-money-dollar-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العملة' : 'Currency' }}
-                        </label>
-                        <select name="currency" id="currency" class="form-select form-select-lg shadow-sm">
-                            <option value="AED" {{ request('currency') == 'AED' ? 'selected' : '' }}>AED</option>
-                            <option value="USD" {{ request('currency') == 'USD' || !request('currency') ? 'selected' : '' }}>USD</option>
-                            <option value="SAR" {{ request('currency') == 'SAR' ? 'selected' : '' }}>SAR</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-1">
-                        <label class="form-label fw-semibold d-block">&nbsp;</label>
-                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow">
-                            <i class="ri-search-line me-1"></i> {{ __('messages.search') }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Filters Row -->
-                <div class="row g-3 mt-2">
-                    <!-- Choice Filter -->
-                    <div class="col-md-4">
+                    <div class="col-md-3 d-flex align-items-end">
                         <div class="form-check form-switch">
                             <input
                                 class="form-check-input"
@@ -125,45 +155,13 @@
                                 value="1"
                                 {{ request('choice_only') ? 'checked' : '' }}
                                 style="width: 50px; height: 25px; cursor: pointer;">
-                            <label class="form-check-label fw-semibold ms-2" for="choiceFilter" style="cursor: pointer; white-space: nowrap;">
-                                <span class="badge choice-filter-badge px-3 py-2" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%) !important; font-size: 0.9rem; color: white;">
-                                    <i class="ri-vip-crown-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'منتجات Choice فقط' : 'Choice Products Only' }}
+                            <label class="form-check-label fw-bold ms-2" for="choiceFilter" style="cursor: pointer;">
+                                <span class="badge px-4 py-2" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; font-size: 1rem; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5); border: 2px solid #FFD700;">
+                                    <i class="ri-vip-crown-fill me-2" style="font-size: 1.2rem; color: #8B4513;"></i>
+                                    <strong style="letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
+                                        {{ app()->getLocale() == 'ar' ? 'منتجات مميزة' : 'Premium' }}
+                                    </strong>
                                 </span>
-                            </label>
-                        </div>
-                        <small class="text-muted d-block mt-1">
-                            <i class="ri-information-line"></i>
-                            {{ app()->getLocale() == 'ar' ? 'منتجات مميزة بشحن أسرع وجودة مضمونة' : 'Premium products with faster shipping' }}
-                        </small>
-                    </div>
-
-                    <!-- Price Range -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold small">
-                            <i class="ri-money-dollar-circle-line me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'نطاق السعر' : 'Price Range' }}
-                        </label>
-                        <div class="input-group">
-                            <input type="number" name="min_price" class="form-control"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'من' : 'Min' }}"
-                                   value="{{ request('min_price') }}" min="0" step="0.01">
-                            <span class="input-group-text">-</span>
-                            <input type="number" name="max_price" class="form-control"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'إلى' : 'Max' }}"
-                                   value="{{ request('max_price') }}" min="0" step="0.01">
-                        </div>
-                    </div>
-
-                    <!-- Free Shipping Filter -->
-                    <div class="col-md-4">
-                      
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="minOrders"
-                                   name="min_orders" value="100" {{ request('min_orders') ? 'checked' : '' }}>
-                            <label class="form-check-label" for="minOrders">
-                                <i class="ri-shopping-cart-line me-1"></i>
-                                {{ app()->getLocale() == 'ar' ? 'الأكثر مبيعاً (100+ طلب)' : 'Best Sellers (100+ orders)' }}
                             </label>
                         </div>
                     </div>
@@ -382,6 +380,23 @@
                                         style="height: 280px; object-fit: contain; padding: 15px;"
                                         onerror="this.src='https://via.placeholder.com/280x280?text=No+Image'"
                                     >
+
+                                    <!-- China Badge SVG -->
+                                    <div class="position-absolute bottom-0 start-0 m-2" style="z-index: 5;">
+                                        <div class="d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm" style="border: 1px solid #e0e0e0;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="margin-right: 4px;">
+                                                <rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#de2910"></rect>
+                                                <g fill="#ffde00">
+                                                    <path d="M7.5,9.5 l0.9,2.8 l2.9,0 l-2.4,1.7 l0.9,2.8 l-2.4,-1.7 l-2.4,1.7 l0.9,-2.8 l-2.4,-1.7 l2.9,0z"/>
+                                                    <path d="M14.5,7 l0.3,0.9 l1,0 l-0.8,0.6 l0.3,0.9 l-0.8,-0.6 l-0.8,0.6 l0.3,-0.9 l-0.8,-0.6 l1,0z"/>
+                                                    <path d="M16,10 l0.3,0.9 l1,0 l-0.8,0.6 l0.3,0.9 l-0.8,-0.6 l-0.8,0.6 l0.3,-0.9 l-0.8,-0.6 l1,0z"/>
+                                                    <path d="M16,14 l0.3,0.9 l1,0 l-0.8,0.6 l0.3,0.9 l-0.8,-0.6 l-0.8,0.6 l0.3,-0.9 l-0.8,-0.6 l1,0z"/>
+                                                    <path d="M14.5,17 l0.3,0.9 l1,0 l-0.8,0.6 l0.3,0.9 l-0.8,-0.6 l-0.8,0.6 l0.3,-0.9 l-0.8,-0.6 l1,0z"/>
+                                                </g>
+                                            </svg>
+                                            <span style="font-size: 0.7rem; color: #666; font-weight: 500;">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
+                                        </div>
+                                    </div>
 
                                     <!-- Choice Badge -->
                                     @if(request('choice_only'))
@@ -602,56 +617,58 @@
     });
 
     // Auto-change currency based on country selection
-    document.getElementById('country').addEventListener('change', function() {
-        const country = this.value;
-        const currencySelect = document.getElementById('currency');
+    const countrySelect = document.getElementById('country');
+    if (countrySelect) {
+        countrySelect.addEventListener('change', function() {
+            const country = this.value;
+            const currencySelect = document.getElementById('currency');
 
-        // Map country to currency
-        const countryToCurrency = {
-            'AE': 'AED',  // UAE -> AED
-            'SA': 'SAR',  // Saudi Arabia -> SAR
-        };
+            // Map country to currency
+            const countryToCurrency = {
+                'AE': 'AED',  // UAE -> AED
+                'SA': 'SAR',  // Saudi Arabia -> SAR
+            };
 
-        if (countryToCurrency[country]) {
-            currencySelect.value = countryToCurrency[country];
-        }
-    });
+            if (countryToCurrency[country]) {
+                currencySelect.value = countryToCurrency[country];
+            }
+        });
+    }
 
     // Auto-change country and currency based on language selection
-    document.getElementById('locale').addEventListener('change', function() {
-        const locale = this.value;
-        const countrySelect = document.getElementById('country');
-        const currencySelect = document.getElementById('currency');
+    const localeSelect = document.getElementById('locale');
+    if (localeSelect) {
+        localeSelect.addEventListener('change', function() {
+            const locale = this.value;
+            const countrySelect = document.getElementById('country');
+            const currencySelect = document.getElementById('currency');
 
-        // Map locales to country and currency (only for SA/AE)
-        const localeMap = {
-            'en_US': { country: 'AE', currency: 'AED' },
-            'ar_MA': { country: 'AE', currency: 'AED' },
-            'es_ES': { country: 'AE', currency: 'AED' },
-            'fr_FR': { country: 'AE', currency: 'AED' },
-            'ru_RU': { country: 'AE', currency: 'AED' },
-            'pt_BR': { country: 'AE', currency: 'AED' },
-            'de_DE': { country: 'AE', currency: 'AED' },
-        };
+            // Map locales to country and currency (only for SA/AE)
+            const localeMap = {
+                'en_US': { country: 'AE', currency: 'AED' },
+                'ar_MA': { country: 'AE', currency: 'AED' },
+                'es_ES': { country: 'AE', currency: 'AED' },
+                'fr_FR': { country: 'AE', currency: 'AED' },
+                'ru_RU': { country: 'AE', currency: 'AED' },
+                'pt_BR': { country: 'AE', currency: 'AED' },
+                'de_DE': { country: 'AE', currency: 'AED' },
+            };
 
-        if (localeMap[locale]) {
-            countrySelect.value = localeMap[locale].country;
-            currencySelect.value = localeMap[locale].currency;
-        }
-    });
+            if (localeMap[locale]) {
+                countrySelect.value = localeMap[locale].country;
+                currencySelect.value = localeMap[locale].currency;
+            }
+        });
+    }
 
-    // Category hierarchy data
-    const categoryHierarchy = {
+    // Simple category hierarchy - just the data
+    const categoryData = {
         @if(isset($categories) && count($categories) > 0)
             @foreach($categories as $category)
                 '{{ $category->aliexpress_category_id }}': [
                     @if(isset($category->children) && count($category->children) > 0)
                         @foreach($category->children as $child)
-                            {
-                                id: '{{ $child->aliexpress_category_id }}',
-                                name: '{{ $child->name }}',
-                                name_ar: '{{ $child->name_ar ?? '' }}'
-                            },
+                            {id: '{{ $child->aliexpress_category_id }}', name: '{{ addslashes($child->name) }}', name_ar: '{{ addslashes($child->name_ar ?? '') }}'},
                         @endforeach
                     @endif
                 ],
@@ -659,73 +676,52 @@
         @endif
     };
 
-    // Main category change handler
-    document.getElementById('main_category').addEventListener('change', function() {
-        const mainCategoryId = this.value;
-        const subCategorySelect = document.getElementById('sub_category');
-        const selectedChildId = this.options[this.selectedIndex].getAttribute('data-selected-child');
+    // Update subcategory dropdown based on main category selection
+    function updateSubcategories(mainCategoryId) {
+        const subSelect = document.getElementById('sub_category');
+        if (!subSelect) return;
 
-        // Clear subcategory dropdown
-        subCategorySelect.innerHTML = '';
+        // Clear existing options
+        subSelect.innerHTML = '';
 
         if (!mainCategoryId) {
-            // No main category selected
-            subCategorySelect.disabled = true;
-            subCategorySelect.innerHTML = '<option value="">Select main category first</option>';
+            subSelect.disabled = true;
+            subSelect.add(new Option('{{ __("messages.select_main_category_first") }}', ''));
             return;
         }
 
-        const children = categoryHierarchy[mainCategoryId] || [];
+        const children = categoryData[mainCategoryId] || [];
+        subSelect.disabled = false;
 
         if (children.length === 0) {
-            // No subcategories available - use main category ID directly
-            subCategorySelect.disabled = true;
-            subCategorySelect.innerHTML = '<option value="' + mainCategoryId + '">No subcategories (using main category)</option>';
-            const option = document.createElement('option');
-            option.value = mainCategoryId;
-            option.textContent = 'No subcategories (using main category)';
-            option.selected = true;
-            subCategorySelect.innerHTML = '';
-            subCategorySelect.appendChild(option);
+            // No subcategories - use main category
+            subSelect.add(new Option('No subcategories (using main category)', mainCategoryId, true, true));
         } else {
-            // Has subcategories
-            subCategorySelect.disabled = false;
-
             // Add "All" option
-            const allOption = document.createElement('option');
-            allOption.value = mainCategoryId;
-            allOption.textContent = 'All Subcategories';
-            subCategorySelect.appendChild(allOption);
+            subSelect.add(new Option('All Subcategories', mainCategoryId));
 
-            // Add subcategory options
-            children.forEach(child => {
-                const option = document.createElement('option');
-                option.value = child.id;
-                option.textContent = child.name;
-                if (child.name_ar) {
-                    option.textContent += ' (' + child.name_ar + ')';
-                }
-
-                // Check if this child should be selected
-                if (selectedChildId && selectedChildId === child.id) {
-                    option.selected = true;
-                }
-
-                subCategorySelect.appendChild(option);
+            // Add each subcategory
+            children.forEach(function(child) {
+                const text = child.name_ar ? child.name + ' (' + child.name_ar + ')' : child.name;
+                subSelect.add(new Option(text, child.id));
             });
         }
-    });
+    }
 
-    // Trigger change on page load to populate subcategories if main category is selected
+    // Setup event listener when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
-        const mainCategorySelect = document.getElementById('main_category');
+        const mainSelect = document.getElementById('main_category');
 
-        // Debug: Log category hierarchy
-        console.log('Category Hierarchy loaded:', categoryHierarchy);
-        console.log('Main category select value:', mainCategorySelect.value);
+        if (mainSelect) {
+            // Add change event listener
+            mainSelect.addEventListener('change', function() {
+                updateSubcategories(this.value);
+            });
 
-        if (mainCategorySelect.value) {
-            mainCategorySelect.dispatchEvent(new Event('change'));
+            // Initialize if there's a selected value
+            if (mainSelect.value) {
+                updateSubcategories(mainSelect.value);
+            }
         }
     });
 
@@ -829,9 +825,15 @@
     }
 
     // Show loading spinner on form submit
-    document.getElementById('searchForm').addEventListener('submit', function() {
-        document.getElementById('loadingSpinner').style.display = 'block';
-    });
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            if (loadingSpinner) {
+                loadingSpinner.style.display = 'block';
+            }
+        });
+    }
 
     // Handle product type filter changes
     document.querySelectorAll('input[name="product_type"]').forEach(radio => {

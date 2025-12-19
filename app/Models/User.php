@@ -35,6 +35,7 @@ class User extends Authenticatable
         'marketing_code',
         'marketing_code_approved',
         'avatar',
+        'logo',
         'otp_code',
         'otp_expires_at',
         'is_verified',

@@ -927,6 +927,11 @@ class ProductController extends Controller
                     $apiOptions['min_orders'] = $request->get('min_orders');
                 }
 
+                // Add ship from filter
+                if ($request->filled('ship_from')) {
+                    $apiOptions['ship_from'] = $request->get('ship_from');
+                }
+
                 $result = $this->aliexpressTextService->searchProductsByText(
                     $categoryKeyword,
                     $apiOptions
@@ -983,6 +988,11 @@ class ProductController extends Controller
                 // Add minimum orders filter
                 if ($request->get('min_orders')) {
                     $apiOptions['min_orders'] = $request->get('min_orders');
+                }
+
+                // Add ship from filter
+                if ($request->filled('ship_from')) {
+                    $apiOptions['ship_from'] = $request->get('ship_from');
                 }
 
                 $result = $this->aliexpressTextService->searchProductsByText(
