@@ -1282,8 +1282,8 @@ return [
     'payment_verification_failed' => 'فشل التحقق من الدفع',
     'payment_cancelled' => 'تم إلغاء الدفع',
     'invalid_payment_data' => 'بيانات دفع غير صالحة',
-    'pay_with_ziina' => 'الدفع عبر زينة',
-    'secure_payment_gateway' => 'بوابة دفع آمنة للإمارات',
+    'pay_with_ziina' => 'الدفع الإلكتروني',
+    'secure_payment_gateway' => 'بوابة دفع آمنة',
 
     // Invoice
     'invoice_number' => 'رقم الفاتورة',

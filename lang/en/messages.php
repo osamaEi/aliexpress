@@ -971,8 +971,8 @@ return [
     'payment_verification_failed' => 'Payment verification failed',
     'payment_cancelled' => 'Payment was cancelled',
     'invalid_payment_data' => 'Invalid payment data',
-    'pay_with_ziina' => 'Pay with Ziina',
-    'secure_payment_gateway' => 'Secure payment gateway for UAE',
+    'pay_with_ziina' => 'Pay Electronically',
+    'secure_payment_gateway' => 'Secure payment gateway',
 
     // Invoice
     'invoice_number' => 'Invoice Number',
