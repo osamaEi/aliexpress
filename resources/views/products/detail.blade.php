@@ -11,12 +11,11 @@
         <!-- Currency Switcher -->
         <div class="btn-group" role="group">
             @php
-                $currentCurrency = session('currency_code', 'USD');
                 $activeCurrencies = \App\Models\Currency::active();
             @endphp
             @foreach($activeCurrencies as $currency)
                 <a href="{{ route('currency.switch', $currency->code) }}"
-                   class="btn btn-sm {{ $currentCurrency == $currency->code ? 'btn-success' : 'btn-outline-success' }}"
+                   class="btn btn-sm {{ $currentCurrency->code == $currency->code ? 'btn-success' : 'btn-outline-success' }}"
                    onclick="event.preventDefault(); switchCurrency('{{ $currency->code }}')">
                     <x-currency-symbol :currency="$currency->code" width="16" height="16" :showText="false" />
                     {{ $currency->code }}
@@ -26,12 +25,12 @@
 
         <!-- Language Switcher -->
         <!-- <div class="btn-group" role="group">
-            <a href="{{ url()->current() }}?lang=en&currency={{ $currentCurrency }}"
+            <a href="{{ url()->current() }}?lang=en&currency={{ $currentCurrency->code }}"
                class="btn btn-sm {{ app()->getLocale() == 'en' ? 'btn-primary' : 'btn-outline-primary' }}"
                onclick="event.preventDefault(); switchLanguage('en')">
                 English
             </a>
-            <a href="{{ url()->current() }}?lang=ar&currency={{ $currentCurrency }}"
+            <a href="{{ url()->current() }}?lang=ar&currency={{ $currentCurrency->code }}"
                class="btn btn-sm {{ app()->getLocale() == 'ar' ? 'btn-primary' : 'btn-outline-primary' }}"
                onclick="event.preventDefault(); switchLanguage('ar')">
                 العربية
