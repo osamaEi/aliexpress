@@ -41,7 +41,7 @@
                     <div class="card bg-success text-white">
                         <div class="card-body text-center">
                             <h3 class="mb-0">{{ App\Models\Order::where('status', 'delivered')->count() }}</h3>
-                            <small>{{ app()->getLocale() == 'ar' ? 'طلبات موصلة' : 'Delivered Orders' }}</small>
+                            <small>{{ __('messages.delivered_orders') }}</small>
                         </div>
                     </div>
                 </div>
@@ -160,7 +160,7 @@
                                             {{ $order->product->name }}
                                         </a>
                                         @if($order->product->isAliexpressProduct())
-                                            <br><small class="text-muted">🇨🇳 {{ app()->getLocale() == 'ar' ? 'من الصين' : 'From China' }}</small>
+                                            <br><small class="text-muted">{{ __('messages.from_china') }}</small>
                                         @endif
                                     </td>
                                     <td>{{ $order->quantity }}</td>
@@ -188,6 +188,10 @@
                                         <div class="btn-group">
                                             <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-info" title="{{ __('messages.view') }}">
                                                 <i class="ri-eye-line"></i>
+                                            </a>
+
+                                            <a href="{{ route('products.detail', $order->product) }}" class="btn btn-sm btn-outline-primary" title="{{ __('messages.view_product') }}">
+                                                <i class="ri-product-hunt-line"></i>
                                             </a>
 
                                             @if($order->canBePlaced())

@@ -995,6 +995,27 @@ return [
     'select_seller' => 'اختر البائع',
     'products_assigned_successfully' => 'تم تخصيص المنتجات بنجاح',
 
+    // Orders labels
+    'delivered_orders' => 'طلبات موصلة',
+    'view_product' => 'عرض المنتج',
+    'order' => 'الطلب',
+    'supplier_order_id' => 'معرّف طلب المورد',
+    'order_auto_place_info' => 'سيتم إرسال هذا الطلب تلقائيًا إلى علي إكسبريس. إذا لم يحدث ذلك تلقائيًا، يمكنك استخدام الزر أدناه.',
+    'place_with_supplier' => 'إرسال الطلب للمورد يدويًا',
+    'confirm_place_with_supplier' => 'هل تريد إرسال هذا الطلب إلى المورد؟\n\nملاحظة: الطلبات تُرسل تلقائيًا. انقر فقط إذا فشل الإرسال التلقائي.',
+    'update_tracking' => 'تحديث التتبع',
+    'order_items' => 'عناصر الطلب',
+    'unit_price' => 'سعر الوحدة',
+    'customer_information' => 'معلومات العميل',
+    'shipping_information' => 'معلومات الشحن',
+    'tracking_number' => 'رقم التتبع',
+    'shipping_method' => 'طريقة الشحن',
+    'order_timeline' => 'خط زمني للطلب',
+    'order_created' => 'تم إنشاء الطلب',
+    'placed_with_supplier' => 'تم الطلب من المورد',
+    'admin_notes' => 'ملاحظات المدير',
+    'confirm_cancel_order' => 'هل أنت متأكد من إلغاء هذا الطلب؟',
+
     // China Search
     'search_aliexpress' => 'البحث في الصين 🇨🇳',
     'search_aliexpress_products' => 'البحث في المنتجات الصينية 🇨🇳',
