@@ -68,9 +68,29 @@
                         <div class="flex-grow-1">
                             <h6>{{ $order->product->name }}</h6>
                             <p class="text-muted mb-2">{{ __('messages.quantity') }}: {{ $order->quantity }}</p>
+                            @php
+                                $currentCurrency = $currentCurrency ?? \App\Models\Currency::where('code', session('currency_code', 'USD'))->first() ?? \App\Models\Currency::default();
+                                $orderCurrency = \App\Models\Currency::where('code', $order->currency)->first();
+
+                                // Convert prices if order currency is different from current currency
+                                $unitPrice = $order->unit_price;
+                                $totalPrice = $order->total_price;
+
+                                if ($orderCurrency && $currentCurrency->code !== $order->currency) {
+                                    $unitPrice = $currentCurrency->convertFrom($order->unit_price, $order->currency);
+                                    $totalPrice = $currentCurrency->convertFrom($order->total_price, $order->currency);
+                                }
+                            @endphp
                             <p class="mb-0">
-                                <strong>{{ __('messages.unit_price') }}:</strong> {{ $order->currency }} {{ number_format($order->unit_price, 2) }}<br>
-                                <strong>{{ __('messages.total') }}:</strong> <span class="text-primary fs-5">{{ $order->currency }} {{ number_format($order->total_price, 2) }}</span>
+                                <strong>{{ __('messages.unit_price') }}:</strong> {{ $currentCurrency->symbol }} {{ number_format($unitPrice, 2) }}
+                                @if($currentCurrency->code !== $order->currency)
+                                    <small class="text-muted">({{ __('messages.original') }}: {{ $order->currency }} {{ number_format($order->unit_price, 2) }})</small>
+                                @endif
+                                <br>
+                                <strong>{{ __('messages.total') }}:</strong> <span class="text-primary fs-5">{{ $currentCurrency->symbol }} {{ number_format($totalPrice, 2) }}</span>
+                                @if($currentCurrency->code !== $order->currency)
+                                    <small class="text-muted d-block">({{ __('messages.original') }}: {{ $order->currency }} {{ number_format($order->total_price, 2) }})</small>
+                                @endif
                             </p>
                         </div>
                         <div>

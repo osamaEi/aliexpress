@@ -47,6 +47,17 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'code' => 'SAR',
+                'name' => 'Saudi Riyal',
+                'symbol' => 'ر.س',
+                'exchange_rate' => 3.7500,
+                'is_active' => true,
+                'is_default' => false,
+                'sort_order' => 3,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 

@@ -321,6 +321,11 @@ Route::middleware('auth')->group(function () {
         Route::put('/settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
         Route::post('/settings/delete-image', [App\Http\Controllers\Admin\SettingController::class, 'deleteImage'])->name('settings.delete-image');
 
+        // Currency Management
+        Route::resource('currencies', App\Http\Controllers\Admin\CurrencyManagementController::class);
+        Route::post('/currencies/{currency}/toggle-active', [App\Http\Controllers\Admin\CurrencyManagementController::class, 'toggleActive'])->name('currencies.toggle-active');
+        Route::post('/currencies/{currency}/set-default', [App\Http\Controllers\Admin\CurrencyManagementController::class, 'setDefault'])->name('currencies.set-default');
+
         // Logs Management
         Route::get('/logs', [App\Http\Controllers\Admin\LogController::class, 'index'])->name('logs.index');
         Route::get('/logs/download', [App\Http\Controllers\Admin\LogController::class, 'download'])->name('logs.download');

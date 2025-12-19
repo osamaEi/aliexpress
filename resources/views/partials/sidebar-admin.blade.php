@@ -92,6 +92,14 @@
             </a>
         </li>
 
+        <!-- Currency Management -->
+        <li class="menu-item {{ request()->routeIs('admin.currencies.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.currencies.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-money-dollar-circle-line"></i>
+                <div>{{ __('messages.currency_management') }}</div>
+            </a>
+        </li>
+
         <!-- Token Management -->
         <li class="menu-item {{ request()->routeIs('admin.tokens') ? 'active' : '' }}">
             <a href="{{ route('admin.tokens') }}" class="menu-link">
