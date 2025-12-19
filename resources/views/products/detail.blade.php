@@ -502,10 +502,10 @@
 
                     <div class="d-flex gap-2 mt-4">
                         <button type="button" class="btn btn-outline-secondary btn-lg" onclick="goToStep(2)">
-                            <i class="ri-arrow-left-line me-2"></i>Back
+                            <i class="ri-arrow-left-line me-2"></i>
                         </button>
                         <button type="button" class="btn btn-success btn-lg flex-grow-1" id="proceedToOrderBtn" style="display: none;" onclick="goToStep(4)">
-                            <i class="ri-shopping-bag-line me-2"></i>Create Order
+                            <i class="ri-shopping-bag-line me-2"></i>{{ __('messages.create_order') }}
                         </button>
                     </div>
                 </div>
