@@ -117,7 +117,9 @@
             <!-- Subscription History Button -->
             <div class="card mb-4">
                 <div class="card-body text-center">
-                    <a href="https://i.selaa.ae/subscriptions-history" class="btn btn-outline-primary w-100">
+                    <a href="https://i.selaa.ae/subscriptions-history" class="btn btn-outline-primary w-100"
+                       onmouseover="this.style.backgroundColor='#ff8c00'; this.style.borderColor='#ff8c00'; this.style.color='white';"
+                       onmouseout="this.style.backgroundColor=''; this.style.borderColor=''; this.style.color='';">
                         <i class="ri-history-line me-2"></i>
                         {{ __('messages.view_subscription_history') }}
                     </a>

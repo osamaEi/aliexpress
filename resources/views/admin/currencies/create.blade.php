@@ -57,10 +57,7 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="symbol" class="form-label">
-                            <x-currency-icon width="18" height="18" class="text-primary" />
-                            {{ __('messages.symbol') }} *
-                        </label>
+                        <label for="symbol" class="form-label">{{ __('messages.symbol') }} *</label>
                         <input type="text"
                                class="form-control @error('symbol') is-invalid @enderror"
                                id="symbol"

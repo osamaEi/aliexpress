@@ -6,17 +6,69 @@
 
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
-    <!-- Language Switcher -->
-    <div class="d-flex justify-content-end mb-3">
+    <!-- Language & Currency Switchers -->
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-3">
+        <!-- Currency Switcher -->
         <div class="btn-group" role="group">
-            <a href="{{ url()->current() }}?lang=en" class="btn btn-sm {{ app()->getLocale() == 'en' ? 'btn-primary' : 'btn-outline-primary' }}">
+            @php
+                $currentCurrency = session('currency_code', 'USD');
+                $activeCurrencies = \App\Models\Currency::active();
+            @endphp
+            @foreach($activeCurrencies as $currency)
+                <a href="{{ route('currency.switch', $currency->code) }}"
+                   class="btn btn-sm {{ $currentCurrency == $currency->code ? 'btn-success' : 'btn-outline-success' }}"
+                   onclick="event.preventDefault(); switchCurrency('{{ $currency->code }}')">
+                    <x-currency-symbol :currency="$currency->code" width="16" height="16" :showText="false" />
+                    {{ $currency->code }}
+                </a>
+            @endforeach
+        </div>
+
+        <!-- Language Switcher -->
+        <!-- <div class="btn-group" role="group">
+            <a href="{{ url()->current() }}?lang=en&currency={{ $currentCurrency }}"
+               class="btn btn-sm {{ app()->getLocale() == 'en' ? 'btn-primary' : 'btn-outline-primary' }}"
+               onclick="event.preventDefault(); switchLanguage('en')">
                 English
             </a>
-            <a href="{{ url()->current() }}?lang=ar" class="btn btn-sm {{ app()->getLocale() == 'ar' ? 'btn-primary' : 'btn-outline-primary' }}">
+            <a href="{{ url()->current() }}?lang=ar&currency={{ $currentCurrency }}"
+               class="btn btn-sm {{ app()->getLocale() == 'ar' ? 'btn-primary' : 'btn-outline-primary' }}"
+               onclick="event.preventDefault(); switchLanguage('ar')">
                 العربية
             </a>
-        </div>
+        </div> -->
     </div>
+
+    @push('scripts')
+    <script>
+        function switchLanguage(lang) {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('lang', lang);
+            currentUrl.searchParams.set('currency', '{{ $currentCurrency }}');
+            window.location.href = currentUrl.toString();
+        }
+
+        function switchCurrency(currencyCode) {
+            // First, switch the currency in session
+            fetch(`/currency/${currencyCode}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(() => {
+                // Reload the page with the new currency parameter
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('currency', currencyCode);
+                currentUrl.searchParams.set('lang', '{{ app()->getLocale() }}');
+                window.location.href = currentUrl.toString();
+            })
+            .catch(error => {
+                console.error('Error switching currency:', error);
+            });
+        }
+    </script>
+    @endpush
 
     <!-- Product Hero Section -->
     <div class="card shadow-lg mb-4" style="border-radius: 20px; overflow: hidden; border: none;">

@@ -53,10 +53,7 @@
                             </td>
                             <td>{{ $currency->name }}</td>
                             <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <x-currency-icon width="24" height="24" class="text-primary" />
-                                    <span class="fs-5 fw-semibold">{{ $currency->symbol }}</span>
-                                </div>
+                                <x-currency-symbol :currency="$currency->code" width="28" height="28" class="fs-5" />
                             </td>
                             <td>
                                 <code>{{ number_format($currency->exchange_rate, 4) }}</code>

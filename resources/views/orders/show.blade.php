@@ -83,19 +83,19 @@
                             @endphp
                             <p class="mb-0">
                                 <strong>{{ __('messages.unit_price') }}:</strong>
-                                <x-currency-icon width="16" height="16" class="text-primary" />
-                                <span>{{ $currentCurrency->symbol }} {{ number_format($unitPrice, 2) }}</span>
+                                <x-currency-symbol :currency="$currentCurrency->code" width="18" height="18" />
+                                {{ number_format($unitPrice, 2) }}
                                 @if($currentCurrency->code !== $order->currency)
-                                    <small class="text-muted">({{ __('messages.original') }}: {{ $order->currency }} {{ number_format($order->unit_price, 2) }})</small>
+                                    <small class="text-muted">({{ __('messages.original') }}: <x-currency-symbol :currency="$order->currency" width="14" height="14" /> {{ number_format($order->unit_price, 2) }})</small>
                                 @endif
                                 <br>
                                 <strong>{{ __('messages.total') }}:</strong>
                                 <span class="text-primary fs-5">
-                                    <x-currency-icon width="20" height="20" class="text-primary" />
-                                    {{ $currentCurrency->symbol }} {{ number_format($totalPrice, 2) }}
+                                    <x-currency-symbol :currency="$currentCurrency->code" width="24" height="24" class="text-primary" />
+                                    {{ number_format($totalPrice, 2) }}
                                 </span>
                                 @if($currentCurrency->code !== $order->currency)
-                                    <small class="text-muted d-block">({{ __('messages.original') }}: {{ $order->currency }} {{ number_format($order->total_price, 2) }})</small>
+                                    <small class="text-muted d-block">({{ __('messages.original') }}: <x-currency-symbol :currency="$order->currency" width="16" height="16" /> {{ number_format($order->total_price, 2) }})</small>
                                 @endif
                             </p>
                         </div>

@@ -86,12 +86,12 @@
         </li>
 
         <!-- Products -->
-        <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('products.search-*') && !request()->routeIs('products.my-assigned') ? 'active' : '' }}">
+        <!-- <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('products.search-*') && !request()->routeIs('products.my-assigned') ? 'active' : '' }}">
             <a href="{{ route('products.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-shopping-bag-3-line"></i>
                 <div>{{ __('messages.products') }}</div>
             </a>
-        </li>
+        </li> -->
         @endif
 
         @if(auth()->user()->hasActiveSubscription())
