@@ -82,12 +82,18 @@
                                 }
                             @endphp
                             <p class="mb-0">
-                                <strong>{{ __('messages.unit_price') }}:</strong> {{ $currentCurrency->symbol }} {{ number_format($unitPrice, 2) }}
+                                <strong>{{ __('messages.unit_price') }}:</strong>
+                                <x-currency-icon width="16" height="16" class="text-primary" />
+                                <span>{{ $currentCurrency->symbol }} {{ number_format($unitPrice, 2) }}</span>
                                 @if($currentCurrency->code !== $order->currency)
                                     <small class="text-muted">({{ __('messages.original') }}: {{ $order->currency }} {{ number_format($order->unit_price, 2) }})</small>
                                 @endif
                                 <br>
-                                <strong>{{ __('messages.total') }}:</strong> <span class="text-primary fs-5">{{ $currentCurrency->symbol }} {{ number_format($totalPrice, 2) }}</span>
+                                <strong>{{ __('messages.total') }}:</strong>
+                                <span class="text-primary fs-5">
+                                    <x-currency-icon width="20" height="20" class="text-primary" />
+                                    {{ $currentCurrency->symbol }} {{ number_format($totalPrice, 2) }}
+                                </span>
                                 @if($currentCurrency->code !== $order->currency)
                                     <small class="text-muted d-block">({{ __('messages.original') }}: {{ $order->currency }} {{ number_format($order->total_price, 2) }})</small>
                                 @endif
