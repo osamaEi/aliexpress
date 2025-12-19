@@ -43,36 +43,32 @@
                 @csrf
                 @method('PUT')
 
-                @if(request()->get('only') == 'descriptions')
-                    <div class="row">
-                        <div class="col-12 mb-3">
-                            <label for="description" class="form-label">{{ __('messages.description') }} (EN)</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="8">{{ old('description', $product->description) }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="description_ar" class="form-label">{{ __('messages.description') }} (AR)</label>
-                            <textarea class="form-control @error('description_ar') is-invalid @enderror" id="description_ar" name="description_ar" rows="8">{{ old('description_ar', $product->description_ar) }}</textarea>
-                            @error('description_ar')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mt-3">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="ri-save-line me-1"></i> {{ __('messages.update_product') }}
-                            </button>
-                            <a href="{{ route('products.index') }}" class="btn btn-secondary">
-                                <i class="ri-close-line me-1"></i> {{ __('messages.cancel') }}
-                            </a>
-                        </div>
-                    </div>
-                @else
-
                 <div class="row">
+                    <div class="col-12 mb-3">
+                        <label for="description" class="form-label">{{ __('messages.description') }} (EN)</label>
+                        <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="12">{{ old('description', $product->description) }}</textarea>
+                        @error('description')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label for="description_ar" class="form-label">{{ __('messages.description') }} (AR)</label>
+                        <textarea class="form-control @error('description_ar') is-invalid @enderror" id="description_ar" name="description_ar" rows="12">{{ old('description_ar', $product->description_ar) }}</textarea>
+                        @error('description_ar')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line me-1"></i> {{ __('messages.update_product') }}
+                        </button>
+                        <a href="{{ route('products.index') }}" class="btn btn-secondary">
+                            <i class="ri-close-line me-1"></i> {{ __('messages.cancel') }}
+                        </a>
+                    </div>
+                </div>
                     <!-- Product Name -->
                     <div class="col-md-8 mb-3">
                         <label for="name" class="form-label">{{ __('messages.product_name') }} <span class="text-danger">*</span></label>
@@ -278,10 +274,12 @@
     </div>
 </div>
 
-<script>
-    // Auto-calculate final price based on markup
+    <script>
+    // Only run price update JS when price-related inputs exist (keeps page safe when fields removed)
     document.addEventListener('DOMContentLoaded', function() {
         const originalPriceInput = document.getElementById('original_price');
+        if (!originalPriceInput) return; // no price inputs on this page (description-only edit)
+
         const markupAmountInput = document.getElementById('markup_amount');
         const markupPercentageInput = document.getElementById('markup_percentage');
         const finalPriceInput = document.getElementById('price');
@@ -293,27 +291,22 @@
             const markupAmount = parseFloat(markupAmountInput.value) || 0;
             const markupPercentage = parseFloat(markupPercentageInput.value) || 0;
 
-            // Calculate: Original Price + Markup Amount + (Original Price × Markup %)
             const percentageAmount = originalPrice * (markupPercentage / 100);
             const finalPrice = originalPrice + markupAmount + percentageAmount;
 
-            // Update final price field
-            finalPriceInput.value = finalPrice.toFixed(2);
+            if (finalPriceInput) finalPriceInput.value = finalPrice.toFixed(2);
         }
 
-        // Update currency symbol
         function updateCurrencySymbol() {
-            currencySymbol.textContent = currencySelect.value;
+            if (currencySymbol && currencySelect) currencySymbol.textContent = currencySelect.value;
         }
 
-        // Add event listeners
-        markupAmountInput.addEventListener('input', calculateFinalPrice);
-        markupPercentageInput.addEventListener('input', calculateFinalPrice);
-        originalPriceInput.addEventListener('input', calculateFinalPrice);
-        currencySelect.addEventListener('change', updateCurrencySymbol);
+        markupAmountInput?.addEventListener('input', calculateFinalPrice);
+        markupPercentageInput?.addEventListener('input', calculateFinalPrice);
+        originalPriceInput?.addEventListener('input', calculateFinalPrice);
+        currencySelect?.addEventListener('change', updateCurrencySymbol);
 
-        // Calculate on page load
         calculateFinalPrice();
     });
-</script>
+    </script>
 @endsection
