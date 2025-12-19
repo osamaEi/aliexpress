@@ -512,27 +512,27 @@
 
                 <!-- Step 4: Order Form -->
                 <div id="shipping-step-4" style="display: none;">
-                    <h5 class="mb-4">Order Details</h5>
+                    <h5 class="mb-4">{{ __('messages.order_details') }}</h5>
 
                     <!-- Order Summary -->
                     <div class="card border-0 bg-light mb-4">
                         <div class="card-body">
-                            <h6 class="card-title mb-3">Order Summary</h6>
+                            <h6 class="card-title mb-3">{{ __('messages.order_summary') }}</h6>
                             <div class="d-flex justify-content-between mb-2">
-                                <span>Product Price:</span>
+                                <span>{{ __('messages.product_price') }}:</span>
                                 <strong id="order-product-price"></strong>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
-                                <span>Shipping Cost:</span>
+                                <span>{{ __('messages.shipping_cost') }}:</span>
                                 <strong id="order-shipping-price"></strong>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
-                                <span>Quantity:</span>
+                                <span>{{ __('messages.quantity') }}:</span>
                                 <strong id="order-quantity"></strong>
                             </div>
                             <hr>
                             <div class="d-flex justify-content-between">
-                                <strong>Total Amount:</strong>
+                                <strong>{{ __('messages.total_amount') }}:</strong>
                                 <strong class="text-primary fs-5" id="order-total-price"></strong>
                             </div>
                         </div>
@@ -551,52 +551,52 @@
 
                         <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('messages.full_name') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="customer_name" required>
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Email</label>
+                                <label class="form-label">{{ __('messages.email') }}</label>
                                 <input type="email" class="form-control" name="customer_email">
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label">Phone Code <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('messages.phone_code') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="phone_country" placeholder="+971" required>
                             </div>
 
                             <div class="col-md-9">
-                                <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('messages.phone_number') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="customer_phone" required>
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Street Address <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('messages.street_address') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="shipping_address" required>
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Apartment, Suite, etc. (Optional)</label>
+                                <label class="form-label">{{ __('messages.apartment_optional') }}</label>
                                 <input type="text" class="form-control" name="shipping_address2">
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Postal/ZIP Code <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('messages.postal_zip_code') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="shipping_zip" required>
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Order Notes (Optional)</label>
-                                <textarea class="form-control" name="customer_notes" rows="3" placeholder="Any special instructions?"></textarea>
+                                <label class="form-label">{{ __('messages.order_notes_optional') }}</label>
+                                <textarea class="form-control" name="customer_notes" rows="3" placeholder="{{ __('messages.any_special_instructions') }}"></textarea>
                             </div>
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
                             <button type="button" class="btn btn-outline-secondary btn-lg" onclick="goToStep(3)">
-                                <i class="ri-arrow-left-line me-2"></i>Back
+                                <i class="ri-arrow-left-line me-2"></i>{{ __('messages.back') }}
                             </button>
                             <button type="submit" class="btn btn-success btn-lg flex-grow-1">
-                                <i class="ri-shopping-bag-line me-2"></i>Confirm & Create Order
+                                <i class="ri-shopping-bag-line me-2"></i>{{ __('messages.confirm_create_order') }}
                             </button>
                         </div>
                     </form>

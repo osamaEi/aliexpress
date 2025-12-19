@@ -206,6 +206,13 @@ return [
     'shipping_province' => 'المحافظة/الولاية',
     'customer_notes' => 'ملاحظات العميل',
     'phone_country' => 'رمز الدولة',
+    'phone_code' => 'كود الهاتف',
+    'phone_number' => 'رقم الهاتف',
+    'apartment_optional' => 'شقة/جناح (اختياري)',
+    'postal_zip_code' => 'الرمز البريدي',
+    'order_notes_optional' => 'ملاحظات الطلب (اختياري)',
+    'any_special_instructions' => 'أي تعليمات خاصة؟',
+    'confirm_create_order' => 'تأكيد وإنشاء الطلب',
     'select_product' => 'اختر المنتج',
 
     // Categories

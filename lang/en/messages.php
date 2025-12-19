@@ -203,6 +203,13 @@ return [
     'shipping_province' => 'Province/State',
     'customer_notes' => 'Customer Notes',
     'phone_country' => 'Phone Country',
+    'phone_code' => 'Phone Code',
+    'phone_number' => 'Phone Number',
+    'apartment_optional' => 'Apartment, Suite, etc. (Optional)',
+    'postal_zip_code' => 'Postal/ZIP Code',
+    'order_notes_optional' => 'Order Notes (Optional)',
+    'any_special_instructions' => 'Any special instructions?',
+    'confirm_create_order' => 'Confirm & Create Order',
     'select_product' => 'Select Product',
 
     // Categories
