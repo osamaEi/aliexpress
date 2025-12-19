@@ -30842,3 +30842,55 @@ a:focus {
 .badge-primary:hover {
   background-color: #2b0e02 !important;
 }
+
+/* Override all button hover states with #561C04 theme - High Priority */
+.btn.btn-primary:hover,
+.btn.btn-primary:focus,
+.btn.btn-primary:active,
+.btn.btn-primary.active,
+button.btn-primary:hover,
+button.btn-primary:focus,
+a.btn-primary:hover,
+a.btn-primary:focus {
+  background-color: #2b0e02 !important;
+  border-color: #2b0e02 !important;
+  color: #fff !important;
+  box-shadow: 0 0.125rem 0.625rem 0 rgba(86, 28, 4, 0.4) !important;
+}
+
+.btn.btn-outline-primary:hover,
+.btn.btn-outline-primary:focus,
+button.btn-outline-primary:hover,
+a.btn-outline-primary:hover {
+  background-color: #561C04 !important;
+  border-color: #561C04 !important;
+  color: #fff !important;
+}
+
+/* All buttons generic hover */
+.btn:not(.btn-link):hover,
+button:not(.btn-link):hover,
+a.btn:hover {
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Waves effect color */
+.waves-effect.waves-light:hover {
+  background-color: rgba(86, 28, 4, 0.1) !important;
+}
+
+/* Active state */
+.btn-primary:active,
+.btn-primary.active,
+.show > .btn-primary.dropdown-toggle {
+  background-color: #1a0901 !important;
+  border-color: #1a0901 !important;
+}
+
+/* Focus visible state */
+.btn-primary:focus-visible {
+  background-color: #2b0e02 !important;
+  border-color: #2b0e02 !important;
+  box-shadow: 0 0 0 0.15rem rgba(86, 28, 4, 0.5) !important;
+}

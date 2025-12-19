@@ -41,6 +41,9 @@
     @endif
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
 
+    <!-- Custom Theme CSS - Must be loaded last -->
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-theme.css') }}" />
+
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/typeahead-js/typeahead.css') }}" />

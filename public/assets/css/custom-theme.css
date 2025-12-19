@@ -1,0 +1,171 @@
+/* Custom Theme Override - #561C04 Primary Color */
+/* This file should be loaded AFTER all other CSS files */
+
+/* Primary Button Hover States - Highest Priority */
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.btn.btn-primary:hover,
+.btn.btn-primary:focus,
+.btn.btn-primary:active,
+.btn.btn-primary.active,
+button.btn-primary:hover,
+button.btn-primary:focus,
+button.btn-primary:active,
+a.btn-primary:hover,
+a.btn-primary:focus,
+a.btn-primary:active,
+.waves-effect.btn-primary:hover,
+.waves-effect.btn-primary:focus {
+  background-color: #2b0e02 !important;
+  border-color: #2b0e02 !important;
+  color: #fff !important;
+  box-shadow: 0 0.125rem 0.625rem 0 rgba(86, 28, 4, 0.4) !important;
+}
+
+/* Outline Primary Button Hover */
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn.btn-outline-primary:hover,
+.btn.btn-outline-primary:focus,
+button.btn-outline-primary:hover,
+a.btn-outline-primary:hover {
+  background-color: #561C04 !important;
+  border-color: #561C04 !important;
+  color: #fff !important;
+}
+
+/* Label Primary Button Hover */
+.btn-label-primary:hover,
+.btn-label-primary:focus {
+  background-color: #f5e6d3 !important;
+  border-color: #f5e6d3 !important;
+  color: #561C04 !important;
+}
+
+/* Text Primary Button Hover */
+.btn-text-primary:hover,
+.btn-text-primary:focus {
+  background-color: rgba(86, 28, 4, 0.08) !important;
+  color: #561C04 !important;
+}
+
+/* Active State */
+.btn-primary:active,
+.btn-primary.active,
+.show > .btn-primary.dropdown-toggle,
+.btn-primary:active:focus,
+.btn-primary.active:focus {
+  background-color: #1a0901 !important;
+  border-color: #1a0901 !important;
+  color: #fff !important;
+}
+
+/* Focus Visible State */
+.btn-primary:focus-visible {
+  background-color: #2b0e02 !important;
+  border-color: #2b0e02 !important;
+  box-shadow: 0 0 0 0.15rem rgba(86, 28, 4, 0.5) !important;
+}
+
+/* Disabled State - Keep Original Color */
+.btn-primary:disabled,
+.btn-primary.disabled {
+  background-color: #561C04 !important;
+  border-color: #561C04 !important;
+  opacity: 0.6;
+}
+
+/* All Buttons Hover Effect */
+.btn:not(.btn-link):hover {
+  transform: translateY(-1px);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Waves Effect */
+.waves-effect.waves-light:hover {
+  background-color: rgba(86, 28, 4, 0.1) !important;
+}
+
+/* Links Hover */
+a:hover:not(.btn),
+a:focus:not(.btn) {
+  color: #561C04 !important;
+}
+
+/* Nav Links Hover */
+.nav-link:hover,
+.nav-link:focus {
+  color: #561C04 !important;
+}
+
+/* Dropdown Items Hover */
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: rgba(86, 28, 4, 0.08) !important;
+  color: #561C04 !important;
+}
+
+/* Badges */
+.badge-primary,
+.badge.bg-primary {
+  background-color: #561C04 !important;
+}
+
+.badge-primary:hover,
+.badge.bg-primary:hover {
+  background-color: #2b0e02 !important;
+}
+
+/* Alert Primary */
+.alert-primary {
+  background-color: rgba(86, 28, 4, 0.1) !important;
+  border-color: #561C04 !important;
+  color: #561C04 !important;
+}
+
+/* Form Focus */
+.form-control:focus,
+.form-select:focus {
+  border-color: #561C04 !important;
+  box-shadow: 0 0 0 0.15rem rgba(86, 28, 4, 0.25) !important;
+}
+
+/* Checkbox and Radio */
+.form-check-input:checked {
+  background-color: #561C04 !important;
+  border-color: #561C04 !important;
+}
+
+/* Switch */
+.form-switch .form-check-input:checked {
+  background-color: #561C04 !important;
+  border-color: #561C04 !important;
+}
+
+/* Progress Bar */
+.progress-bar {
+  background-color: #561C04 !important;
+}
+
+/* Pagination Active */
+.pagination .page-item.active .page-link {
+  background-color: #561C04 !important;
+  border-color: #561C04 !important;
+}
+
+.pagination .page-link:hover {
+  background-color: rgba(86, 28, 4, 0.1) !important;
+  color: #561C04 !important;
+}
+
+/* Table Hover */
+.table-hover tbody tr:hover {
+  background-color: rgba(86, 28, 4, 0.05) !important;
+}
+
+/* Card Hover */
+.card:hover {
+  box-shadow: 0 0.375rem 1.25rem 0 rgba(86, 28, 4, 0.18) !important;
+}
