@@ -973,6 +973,12 @@ return [
     'invalid_payment_data' => 'Invalid payment data',
     'pay_with_ziina' => 'Pay Electronically',
     'secure_payment_gateway' => 'Secure payment gateway',
+    'subscription_price' => 'Subscription Price',
+    'fixed_gateway_fee' => 'Fixed Fee',
+    'percentage_gateway_fee' => 'Percentage Fee',
+    'total_gateway_fees' => 'Total Gateway Fees',
+    'final_amount_to_pay' => 'Final Amount to Pay',
+    'gateway_fee_note' => 'Payment gateway fees: Fixed fee 2 AED + 7.9% of subscription price',
 
     // Invoice
     'invoice_number' => 'Invoice Number',

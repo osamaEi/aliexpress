@@ -1284,6 +1284,12 @@ return [
     'invalid_payment_data' => 'بيانات دفع غير صالحة',
     'pay_with_ziina' => 'الدفع الإلكتروني',
     'secure_payment_gateway' => 'بوابة دفع آمنة',
+    'subscription_price' => 'سعر الاشتراك',
+    'fixed_gateway_fee' => 'رسوم ثابتة',
+    'percentage_gateway_fee' => 'رسوم نسبية',
+    'total_gateway_fees' => 'إجمالي رسوم البوابة',
+    'final_amount_to_pay' => 'المبلغ النهائي المطلوب دفعه',
+    'gateway_fee_note' => 'رسوم بوابة الدفع: رسوم ثابتة 2 درهم + 7.9% من قيمة الاشتراك',
 
     // Invoice
     'invoice_number' => 'رقم الفاتورة',

@@ -55,8 +55,19 @@ class SubscriptionController extends Controller
             $totalDays = $subscription->duration_days + $remainingDays;
         }
 
+        // Calculate payment gateway fees
+        $ziinaService = app(\App\Services\ZiinaPaymentService::class);
+        $feeBreakdown = $ziinaService->calculateFees($subscription->price);
+
         // Show payment page with options
-        return view('subscriptions.payment', compact('subscription', 'isUpgrade', 'remainingDays', 'totalDays', 'currentSubscription'));
+        return view('subscriptions.payment', compact(
+            'subscription',
+            'isUpgrade',
+            'remainingDays',
+            'totalDays',
+            'currentSubscription',
+            'feeBreakdown'
+        ));
     }
 
     /**

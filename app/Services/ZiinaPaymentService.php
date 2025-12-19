@@ -231,25 +231,28 @@ class ZiinaPaymentService
     }
 
     /**
-     * Calculate Ziina payment gateway fees
-     * Based on Ziina's fee structure
+     * Calculate payment gateway fees
+     * Fee structure: 2 AED + 7.9% of the amount
      *
      * @param float $amount Amount in AED
-     * @return array ['gross_amount' => float, 'fee' => float, 'net_amount' => float]
+     * @return array ['gross_amount' => float, 'fee' => float, 'net_amount' => float, 'fixed_fee' => float, 'percentage_fee' => float]
      */
     public function calculateFees(float $amount): array
     {
-        // Ziina fee structure (to be confirmed with Omar)
-        // Typically: 2.9% + 1 AED per transaction
-        $percentageFee = 0.029; // 2.9%
-        $fixedFee = 1.00; // 1 AED
+        // Payment gateway fee structure
+        // Fixed fee: 2 AED + Percentage fee: 7.9% of the amount
+        $fixedFee = 2.00; // 2 AED
+        $percentageRate = 0.079; // 7.9%
 
-        $fee = ($amount * $percentageFee) + $fixedFee;
-        $grossAmount = $amount + $fee;
+        $percentageFee = $amount * $percentageRate;
+        $totalFee = $fixedFee + $percentageFee;
+        $grossAmount = $amount + $totalFee;
 
         return [
             'net_amount' => round($amount, 2),
-            'fee' => round($fee, 2),
+            'fixed_fee' => round($fixedFee, 2),
+            'percentage_fee' => round($percentageFee, 2),
+            'fee' => round($totalFee, 2),
             'gross_amount' => round($grossAmount, 2),
         ];
     }
