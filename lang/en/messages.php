@@ -229,7 +229,7 @@ return [
     'order_created' => 'Order Created',
     'placed_with_supplier' => 'Placed with Supplier',
     'admin_notes' => 'Admin Notes',
-    'confirm_cancel_order' => 'Are you sure you want to cancel this order?'
+    'confirm_cancel_order' => 'Are you sure you want to cancel this order?',
 
     // Categories
     'category_list' => 'Category List',
