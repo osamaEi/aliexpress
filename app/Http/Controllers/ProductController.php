@@ -955,9 +955,9 @@ class ProductController extends Controller
                     'choice_filter' => $request->get('choice_only') ? 'enabled' : 'disabled'
                 ]);
 
-                // Determine locale based on app language
-                $appLocale = app()->getLocale();
-                $aliexpressLocale = $appLocale === 'ar' ? 'ar_MA' : 'en_US';
+                // ALWAYS use English locale for primary search to ensure clean English titles
+                // We'll fetch Arabic translations separately
+                $aliexpressLocale = 'en_US';
 
                 // Prepare API options
                 $apiOptions = [
@@ -1065,16 +1065,9 @@ class ProductController extends Controller
                     ->toArray();
             }
 
-            // Always fetch both English and Arabic titles for products
+            // Always fetch Arabic titles for products (since we always search in English first)
             if (!empty($result['products'])) {
                 try {
-                    $currentLocale = $request->get('locale', 'en_US');
-
-                    // Determine which locale we need to fetch (the opposite of current)
-                    $needArabic = $currentLocale !== 'ar_MA';
-                    $needEnglish = $currentLocale === 'ar_MA';
-
-                    if ($needArabic) {
                         // Current results are in English, fetch Arabic versions
                         $arabicApiOptions = [
                             'locale' => 'ar_MA',
@@ -1118,59 +1111,10 @@ class ProductController extends Controller
                         }
                         unset($product);
 
-                        Log::info('Arabic titles fetched for English search', [
-                            'arabic_titles_found' => count($arabicTitles),
-                            'total_products' => count($result['products'])
-                        ]);
-                    } else {
-                        // Current results are in Arabic, fetch English versions
-                        $englishApiOptions = [
-                            'locale' => 'en_US',
-                            'page' => 1,
-                            'limit' => min(count($result['products']), 50),
-                            'country' => $request->get('country', 'AE'),
-                            'currency' => $request->get('currency', 'AED'),
-                        ];
-
-                        // Add all filters to ensure we get the same products
-                        if (!empty($aliexpressCategoryId)) {
-                            $englishApiOptions['category_id'] = $aliexpressCategoryId;
-                        }
-                        if ($request->get('choice_only')) {
-                            $englishApiOptions['item_tag'] = 'choice';
-                        }
-                        if ($request->filled('ship_from')) {
-                            $englishApiOptions['ship_from'] = $request->get('ship_from');
-                        }
-
-                        // Determine search keyword
-                        $searchKeyword = $keyword ?? $categoryKeyword ?? 'product';
-
-                        $englishResult = $this->aliexpressTextService->searchProductsByText(
-                            $searchKeyword,
-                            $englishApiOptions
-                        );
-
-                        // Create a map of product IDs to English titles
-                        $englishTitles = [];
-                        if (!empty($englishResult['products'])) {
-                            foreach ($englishResult['products'] as $englishProduct) {
-                                $englishTitles[$englishProduct['item_id']] = $englishProduct['title'] ?? null;
-                            }
-                        }
-
-                        // Add English titles to original products (Arabic is already there)
-                        foreach ($result['products'] as &$product) {
-                            $product['title_ar'] = $product['title']; // Original Arabic title
-                            $product['title_en'] = $englishTitles[$product['item_id']] ?? $product['title'];
-                        }
-                        unset($product);
-
-                        Log::info('English titles fetched for Arabic search', [
-                            'english_titles_found' => count($englishTitles),
-                            'total_products' => count($result['products'])
-                        ]);
-                    }
+                    Log::info('Arabic titles fetched', [
+                        'arabic_titles_found' => count($arabicTitles),
+                        'total_products' => count($result['products'])
+                    ]);
                 } catch (\Exception $e) {
                     Log::warning('Failed to fetch bilingual titles', [
                         'error' => $e->getMessage()
