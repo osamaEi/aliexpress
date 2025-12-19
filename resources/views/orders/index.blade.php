@@ -115,7 +115,9 @@
                                         'LB' => '🇱🇧',
                                     ];
                                     $customerCountry = strtoupper($order->shipping_country ?? 'AE');
-                                    $customerFlag = $countryFlags[$customerCountry] ?? '🌍';
+                                        $customerFlagEmoji = $countryFlags[$customerCountry] ?? '🌍';
+                                        $flagSvgPath = public_path('images/flags/'.strtolower($customerCountry).'.svg');
+                                        $flagSvgUrl = file_exists($flagSvgPath) ? asset('images/flags/'.strtolower($customerCountry).'.svg') : null;
 
                                     // Convert currency if needed (AED to current session currency)
                                     $displayCurrency = session('currency_code', 'AED');
@@ -145,7 +147,11 @@
                                     <td>
                                         <div>
                                             {{ $order->customer_name }}
-                                            <span class="ms-1">{{ $customerFlag }}</span>
+                                            @if($flagSvgUrl)
+                                                <img src="{{ $flagSvgUrl }}" alt="{{ $customerCountry }}" class="ms-1" style="width:20px;height:14px;object-fit:cover;vertical-align:middle;border-radius:2px;" />
+                                            @else
+                                                <span class="ms-1">{{ $customerFlagEmoji }}</span>
+                                            @endif
                                         </div>
                                         <small class="text-muted">{{ $order->customer_phone }}</small>
                                     </td>
