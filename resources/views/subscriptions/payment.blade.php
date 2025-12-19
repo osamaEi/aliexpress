@@ -167,7 +167,7 @@
                             </div>
 
                             <!-- Alternative: Wallet Payment (if available) -->
-                            @if(auth()->user()->wallet && auth()->user()->wallet->balance >= $subscription->price)
+                            <!-- @if(auth()->user()->wallet && auth()->user()->wallet->balance >= $subscription->price)
                             <form action="{{ route('subscriptions.pay-with-wallet', $subscription) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-lg btn-outline-success w-100" onclick="return confirm('{{ __('messages.confirm_wallet_payment') }}')">
@@ -178,12 +178,12 @@
                                     </div>
                                 </button>
                             </form>
-                            @endif
+                            @endif -->
                         </div>
                     </div>
 
                     <!-- Security Notice -->
-                    <div class="row mt-4">
+                    <!-- <div class="row mt-4">
                         <div class="col-12">
                             <div class="alert alert-info d-flex align-items-center">
                                 <i class="ri-shield-check-line fs-4 me-3"></i>
@@ -193,7 +193,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Cancel Button -->
                     <div class="row mt-3">
