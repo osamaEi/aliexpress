@@ -1249,7 +1249,7 @@ function displayShippingSuccess(data) {
                 <div class="card border-0 bg-light text-center h-100">
                     <div class="card-body">
                         <i class="ri-truck-line text-success mb-2" style="font-size: 32px;"></i>
-                        <h6 class="mb-1">${data.service_name || '{{ __('messages.standard') }}'}</h6>
+                       
                         <small class="text-muted">{{ __('messages.carrier') }}</small>
                     </div>
                 </div>
