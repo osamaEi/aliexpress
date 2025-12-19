@@ -43,6 +43,35 @@
                 @csrf
                 @method('PUT')
 
+                @if(request()->get('only') == 'descriptions')
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="description" class="form-label">{{ __('messages.description') }} (EN)</label>
+                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="8">{{ old('description', $product->description) }}</textarea>
+                            @error('description')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="description_ar" class="form-label">{{ __('messages.description') }} (AR)</label>
+                            <textarea class="form-control @error('description_ar') is-invalid @enderror" id="description_ar" name="description_ar" rows="8">{{ old('description_ar', $product->description_ar) }}</textarea>
+                            @error('description_ar')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line me-1"></i> {{ __('messages.update_product') }}
+                            </button>
+                            <a href="{{ route('products.index') }}" class="btn btn-secondary">
+                                <i class="ri-close-line me-1"></i> {{ __('messages.cancel') }}
+                            </a>
+                        </div>
+                    </div>
+                @else
+
                 <div class="row">
                     <!-- Product Name -->
                     <div class="col-md-8 mb-3">
@@ -233,6 +262,7 @@
                 </div>
 
                 <!-- Buttons -->
+                @unless(request()->get('only') == 'descriptions')
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">
                         <i class="ri-save-line me-1"></i> {{ __('messages.update_product') }}
@@ -241,6 +271,7 @@
                         <i class="ri-close-line me-1"></i> {{ __('messages.cancel') }}
                     </a>
                 </div>
+                @endunless
             </form>
         </div>
     </div>

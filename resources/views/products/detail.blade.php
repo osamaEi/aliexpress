@@ -221,13 +221,13 @@
         <div class="tab-pane fade show active" id="description">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    @if($aliexpressData && isset($aliexpressData['ae_item_base_info_dto']['detail']))
-                        <div class="product-description">
-                            {!! $aliexpressData['ae_item_base_info_dto']['detail'] !!}
-                        </div>
-                    @elseif($product->description || $product->description_ar)
+                    @if($product->description || $product->description_ar)
                         <div class="product-description">
                             {!! app()->getLocale() == 'ar' && $product->description_ar ? $product->description_ar : $product->description !!}
+                        </div>
+                    @elseif($aliexpressData && isset($aliexpressData['ae_item_base_info_dto']['detail']))
+                        <div class="product-description">
+                            {!! $aliexpressData['ae_item_base_info_dto']['detail'] !!}
                         </div>
                     @else
                         <p class="text-muted text-center py-5">{{ __('messages.no_description_available') }}</p>
