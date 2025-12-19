@@ -110,7 +110,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <strong>{{ $assignedProduct->localized_name }}</strong>
+                                        <strong>{{ app()->getLocale() == 'ar' && $assignedProduct->name_ar ? $assignedProduct->name_ar : $assignedProduct->name }}</strong>
                                         <br>
                                         @if($assignedProduct->price)
                                             <span class="fw-bold d-flex align-items-center" style="color: #561C04;">

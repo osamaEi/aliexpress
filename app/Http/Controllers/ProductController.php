@@ -173,7 +173,8 @@ class ProductController extends Controller
 
         $product->load('category');
 
-        // Determine language for AliExpress API
+        // Determine locale for AliExpress API
+        $apiLocale = app()->getLocale() == 'ar' ? 'ar_MA' : 'en_US';
         $apiLanguage = app()->getLocale() == 'ar' ? 'AR' : 'EN';
 
         // Fetch AliExpress details if it's an AliExpress product
@@ -190,6 +191,7 @@ class ProductController extends Controller
                         'country' => $country,
                         'currency' => 'USD',
                         'language' => $apiLanguage,
+                        'locale' => $apiLocale,
                     ]
                 );
 
@@ -1063,6 +1065,67 @@ class ProductController extends Controller
                     ->toArray();
             }
 
+            // Fetch Arabic titles for products if not already in Arabic
+            if (!empty($result['products']) && $request->get('locale', 'en_US') !== 'ar_MA') {
+                try {
+                    // Prepare base options for Arabic search
+                    $arabicApiOptions = [
+                        'locale' => 'ar_MA',
+                        'page' => 1,
+                        'limit' => min(count($result['products']), 50),
+                        'country' => $request->get('country', 'AE'),
+                        'currency' => $request->get('currency', 'AED'),
+                    ];
+
+                    // Add category if available
+                    if (!empty($aliexpressCategoryId)) {
+                        $arabicApiOptions['category_id'] = $aliexpressCategoryId;
+                    }
+
+                    // Determine search keyword
+                    $searchKeyword = $keyword ?? $categoryKeyword ?? 'product';
+
+                    $arabicResult = $this->aliexpressTextService->searchProductsByText(
+                        $searchKeyword,
+                        $arabicApiOptions
+                    );
+
+                    // Create a map of product IDs to Arabic titles
+                    $arabicTitles = [];
+                    if (!empty($arabicResult['products'])) {
+                        foreach ($arabicResult['products'] as $arabicProduct) {
+                            $arabicTitles[$arabicProduct['item_id']] = $arabicProduct['title'] ?? null;
+                        }
+                    }
+
+                    // Add Arabic titles to original products
+                    foreach ($result['products'] as &$product) {
+                        $product['title_ar'] = $arabicTitles[$product['item_id']] ?? $product['title'];
+                    }
+                    unset($product);
+
+                    Log::info('Arabic titles fetched', [
+                        'products_count' => count($arabicTitles),
+                        'total_products' => count($result['products'])
+                    ]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to fetch Arabic titles', [
+                        'error' => $e->getMessage()
+                    ]);
+                    // Continue without Arabic titles
+                    foreach ($result['products'] as &$product) {
+                        $product['title_ar'] = $product['title']; // Fallback to English
+                    }
+                    unset($product);
+                }
+            } else {
+                // If already in Arabic or no products, set title_ar
+                foreach ($result['products'] as &$product) {
+                    $product['title_ar'] = $product['title'];
+                }
+                unset($product);
+            }
+
             // Add admin profit to each product price based on category
             if (!empty($result['products'])) {
                 // Get local category ID for admin profit calculation
@@ -1253,8 +1316,10 @@ class ProductController extends Controller
                 'name' => $request->product_title,
                 'name_ar' => $arabicTitle,
                 'slug' => \Str::slug($request->product_title) . '-' . $aliexpressProductId,
-                'description' => 'Product imported from AliExpress',
-                'description_ar' => null,
+                'description' => $request->product_title,
+                'description_ar' => $arabicTitle,
+                'short_description' => $request->product_title,
+                'short_description_ar' => $arabicTitle,
                 'price' => $finalPrice,
                 'currency' => $request->currency ?? 'AED',
                 'original_price' => $basePrice,
@@ -1388,7 +1453,10 @@ class ProductController extends Controller
                         'name' => $productData['product_title'],
                         'name_ar' => $productData['product_title_ar'] ?? null,
                         'slug' => \Str::slug($productData['product_title']) . '-' . $aliexpressProductId,
-                        'description' => 'Product imported from AliExpress',
+                        'description' => $productData['product_title'],
+                        'description_ar' => $productData['product_title_ar'] ?? null,
+                        'short_description' => $productData['product_title'],
+                        'short_description_ar' => $productData['product_title_ar'] ?? null,
                         'price' => $finalPrice,
                         'currency' => $productData['currency'] ?? 'AED',
                         'original_price' => $basePrice,

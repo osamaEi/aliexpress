@@ -69,10 +69,14 @@
                     
                     </div>
 
-                    <h1 class="mb-3 fw-bold" style="font-size: 28px; line-height: 1.4;">{{ $product->name }}</h1>
+                    <h1 class="mb-3 fw-bold" style="font-size: 28px; line-height: 1.4;">
+                        {{ app()->getLocale() == 'ar' && $product->name_ar ? $product->name_ar : $product->name }}
+                    </h1>
 
-                    @if($product->short_description)
-                        <p class="text-muted mb-4" style="font-size: 15px;">{{ $product->short_description }}</p>
+                    @if($product->short_description || $product->short_description_ar)
+                        <p class="text-muted mb-4" style="font-size: 15px;">
+                            {{ app()->getLocale() == 'ar' && $product->short_description_ar ? $product->short_description_ar : $product->short_description }}
+                        </p>
                     @endif
 
                     <!-- Rating & Sales -->
@@ -217,9 +221,9 @@
                         <div class="product-description">
                             {!! $aliexpressData['ae_item_base_info_dto']['detail'] !!}
                         </div>
-                    @elseif($product->description)
+                    @elseif($product->description || $product->description_ar)
                         <div class="product-description">
-                            {!! $product->description !!}
+                            {!! app()->getLocale() == 'ar' && $product->description_ar ? $product->description_ar : $product->description !!}
                         </div>
                     @else
                         <p class="text-muted text-center py-5">{{ __('messages.no_description_available') }}</p>
