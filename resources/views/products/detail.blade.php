@@ -1,5 +1,9 @@
 @extends('dashboard')
 
+@section('title')
+    {{ app()->getLocale() == 'ar' && $product->name_ar ? $product->name_ar : $product->name }} - {{ setting('site_name', 'EcommAli') }}
+@endsection
+
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <!-- Language Switcher -->

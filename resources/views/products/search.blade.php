@@ -415,7 +415,7 @@
                                                 <i class="ri-vip-crown-fill" style="color: #8B4513;"></i>
                                             </span>
                                         @endif
-                                        {{ $product['title'] }}
+                                        {{ app()->getLocale() == 'ar' ? ($product['title_ar'] ?? $product['title']) : ($product['title_en'] ?? $product['title']) }}
                                     </h6>
 
                                     <!-- Price -->
@@ -521,9 +521,9 @@
                                                     <button
                                                         type="button"
                                                         class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
-                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title']) }}', '{{ addslashes($product['title_ar'] ?? $product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', 'AED') }}', '{{ $localCategoryId ?? '' }}', this)"
+                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title_en'] ?? $product['title']) }}', '{{ addslashes($product['title_ar'] ?? $product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', 'AED') }}', '{{ $localCategoryId ?? '' }}', this)"
                                                         data-product-id="{{ $product['item_id'] }}"
-                                                        data-title-en="{{ addslashes($product['title']) }}"
+                                                        data-title-en="{{ addslashes($product['title_en'] ?? $product['title']) }}"
                                                         data-title-ar="{{ addslashes($product['title_ar'] ?? $product['title']) }}"
                                                     >
                                                         <i class="ri-pushpin-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'إسناد لي' : 'Assign to Me' }}
