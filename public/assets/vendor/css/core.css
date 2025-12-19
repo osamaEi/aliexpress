@@ -6,9 +6,9 @@
  */
 :root,
 [data-bs-theme=light] {
-  --bs-blue: #26c6f9;
-  --bs-indigo: #666cff;
-  --bs-purple: #6f42c1;
+  --bs-blue: #561C04;
+  --bs-indigo: #561C04;
+  --bs-purple: #561C04;
   --bs-pink: #e83e8c;
   --bs-red: #ff4d49;
   --bs-orange: #fdb528;
@@ -31,7 +31,7 @@
   --bs-light: #dfdfe3;
   --bs-dark: #4b4b4b;
   --bs-gray: rgba(38, 43, 67, 0.06);
-  --bs-primary-rgb: 102, 108, 255;
+  --bs-primary-rgb:#561C04;
   --bs-secondary-rgb: 109, 120, 141;
   --bs-success-rgb: 114, 225, 40;
   --bs-info-rgb: 38, 198, 249;
@@ -92,8 +92,8 @@
   --bs-link-color: #666cff;
   --bs-link-color-rgb: 102, 108, 255;
   --bs-link-decoration: none;
-  --bs-link-hover-color: #5c61e6;
-  --bs-link-hover-color-rgb: 92, 97, 230;
+  --bs-link-hover-color: #561C04;
+  --bs-link-hover-color-rgb: #561C04;
   --bs-code-color: #e83e8c;
   --bs-highlight-color: #676b7b;
   --bs-highlight-bg: #fff7dc;

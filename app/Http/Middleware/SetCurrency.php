@@ -29,9 +29,34 @@ class SetCurrency
 
         // Share currency with all views
         $currency = Currency::where('code', session('currency_code'))->first();
-        if ($currency) {
-            view()->share('currentCurrency', $currency);
+
+        // If currency not found, fall back to default currency
+        if (!$currency) {
+            $currency = Currency::default();
+
+            // If still no currency, create a default USD currency
+            if (!$currency) {
+                $currency = Currency::where('code', 'USD')->first();
+
+                // Last resort: create USD currency if it doesn't exist
+                if (!$currency) {
+                    $currency = Currency::create([
+                        'code' => 'USD',
+                        'name' => 'US Dollar',
+                        'symbol' => '$',
+                        'exchange_rate' => 1.00,
+                        'is_active' => true,
+                        'is_default' => true,
+                        'sort_order' => 1
+                    ]);
+                }
+            }
+
+            // Update session with the fallback currency
+            session(['currency_code' => $currency->code]);
         }
+
+        view()->share('currentCurrency', $currency);
 
         return $next($request);
     }
