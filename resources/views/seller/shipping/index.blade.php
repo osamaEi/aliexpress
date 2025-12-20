@@ -152,16 +152,8 @@
                             <tbody>
                                 @forelse($orders as $order)
                                 @php
-                                    $countryFlags = [
-                                        'AE' => '🇦🇪', 'SA' => '🇸🇦', 'US' => '🇺🇸', 'GB' => '🇬🇧',
-                                        'EG' => '🇪🇬', 'JO' => '🇯🇴', 'KW' => '🇰🇼', 'BH' => '🇧🇭',
-                                        'OM' => '🇴🇲', 'QA' => '🇶🇦', 'IQ' => '🇮🇶', 'LB' => '🇱🇧',
-                                        'SY' => '🇸🇾', 'YE' => '🇾🇪', 'PS' => '🇵🇸', 'MA' => '🇲🇦',
-                                        'DZ' => '🇩🇿', 'TN' => '🇹🇳', 'LY' => '🇱🇾', 'SD' => '🇸🇩',
-                                        'CN' => '🇨🇳'
-                                    ];
-                                    $customerCountry = strtoupper($order->shipping_country ?? 'AE');
-                                    $customerFlag = $countryFlags[$customerCountry] ?? '🌍';
+                                    // Get country code for flag
+                                    $customerCountry = strtolower($order->shipping_country ?? 'ae');
                                 @endphp
                                 <tr>
                                     <td>
@@ -170,7 +162,11 @@
                                     <td>
                                         <div>
                                             {{ $order->customer_name }}
-                                            <span class="ms-1">{{ $customerFlag }}</span>
+                                            <img src="https://flagcdn.com/w20/{{ $customerCountry }}.png"
+                                                 alt="{{ strtoupper($customerCountry) }}"
+                                                 class="ms-1"
+                                                 style="width:20px;height:14px;object-fit:cover;vertical-align:middle;border-radius:2px;"
+                                                 onerror="this.style.display='none'" />
                                         </div>
                                         <small class="text-muted">{{ $order->customer_phone }}</small>
                                     </td>

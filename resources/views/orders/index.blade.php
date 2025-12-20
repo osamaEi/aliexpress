@@ -98,24 +98,8 @@
                         <tbody>
                             @foreach($orders as $order)
                                 @php
-                                    // Get country flag
-                                    $countryFlags = [
-                                        'AE' => '🇦🇪',
-                                        'SA' => '🇸🇦',
-                                        'US' => '🇺🇸',
-                                        'GB' => '🇬🇧',
-                                        'EG' => '🇪🇬',
-                                        'KW' => '🇰🇼',
-                                        'QA' => '🇶🇦',
-                                        'BH' => '🇧🇭',
-                                        'OM' => '🇴🇲',
-                                        'JO' => '🇯🇴',
-                                        'LB' => '🇱🇧',
-                                    ];
-                                    $customerCountry = strtoupper($order->shipping_country ?? 'AE');
-                                        $customerFlagEmoji = $countryFlags[$customerCountry] ?? '🌍';
-                                        $flagSvgPath = public_path('images/flags/'.strtolower($customerCountry).'.svg');
-                                        $flagSvgUrl = file_exists($flagSvgPath) ? asset('images/flags/'.strtolower($customerCountry).'.svg') : null;
+                                    // Get country code for flag
+                                    $customerCountry = strtolower($order->shipping_country ?? 'ae');
 
                                     // Convert currency using Currency model
                                     $displayAmount = $currentCurrency->convertFrom($order->total_price, $order->currency ?? 'USD');
@@ -129,11 +113,11 @@
                                     <td>
                                         <div>
                                             {{ $order->customer_name }}
-                                            @if($flagSvgUrl)
-                                                <img src="{{ $flagSvgUrl }}" alt="{{ $customerCountry }}" class="ms-1" style="width:20px;height:14px;object-fit:cover;vertical-align:middle;border-radius:2px;" />
-                                            @else
-                                                <span class="ms-1">{{ $customerFlagEmoji }}</span>
-                                            @endif
+                                            <img src="https://flagcdn.com/w20/{{ $customerCountry }}.png"
+                                                 alt="{{ strtoupper($customerCountry) }}"
+                                                 class="ms-1"
+                                                 style="width:20px;height:14px;object-fit:cover;vertical-align:middle;border-radius:2px;"
+                                                 onerror="this.style.display='none'" />
                                         </div>
                                         <small class="text-muted">{{ $order->customer_phone }}</small>
                                     </td>
