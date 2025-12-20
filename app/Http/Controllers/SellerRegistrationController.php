@@ -48,7 +48,7 @@ class SellerRegistrationController extends Controller
                 : 'The image size must be less than 2MB',
         ]);
 
-        // Verify reCAPTCHA v2
+        // Verify reCAPTCHA v3
         if (config('services.recaptcha.enabled')) {
             $recaptchaResponse = $request->input('g-recaptcha-response');
             $recaptchaSecret = config('services.recaptcha.secret_key');
@@ -59,12 +59,12 @@ class SellerRegistrationController extends Controller
 
             $responseData = json_decode($response);
 
-            // For reCAPTCHA v2, just check success
-            if (!$responseData->success) {
+            // For reCAPTCHA v3, check success and score (0.5+ is human)
+            if (!$responseData->success || (isset($responseData->score) && $responseData->score < 0.5)) {
                 return back()->withErrors([
                     'g-recaptcha-response' => app()->getLocale() == 'ar'
-                        ? 'يرجى التحقق من أنك لست روبوت'
-                        : 'Please verify that you are not a robot'
+                        ? 'فشل التحقق من reCAPTCHA. يرجى المحاولة مرة أخرى.'
+                        : 'reCAPTCHA verification failed. Please try again.'
                 ])->withInput();
             }
         }

@@ -12,9 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Google reCAPTCHA v2 -->
+    <!-- Google reCAPTCHA v3 -->
     @if(config('services.recaptcha.enabled'))
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
     @endif
     <style>
         :root {
@@ -487,15 +487,14 @@
             display: none;
         }
 
-        /* reCAPTCHA v2 Checkbox Styling */
-        .recaptcha-wrapper {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-
-        .recaptcha-wrapper > div {
-            transform-origin: center;
+        /* reCAPTCHA v3 Badge Styling */
+        .grecaptcha-badge {
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 9999 !important;
+            position: fixed !important;
+            bottom: 14px !important;
+            right: 14px !important;
         }
     </style>
 </head>
@@ -694,11 +693,9 @@
                     </div>
                 </div>
 
-                <!-- reCAPTCHA v2 Checkbox -->
+                <!-- Hidden reCAPTCHA v3 token field -->
                 @if(config('services.recaptcha.enabled'))
-                <div class="recaptcha-wrapper">
-                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
-                </div>
+                <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
                 @error('g-recaptcha-response')
                     <div class="text-danger text-center mb-3">{{ $message }}</div>
                 @enderror
@@ -795,5 +792,19 @@
         }
     </script>
 
+    <!-- reCAPTCHA v3 Script -->
+    @if(config('services.recaptcha.enabled'))
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            grecaptcha.ready(function() {
+                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'submit'}).then(function(token) {
+                    document.getElementById('g-recaptcha-response').value = token;
+                    document.querySelector('form').submit();
+                });
+            });
+        });
+    </script>
+    @endif
 </body>
 </html>
