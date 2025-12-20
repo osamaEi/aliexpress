@@ -119,11 +119,12 @@ class DistributorController extends Controller
     }
 
     /**
-     * Display all categories.
+     * Display all categories (read-only for distributors).
      */
     public function categories()
     {
-        $categories = Category::where('is_active', true)->paginate(20);
+        // Show all categories (both active and inactive) for viewing
+        $categories = Category::orderBy('name', 'asc')->paginate(20);
         return view('distributor.categories.index', compact('categories'));
     }
 
