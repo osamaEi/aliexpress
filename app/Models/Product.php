@@ -30,6 +30,7 @@ class Product extends Model
         'track_inventory',
         'is_active',
         'category_id',
+        'photo',
         'aliexpress_id',
         'aliexpress_url',
         'aliexpress_price',

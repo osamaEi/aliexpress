@@ -78,17 +78,13 @@
                             <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createOrderModal">
                                 <i class="ri-shopping-bag-line me-1"></i> {{ __('messages.create_order') }}
                             </button>
-                            <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-primary">
-                                <i class="ri-edit-line me-1"></i> {{ __('messages.edit') }}
-                            </a>
+                          
                             @if($product->isAliexpressProduct())
                                 <button type="button" class="btn btn-sm btn-info" id="syncProductBtn" onclick="syncProduct()">
                                     <i class="ri-refresh-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'مزامنة من المورد' : 'Sync from Supplier' }}
                                 </button>
                             @endif
-                            <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
-                            </a>
+                        
                         </div>
                     </div>
 
