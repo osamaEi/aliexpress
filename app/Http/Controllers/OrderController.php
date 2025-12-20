@@ -25,7 +25,14 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user();
         $query = Order::with(['user', 'product'])->latest();
+
+        // Filter orders based on user role
+        // Admin sees all orders, Sellers/Distributors see only their own orders
+        if ($user->user_type !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
 
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {

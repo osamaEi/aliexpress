@@ -269,6 +269,7 @@ Route::middleware('auth')->group(function () {
 
         // Orders View
         Route::get('/orders', [App\Http\Controllers\DistributorController::class, 'orders'])->name('orders');
+        Route::post('/orders/{order}/update-status', [App\Http\Controllers\DistributorController::class, 'updateOrderStatus'])->name('orders.update-status');
     });
 
     // Admin Routes

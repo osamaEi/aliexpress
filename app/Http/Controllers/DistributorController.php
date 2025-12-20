@@ -277,16 +277,69 @@ class DistributorController extends Controller
     /**
      * Display orders assigned to distributor's products.
      */
-    public function orders()
+    public function orders(Request $request)
     {
         $user = Auth::user();
         $assignedProductIds = $user->assignedProducts()->pluck('products.id');
 
-        $orders = Order::whereIn('product_id', $assignedProductIds)
-            ->with(['product', 'user'])
-            ->latest()
-            ->paginate(20);
+        $query = Order::whereIn('product_id', $assignedProductIds)
+            ->with(['product', 'user']);
+
+        // Filter by status
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Search by order number or customer name
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%");
+            });
+        }
+
+        $orders = $query->latest()->paginate(20);
 
         return view('distributor.orders.index', compact('orders'));
+    }
+
+    /**
+     * Update order status (for distributor).
+     */
+    public function updateOrderStatus(Request $request, $orderId)
+    {
+        $user = Auth::user();
+        $assignedProductIds = $user->assignedProducts()->pluck('products.id');
+
+        // Find order and verify it belongs to distributor's products
+        $order = Order::whereIn('product_id', $assignedProductIds)
+            ->findOrFail($orderId);
+
+        $validated = $request->validate([
+            'status' => 'required|in:pending,processing,shipped,delivered,cancelled'
+        ]);
+
+        $oldStatus = $order->status;
+        $order->status = $validated['status'];
+        $order->save();
+
+        \Log::info('Distributor updated order status', [
+            'distributor_id' => $user->id,
+            'order_id' => $order->id,
+            'old_status' => $oldStatus,
+            'new_status' => $validated['status']
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => app()->getLocale() == 'ar' ? 'تم تحديث حالة الطلب بنجاح' : 'Order status updated successfully',
+                'status' => $order->status
+            ]);
+        }
+
+        return redirect()->back()
+            ->with('success', app()->getLocale() == 'ar' ? 'تم تحديث حالة الطلب بنجاح' : 'Order status updated successfully');
     }
 }

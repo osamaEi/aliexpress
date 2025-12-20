@@ -4,17 +4,35 @@
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">{{ __('messages.order_management') }}</h5>
-        
+            <div>
+                <h5 class="mb-0">{{ __('messages.order_management') }}</h5>
+                @if(auth()->user()->user_type === 'admin')
+                    <small class="text-muted">
+                        <i class="ri-global-line me-1"></i>
+                        {{ app()->getLocale() == 'ar' ? 'عرض جميع الطلبات' : 'Viewing all orders' }}
+                    </small>
+                @else
+                    <small class="text-muted">
+                        <i class="ri-user-line me-1"></i>
+                        {{ app()->getLocale() == 'ar' ? 'عرض طلباتك فقط' : 'Viewing your orders only' }}
+                    </small>
+                @endif
+            </div>
         </div>
 
         <div class="card-body">
             <!-- Orders Statistics - Moved to Top -->
+            @php
+                // Filter statistics based on user role
+                $statsQuery = auth()->user()->user_type === 'admin'
+                    ? App\Models\Order::query()
+                    : App\Models\Order::where('user_id', auth()->id());
+            @endphp
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="card bg-warning text-white">
                         <div class="card-body text-center">
-                            <h3 class="mb-0">{{ App\Models\Order::pending()->count() }}</h3>
+                            <h3 class="mb-0">{{ (clone $statsQuery)->where('status', 'pending')->count() }}</h3>
                             <small>{{ __('messages.pending_orders') }}</small>
                         </div>
                     </div>
@@ -22,7 +40,7 @@
                 <div class="col-md-3">
                     <div class="card bg-primary text-white">
                         <div class="card-body text-center">
-                            <h3 class="mb-0">{{ App\Models\Order::placed()->count() }}</h3>
+                            <h3 class="mb-0">{{ (clone $statsQuery)->where('status', 'placed')->count() }}</h3>
                             <small>{{ __('messages.placed_orders') }}</small>
                         </div>
                     </div>
@@ -30,7 +48,7 @@
                 <div class="col-md-3">
                     <div class="card bg-info text-white">
                         <div class="card-body text-center">
-                            <h3 class="mb-0">{{ App\Models\Order::shipped()->count() }}</h3>
+                            <h3 class="mb-0">{{ (clone $statsQuery)->where('status', 'shipped')->count() }}</h3>
                             <small>{{ __('messages.shipped_orders') }}</small>
                         </div>
                     </div>
@@ -38,7 +56,7 @@
                 <div class="col-md-3">
                     <div class="card bg-success text-white">
                         <div class="card-body text-center">
-                            <h3 class="mb-0">{{ App\Models\Order::where('status', 'delivered')->count() }}</h3>
+                            <h3 class="mb-0">{{ (clone $statsQuery)->where('status', 'delivered')->count() }}</h3>
                             <small>{{ __('messages.delivered_orders') }}</small>
                         </div>
                     </div>
@@ -86,6 +104,9 @@
                         <thead>
                             <tr>
                                 <th>{{ __('messages.order_number') }}</th>
+                                @if(auth()->user()->user_type === 'admin')
+                                    <th>{{ app()->getLocale() == 'ar' ? 'البائع' : 'Seller' }}</th>
+                                @endif
                                 <th>{{ __('messages.customer') }}</th>
                                 <th>{{ __('messages.product') }}</th>
                                 <th>{{ __('messages.quantity') }}</th>
@@ -110,6 +131,12 @@
                                             {{ $order->order_number }}
                                         </a>
                                     </td>
+                                    @if(auth()->user()->user_type === 'admin')
+                                        <td>
+                                            <div>{{ $order->user->name ?? 'N/A' }}</div>
+                                            <small class="text-muted">{{ $order->user->email ?? '' }}</small>
+                                        </td>
+                                    @endif
                                     <td>
                                         <div>
                                             {{ $order->customer_name }}

@@ -263,7 +263,7 @@
         color: white !important;
         border-color: #561C04 !important;
     }
-
+o
     /* Info Color Override - Same as Primary */
     .bg-info,
     .btn-info,
