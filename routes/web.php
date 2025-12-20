@@ -169,6 +169,11 @@ Route::middleware('auth')->group(function () {
 
     // Order routes
     Route::resource('orders', OrderController::class);
+
+    // Distributor order routes (non-AliExpress)
+    Route::get('/orders/distributor/create', [OrderController::class, 'createDistributorOrder'])->name('orders.distributor.create');
+    Route::post('/orders/distributor', [OrderController::class, 'storeDistributorOrder'])->name('orders.distributor.store');
+
     Route::get('/orders/product/{product}/info', [OrderController::class, 'getProductInfo'])->name('orders.product-info');
     Route::post('/orders/calculate-freight', [OrderController::class, 'calculateFreight'])->name('orders.calculate-freight');
     Route::post('/orders/{order}/place-on-aliexpress', [OrderController::class, 'placeOnAliexpress'])->name('orders.place-on-aliexpress');

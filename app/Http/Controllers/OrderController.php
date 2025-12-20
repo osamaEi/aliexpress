@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Services\AliExpressService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -915,6 +916,156 @@ class OrderController extends Controller
                 'error' => 'Failed to calculate freight: ' . $e->getMessage(),
                 'exception_class' => get_class($e)
             ], 500);
+        }
+    }
+
+    /**
+     * Show the form for creating a distributor order (non-AliExpress).
+     */
+    public function createDistributorOrder(Request $request)
+    {
+        $productId = $request->get('product_id');
+        $product = null;
+
+        if ($productId) {
+            $product = Product::findOrFail($productId);
+
+            // Ensure this is not an AliExpress product
+            if ($product->isAliexpressProduct()) {
+                return redirect()->route('orders.create', ['product_id' => $productId])
+                    ->with('error', 'This is an AliExpress product. Please use the regular order creation.');
+            }
+        }
+
+        // Extract query parameters for auto-population
+        $queryParams = [
+            'quantity' => $request->get('quantity', 1),
+            'customer_notes' => $request->get('customer_notes'),
+        ];
+
+        return view('orders.create-distributor', compact('product', 'queryParams'));
+    }
+
+    /**
+     * Store a newly created distributor order (non-AliExpress).
+     */
+    public function storeDistributorOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'customer_name' => 'required|string|max:255',
+            'customer_email' => 'nullable|email|max:255',
+            'customer_phone' => 'required|string|max:20',
+            'phone_country' => 'required|string|max:5',
+            'shipping_address' => 'required|string',
+            'shipping_address2' => 'nullable|string|max:255',
+            'shipping_city' => 'required|string|max:100',
+            'shipping_province' => 'nullable|string|max:100',
+            'shipping_country' => 'required|string|max:2',
+            'shipping_zip' => 'required|string|max:20',
+            'customer_notes' => 'nullable|string',
+            'shipping_cost' => 'nullable|numeric|min:0',
+        ]);
+
+        try {
+            $product = Product::findOrFail($validated['product_id']);
+
+            // Ensure this is not an AliExpress product
+            if ($product->isAliexpressProduct()) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'This is an AliExpress product. Please use the regular order creation.');
+            }
+
+            $user = Auth::user();
+
+            // Calculate pricing
+            $quantity = $validated['quantity'];
+            $unitPrice = $product->price;
+            $productTotal = $unitPrice * $quantity;
+
+            // Add shipping cost if provided (for distributor products, shipping is optional)
+            $shippingCost = isset($validated['shipping_cost']) ? (float)$validated['shipping_cost'] : ($product->shipping_cost ?? 0);
+            $totalPrice = $productTotal + $shippingCost;
+
+            // Check seller's wallet balance
+            if (!$user->wallet) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Please increase your balance to create orders.');
+            }
+
+            if ($user->wallet->balance < $totalPrice) {
+                $errorMsg = 'Insufficient balance. Please increase your balance to create this order. Required: ' . number_format($totalPrice, 2) . ' ' . ($product->currency ?? 'AED') . ', Available: ' . number_format($user->wallet->balance, 2) . ' AED';
+
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', $errorMsg);
+            }
+
+            DB::beginTransaction();
+
+            // Create order (profits will be calculated automatically by OrderObserver)
+            $order = Order::create([
+                'user_id' => $user->id,
+                'order_number' => Order::generateOrderNumber(),
+                'product_id' => $product->id,
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
+                'total_price' => $totalPrice,
+                'total_amount' => $totalPrice,
+                'currency' => $product->currency ?? 'AED',
+                'customer_name' => $validated['customer_name'],
+                'customer_email' => $validated['customer_email'],
+                'customer_phone' => $validated['customer_phone'],
+                'phone_country' => $validated['phone_country'],
+                'shipping_address' => $validated['shipping_address'],
+                'shipping_address2' => $validated['shipping_address2'],
+                'shipping_city' => $validated['shipping_city'],
+                'shipping_province' => $validated['shipping_province'] ?? null,
+                'shipping_country' => $validated['shipping_country'],
+                'shipping_zip' => $validated['shipping_zip'],
+                'customer_notes' => $validated['customer_notes'],
+                'status' => 'pending',
+                'payment_status' => 'paid', // Mark as paid since we're deducting from wallet
+            ]);
+
+            // Deduct amount from seller's wallet
+            $user->wallet->debit($totalPrice, 'Order payment for order #' . $order->order_number);
+
+            // Update product stock if tracking inventory
+            if ($product->track_inventory) {
+                $product->decrement('stock_quantity', $quantity);
+            }
+
+            DB::commit();
+
+            Log::info('Distributor order created', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'user_id' => $user->id,
+                'product_id' => $product->id,
+                'product_total' => $productTotal,
+                'shipping_cost' => $shippingCost,
+                'total_amount' => $totalPrice,
+                'wallet_balance_after' => $user->wallet->fresh()->balance
+            ]);
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Distributor Order Creation Error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to create order: ' . $e->getMessage());
         }
     }
 }
