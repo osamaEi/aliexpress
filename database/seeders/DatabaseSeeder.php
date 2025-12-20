@@ -22,11 +22,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // Seed admin user
+        // Seed admin user and distributor
         $this->call([
             AdminUserSeeder::class,
             SubscriptionSeeder::class,
             SettingsSeeder::class,
+            DistributorUserSeeder::class,
         ]);
     }
 }

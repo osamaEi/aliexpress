@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
+            'distributor' => \App\Http\Middleware\IsDistributor::class,
         ]);
         // Exclude webhooks from CSRF verification
         $middleware->validateCsrfTokens(except: [

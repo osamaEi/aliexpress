@@ -84,6 +84,11 @@ Route::get('/dashboard', function () {
         return redirect()->route('seller.dashboard');
     }
 
+    // Redirect distributors to distributor dashboard
+    if ($user && $user->user_type === 'distributor') {
+        return redirect()->route('distributor.dashboard');
+    }
+
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -239,6 +244,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [App\Http\Controllers\Seller\TicketController::class, 'store'])->name('store');
         Route::get('/{ticket}', [App\Http\Controllers\Seller\TicketController::class, 'show'])->name('show');
         Route::post('/{ticket}/reply', [App\Http\Controllers\Seller\TicketController::class, 'reply'])->name('reply');
+    });
+
+    // Distributor Routes
+    Route::middleware('distributor')->prefix('distributor')->name('distributor.')->group(function () {
+        // Distributor Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\DistributorController::class, 'dashboard'])->name('dashboard');
+
+        // Products Management
+        Route::get('/products', [App\Http\Controllers\DistributorController::class, 'products'])->name('products');
+        Route::get('/products/create', [App\Http\Controllers\DistributorController::class, 'createProduct'])->name('products.create');
+        Route::post('/products', [App\Http\Controllers\DistributorController::class, 'storeProduct'])->name('products.store');
+
+        // Categories View
+        Route::get('/categories', [App\Http\Controllers\DistributorController::class, 'categories'])->name('categories');
+
+        // Orders View
+        Route::get('/orders', [App\Http\Controllers\DistributorController::class, 'orders'])->name('orders');
     });
 
     // Admin Routes
