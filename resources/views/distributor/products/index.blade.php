@@ -28,8 +28,14 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    @if($product->images && count($product->images) > 0)
+                                    @if($product->photo)
+                                        <img src="{{ asset('storage/' . $product->photo) }}" alt="{{ $product->name }}" class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                    @elseif($product->images && count($product->images) > 0)
                                         <img src="{{ $product->images[0] }}" alt="{{ $product->name }}" class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                    @else
+                                        <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="ri-image-line text-muted"></i>
+                                        </div>
                                     @endif
                                     <div>
                                         <strong>{{ $product->name }}</strong>
@@ -56,9 +62,14 @@
                                 </span>
                             </td>
                             <td>
-                                <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-info">
-                                    <i class="ri-eye-line"></i>
-                                </a>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-info" title="{{ app()->getLocale() == 'ar' ? 'عرض' : 'View' }}">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
+                                    <a href="{{ route('distributor.products.edit', $product->id) }}" class="btn btn-sm btn-primary" title="{{ app()->getLocale() == 'ar' ? 'تعديل' : 'Edit' }}">
+                                        <i class="ri-edit-line"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         @empty

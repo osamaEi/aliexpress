@@ -255,6 +255,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/products', [App\Http\Controllers\DistributorController::class, 'products'])->name('products');
         Route::get('/products/create', [App\Http\Controllers\DistributorController::class, 'createProduct'])->name('products.create');
         Route::post('/products', [App\Http\Controllers\DistributorController::class, 'storeProduct'])->name('products.store');
+        Route::get('/products/{id}/edit', [App\Http\Controllers\DistributorController::class, 'editProduct'])->name('products.edit');
+        Route::put('/products/{id}', [App\Http\Controllers\DistributorController::class, 'updateProduct'])->name('products.update');
 
         // Categories View
         Route::get('/categories', [App\Http\Controllers\DistributorController::class, 'categories'])->name('categories');

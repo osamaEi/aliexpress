@@ -8,21 +8,33 @@
             <div class="row g-0">
                 <!-- Product Images Gallery -->
                 <div class="col-md-6 bg-light p-4">
-                    @if($product->images && count($product->images) > 0)
+                    @php
+                        $allImages = [];
+                        // Add photo first if it exists
+                        if($product->photo) {
+                            $allImages[] = asset('storage/' . $product->photo);
+                        }
+                        // Then add other images
+                        if($product->images && is_array($product->images)) {
+                            $allImages = array_merge($allImages, $product->images);
+                        }
+                    @endphp
+
+                    @if(count($allImages) > 0)
                         <div id="productGallery" class="carousel slide" data-bs-ride="carousel">
                             <div class="carousel-indicators">
-                                @foreach($product->images as $index => $image)
+                                @foreach($allImages as $index => $image)
                                     <button type="button" data-bs-target="#productGallery" data-bs-slide-to="{{ $index }}" class="{{ $index === 0 ? 'active' : '' }}"></button>
                                 @endforeach
                             </div>
                             <div class="carousel-inner" style="border-radius: 12px;">
-                                @foreach($product->images as $index => $image)
+                                @foreach($allImages as $index => $image)
                                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
                                         <img src="{{ $image }}" class="d-block w-100" alt="{{ $product->name }}" style="height: 500px; object-fit: contain; background: white;">
                                     </div>
                                 @endforeach
                             </div>
-                            @if(count($product->images) > 1)
+                            @if(count($allImages) > 1)
                                 <button class="carousel-control-prev" type="button" data-bs-target="#productGallery" data-bs-slide="prev">
                                     <span class="carousel-control-prev-icon"></span>
                                 </button>
@@ -34,7 +46,7 @@
 
                         <!-- Thumbnail Gallery -->
                         <div class="row mt-3 g-2">
-                            @foreach($product->images as $index => $image)
+                            @foreach($allImages as $index => $image)
                                 @if($index < 6)
                                     <div class="col-2">
                                         <img src="{{ $image }}" class="img-thumbnail" style="cursor: pointer; height: 70px; object-fit: cover;" onclick="document.querySelector('[data-bs-slide-to=\\\'{{ $index }}\\\']').click()">
@@ -88,14 +100,31 @@
 
                     <!-- Pricing -->
                     <div class="mb-4">
-                        <div class="d-flex align-items-baseline mb-2">
-                            <h3 class="text-primary mb-0 me-3">{{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}</h3>
+                        <div class="d-flex align-items-baseline mb-2 flex-wrap">
+                            <h3 class="text-primary mb-0 me-3">
+                                <span id="displayCurrency">{{ $product->currency ?? 'AED' }}</span>
+                                <span id="displayPrice">{{ number_format($product->price, 2) }}</span>
+                            </h3>
                             @if($product->compare_price && $product->compare_price > $product->price)
-                                <span class="text-muted text-decoration-line-through me-2">{{ $product->currency }} {{ number_format($product->compare_price, 2) }}</span>
+                                <span class="text-muted text-decoration-line-through me-2">
+                                    <span id="displayCompareCurrency">{{ $product->currency }}</span>
+                                    <span id="displayComparePrice">{{ number_format($product->compare_price, 2) }}</span>
+                                </span>
                                 <span class="badge bg-danger">
                                     {{ round((($product->compare_price - $product->price) / $product->compare_price) * 100) }}% OFF
                                 </span>
                             @endif
+                        </div>
+
+                        <!-- Currency Selector -->
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">{{ app()->getLocale() == 'ar' ? 'عرض بالعملة' : 'Display Currency' }}:</label>
+                            <select class="form-select form-select-sm" id="currencySelector" style="max-width: 200px;" onchange="changeCurrency()">
+                                <option value="AED" {{ ($product->currency ?? 'AED') == 'AED' ? 'selected' : '' }}>AED (د.إ)</option>
+                                <option value="USD" {{ ($product->currency ?? 'AED') == 'USD' ? 'selected' : '' }}>USD ($)</option>
+                                <option value="SAR" {{ ($product->currency ?? 'AED') == 'SAR' ? 'selected' : '' }}>SAR (ر.س)</option>
+                                <option value="EUR" {{ ($product->currency ?? 'AED') == 'EUR' ? 'selected' : '' }}>EUR (€)</option>
+                            </select>
                         </div>
 
                         @if($product->original_price && $product->original_price > 0)
@@ -668,5 +697,43 @@ document.getElementById('createOrderModal').addEventListener('hidden.bs.modal', 
     document.getElementById('selected_variant_index').value = '';
     document.getElementById('selected_sku_attr').value = '';
 });
+
+// Currency conversion functionality
+const originalPrice = {{ $product->price }};
+const originalComparePrice = {{ $product->compare_price ?? 0 }};
+const originalCurrency = '{{ $product->currency ?? "AED" }}';
+
+// Exchange rates (approximate - you can fetch these from an API)
+const exchangeRates = {
+    'AED': 1,
+    'USD': 0.27,  // 1 AED = 0.27 USD
+    'SAR': 1.02,  // 1 AED = 1.02 SAR
+    'EUR': 0.25   // 1 AED = 0.25 EUR
+};
+
+function changeCurrency() {
+    const selectedCurrency = document.getElementById('currencySelector').value;
+
+    // Calculate conversion rate from original currency to selected currency
+    let conversionRate = 1;
+    if (originalCurrency !== selectedCurrency) {
+        // Convert to AED first (base), then to target currency
+        const toAED = 1 / (exchangeRates[originalCurrency] || 1);
+        const toTarget = exchangeRates[selectedCurrency] || 1;
+        conversionRate = toAED * toTarget;
+    }
+
+    // Update displayed prices
+    const newPrice = originalPrice * conversionRate;
+    const newComparePrice = originalComparePrice * conversionRate;
+
+    document.getElementById('displayCurrency').textContent = selectedCurrency;
+    document.getElementById('displayPrice').textContent = newPrice.toFixed(2);
+
+    if (originalComparePrice > 0) {
+        document.getElementById('displayCompareCurrency').textContent = selectedCurrency;
+        document.getElementById('displayComparePrice').textContent = newComparePrice.toFixed(2);
+    }
+}
 </script>
 @endsection
