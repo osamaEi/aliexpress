@@ -43,7 +43,7 @@
         function switchLanguage(lang) {
             const currentUrl = new URL(window.location.href);
             currentUrl.searchParams.set('lang', lang);
-            currentUrl.searchParams.set('currency', '{{ $currentCurrency }}');
+            currentUrl.searchParams.set('currency', '{{ $currentCurrency->code }}');
             window.location.href = currentUrl.toString();
         }
 

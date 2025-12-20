@@ -11,7 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Google reCAPTCHA v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=6LeO8CUsAAAAAPT7tfbRUiQd0Jzy_QGTCJB7Rzj3"></script>
+    @if(config('services.recaptcha.enabled'))
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+    @endif
     <style>
         :root {
             --primary-color: #561C04;
@@ -660,10 +662,12 @@
                 </div>
 
                 <!-- Hidden reCAPTCHA v3 token field -->
+                @if(config('services.recaptcha.enabled'))
                 <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
                 @error('g-recaptcha-response')
                     <div class="text-danger text-center mb-3">{{ $message }}</div>
                 @enderror
+                @endif
 
                 <button type="submit" class="btn-continue" id="submitBtn">
                     <span>{{ app()->getLocale() == 'ar' ? 'التالي' : 'Next' }}</span>
@@ -770,12 +774,17 @@
         document.getElementById('submitBtn').addEventListener('click', function(e) {
             e.preventDefault();
 
+            @if(config('services.recaptcha.enabled'))
             grecaptcha.ready(function() {
-                grecaptcha.execute('6LeO8CUsAAAAAPT7tfbRUiQd0Jzy_QGTCJB7Rzj3', {action: 'submit'}).then(function(token) {
+                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'submit'}).then(function(token) {
                     document.getElementById('g-recaptcha-response').value = token;
                     document.querySelector('form').submit();
                 });
             });
+            @else
+            // If reCAPTCHA is disabled, just submit the form
+            document.querySelector('form').submit();
+            @endif
         });
     </script>
 </body>
