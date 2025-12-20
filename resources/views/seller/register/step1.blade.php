@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ app()->getLocale() == 'ar' ? 'تسجيل بائع جديد - الخطوة 1' : 'Seller Registration - Step 1' }}</title>
+        <link rel="icon" type="image/x-icon" href="{{ asset('logo/logo.png') }}">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
     <!-- Fonts -->
@@ -383,6 +385,20 @@
             height: 20px;
         }
 
+        .sidebar-footer {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .sidebar-footer img {
+            max-width: 200px;
+            height: auto;
+            opacity: 0.9;
+        }
+
         /* Logo Upload Styles */
         .logo-upload-wrapper {
             margin-bottom: 25px;
@@ -495,6 +511,12 @@
         <div class="sidebar">
             <div class="logo-wrapper">
                 <img src="{{ asset('images/white-logo.png') }}" alt="Logo">
+
+                <!-- Footer in Sidebar -->
+                <div class="sidebar-footer">
+                    <img src="{{ asset('foot.png') }}" alt="EVORQ">
+                </div>
+
                 <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل البائع' : 'Seller Registration' }}</h3>
             </div>
 
@@ -688,15 +710,6 @@
         </div>
     </div>
 
-    <!-- Footer with EVORQ Logo -->
-   <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
-        <span style="color: #808080; font-size: 14px; font-weight: 400;">{{ app()->getLocale() == 'ar' ? 'بواسطة' : 'BY' }}</span>
-        <img src="{{ asset('footer.png') }}"
-             alt="EVORQ Logo"
-             style="height: 45px;"
-           >
-        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">{{ app()->getLocale() == 'ar' ? 'إيفورك للتقنية' : 'EVORQ TECHNOLOGIES' }}</span>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
