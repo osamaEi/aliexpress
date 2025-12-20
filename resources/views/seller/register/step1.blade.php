@@ -470,6 +470,12 @@
         #logo_file {
             display: none;
         }
+
+        /* reCAPTCHA v3 Badge Styling */
+        .grecaptcha-badge {
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
     </style>
 </head>
 <body>
