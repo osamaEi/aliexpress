@@ -270,6 +270,15 @@ Route::middleware('auth')->group(function () {
         // Orders View
         Route::get('/orders', [App\Http\Controllers\DistributorController::class, 'orders'])->name('orders');
         Route::post('/orders/{order}/update-status', [App\Http\Controllers\DistributorController::class, 'updateOrderStatus'])->name('orders.update-status');
+
+        // Support Tickets
+        Route::prefix('tickets')->name('tickets.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Distributor\TicketController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Distributor\TicketController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Distributor\TicketController::class, 'store'])->name('store');
+            Route::get('/{ticket}', [App\Http\Controllers\Distributor\TicketController::class, 'show'])->name('show');
+            Route::post('/{ticket}/reply', [App\Http\Controllers\Distributor\TicketController::class, 'reply'])->name('reply');
+        });
     });
 
     // Admin Routes
