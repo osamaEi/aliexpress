@@ -973,6 +973,12 @@ class OrderController extends Controller
 
             // Ensure this is not an AliExpress product
             if ($product->isAliexpressProduct()) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'This is an AliExpress product. Please use the regular order creation.'
+                    ], 400);
+                }
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'This is an AliExpress product. Please use the regular order creation.');
@@ -991,6 +997,12 @@ class OrderController extends Controller
 
             // Check seller's wallet balance
             if (!$user->wallet) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Please increase your balance to create orders.'
+                    ], 400);
+                }
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Please increase your balance to create orders.');
@@ -999,6 +1011,12 @@ class OrderController extends Controller
             if ($user->wallet->balance < $totalPrice) {
                 $errorMsg = 'Insufficient balance. Please increase your balance to create this order. Required: ' . number_format($totalPrice, 2) . ' ' . ($product->currency ?? 'AED') . ', Available: ' . number_format($user->wallet->balance, 2) . ' AED';
 
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => $errorMsg
+                    ], 400);
+                }
                 return redirect()->back()
                     ->withInput()
                     ->with('error', $errorMsg);
@@ -1052,8 +1070,24 @@ class OrderController extends Controller
                 'wallet_balance_after' => $user->wallet->fresh()->balance
             ]);
 
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Distributor order created successfully!',
+                    'order' => [
+                        'id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'status' => $order->status,
+                        'total_price' => $order->total_price,
+                        'currency' => $order->currency,
+                    ],
+                    'wallet_balance' => $user->wallet->fresh()->balance
+                ]);
+            }
+
             return redirect()->route('orders.show', $order)
-                ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet.');
+                ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet. The distributor will process your order shortly.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1062,6 +1096,13 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Failed to create order: ' . $e->getMessage()
+                ], 500);
+            }
 
             return redirect()->back()
                 ->withInput()

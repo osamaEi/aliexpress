@@ -75,16 +75,18 @@
                             </span>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createOrderModal">
-                                <i class="ri-shopping-bag-line me-1"></i> {{ __('messages.create_order') }}
-                            </button>
-                          
                             @if($product->isAliexpressProduct())
+                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+                                    <i class="ri-shopping-bag-line me-1"></i> {{ __('messages.create_order') }}
+                                </button>
                                 <button type="button" class="btn btn-sm btn-info" id="syncProductBtn" onclick="syncProduct()">
                                     <i class="ri-refresh-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'مزامنة من المورد' : 'Sync from Supplier' }}
                                 </button>
+                            @else
+                                <a href="{{ route('orders.distributor.create', ['product_id' => $product->id]) }}" class="btn btn-sm btn-success">
+                                    <i class="ri-shopping-bag-line me-1"></i> {{ __('messages.create_order') }}
+                                </a>
                             @endif
-                        
                         </div>
                     </div>
 
