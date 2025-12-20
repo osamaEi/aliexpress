@@ -49,10 +49,10 @@
               </svg>
             </span>
           </span>
-            <span class="app-brand-text demo menu-text fw-semibold ms-2">{{ app()->getLocale() == 'ar' ? 'الموزع' : 'Distributor' }}</span>
+            <span class="app-brand-text demo menu-text fw-semibold {{ app()->getLocale() == 'ar' ? 'me-2' : 'ms-2' }}">{{ app()->getLocale() == 'ar' ? 'الموزع' : 'Distributor' }}</span>
         </a>
 
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large {{ app()->getLocale() == 'ar' ? 'me-auto' : 'ms-auto' }}">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M8.47365 11.7183C8.11707 12.0749 8.11707 12.6531 8.47365 13.0097L12.071 16.607C12.4615 16.9975 12.4615 17.6305 12.071 18.021C11.6805 18.4115 11.0475 18.4115 10.657 18.021L5.83009 13.1941C5.37164 12.7356 5.37164 11.9924 5.83009 11.5339L10.657 6.707C11.0475 6.31653 11.6805 6.31653 12.071 6.707C12.4615 7.09747 12.4615 7.73053 12.071 8.121L8.47365 11.7183Z"
@@ -77,25 +77,25 @@
 
         <!-- Products Section -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text">{{ app()->getLocale() == 'ar' ? 'إدارة المنتجات' : 'Product Management' }}</span>
+            <span class="menu-header-text">{{ __('messages.product_management') }}</span>
         </li>
 
         <!-- My Products -->
         <li class="menu-item {{ request()->routeIs('distributor.products*') ? 'open active' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-shopping-bag-3-line"></i>
-                <div data-i18n="My Products">{{ app()->getLocale() == 'ar' ? 'منتجاتي' : 'My Products' }}</div>
+                <div>{{ app()->getLocale() == 'ar' ? 'منتجاتي' : 'My Products' }}</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('distributor.products') && !request()->routeIs('distributor.products.create') ? 'active' : '' }}">
                     <a href="{{ route('distributor.products') }}" class="menu-link">
-                        <div data-i18n="All Products">{{ app()->getLocale() == 'ar' ? 'كل المنتجات' : 'All Products' }}</div>
+                        <div>{{ app()->getLocale() == 'ar' ? 'كل المنتجات' : 'All Products' }}</div>
                     </a>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('distributor.products.create') ? 'active' : '' }}">
                     <a href="{{ route('distributor.products.create') }}" class="menu-link">
-                        <div data-i18n="Create Product">{{ app()->getLocale() == 'ar' ? 'إضافة منتج جديد' : 'Create New Product' }}</div>
+                        <div>{{ app()->getLocale() == 'ar' ? 'إضافة منتج جديد' : 'Create New Product' }}</div>
                     </a>
                 </li>
             </ul>
@@ -111,27 +111,27 @@
 
         <!-- Orders Section -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text">{{ app()->getLocale() == 'ar' ? 'إدارة الطلبات' : 'Order Management' }}</span>
+            <span class="menu-header-text">{{ __('messages.order_management') }}</span>
         </li>
 
         <!-- My Orders -->
         <li class="menu-item {{ request()->routeIs('distributor.orders') ? 'active' : '' }}">
             <a href="{{ route('distributor.orders') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-file-list-3-line"></i>
-                <div data-i18n="My Orders">{{ app()->getLocale() == 'ar' ? 'طلباتي' : 'My Orders' }}</div>
+                <div>{{ app()->getLocale() == 'ar' ? 'طلباتي' : 'My Orders' }}</div>
             </a>
         </li>
 
         <!-- Account Section -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text">{{ app()->getLocale() == 'ar' ? 'الحساب' : 'Account' }}</span>
+            <span class="menu-header-text">{{ __('messages.account') }}</span>
         </li>
 
         <!-- Profile -->
         <li class="menu-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <a href="{{ route('profile.edit') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-user-line"></i>
-                <div data-i18n="Profile">{{ app()->getLocale() == 'ar' ? 'الملف الشخصي' : 'Profile' }}</div>
+                <div>{{ __('messages.profile') }}</div>
             </a>
         </li>
 
@@ -139,7 +139,7 @@
         <li class="menu-item {{ request()->routeIs('wallet.*') ? 'active' : '' }}">
             <a href="{{ route('wallet.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-wallet-3-line"></i>
-                <div data-i18n="Wallet">{{ app()->getLocale() == 'ar' ? 'المحفظة' : 'Wallet' }}</div>
+                <div>{{ __('messages.my_wallet') }}</div>
             </a>
         </li>
 
@@ -147,8 +147,20 @@
         <li class="menu-item {{ request()->routeIs('distributor.tickets.*') ? 'active' : '' }}">
             <a href="{{ route('distributor.tickets.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-customer-service-line"></i>
-                <div data-i18n="Support Tickets">{{ __('messages.support_tickets') }}</div>
+                <div>{{ __('messages.support_tickets') }}</div>
             </a>
+        </li>
+
+        <!-- Logout -->
+        <li class="menu-item">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <a href="{{ route('logout') }}" class="menu-link"
+                   onclick="event.preventDefault(); this.closest('form').submit();">
+                    <i class="menu-icon tf-icons ri-logout-box-line"></i>
+                    <div>{{ __('messages.logout') }}</div>
+                </a>
+            </form>
         </li>
     </ul>
 </aside>
