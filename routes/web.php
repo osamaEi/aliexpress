@@ -119,10 +119,14 @@ Route::middleware('auth')->group(function () {
     // Category routes
     Route::get('/categories/{category}/fetch-subcategories', [CategoryController::class, 'fetchSubcategories'])->name('categories.fetch-subcategories');
     Route::post('/categories/{category}/save-subcategories', [CategoryController::class, 'saveSubcategories'])->name('categories.save-subcategories');
-    Route::post('/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
     Route::get('/categories/fetch-tree', [CategoryController::class, 'fetchCategoryTree'])->name('categories.fetch-tree');
     Route::post('/categories/save-tree', [CategoryController::class, 'saveCategoryTree'])->name('categories.save-tree');
     Route::post('/categories/import-all', [CategoryController::class, 'importAllCategories'])->name('categories.import-all');
+
+    // Admin-only category routes
+    Route::middleware('admin')->group(function () {
+        Route::post('/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+    });
 
     // Seller category assignment request
     Route::get('/seller/request-category-assignment', [CategoryController::class, 'requestCategoryAssignment'])->name('seller.request-category-assignment');

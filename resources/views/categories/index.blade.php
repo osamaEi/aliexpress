@@ -145,16 +145,26 @@
                                 </td>
                                 <td>{{ $category->order }}</td>
                                 <td>
-                                    <form action="{{ route('categories.toggle-status', $category) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm {{ $category->is_active ? 'btn-success' : 'btn-secondary' }}" title="Click to {{ $category->is_active ? 'Deactivate' : 'Activate' }}">
+                                    @if(auth()->user()->user_type === 'admin')
+                                        <form action="{{ route('categories.toggle-status', $category) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm {{ $category->is_active ? 'btn-success' : 'btn-secondary' }}" title="Click to {{ $category->is_active ? 'Deactivate' : 'Activate' }}">
+                                                @if($category->is_active)
+                                                    <i class="ri-checkbox-circle-line me-1"></i> Active
+                                                @else
+                                                    <i class="ri-close-circle-line me-1"></i> Inactive
+                                                @endif
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="badge {{ $category->is_active ? 'bg-success' : 'bg-secondary' }}">
                                             @if($category->is_active)
                                                 <i class="ri-checkbox-circle-line me-1"></i> Active
                                             @else
                                                 <i class="ri-close-circle-line me-1"></i> Inactive
                                             @endif
-                                        </button>
-                                    </form>
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
