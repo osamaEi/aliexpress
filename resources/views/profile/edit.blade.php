@@ -25,12 +25,18 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
-                @csrf
-                @method('PATCH')
+            @if(session('status') === 'avatar-updated')
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="ri-checkbox-circle-line me-2"></i>
+                    {{ __('messages.avatar_updated') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
-                <div class="row g-4">
-                    <!-- Avatar Section -->
+            <!-- Avatar Upload Section (Separate Form) -->
+            <form id="avatarForm" method="POST" action="{{ route('profile.avatar.update') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="row g-4 mb-4">
                     <div class="col-12">
                         <div class="d-flex align-items-center mb-4">
                             <div class="avatar avatar-xl me-3">
@@ -48,9 +54,21 @@
                                 </label>
                                 <input type="file" id="avatar" name="avatar" class="d-none" accept="image/*">
                                 <p class="text-muted small mb-0">{{ __('messages.allowed_formats') }}</p>
+                                @error('avatar')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
+                </div>
+            </form>
+
+            <!-- Profile Information Form (Separate) -->
+            <form method="POST" action="{{ route('profile.update') }}">
+                @csrf
+                @method('PATCH')
+
+                <div class="row g-4">
 
                     <!-- Basic Information -->
                     <div class="col-12">
@@ -60,10 +78,10 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="full_name" class="form-label">{{ __('messages.full_name') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('full_name') is-invalid @enderror"
-                               id="full_name" name="full_name" value="{{ old('full_name', $user->full_name) }}" required>
-                        @error('full_name')
+                        <label for="name" class="form-label">{{ __('messages.full_name') }} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror"
+                               id="name" name="name" value="{{ old('name', $user->name) }}" required>
+                        @error('name')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -517,7 +535,7 @@
 </div>
 
 <script>
-    // Avatar preview
+    // Avatar preview and auto-submit
     document.getElementById('avatar')?.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -535,6 +553,9 @@
                 }
             };
             reader.readAsDataURL(file);
+
+            // Auto-submit the avatar form
+            document.getElementById('avatarForm').submit();
         }
     });
 </script>
