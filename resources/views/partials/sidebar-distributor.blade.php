@@ -142,5 +142,13 @@
                 <div data-i18n="Wallet">{{ app()->getLocale() == 'ar' ? 'المحفظة' : 'Wallet' }}</div>
             </a>
         </li>
+
+        <!-- Support Tickets -->
+        <li class="menu-item {{ request()->routeIs('distributor.tickets.*') ? 'active' : '' }}">
+            <a href="{{ route('distributor.tickets.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-customer-service-line"></i>
+                <div data-i18n="Support Tickets">{{ __('messages.support_tickets') }}</div>
+            </a>
+        </li>
     </ul>
 </aside>
