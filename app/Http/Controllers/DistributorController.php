@@ -121,11 +121,28 @@ class DistributorController extends Controller
     /**
      * Display all categories (read-only for distributors).
      */
-    public function categories()
+    public function categories(Request $request)
     {
-        // Show all categories (both active and inactive) for viewing
-        $categories = Category::orderBy('name', 'asc')->paginate(20);
-        return view('distributor.categories.index', compact('categories'));
+        // Get parent category if specified
+        $parentId = $request->get('parent_id');
+        $parentCategory = null;
+
+        if ($parentId) {
+            $parentCategory = Category::find($parentId);
+            // Show subcategories of the parent
+            $categories = Category::where('parent_id', $parentId)
+                ->withCount('children')
+                ->orderBy('name', 'asc')
+                ->paginate(20);
+        } else {
+            // Show only root categories (no parent)
+            $categories = Category::whereNull('parent_id')
+                ->withCount('children')
+                ->orderBy('name', 'asc')
+                ->paginate(20);
+        }
+
+        return view('distributor.categories.index', compact('categories', 'parentCategory'));
     }
 
     /**
