@@ -120,10 +120,12 @@
 
                     <div class="col-md-6">
                         <label for="country" class="form-label">{{ __('messages.country') }}</label>
-                        <select class="form-select @error('country') is-invalid @enderror" id="country" name="country">
-                            <option value="">{{ __('messages.select_country') }}</option>
-                            @php
-                                $countries = [
+                        <div class="position-relative">
+                            <span id="countryFlag" class="position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); z-index: 10; pointer-events: none;"></span>
+                            <select class="form-select @error('country') is-invalid @enderror" id="country" name="country" style="padding-left: 40px;">
+                                <option value="">{{ __('messages.select_country') }}</option>
+                                @php
+                                    $countries = [
                                     'AF' => ['flag' => '🇦🇫', 'name_ar' => 'أفغانستان', 'name_en' => 'Afghanistan'],
                                     'AL' => ['flag' => '🇦🇱', 'name_ar' => 'ألبانيا', 'name_en' => 'Albania'],
                                     'DZ' => ['flag' => '🇩🇿', 'name_ar' => 'الجزائر', 'name_en' => 'Algeria'],
@@ -325,7 +327,8 @@
                                     {{ $locale == 'ar' ? $country['name_ar'] : $country['name_en'] }}
                                 </option>
                             @endforeach
-                        </select>
+                            </select>
+                        </div>
                         @error('country')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -462,18 +465,15 @@
 </div>
 
 <style>
-    /* Style for country select with flags */
-    #country {
-        background-repeat: no-repeat;
-        background-position: 12px center;
-        background-size: 20px 14px;
-        padding-left: 40px;
+    /* RTL support for country flag */
+    [dir="rtl"] #countryFlag {
+        left: auto !important;
+        right: 12px !important;
     }
 
     [dir="rtl"] #country {
-        background-position: calc(100% - 12px) center;
-        padding-left: 12px;
-        padding-right: 40px;
+        padding-left: 12px !important;
+        padding-right: 40px !important;
     }
 </style>
 
@@ -504,15 +504,17 @@
 
     // Update country flag on select change
     const countrySelect = document.getElementById('country');
-    if (countrySelect) {
+    const countryFlagSpan = document.getElementById('countryFlag');
+
+    if (countrySelect && countryFlagSpan) {
         function updateCountryFlag() {
             const selectedOption = countrySelect.options[countrySelect.selectedIndex];
             const flagCode = selectedOption.dataset.flag;
 
             if (flagCode) {
-                countrySelect.style.backgroundImage = `url('https://flagcdn.com/w20/${flagCode}.png')`;
+                countryFlagSpan.innerHTML = `<img src="https://flagcdn.com/w20/${flagCode}.png" alt="${flagCode}" style="width:20px;height:14px;object-fit:cover;border-radius:2px;" onerror="this.style.display='none'" />`;
             } else {
-                countrySelect.style.backgroundImage = 'none';
+                countryFlagSpan.innerHTML = '';
             }
         }
 
