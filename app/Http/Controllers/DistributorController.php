@@ -98,8 +98,9 @@ class DistributorController extends Controller
             'processing_time_days' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        // Generate slug from name
-        $validated['slug'] = Str::slug($validated['name']);
+        // Generate unique random slug from name
+        $baseSlug = Str::slug($validated['name']);
+        $validated['slug'] = $baseSlug . '-' . Str::random(8);
         $validated['is_active'] = true;
 
         // Calculate seller and admin amounts (you can adjust this logic)
