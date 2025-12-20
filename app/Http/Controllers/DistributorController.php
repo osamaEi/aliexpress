@@ -111,7 +111,7 @@ class DistributorController extends Controller
 
         // Assign product to the distributor
         Auth::user()->assignedProducts()->attach($product->id, [
-            'status' => 'active'
+            'status' => 'published'
         ]);
 
         return redirect()->route('distributor.products')
