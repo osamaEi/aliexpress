@@ -78,8 +78,9 @@ class SellerRegistrationController extends Controller
             $logoPath = $logo->storeAs('logos/sellers', $logoName, 'public');
         }
 
-        // Remove reCAPTCHA from validated data
+        // Remove reCAPTCHA and logo file from validated data (can't be serialized in session)
         unset($validated['g-recaptcha-response']);
+        unset($validated['logo']);
 
         // Add logo path to validated data
         if ($logoPath) {

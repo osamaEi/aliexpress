@@ -12,9 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Google reCAPTCHA v3 -->
+    <!-- Google reCAPTCHA v2 -->
     @if(config('services.recaptcha.enabled'))
-    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     @endif
     <style>
         :root {
