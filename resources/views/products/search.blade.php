@@ -427,7 +427,7 @@
                                                 <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
                                             </svg>
                                             @if($product['sale_price_format'])
-                                                {{ str_replace('AED', '', $product['sale_price_format']) }}
+                                                {{ preg_replace('/[A-Z]{3}\s*/', '', $product['sale_price_format']) }}
                                             @else
                                                 {{ number_format((float)$product['sale_price'], 2) }}
                                             @endif
@@ -456,7 +456,7 @@
                                                     <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
                                                 </svg>
                                                 @if($product['original_price_format'])
-                                                    {{ str_replace('AED', '', $product['original_price_format']) }}
+                                                    {{ preg_replace('/[A-Z]{3}\s*/', '', $product['original_price_format']) }}
                                                 @else
                                                     {{ number_format((float)$product['original_price'], 2) }}
                                                 @endif
