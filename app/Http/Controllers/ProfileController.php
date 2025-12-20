@@ -32,8 +32,6 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:2'],
-            'main_activity' => ['nullable', 'string', 'max:255'],
-            'sub_activity' => ['nullable', 'string', 'max:255'],
             'withdrawal_method' => ['nullable', 'string', 'in:paypal,e_wallet,uae_bank'],
             'marketing_code' => ['nullable', 'string', 'max:100'],
         ]);

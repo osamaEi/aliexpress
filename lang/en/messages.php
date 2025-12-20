@@ -39,6 +39,7 @@ return [
     'update_password' => 'Update Password',
     'profile_updated' => 'Profile updated successfully!',
     'password_updated' => 'Password updated successfully!',
+    'avatar_updated' => 'Avatar updated successfully!',
     'email_not_verified' => 'Email not verified',
     'minimum_8_characters' => 'Minimum 8 characters',
 

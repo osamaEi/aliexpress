@@ -39,6 +39,7 @@ return [
     'update_password' => 'تحديث كلمة المرور',
     'profile_updated' => 'تم تحديث الملف الشخصي بنجاح!',
     'password_updated' => 'تم تحديث كلمة المرور بنجاح!',
+    'avatar_updated' => 'تم تحديث الصورة الشخصية بنجاح!',
     'email_not_verified' => 'البريد الإلكتروني غير موثق',
     'minimum_8_characters' => 'الحد الأدنى 8 أحرف',
 
