@@ -103,6 +103,12 @@ class DistributorController extends Controller
         $validated['slug'] = $baseSlug . '-' . Str::random(8);
         $validated['is_active'] = true;
 
+        // Generate unique SKU if provided
+        if (!empty($validated['sku'])) {
+            $baseSku = $validated['sku'];
+            $validated['sku'] = $baseSku . '-' . Str::random(6);
+        }
+
         // Calculate seller and admin amounts (you can adjust this logic)
         $validated['seller_amount'] = $validated['price'] * 0.7; // 70% to seller
         $validated['admin_amount'] = $validated['price'] * 0.3; // 30% to admin
