@@ -227,7 +227,9 @@
                     @if($product->isAliexpressProduct() && $product->aliexpress_url)
                         <div class="mt-3 text-center">
                             <a href="{{ $product->aliexpress_url }}" target="_blank" class="text-muted text-decoration-none">
-                                <i class="ri-external-link-line me-1"></i> 🇨🇳 {{ app()->getLocale() == 'ar' ? 'عرض على موقع الصين' : 'View on China Store' }}
+                                <i class="ri-external-link-line me-1"></i>
+                                <img src="https://flagcdn.com/w20/cn.png" alt="CN" style="width:16px;height:12px;object-fit:cover;vertical-align:middle;border-radius:2px;" />
+                                {{ app()->getLocale() == 'ar' ? 'عرض على موقع الصين' : 'View on China Store' }}
                             </a>
                         </div>
                     @endif
@@ -1204,7 +1206,7 @@ function calculateShipping() {
     console.log('Selected Variant Data:', selectedVariantData);
     console.log('SKU ID:', skuId);
     console.log('Product ID:', {{ $product->id }});
-    console.log('🇨🇳 China Product ID:', '{{ $product->aliexpress_id }}');
+    console.log('China Product ID:', '{{ $product->aliexpress_id }}');
     console.log('Quantity:', quantity);
     console.log('Country:', country);
     console.log('City:', city);
@@ -1620,7 +1622,7 @@ function syncProduct() {
     const btn = document.getElementById('syncProductBtn');
     const originalContent = btn.innerHTML;
 
-    if (!confirm('Sync this product with latest China data? 🇨🇳')) {
+    if (!confirm('Sync this product with latest China data?')) {
         return;
     }
 
