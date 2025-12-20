@@ -258,6 +258,7 @@ Route::middleware('auth')->group(function () {
 
         // Categories View
         Route::get('/categories', [App\Http\Controllers\DistributorController::class, 'categories'])->name('categories');
+        Route::get('/categories/{parentId}/subcategories', [App\Http\Controllers\DistributorController::class, 'getSubcategories'])->name('categories.subcategories');
 
         // Orders View
         Route::get('/orders', [App\Http\Controllers\DistributorController::class, 'orders'])->name('orders');

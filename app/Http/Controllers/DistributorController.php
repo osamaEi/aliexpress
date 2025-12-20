@@ -66,8 +66,25 @@ class DistributorController extends Controller
      */
     public function createProduct()
     {
-        $categories = Category::where('is_active', true)->get();
+        // Get only parent categories (main categories)
+        $categories = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('name', 'asc')
+            ->get();
         return view('distributor.products.create', compact('categories'));
+    }
+
+    /**
+     * Get subcategories for a parent category (AJAX endpoint).
+     */
+    public function getSubcategories($parentId)
+    {
+        $subcategories = Category::where('parent_id', $parentId)
+            ->where('is_active', true)
+            ->orderBy('name', 'asc')
+            ->get(['id', 'name', 'name_ar']);
+
+        return response()->json($subcategories);
     }
 
     /**
@@ -90,13 +107,24 @@ class DistributorController extends Controller
             'sku' => ['nullable', 'string', 'max:100'],
             'stock_quantity' => ['required', 'integer', 'min:0'],
             'track_inventory' => ['boolean'],
+            'parent_category_id' => ['required', 'exists:categories,id'],
             'category_id' => ['required', 'exists:categories,id'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'images' => ['nullable', 'array'],
             'images.*' => ['string'],
             'specifications' => ['nullable', 'array'],
             'shipping_cost' => ['nullable', 'numeric', 'min:0'],
             'processing_time_days' => ['nullable', 'integer', 'min:0'],
         ]);
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('products', 'public');
+            $validated['photo'] = $photoPath;
+        }
+
+        // Remove parent_category_id from validated data (not a product field)
+        unset($validated['parent_category_id']);
 
         // Generate unique random slug from name
         $baseSlug = Str::slug($validated['name']);

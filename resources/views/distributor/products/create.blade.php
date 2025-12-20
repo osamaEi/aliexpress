@@ -7,7 +7,7 @@
             <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'إضافة منتج جديد' : 'Create New Product' }}</h5>
         </div>
         <div class="card-body">
-            <form action="{{ route('distributor.products.store') }}" method="POST">
+            <form action="{{ route('distributor.products.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="row g-3">
@@ -29,16 +29,39 @@
                         @enderror
                     </div>
 
-                    <!-- Category -->
+                    <!-- Product Photo -->
+                    <div class="col-12">
+                        <label for="photo" class="form-label">{{ app()->getLocale() == 'ar' ? 'صورة المنتج' : 'Product Photo' }}</label>
+                        <input type="file" class="form-control @error('photo') is-invalid @enderror" id="photo" name="photo" accept="image/*" onchange="previewImage(event)">
+                        @error('photo')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div id="imagePreview" class="mt-2" style="display: none;">
+                            <img id="preview" src="" alt="Preview" class="rounded" style="max-width: 200px; max-height: 200px; object-fit: cover;">
+                        </div>
+                    </div>
+
+                    <!-- Main Category -->
                     <div class="col-md-6">
-                        <label for="category_id" class="form-label">{{ __('messages.category') }} <span class="text-danger">*</span></label>
-                        <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required>
-                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف' : 'Select Category' }}</option>
+                        <label for="parent_category_id" class="form-label">{{ app()->getLocale() == 'ar' ? 'التصنيف الرئيسي' : 'Main Category' }} <span class="text-danger">*</span></label>
+                        <select class="form-select @error('parent_category_id') is-invalid @enderror" id="parent_category_id" name="parent_category_id" required>
+                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف الرئيسي' : 'Select Main Category' }}</option>
                             @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                <option value="{{ $category->id }}" {{ old('parent_category_id') == $category->id ? 'selected' : '' }}>
                                     {{ app()->getLocale() == 'ar' && $category->name_ar ? $category->name_ar : $category->name }}
                                 </option>
                             @endforeach
+                        </select>
+                        @error('parent_category_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Subcategory -->
+                    <div class="col-md-6">
+                        <label for="category_id" class="form-label">{{ app()->getLocale() == 'ar' ? 'التصنيف الفرعي' : 'Subcategory' }} <span class="text-danger">*</span></label>
+                        <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required disabled>
+                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف الرئيسي أولاً' : 'Select Main Category First' }}</option>
                         </select>
                         @error('category_id')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -147,4 +170,81 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+// Image preview functionality
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('imagePreview');
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            previewContainer.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    } else {
+        previewContainer.style.display = 'none';
+    }
+}
+
+// Dynamic subcategory loading
+document.getElementById('parent_category_id').addEventListener('change', function() {
+    const parentId = this.value;
+    const subcategorySelect = document.getElementById('category_id');
+    const locale = '{{ app()->getLocale() }}';
+
+    // Reset subcategory dropdown
+    subcategorySelect.innerHTML = '<option value="">' + (locale === 'ar' ? 'جاري التحميل...' : 'Loading...') + '</option>';
+    subcategorySelect.disabled = true;
+
+    if (parentId) {
+        // Fetch subcategories via AJAX
+        fetch(`/distributor/categories/${parentId}/subcategories`)
+            .then(response => response.json())
+            .then(data => {
+                subcategorySelect.innerHTML = '<option value="">' + (locale === 'ar' ? 'اختر التصنيف الفرعي' : 'Select Subcategory') + '</option>';
+
+                if (data.length > 0) {
+                    data.forEach(subcategory => {
+                        const option = document.createElement('option');
+                        option.value = subcategory.id;
+                        option.textContent = (locale === 'ar' && subcategory.name_ar) ? subcategory.name_ar : subcategory.name;
+                        subcategorySelect.appendChild(option);
+                    });
+                    subcategorySelect.disabled = false;
+                } else {
+                    subcategorySelect.innerHTML = '<option value="">' + (locale === 'ar' ? 'لا توجد تصنيفات فرعية' : 'No subcategories available') + '</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading subcategories:', error);
+                subcategorySelect.innerHTML = '<option value="">' + (locale === 'ar' ? 'خطأ في التحميل' : 'Error loading') + '</option>';
+            });
+    } else {
+        subcategorySelect.innerHTML = '<option value="">' + (locale === 'ar' ? 'اختر التصنيف الرئيسي أولاً' : 'Select Main Category First') + '</option>';
+    }
+});
+
+// Load subcategories on page load if parent category is already selected (for validation errors)
+document.addEventListener('DOMContentLoaded', function() {
+    const parentSelect = document.getElementById('parent_category_id');
+    const oldCategoryId = '{{ old("category_id") }}';
+
+    if (parentSelect.value && oldCategoryId) {
+        // Trigger change event to load subcategories
+        parentSelect.dispatchEvent(new Event('change'));
+
+        // Wait for subcategories to load, then select the old value
+        setTimeout(function() {
+            document.getElementById('category_id').value = oldCategoryId;
+        }, 500);
+    }
+});
+</script>
+@endpush
+
 @endsection
