@@ -321,8 +321,8 @@
                                 $locale = app()->getLocale();
                             @endphp
                             @foreach($countries as $code => $country)
-                                <option value="{{ $code }}" {{ old('country', $user->country) == $code ? 'selected' : '' }}>
-                                    {{ $country['flag'] }} {{ $locale == 'ar' ? $country['name_ar'] : $country['name_en'] }}
+                                <option value="{{ $code }}" {{ old('country', $user->country) == $code ? 'selected' : '' }} data-flag="{{ strtolower($code) }}">
+                                    {{ $locale == 'ar' ? $country['name_ar'] : $country['name_en'] }}
                                 </option>
                             @endforeach
                         </select>
@@ -461,6 +461,22 @@
     </div>
 </div>
 
+<style>
+    /* Style for country select with flags */
+    #country {
+        background-repeat: no-repeat;
+        background-position: 12px center;
+        background-size: 20px 14px;
+        padding-left: 40px;
+    }
+
+    [dir="rtl"] #country {
+        background-position: calc(100% - 12px) center;
+        padding-left: 12px;
+        padding-right: 40px;
+    }
+</style>
+
 <script>
     // Avatar preview and auto-submit
     document.getElementById('avatar')?.addEventListener('change', function(e) {
@@ -485,5 +501,26 @@
             document.getElementById('avatarForm').submit();
         }
     });
+
+    // Update country flag on select change
+    const countrySelect = document.getElementById('country');
+    if (countrySelect) {
+        function updateCountryFlag() {
+            const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+            const flagCode = selectedOption.dataset.flag;
+
+            if (flagCode) {
+                countrySelect.style.backgroundImage = `url('https://flagcdn.com/w20/${flagCode}.png')`;
+            } else {
+                countrySelect.style.backgroundImage = 'none';
+            }
+        }
+
+        // Update on page load
+        updateCountryFlag();
+
+        // Update on change
+        countrySelect.addEventListener('change', updateCountryFlag);
+    }
 </script>
 @endsection
