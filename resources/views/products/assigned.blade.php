@@ -76,8 +76,6 @@
                             <tr>
                                 <th style="width: 80px;">{{ app()->getLocale() == 'ar' ? 'الصورة' : 'Image' }}</th>
                                 <th>{{ app()->getLocale() == 'ar' ? 'معلومات المنتج' : 'Product Info' }}</th>
-                                <th style="width: 200px;">{{ app()->getLocale() == 'ar' ? 'رقم المنتج' : 'Product ID' }}</th>
-                                <th style="width: 120px;">{{ app()->getLocale() == 'ar' ? 'الحالة' : 'Status' }}</th>
                                 <th style="width: 150px;">{{ app()->getLocale() == 'ar' ? 'تاريخ التخصيص' : 'Assigned Date' }}</th>
                                 <th style="width: 180px;">{{ app()->getLocale() == 'ar' ? 'الإجراءات' : 'Actions' }}</th>
                             </tr>
@@ -120,24 +118,6 @@
                                                     <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
                                                 </svg>
                                                 {{ number_format($assignedProduct->price, 2) }}
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <code class="small">{{ $aliexpressProductId }}</code>
-                                    </td>
-                                    <td>
-                                        @if($status === 'assigned')
-                                            <span class="badge bg-warning text-white">
-                                                <i class="ri-time-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'مخصص' : 'Assigned' }}
-                                            </span>
-                                        @elseif($status === 'imported')
-                                            <span class="badge text-white" style="background-color: #561C04;">
-                                                <i class="ri-download-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'تم الاستيراد' : 'Imported' }}
-                                            </span>
-                                        @elseif($status === 'published')
-                                            <span class="badge text-white" style="background-color: #e56300;">
-                                                <i class="ri-check-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'تم النشر' : 'Published' }}
                                             </span>
                                         @endif
                                     </td>

@@ -117,24 +117,8 @@
                                         $flagSvgPath = public_path('images/flags/'.strtolower($customerCountry).'.svg');
                                         $flagSvgUrl = file_exists($flagSvgPath) ? asset('images/flags/'.strtolower($customerCountry).'.svg') : null;
 
-                                    // Convert currency if needed (AED to current session currency)
-                                    $displayCurrency = session('currency_code', 'AED');
-                                    $displayAmount = $order->total_price;
-
-                                    if ($order->currency !== $displayCurrency) {
-                                        $currencyModel = \App\Models\Currency::where('code', $displayCurrency)->first();
-                                        if ($currencyModel) {
-                                            // Convert from order currency to AED, then to display currency
-                                            if ($order->currency === 'USD') {
-                                                $inAED = $order->total_price * 3.67; // USD to AED
-                                            } elseif ($order->currency === 'SAR') {
-                                                $inAED = $order->total_price * 0.98; // SAR to AED
-                                            } else {
-                                                $inAED = $order->total_price;
-                                            }
-                                            $displayAmount = $inAED * $currencyModel->rate;
-                                        }
-                                    }
+                                    // Convert currency using Currency model
+                                    $displayAmount = $currentCurrency->convertFrom($order->total_price, $order->currency ?? 'USD');
                                 @endphp
                                 <tr>
                                     <td>
@@ -163,15 +147,7 @@
                                     </td>
                                     <td>{{ $order->quantity }}</td>
                                     <td>
-                                        @php
-                                            $currencySymbols = [
-                                                'AED' => 'د.إ',
-                                                'SAR' => 'ر.س',
-                                                'USD' => '$',
-                                            ];
-                                            $symbol = $currencySymbols[$displayCurrency] ?? $displayCurrency;
-                                        @endphp
-                                        <strong>{{ $symbol }} {{ number_format($displayAmount, 2) }}</strong>
+                                        <strong>{{ $currentCurrency->format($displayAmount) }}</strong>
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $order->getStatusBadgeColor() }}">
