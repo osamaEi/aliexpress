@@ -12,13 +12,35 @@
         </div>
 
         <div class="card-body">
+            {{-- Display session error messages --}}
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="ri-error-warning-line me-2"></i>
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            {{-- Display session success messages --}}
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="ri-checkbox-circle-line me-2"></i>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            {{-- Display validation errors --}}
             @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="ri-alert-line me-2"></i>
+                    <strong>{{ app()->getLocale() == 'ar' ? 'يرجى تصحيح الأخطاء التالية:' : 'Please correct the following errors:' }}</strong>
+                    <ul class="mb-0 mt-2">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
@@ -97,10 +119,28 @@
                                     <strong id="unit_price">{{ $product->currency }} {{ number_format($product->price, 2) }}</strong>
                                 </div>
                                 <hr>
-                                <div class="d-flex justify-content-between">
+                                <div class="d-flex justify-content-between mb-3">
                                     <span class="fs-5">{{ app()->getLocale() == 'ar' ? 'المجموع الكلي' : 'Grand Total' }}:</span>
                                     <strong class="text-primary fs-5" id="grand_total">{{ $product->currency }} {{ number_format($product->price, 2) }}</strong>
                                 </div>
+
+                                {{-- Display Wallet Balance --}}
+                                @if(auth()->user()->wallet)
+                                    <div class="alert alert-info mb-0 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="ri-wallet-3-line me-2"></i>
+                                            <strong>{{ app()->getLocale() == 'ar' ? 'رصيدك الحالي:' : 'Your Current Balance:' }}</strong>
+                                        </div>
+                                        <span class="badge bg-success fs-6">
+                                            AED {{ number_format(auth()->user()->wallet->balance, 2) }}
+                                        </span>
+                                    </div>
+                                @else
+                                    <div class="alert alert-warning mb-0">
+                                        <i class="ri-error-warning-line me-2"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'ليس لديك محفظة. يرجى الاتصال بالإدارة.' : 'You do not have a wallet. Please contact administration.' }}
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -312,10 +352,49 @@ function calculateTotal() {
     const unitPrice = {{ $product->price }};
     const currency = '{{ $product->currency }}';
     const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const walletBalance = {{ auth()->user()->wallet ? auth()->user()->wallet->balance : 0 }};
+    const locale = '{{ app()->getLocale() }}';
 
     const grandTotal = unitPrice * quantity;
 
     document.getElementById('grand_total').textContent = currency + ' ' + grandTotal.toFixed(2);
+
+    // Check if wallet balance is sufficient
+    const submitBtn = document.querySelector('button[type="submit"]');
+    if (walletBalance < grandTotal) {
+        // Show warning and disable submit button
+        if (!document.getElementById('insufficient-balance-warning')) {
+            const warningDiv = document.createElement('div');
+            warningDiv.id = 'insufficient-balance-warning';
+            warningDiv.className = 'alert alert-danger mt-3';
+
+            const warningTitle = locale === 'ar' ? 'رصيد غير كافٍ!' : 'Insufficient Balance!';
+            const warningMessage = locale === 'ar'
+                ? 'رصيدك الحالي غير كافٍ لإنشاء هذا الطلب. يرجى زيادة رصيدك.'
+                : 'Your current balance is not sufficient to create this order. Please increase your balance.';
+
+            warningDiv.innerHTML = '<i class="ri-error-warning-line me-2"></i><strong>' + warningTitle + '</strong> ' + warningMessage;
+
+            const summaryCard = document.querySelector('.card.bg-light');
+            summaryCard.parentNode.appendChild(warningDiv);
+        }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-secondary');
+        }
+    } else {
+        // Remove warning and enable submit button
+        const warningDiv = document.getElementById('insufficient-balance-warning');
+        if (warningDiv) {
+            warningDiv.remove();
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn-secondary');
+            submitBtn.classList.add('btn-primary');
+        }
+    }
 }
 
 // Calculate on page load

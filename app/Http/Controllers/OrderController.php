@@ -1004,8 +1004,19 @@ class OrderController extends Controller
             $unitPrice = $product->price;
             $totalPrice = $unitPrice * $quantity;
 
+            Log::info('Checking wallet balance', [
+                'user_id' => $user->id,
+                'has_wallet' => !is_null($user->wallet),
+                'wallet_balance' => $user->wallet ? $user->wallet->balance : 'N/A',
+                'required_amount' => $totalPrice,
+                'unit_price' => $unitPrice,
+                'quantity' => $quantity
+            ]);
+
             // Check seller's wallet balance
             if (!$user->wallet) {
+                Log::warning('User has no wallet', ['user_id' => $user->id]);
+
                 if ($request->expectsJson()) {
                     return response()->json([
                         'success' => false,
@@ -1019,6 +1030,12 @@ class OrderController extends Controller
 
             if ($user->wallet->balance < $totalPrice) {
                 $errorMsg = 'Insufficient balance. Please increase your balance to create this order. Required: ' . number_format($totalPrice, 2) . ' ' . ($product->currency ?? 'AED') . ', Available: ' . number_format($user->wallet->balance, 2) . ' AED';
+
+                Log::warning('Insufficient wallet balance', [
+                    'user_id' => $user->id,
+                    'required' => $totalPrice,
+                    'available' => $user->wallet->balance
+                ]);
 
                 if ($request->expectsJson()) {
                     return response()->json([
