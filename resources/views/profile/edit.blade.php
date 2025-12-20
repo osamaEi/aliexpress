@@ -120,12 +120,19 @@
 
                     <div class="col-md-6">
                         <label for="country" class="form-label">{{ __('messages.country') }}</label>
-                        <div class="position-relative">
-                            <span id="countryFlag" class="position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); z-index: 10; pointer-events: none;"></span>
-                            <select class="form-select @error('country') is-invalid @enderror" id="country" name="country" style="padding-left: 40px;">
-                                <option value="">{{ __('messages.select_country') }}</option>
-                                @php
-                                    $countries = [
+                        <div class="custom-select-wrapper">
+                            <div class="custom-select-display" id="customSelectDisplay">
+                                <span class="selected-flag"></span>
+                                <span class="selected-text">{{ __('messages.select_country') }}</span>
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                            <div class="custom-select-dropdown" id="customSelectDropdown">
+                                <div class="custom-select-search">
+                                    <input type="text" id="countrySearch" placeholder="{{ __('messages.search') }}...">
+                                </div>
+                                <div class="custom-select-options" id="customSelectOptions">
+                                    @php
+                                        $countries = [
                                     'AF' => ['flag' => '🇦🇫', 'name_ar' => 'أفغانستان', 'name_en' => 'Afghanistan'],
                                     'AL' => ['flag' => '🇦🇱', 'name_ar' => 'ألبانيا', 'name_en' => 'Albania'],
                                     'DZ' => ['flag' => '🇩🇿', 'name_ar' => 'الجزائر', 'name_en' => 'Algeria'],
@@ -322,15 +329,25 @@
                                 ];
                                 $locale = app()->getLocale();
                             @endphp
-                            @foreach($countries as $code => $country)
-                                <option value="{{ $code }}" {{ old('country', $user->country) == $code ? 'selected' : '' }} data-flag="{{ strtolower($code) }}">
-                                    {{ $locale == 'ar' ? $country['name_ar'] : $country['name_en'] }}
-                                </option>
-                            @endforeach
+                                    @foreach($countries as $code => $country)
+                                        <div class="custom-select-option" data-value="{{ $code }}" data-flag="{{ strtolower($code) }}" data-name="{{ $locale == 'ar' ? $country['name_ar'] : $country['name_en'] }}">
+                                            <img src="https://flagcdn.com/w20/{{ strtolower($code) }}.png" alt="{{ $code }}" style="width:20px;height:14px;object-fit:cover;border-radius:2px;margin-right:8px;" onerror="this.style.display='none'" />
+                                            <span>{{ $locale == 'ar' ? $country['name_ar'] : $country['name_en'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <select class="d-none @error('country') is-invalid @enderror" id="country" name="country">
+                                <option value="">{{ __('messages.select_country') }}</option>
+                                @foreach($countries as $code => $country)
+                                    <option value="{{ $code }}" {{ old('country', $user->country) == $code ? 'selected' : '' }}>
+                                        {{ $locale == 'ar' ? $country['name_ar'] : $country['name_en'] }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                         @error('country')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -465,15 +482,133 @@
 </div>
 
 <style>
-    /* RTL support for country flag */
-    [dir="rtl"] #countryFlag {
-        left: auto !important;
-        right: 12px !important;
+    /* Custom Select Styles */
+    .custom-select-wrapper {
+        position: relative;
+        width: 100%;
     }
 
-    [dir="rtl"] #country {
-        padding-left: 12px !important;
-        padding-right: 40px !important;
+    .custom-select-display {
+        background: #fff;
+        border: 1px solid #d9dee3;
+        border-radius: 0.375rem;
+        padding: 0.4375rem 2.5rem 0.4375rem 0.875rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        min-height: calc(1.5em + 0.875rem + 2px);
+    }
+
+    .custom-select-display:hover {
+        border-color: #b4bdc6;
+    }
+
+    .custom-select-display i {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: transform 0.3s;
+    }
+
+    .custom-select-wrapper.active .custom-select-display i {
+        transform: translateY(-50%) rotate(180deg);
+    }
+
+    .selected-flag {
+        margin-right: 8px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .selected-flag img {
+        width: 20px;
+        height: 14px;
+        object-fit: cover;
+        border-radius: 2px;
+    }
+
+    .custom-select-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #d9dee3;
+        border-radius: 0.375rem;
+        margin-top: 4px;
+        max-height: 300px;
+        overflow: hidden;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-select-wrapper.active .custom-select-dropdown {
+        display: block;
+    }
+
+    .custom-select-search {
+        padding: 8px;
+        border-bottom: 1px solid #d9dee3;
+    }
+
+    .custom-select-search input {
+        width: 100%;
+        padding: 6px 12px;
+        border: 1px solid #d9dee3;
+        border-radius: 0.375rem;
+        outline: none;
+    }
+
+    .custom-select-search input:focus {
+        border-color: #696cff;
+    }
+
+    .custom-select-options {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .custom-select-option {
+        padding: 8px 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+
+    .custom-select-option:hover {
+        background: #f5f5f9;
+    }
+
+    .custom-select-option.selected {
+        background: #696cff;
+        color: #fff;
+    }
+
+    .custom-select-option img {
+        flex-shrink: 0;
+    }
+
+    /* RTL support */
+    [dir="rtl"] .custom-select-display {
+        padding: 0.4375rem 0.875rem 0.4375rem 2.5rem;
+    }
+
+    [dir="rtl"] .custom-select-display i {
+        right: auto;
+        left: 12px;
+    }
+
+    [dir="rtl"] .selected-flag {
+        margin-right: 0;
+        margin-left: 8px;
+    }
+
+    [dir="rtl"] .custom-select-option img {
+        margin-right: 0;
+        margin-left: 8px;
     }
 </style>
 
@@ -502,27 +637,89 @@
         }
     });
 
-    // Update country flag on select change
+    // Custom Select Implementation
+    const customSelectWrapper = document.querySelector('.custom-select-wrapper');
+    const customSelectDisplay = document.getElementById('customSelectDisplay');
+    const customSelectDropdown = document.getElementById('customSelectDropdown');
+    const customSelectOptions = document.getElementById('customSelectOptions');
+    const countrySearch = document.getElementById('countrySearch');
     const countrySelect = document.getElementById('country');
-    const countryFlagSpan = document.getElementById('countryFlag');
 
-    if (countrySelect && countryFlagSpan) {
-        function updateCountryFlag() {
-            const selectedOption = countrySelect.options[countrySelect.selectedIndex];
-            const flagCode = selectedOption.dataset.flag;
+    if (customSelectWrapper && customSelectDisplay && customSelectDropdown) {
+        // Toggle dropdown
+        customSelectDisplay.addEventListener('click', function(e) {
+            e.stopPropagation();
+            customSelectWrapper.classList.toggle('active');
+            if (customSelectWrapper.classList.contains('active')) {
+                countrySearch.focus();
+            }
+        });
 
-            if (flagCode) {
-                countryFlagSpan.innerHTML = `<img src="https://flagcdn.com/w20/${flagCode}.png" alt="${flagCode}" style="width:20px;height:14px;object-fit:cover;border-radius:2px;" onerror="this.style.display='none'" />`;
-            } else {
-                countryFlagSpan.innerHTML = '';
+        // Select option
+        const options = customSelectOptions.querySelectorAll('.custom-select-option');
+        options.forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.dataset.value;
+                const flag = this.dataset.flag;
+                const name = this.dataset.name;
+
+                // Update hidden select
+                countrySelect.value = value;
+
+                // Update display
+                const selectedFlag = customSelectDisplay.querySelector('.selected-flag');
+                const selectedText = customSelectDisplay.querySelector('.selected-text');
+
+                if (value) {
+                    selectedFlag.innerHTML = `<img src="https://flagcdn.com/w20/${flag}.png" alt="${flag}" style="width:20px;height:14px;object-fit:cover;border-radius:2px;" onerror="this.style.display='none'" />`;
+                    selectedText.textContent = name;
+                } else {
+                    selectedFlag.innerHTML = '';
+                    selectedText.textContent = '{{ __("messages.select_country") }}';
+                }
+
+                // Update selected state
+                options.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+
+                // Close dropdown
+                customSelectWrapper.classList.remove('active');
+            });
+        });
+
+        // Search functionality
+        countrySearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            options.forEach(option => {
+                const name = option.dataset.name.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    option.style.display = 'flex';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!customSelectWrapper.contains(e.target)) {
+                customSelectWrapper.classList.remove('active');
+            }
+        });
+
+        // Prevent dropdown from closing when clicking inside
+        customSelectDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Initialize with current value
+        const currentValue = countrySelect.value;
+        if (currentValue) {
+            const currentOption = customSelectOptions.querySelector(`[data-value="${currentValue}"]`);
+            if (currentOption) {
+                currentOption.click();
             }
         }
-
-        // Update on page load
-        updateCountryFlag();
-
-        // Update on change
-        countrySelect.addEventListener('change', updateCountryFlag);
     }
 </script>
 @endsection
