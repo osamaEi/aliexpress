@@ -177,7 +177,8 @@
                                             </a>
                                             @if($order->product->isAliexpressProduct())
                                                 <br><small class="text-muted">
-                                                    🇨🇳 {{ app()->getLocale() == 'ar' ? 'من الصين' : 'From China' }}
+                                                    <img src="https://flagcdn.com/w20/cn.png" alt="CN" style="width:16px;height:12px;object-fit:cover;vertical-align:middle;border-radius:2px;" />
+                                                    {{ app()->getLocale() == 'ar' ? 'من الصين' : 'From China' }}
                                                 </small>
                                             @endif
                                         @else
