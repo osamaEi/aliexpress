@@ -951,6 +951,11 @@ class OrderController extends Controller
      */
     public function storeDistributorOrder(Request $request)
     {
+        Log::info('Distributor order creation started', [
+            'user_id' => auth()->id(),
+            'request_data' => $request->all()
+        ]);
+
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
@@ -965,14 +970,22 @@ class OrderController extends Controller
             'shipping_country' => 'required|string|max:2',
             'shipping_zip' => 'required|string|max:20',
             'customer_notes' => 'nullable|string',
-            'shipping_cost' => 'nullable|numeric|min:0',
         ]);
 
         try {
             $product = Product::findOrFail($validated['product_id']);
 
+            Log::info('Product found for distributor order', [
+                'product_id' => $product->id,
+                'is_aliexpress' => $product->isAliexpressProduct()
+            ]);
+
             // Ensure this is not an AliExpress product
             if ($product->isAliexpressProduct()) {
+                Log::warning('Attempted to create distributor order for AliExpress product', [
+                    'product_id' => $product->id
+                ]);
+
                 if ($request->expectsJson()) {
                     return response()->json([
                         'success' => false,
@@ -986,14 +999,10 @@ class OrderController extends Controller
 
             $user = Auth::user();
 
-            // Calculate pricing
+            // Calculate pricing (no shipping cost for distributor orders)
             $quantity = $validated['quantity'];
             $unitPrice = $product->price;
-            $productTotal = $unitPrice * $quantity;
-
-            // Add shipping cost if provided (for distributor products, shipping is optional)
-            $shippingCost = isset($validated['shipping_cost']) ? (float)$validated['shipping_cost'] : ($product->shipping_cost ?? 0);
-            $totalPrice = $productTotal + $shippingCost;
+            $totalPrice = $unitPrice * $quantity;
 
             // Check seller's wallet balance
             if (!$user->wallet) {
@@ -1059,13 +1068,11 @@ class OrderController extends Controller
 
             DB::commit();
 
-            Log::info('Distributor order created', [
+            Log::info('Distributor order created successfully', [
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
                 'user_id' => $user->id,
                 'product_id' => $product->id,
-                'product_total' => $productTotal,
-                'shipping_cost' => $shippingCost,
                 'total_amount' => $totalPrice,
                 'wallet_balance_after' => $user->wallet->fresh()->balance
             ]);

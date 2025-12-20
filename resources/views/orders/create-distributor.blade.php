@@ -67,7 +67,7 @@
 
                 <!-- Quantity -->
                 <div class="row mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label for="quantity" class="form-label fw-semibold">
                             <i class="ri-shopping-cart-line text-primary me-1"></i>
                             {{ app()->getLocale() == 'ar' ? 'الكمية' : 'Quantity' }} *
@@ -84,24 +84,6 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
-                    <div class="col-md-6">
-                        <label for="shipping_cost" class="form-label fw-semibold">
-                            <i class="ri-truck-line text-primary me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'تكلفة الشحن' : 'Shipping Cost' }}
-                        </label>
-                        <input type="number"
-                               step="0.01"
-                               class="form-control @error('shipping_cost') is-invalid @enderror"
-                               id="shipping_cost"
-                               name="shipping_cost"
-                               value="{{ old('shipping_cost', $product->shipping_cost ?? 0) }}"
-                               min="0"
-                               onchange="calculateTotal()">
-                        @error('shipping_cost')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
                 </div>
 
                 <!-- Order Summary -->
@@ -114,18 +96,10 @@
                                     <span>{{ app()->getLocale() == 'ar' ? 'سعر الوحدة' : 'Unit Price' }}:</span>
                                     <strong id="unit_price">{{ $product->currency }} {{ number_format($product->price, 2) }}</strong>
                                 </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>{{ app()->getLocale() == 'ar' ? 'إجمالي المنتج' : 'Product Total' }}:</span>
-                                    <strong id="product_total">{{ $product->currency }} {{ number_format($product->price, 2) }}</strong>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>{{ app()->getLocale() == 'ar' ? 'تكلفة الشحن' : 'Shipping Cost' }}:</span>
-                                    <strong id="shipping_display">{{ $product->currency }} {{ number_format($product->shipping_cost ?? 0, 2) }}</strong>
-                                </div>
                                 <hr>
                                 <div class="d-flex justify-content-between">
                                     <span class="fs-5">{{ app()->getLocale() == 'ar' ? 'المجموع الكلي' : 'Grand Total' }}:</span>
-                                    <strong class="text-primary fs-5" id="grand_total">{{ $product->currency }} {{ number_format($product->price + ($product->shipping_cost ?? 0), 2) }}</strong>
+                                    <strong class="text-primary fs-5" id="grand_total">{{ $product->currency }} {{ number_format($product->price, 2) }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -338,13 +312,9 @@ function calculateTotal() {
     const unitPrice = {{ $product->price }};
     const currency = '{{ $product->currency }}';
     const quantity = parseInt(document.getElementById('quantity').value) || 1;
-    const shippingCost = parseFloat(document.getElementById('shipping_cost').value) || 0;
 
-    const productTotal = unitPrice * quantity;
-    const grandTotal = productTotal + shippingCost;
+    const grandTotal = unitPrice * quantity;
 
-    document.getElementById('product_total').textContent = currency + ' ' + productTotal.toFixed(2);
-    document.getElementById('shipping_display').textContent = currency + ' ' + shippingCost.toFixed(2);
     document.getElementById('grand_total').textContent = currency + ' ' + grandTotal.toFixed(2);
 }
 
