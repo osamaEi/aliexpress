@@ -487,14 +487,15 @@
             display: none;
         }
 
-        /* reCAPTCHA v3 Badge Styling */
-        .grecaptcha-badge {
-            visibility: visible !important;
-            opacity: 1 !important;
-            z-index: 9999 !important;
-            position: fixed !important;
-            bottom: 14px !important;
-            right: 14px !important;
+        /* reCAPTCHA v2 Checkbox Styling */
+        .recaptcha-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .recaptcha-wrapper > div {
+            transform-origin: center;
         }
     </style>
 </head>
@@ -693,9 +694,11 @@
                     </div>
                 </div>
 
-                <!-- Hidden reCAPTCHA v3 token field -->
+                <!-- reCAPTCHA v2 Checkbox -->
                 @if(config('services.recaptcha.enabled'))
-                <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+                <div class="recaptcha-wrapper">
+                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                </div>
                 @error('g-recaptcha-response')
                     <div class="text-danger text-center mb-3">{{ $message }}</div>
                 @enderror
@@ -792,23 +795,5 @@
         }
     </script>
 
-    <!-- reCAPTCHA v3 Script -->
-    <script>
-        document.getElementById('submitBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-
-            @if(config('services.recaptcha.enabled'))
-            grecaptcha.ready(function() {
-                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'submit'}).then(function(token) {
-                    document.getElementById('g-recaptcha-response').value = token;
-                    document.querySelector('form').submit();
-                });
-            });
-            @else
-            // If reCAPTCHA is disabled, just submit the form
-            document.querySelector('form').submit();
-            @endif
-        });
-    </script>
 </body>
 </html>
