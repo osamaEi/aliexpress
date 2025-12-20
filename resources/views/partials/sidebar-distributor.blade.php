@@ -71,7 +71,7 @@
         <li class="menu-item {{ request()->routeIs('distributor.dashboard') ? 'active' : '' }}">
             <a href="{{ route('distributor.dashboard') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-home-smile-line"></i>
-                <div data-i18n="Dashboard">{{ __('messages.dashboard') }}</div>
+                <div>{{ __('messages.dashboard') }}</div>
             </a>
         </li>
 
@@ -105,7 +105,7 @@
         <li class="menu-item {{ request()->routeIs('distributor.categories') ? 'active' : '' }}">
             <a href="{{ route('distributor.categories') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-price-tag-3-line"></i>
-                <div data-i18n="Categories">{{ __('messages.categories') }}</div>
+                <div>{{ __('messages.categories') }}</div>
             </a>
         </li>
 

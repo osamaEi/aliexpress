@@ -491,6 +491,10 @@
         .grecaptcha-badge {
             visibility: visible !important;
             opacity: 1 !important;
+            z-index: 9999 !important;
+            position: fixed !important;
+            bottom: 14px !important;
+            right: 14px !important;
         }
     </style>
 </head>
