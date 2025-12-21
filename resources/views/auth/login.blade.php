@@ -440,7 +440,9 @@
 
                 <div class="register-link">
                     {{ app()->getLocale() == 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?" }}
-                    <a href="{{ route('seller.register.step1') }}">{{ app()->getLocale() == 'ar' ? 'إنشاء حساب جديد' : 'Create Account' }}</a>
+                    <a href="{{ route('seller.register.step1') }}">{{ app()->getLocale() == 'ar' ? 'سجل كبائع' : 'Register as Seller' }}</a>
+                    <span style="margin: 0 8px; color: #999;">|</span>
+                    <a href="{{ route('distributor.register.step1') }}" style="color: #1e40af;">{{ app()->getLocale() == 'ar' ? 'سجل كموزع' : 'Register as Distributor' }}</a>
                 </div>
             </form>
         </div>

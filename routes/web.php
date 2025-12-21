@@ -14,6 +14,7 @@ use App\Http\Controllers\Seller\SellerController;
 use App\Http\Controllers\AliExpressTestController;
 use App\Http\Controllers\AliExpressWebhookController;
 use App\Http\Controllers\SellerRegistrationController;
+use App\Http\Controllers\DistributorRegistrationController;
 use App\Http\Controllers\Admin\OrderManagementController;
 use App\Http\Controllers\Admin\AdminCategoryProfitController;
 use App\Http\Controllers\Admin\SubscriptionManagementController;
@@ -54,6 +55,20 @@ Route::prefix('seller/register')->name('seller.register.')->group(function () {
     Route::get('step-3', [SellerRegistrationController::class, 'showStep3'])->name('step3');
     Route::post('verify-otp', [SellerRegistrationController::class, 'verifyOTP'])->name('verify-otp');
     Route::post('resend-otp', [SellerRegistrationController::class, 'resendOTP'])->name('resend-otp');
+});
+
+// Distributor Registration Routes (Public - No Auth Required)
+Route::prefix('distributor/register')->name('distributor.register.')->group(function () {
+    Route::get('step-1', [DistributorRegistrationController::class, 'showStep1'])->name('step1');
+    Route::post('step-1', [DistributorRegistrationController::class, 'processStep1'])->name('step1.process');
+    Route::get('step-2', [DistributorRegistrationController::class, 'showStep2'])->name('step2');
+    Route::post('step-2', [DistributorRegistrationController::class, 'processStep2'])->name('step2.process');
+    Route::get('step-3', [DistributorRegistrationController::class, 'showStep3'])->name('step3');
+    Route::post('step-3', [DistributorRegistrationController::class, 'processStep3'])->name('step3.process');
+    Route::get('step-4', [DistributorRegistrationController::class, 'showStep4'])->name('step4');
+    Route::post('verify-otp', [DistributorRegistrationController::class, 'verifyOTP'])->name('verify-otp');
+    Route::post('resend-otp', [DistributorRegistrationController::class, 'resendOTP'])->name('resend-otp');
+    Route::get('check-slug', [DistributorRegistrationController::class, 'checkSlug'])->name('check-slug');
 });
 
 // AliExpress API Test Routes (Public - No Auth Required)

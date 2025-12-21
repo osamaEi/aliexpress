@@ -43,6 +43,13 @@ class User extends Authenticatable
         'email_verified_at',
         'is_blocked',
         'block_reason',
+        // Distributor specific fields
+        'store_name',
+        'store_slug',
+        'default_currency',
+        'commercial_register',
+        'freelance_document',
+        'social_media_accounts',
     ];
 
     /**
@@ -69,6 +76,7 @@ class User extends Authenticatable
             'is_verified' => 'boolean',
             'verified_at' => 'datetime',
             'is_blocked' => 'boolean',
+            'social_media_accounts' => 'array',
         ];
     }
 
