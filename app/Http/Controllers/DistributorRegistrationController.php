@@ -179,8 +179,8 @@ class DistributorRegistrationController extends Controller
         $validated = $request->validate([
             'default_currency' => 'required|string|exists:currencies,code',
             'social_media' => 'nullable|array',
-            'social_media.*.type' => 'required_with:social_media.*.url|string|in:facebook,instagram,twitter,tiktok,snapchat,youtube,whatsapp,telegram',
-            'social_media.*.url' => 'required_with:social_media.*.type|url',
+            'social_media.*.type' => 'nullable|string|in:facebook,instagram,twitter,tiktok,snapchat,youtube,whatsapp,telegram',
+            'social_media.*.url' => 'nullable|url',
         ], [
             'default_currency.required' => app()->getLocale() == 'ar'
                 ? 'العملة الافتراضية مطلوبة'
@@ -196,10 +196,10 @@ class DistributorRegistrationController extends Controller
         $data = Session::get('distributor_registration');
         $data['default_currency'] = $validated['default_currency'];
 
-        // Filter out empty social media entries
+        // Filter out empty social media entries - only include if both type and url are provided
         $socialMedia = [];
-        if (!empty($validated['social_media'])) {
-            foreach ($validated['social_media'] as $social) {
+        if (!empty($request->social_media)) {
+            foreach ($request->social_media as $social) {
                 if (!empty($social['type']) && !empty($social['url'])) {
                     $socialMedia[] = [
                         'type' => $social['type'],

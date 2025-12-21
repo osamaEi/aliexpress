@@ -482,6 +482,28 @@
             margin-bottom: 8px;
         }
 
+        .currency-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            color: var(--distributor-color);
+        }
+
+        .currency-option input:checked + label .currency-icon-wrapper {
+            background: linear-gradient(135deg, var(--distributor-color) 0%, var(--distributor-secondary) 100%);
+            color: white;
+        }
+
+        .currency-symbol-text {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
         .currency-name {
             font-size: 14px;
             color: #333;
@@ -665,7 +687,17 @@
                                    {{ old('default_currency', 'AED') == $currency->code ? 'checked' : '' }}
                                    required>
                             <label for="currency_{{ $currency->code }}">
-                                <span class="currency-symbol">{{ $currency->symbol }}</span>
+                                <span class="currency-icon-wrapper">
+                                    @if($currency->code === 'AED')
+                                        <x-dirham-icon width="32" height="32" />
+                                    @elseif($currency->code === 'SAR')
+                                        <x-riyal-icon width="32" height="32" />
+                                    @elseif($currency->code === 'USD')
+                                        <x-dollar-icon width="32" height="32" />
+                                    @else
+                                        <span class="currency-symbol-text">{{ $currency->symbol }}</span>
+                                    @endif
+                                </span>
                                 <span class="currency-name">{{ $currency->name }}</span>
                                 <span class="currency-code">{{ $currency->code }}</span>
                             </label>
