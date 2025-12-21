@@ -99,9 +99,9 @@
         }
 
         .logo-wrapper img {
-            max-width: 160px;
+            max-width: 180px;
             height: auto;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .logo-wrapper h3 {
@@ -299,22 +299,8 @@
         .language-switcher {
             position: absolute;
             top: 20px;
+            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
             z-index: 1000;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        @media (min-width: 1px) {
-            html[dir="rtl"] .language-switcher {
-                left: 20px;
-            }
-            html[dir="ltr"] .language-switcher {
-                right: 20px;
-            }
-        }
-
-        .lang-switch-group {
             display: flex;
             gap: 10px;
             background: white;
@@ -354,62 +340,19 @@
             width: 20px;
             height: 20px;
         }
-
-        .register-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            box-shadow: 0 4px 15px rgba(86, 28, 4, 0.2);
-        }
-
-        .register-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(86, 28, 4, 0.3);
-            color: white;
-        }
-
-        .sidebar-footer {
-            margin-top: 25px;
-            margin-bottom: 40px;
-            text-align: center;
-            position: relative;
-            z-index: 2;
-        }
-
-        .sidebar-footer img {
-            max-width: 200px;
-            height: auto;
-            opacity: 0.9;
-        }
     </style>
 </head>
 <body>
-    <!-- Language Switcher & Register Button -->
+    <!-- Language Switcher -->
     <div class="language-switcher">
-        <a href="{{ route('seller.register.step1') }}" class="register-btn">
-            <i class="ri-user-add-line"></i>
-            <span>{{ app()->getLocale() == 'ar' ? 'إنشاء حساب التاجر' : 'seller regiteration' }}</span>
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
+            <img src="https://flagcdn.com/w20/gb.png" alt="English" style="width: 20px; height: 15px;">
+            <span>English</span>
         </a>
-        <div class="lang-switch-group">
-            <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
-                <img src="https://flagcdn.com/w20/gb.png" alt="English" style="width: 20px; height: 15px;">
-                <span>English</span>
-            </a>
-            <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
-                <img src="https://flagcdn.com/w20/ae.png" alt="العربية" style="width: 20px; height: 15px;">
-                <span>العربية</span>
-            </a>
-        </div>
+        <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
+            <img src="https://flagcdn.com/w20/ae.png" alt="العربية" style="width: 20px; height: 15px;">
+            <span>العربية</span>
+        </a>
     </div>
 
     <div class="main-container">
@@ -417,12 +360,6 @@
         <div class="sidebar">
             <div class="logo-wrapper">
                 <img src="{{ asset('images/white-logo.png') }}" alt="Logo">
-
-                <!-- Footer in Sidebar -->
-                <div class="sidebar-footer">
-                    <img src="{{ asset('foot.png') }}" alt="EVORQ">
-                </div>
-
                 <h3>{{ app()->getLocale() == 'ar' ? 'مرحباً بعودتك' : 'Welcome Back' }}</h3>
                 <p>{{ app()->getLocale() == 'ar' ? 'سجّل دخولك للوصول إلى حسابك ومتابعة أعمالك' : 'Sign in to access your account and continue your work' }}</p>
             </div>
@@ -503,10 +440,22 @@
 
                 <div class="register-link">
                     {{ app()->getLocale() == 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?" }}
-                    <a href="{{ route('seller.register.step1') }}">{{ app()->getLocale() == 'ar' ? 'إنشاء حساب جديد' : 'Create Account' }}</a>
+                    <a href="{{ route('seller.register.step1') }}">{{ app()->getLocale() == 'ar' ? 'سجل كبائع' : 'Register as Seller' }}</a>
+                    <span style="margin: 0 8px; color: #999;">|</span>
+                    <a href="{{ route('distributor.register.step1') }}" style="color: #1e40af;">{{ app()->getLocale() == 'ar' ? 'سجل كموزع' : 'Register as Distributor' }}</a>
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Footer with EVORQ Logo -->
+    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
+        <span style="color: #808080; font-size: 14px; font-weight: 400;">{{ app()->getLocale() == 'ar' ? 'بواسطة' : 'BY' }}</span>
+        <img src="{{ asset('footer.png') }}"
+             alt="EVORQ Logo"
+             style="height: 45px;"
+           >
+        <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">{{ app()->getLocale() == 'ar' ? 'إيفورك للتقنية' : 'EVORQ TECHNOLOGIES' }}</span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
