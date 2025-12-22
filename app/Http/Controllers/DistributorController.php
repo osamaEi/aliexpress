@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductVariation;
 use App\Models\Order;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DistributorController extends Controller
@@ -92,39 +95,64 @@ class DistributorController extends Controller
      */
     public function storeProduct(Request $request)
     {
-        $validated = $request->validate([
+        // Base validation rules
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'name_ar' => ['nullable', 'string', 'max:255'],
+            'name_ar' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'description_ar' => ['nullable', 'string'],
+            'description_ar' => ['required', 'string'],
             'short_description' => ['nullable', 'string', 'max:500'],
             'short_description_ar' => ['nullable', 'string', 'max:500'],
-            'price' => ['required', 'numeric', 'min:0'],
             'currency' => ['required', 'string', 'max:3'],
-            'original_price' => ['nullable', 'numeric', 'min:0'],
-            'compare_price' => ['nullable', 'numeric', 'min:0'],
-            'cost' => ['nullable', 'numeric', 'min:0'],
             'sku' => ['nullable', 'string', 'max:100'],
-            'stock_quantity' => ['required', 'integer', 'min:0'],
             'track_inventory' => ['boolean'],
+            'has_variations' => ['boolean'],
             'parent_category_id' => ['required', 'exists:categories,id'],
             'category_id' => ['required', 'exists:categories,id'],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
-            'images' => ['nullable', 'array'],
-            'images.*' => ['string'],
-            'specifications' => ['nullable', 'array'],
-            'shipping_cost' => ['nullable', 'numeric', 'min:0'],
-            'processing_time_days' => ['nullable', 'integer', 'min:0'],
-        ]);
+            'photo' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'additional_images' => ['nullable', 'array', 'max:5'],
+            'additional_images.*' => ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'video' => ['nullable', 'file', 'mimes:mp4,webm,ogg', 'max:51200'], // 50MB
+        ];
 
-        // Handle photo upload
+        // Conditional validation based on has_variations
+        if ($request->has('has_variations') && $request->has_variations) {
+            $rules['variations'] = ['required', 'array', 'min:1'];
+            $rules['variations.*.name'] = ['required', 'string', 'max:255'];
+            $rules['variations.*.price'] = ['required', 'numeric', 'min:0'];
+            $rules['variations.*.quantity'] = ['required', 'integer', 'min:0'];
+        } else {
+            $rules['price'] = ['required', 'numeric', 'min:0'];
+            $rules['stock_quantity'] = ['required', 'integer', 'min:0'];
+        }
+
+        $validated = $request->validate($rules);
+
+        // Handle main photo upload
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('products', 'public');
             $validated['photo'] = $photoPath;
         }
 
-        // Remove parent_category_id from validated data (not a product field)
+        // Handle video upload
+        if ($request->hasFile('video')) {
+            $videoPath = $request->file('video')->store('products/videos', 'public');
+            $validated['video'] = $videoPath;
+        }
+
+        // Remove fields not in product table
         unset($validated['parent_category_id']);
+        unset($validated['additional_images']);
+        unset($validated['variations']);
+
+        // Set defaults for variation products
+        if ($request->has('has_variations') && $request->has_variations) {
+            $validated['has_variations'] = true;
+            $validated['price'] = 0; // Will be calculated from variations
+            $validated['stock_quantity'] = 0; // Will be calculated from variations
+        } else {
+            $validated['has_variations'] = false;
+        }
 
         // Generate unique random slug from name
         $baseSlug = Str::slug($validated['name']);
@@ -137,12 +165,56 @@ class DistributorController extends Controller
             $validated['sku'] = $baseSku . '-' . Str::random(6);
         }
 
-        // Calculate seller and admin amounts (you can adjust this logic)
-        $validated['seller_amount'] = $validated['price'] * 0.7; // 70% to seller
-        $validated['admin_amount'] = $validated['price'] * 0.3; // 30% to admin
+        // Calculate seller and admin amounts
+        $price = $validated['price'] ?? 0;
+        $validated['seller_amount'] = $price * 0.7;
+        $validated['admin_amount'] = $price * 0.3;
 
         // Create the product
         $product = Product::create($validated);
+
+        // Handle additional images
+        if ($request->hasFile('additional_images')) {
+            $sortOrder = 0;
+            foreach ($request->file('additional_images') as $image) {
+                $imagePath = $image->store('products/additional', 'public');
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_path' => $imagePath,
+                    'sort_order' => $sortOrder++,
+                ]);
+            }
+        }
+
+        // Handle variations
+        if ($request->has('has_variations') && $request->has_variations && !empty($request->variations)) {
+            $minPrice = PHP_FLOAT_MAX;
+            $totalStock = 0;
+
+            foreach ($request->variations as $variation) {
+                if (!empty($variation['name']) && isset($variation['price'])) {
+                    ProductVariation::create([
+                        'product_id' => $product->id,
+                        'name' => $variation['name'],
+                        'price' => $variation['price'],
+                        'quantity' => $variation['quantity'] ?? 0,
+                    ]);
+
+                    if ($variation['price'] < $minPrice) {
+                        $minPrice = $variation['price'];
+                    }
+                    $totalStock += $variation['quantity'] ?? 0;
+                }
+            }
+
+            // Update product with min price and total stock
+            $product->update([
+                'price' => $minPrice != PHP_FLOAT_MAX ? $minPrice : 0,
+                'stock_quantity' => $totalStock,
+                'seller_amount' => ($minPrice != PHP_FLOAT_MAX ? $minPrice : 0) * 0.7,
+                'admin_amount' => ($minPrice != PHP_FLOAT_MAX ? $minPrice : 0) * 0.3,
+            ]);
+        }
 
         // Assign product to the distributor
         Auth::user()->assignedProducts()->attach($product->id, [
@@ -178,6 +250,19 @@ class DistributorController extends Controller
         }
 
         return view('distributor.categories.index', compact('categories', 'parentCategory'));
+    }
+
+    /**
+     * Display the specified product.
+     */
+    public function showProduct($id)
+    {
+        $user = Auth::user();
+        $product = $user->assignedProducts()
+            ->with(['category', 'additionalImages', 'variations'])
+            ->findOrFail($id);
+
+        return view('distributor.products.show', compact('product'));
     }
 
     /**

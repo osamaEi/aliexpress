@@ -63,7 +63,7 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-info" title="{{ app()->getLocale() == 'ar' ? 'عرض' : 'View' }}">
+                                    <a href="{{ route('distributor.products.show', $product->id) }}" class="btn btn-sm btn-info" title="{{ app()->getLocale() == 'ar' ? 'عرض' : 'View' }}">
                                         <i class="ri-eye-line"></i>
                                     </a>
                                     <a href="{{ route('distributor.products.edit', $product->id) }}" class="btn btn-sm btn-primary" title="{{ app()->getLocale() == 'ar' ? 'تعديل' : 'Edit' }}">

@@ -28,9 +28,11 @@ class Product extends Model
         'sku',
         'stock_quantity',
         'track_inventory',
+        'has_variations',
         'is_active',
         'category_id',
         'photo',
+        'video',
         'aliexpress_id',
         'aliexpress_url',
         'aliexpress_price',
@@ -58,6 +60,7 @@ class Product extends Model
         'stock_quantity' => 'integer',
         'processing_time_days' => 'integer',
         'track_inventory' => 'boolean',
+        'has_variations' => 'boolean',
         'is_active' => 'boolean',
         'aliexpress_variants' => 'array',
         'aliexpress_data' => 'array',
@@ -72,6 +75,30 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the additional images for the product.
+     */
+    public function additionalImages()
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get the variations for the product.
+     */
+    public function variations()
+    {
+        return $this->hasMany(ProductVariation::class);
+    }
+
+    /**
+     * Get total stock from variations.
+     */
+    public function getTotalVariationStockAttribute()
+    {
+        return $this->variations()->sum('quantity');
     }
 
     /**
