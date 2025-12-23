@@ -30,6 +30,7 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
             'phone' => ['nullable', 'string', 'max:20'],
+            'phone_code' => ['nullable', 'string', 'max:10'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:2'],
             'withdrawal_method' => ['nullable', 'string', 'in:paypal,e_wallet,uae_bank'],

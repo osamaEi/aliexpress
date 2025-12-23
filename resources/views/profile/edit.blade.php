@@ -88,10 +88,52 @@
 
                     <div class="col-md-6">
                         <label for="phone" class="form-label">{{ __('messages.phone') }}</label>
-                        <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                               id="phone" name="phone" value="{{ old('phone', $user->phone) }}">
+                        <div class="input-group">
+                            <select class="form-select @error('phone_code') is-invalid @enderror"
+                                    id="phone_code"
+                                    name="phone_code"
+                                    style="max-width: 140px;">
+                                @php
+                                    $arabCountryCodes = [
+                                        ['code' => '+971', 'flag' => '🇦🇪', 'name' => 'الإمارات'],
+                                        ['code' => '+966', 'flag' => '🇸🇦', 'name' => 'السعودية'],
+                                        ['code' => '+965', 'flag' => '🇰🇼', 'name' => 'الكويت'],
+                                        ['code' => '+974', 'flag' => '🇶🇦', 'name' => 'قطر'],
+                                        ['code' => '+973', 'flag' => '🇧🇭', 'name' => 'البحرين'],
+                                        ['code' => '+968', 'flag' => '🇴🇲', 'name' => 'عُمان'],
+                                        ['code' => '+962', 'flag' => '🇯🇴', 'name' => 'الأردن'],
+                                        ['code' => '+961', 'flag' => '🇱🇧', 'name' => 'لبنان'],
+                                        ['code' => '+963', 'flag' => '🇸🇾', 'name' => 'سوريا'],
+                                        ['code' => '+970', 'flag' => '🇵🇸', 'name' => 'فلسطين'],
+                                        ['code' => '+964', 'flag' => '🇮🇶', 'name' => 'العراق'],
+                                        ['code' => '+20', 'flag' => '🇪🇬', 'name' => 'مصر'],
+                                        ['code' => '+218', 'flag' => '🇱🇾', 'name' => 'ليبيا'],
+                                        ['code' => '+216', 'flag' => '🇹🇳', 'name' => 'تونس'],
+                                        ['code' => '+213', 'flag' => '🇩🇿', 'name' => 'الجزائر'],
+                                        ['code' => '+212', 'flag' => '🇲🇦', 'name' => 'المغرب'],
+                                        ['code' => '+222', 'flag' => '🇲🇷', 'name' => 'موريتانيا'],
+                                        ['code' => '+249', 'flag' => '🇸🇩', 'name' => 'السودان'],
+                                        ['code' => '+967', 'flag' => '🇾🇪', 'name' => 'اليمن'],
+                                        ['code' => '+252', 'flag' => '🇸🇴', 'name' => 'الصومال'],
+                                        ['code' => '+253', 'flag' => '🇩🇯', 'name' => 'جيبوتي'],
+                                        ['code' => '+269', 'flag' => '🇰🇲', 'name' => 'جزر القمر'],
+                                    ];
+                                @endphp
+                                @foreach($arabCountryCodes as $country)
+                                    <option value="{{ $country['code'] }}" {{ old('phone_code', $user->phone_code ?? '+971') == $country['code'] ? 'selected' : '' }}>
+                                        {{ $country['flag'] }} {{ $country['code'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                                   id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone number' }}">
+                        </div>
+                        @error('phone_code')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
                         @error('phone')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
