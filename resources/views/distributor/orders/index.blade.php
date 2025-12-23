@@ -133,8 +133,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>{{ app()->getLocale() == 'ar' ? 'رقم الطلب' : 'Order #' }}</th>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'البائع' : 'Seller' }}</th>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'العميل' : 'Customer' }}</th>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'المتجر' : 'Store' }}</th>
                                         <th>{{ app()->getLocale() == 'ar' ? 'المنتج' : 'Product' }}</th>
                                         <th>{{ app()->getLocale() == 'ar' ? 'الكمية' : 'Qty' }}</th>
                                         <th>{{ app()->getLocale() == 'ar' ? 'الإجمالي' : 'Total' }}</th>
@@ -155,35 +154,16 @@
                                                 <div class="d-flex align-items-center">
                                                     @if($order->user && $order->user->logo)
                                                         <img src="{{ asset('storage/' . $order->user->logo) }}"
-                                                             alt="{{ $order->user->name }}"
-                                                             class="rounded-circle me-2"
-                                                             style="width: 35px; height: 35px; object-fit: cover;">
-                                                    @else
-                                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
-                                                             style="width: 35px; height: 35px; font-size: 14px;">
-                                                            {{ $order->user ? strtoupper(substr($order->user->name, 0, 1)) : 'N' }}
-                                                        </div>
-                                                    @endif
-                                                    <div>
-                                                        <div>{{ $order->user->name ?? 'N/A' }}</div>
-                                                        <small class="text-muted">{{ $order->user->email ?? '' }}</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    @if($order->user && $order->user->logo)
-                                                        <img src="{{ asset('storage/' . $order->user->logo) }}"
                                                              alt="{{ $order->user->company_name ?? $order->user->name }}"
                                                              class="rounded me-2"
-                                                             style="width: 30px; height: 30px; object-fit: cover;">
+                                                             style="width: 35px; height: 35px; object-fit: cover;">
                                                     @else
-                                                        <div class="rounded bg-secondary text-white d-flex align-items-center justify-content-center me-2"
-                                                             style="width: 30px; height: 30px; font-size: 12px;">
+                                                        <div class="rounded bg-light text-secondary d-flex align-items-center justify-content-center me-2"
+                                                             style="width: 35px; height: 35px; font-size: 16px;">
                                                             <i class="ri-store-2-line"></i>
                                                         </div>
                                                     @endif
-                                                    <span>{{ $order->user->company_name ?? $order->user->name ?? 'N/A' }}</span>
+                                                    <span class="fw-medium">{{ $order->user->company_name ?? $order->user->name ?? 'N/A' }}</span>
                                                 </div>
                                             </td>
                                             <td>
