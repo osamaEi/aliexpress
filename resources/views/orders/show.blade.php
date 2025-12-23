@@ -14,7 +14,7 @@
                     @endif
                 </div>
                 <div class="btn-group">
-                    @if($order->canBePlaced() && empty($order->aliexpress_order_id))
+                    <!-- @if($order->canBePlaced() && empty($order->aliexpress_order_id))
                         <div class="alert alert-info mb-2" style="font-size: 0.875rem;">
                             <i class="ri-information-line me-1"></i>
                             {{ __('messages.order_auto_place_info') }}
@@ -25,29 +25,29 @@
                                 <i class="ri-shopping-cart-line me-1"></i> {{ __('messages.place_with_supplier') }}
                             </button>
                         </form>
-                    @endif
+                    @endif -->
 
-                    @if($order->aliexpress_order_id && in_array($order->status, ['placed', 'paid', 'shipped']))
+                    <!-- @if($order->aliexpress_order_id && in_array($order->status, ['placed', 'paid', 'shipped']))
                         <form action="{{ route('orders.update-tracking', $order) }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-info">
                                 <i class="ri-refresh-line me-1"></i> {{ __('messages.update_tracking') }}
                             </button>
                         </form>
-                    @endif
+                    @endif -->
 
-                    @if($order->canBeCancelled())
+                    <!-- @if($order->canBeCancelled())
                         <form action="{{ route('orders.cancel', $order) }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-warning" onclick="return confirm('{{ __('messages.confirm_cancel_order') }}')">
                                 <i class="ri-close-circle-line me-1"></i> {{ __('messages.cancel') }}
                             </button>
                         </form>
-                    @endif
+                    @endif -->
 
-                    <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
+                    <!-- <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
                         <i class="ri-arrow-left-line me-1"></i> {{ __('messages.back') }}
-                    </a>
+                    </a> -->
                 </div>
             </div>
         </div>
