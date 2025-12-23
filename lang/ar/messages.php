@@ -11,7 +11,7 @@ return [
     'profile' => 'الملف الشخصي',
     'logout' => 'تسجيل الخروج',
     'my_profile' => 'ملفي الشخصي',
-    'my_orders' => 'طلباتي',
+    'my_orders' => 'الطلبات',
     'search' => 'بحث',
 
     // Profile Page
@@ -46,6 +46,7 @@ return [
     // User Types
     'admin' => 'مدير',
     'seller' => 'بائع',
+    'distributor' => 'موزع',
     'buyer' => 'مشتري',
 
     // Countries

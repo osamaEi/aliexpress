@@ -152,8 +152,23 @@
                                                 </a>
                                             </td>
                                             <td>
-                                                <div>{{ $order->user->name ?? 'N/A' }}</div>
-                                                <small class="text-muted">{{ $order->user->email ?? '' }}</small>
+                                                <div class="d-flex align-items-center">
+                                                    @if($order->user && $order->user->logo)
+                                                        <img src="{{ asset('storage/' . $order->user->logo) }}"
+                                                             alt="{{ $order->user->name }}"
+                                                             class="rounded-circle me-2"
+                                                             style="width: 35px; height: 35px; object-fit: cover;">
+                                                    @else
+                                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
+                                                             style="width: 35px; height: 35px; font-size: 14px;">
+                                                            {{ $order->user ? strtoupper(substr($order->user->name, 0, 1)) : 'N' }}
+                                                        </div>
+                                                    @endif
+                                                    <div>
+                                                        <div>{{ $order->user->name ?? 'N/A' }}</div>
+                                                        <small class="text-muted">{{ $order->user->email ?? '' }}</small>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td>
                                                 <div>{{ $order->customer_name }}</div>

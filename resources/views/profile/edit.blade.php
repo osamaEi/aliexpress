@@ -356,6 +356,7 @@
                         <select class="form-select @error('user_type') is-invalid @enderror" id="user_type" name="user_type" disabled>
                             <option value="admin" {{ $user->user_type == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
                             <option value="seller" {{ $user->user_type == 'seller' ? 'selected' : '' }}>{{ __('messages.seller') }}</option>
+                            <option value="distributor" {{ $user->user_type == 'distributor' ? 'selected' : '' }}>{{ __('messages.distributor') }}</option>
                             <option value="buyer" {{ $user->user_type == 'buyer' ? 'selected' : '' }}>{{ __('messages.buyer') }}</option>
                         </select>
                         <small class="text-muted">{{ __('messages.contact_admin_change') }}</small>

@@ -46,6 +46,7 @@ return [
     // User Types
     'admin' => 'Admin',
     'seller' => 'Seller',
+    'distributor' => 'Distributor',
     'buyer' => 'Buyer',
 
     // Countries

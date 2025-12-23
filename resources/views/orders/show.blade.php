@@ -112,15 +112,55 @@
             <!-- Shipping Information -->
             <div class="card">
                 <div class="card-header">
-                        <h6 class="mb-0">{{ __('messages.shipping_information') }}</h6>
-                    </div>
+                    <h6 class="mb-0">{{ __('messages.shipping_information') }}</h6>
+                </div>
                 <div class="card-body">
-                    <p class="mb-1">{{ $order->shipping_address }}</p>
-                    @if($order->shipping_address2)
-                        <p class="mb-1">{{ $order->shipping_address2 }}</p>
-                    @endif
-                    <p class="mb-1">{{ $order->shipping_city }}{{ $order->shipping_province ? ', ' . $order->shipping_province : '' }} {{ $order->shipping_zip }}</p>
-                    <p class="mb-0"><strong>{{ $order->shipping_country }}</strong></p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong><i class="ri-user-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الاسم:' : 'Name:' }}</strong>
+                                {{ $order->customer_name }}
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="ri-phone-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'رقم الهاتف:' : 'Phone:' }}</strong>
+                                +{{ $order->phone_country }} {{ $order->customer_phone }}
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="ri-global-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الدولة:' : 'Country:' }}</strong>
+                                {{ $order->shipping_country }}
+                            </p>
+                            @if($order->shipping_province)
+                                <p class="mb-2">
+                                    <strong><i class="ri-map-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المنطقة/المحافظة:' : 'Region/Province:' }}</strong>
+                                    {{ $order->shipping_province }}
+                                </p>
+                            @endif
+                        </div>
+                        <div class="col-md-6">
+                            @if($order->shipping_city)
+                                <p class="mb-2">
+                                    <strong><i class="ri-building-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المدينة:' : 'City:' }}</strong>
+                                    {{ $order->shipping_city }}
+                                </p>
+                            @endif
+                            <p class="mb-2">
+                                <strong><i class="ri-home-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العنوان:' : 'Address:' }}</strong>
+                                {{ $order->shipping_address }}
+                            </p>
+                            @if($order->shipping_address2)
+                                <p class="mb-2">
+                                    <strong><i class="ri-home-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العنوان 2:' : 'Address 2:' }}</strong>
+                                    {{ $order->shipping_address2 }}
+                                </p>
+                            @endif
+                            @if($order->shipping_zip)
+                                <p class="mb-2">
+                                    <strong><i class="ri-mail-send-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'صندوق البريد/الرمز البريدي:' : 'P.O. Box/Zip Code:' }}</strong>
+                                    {{ $order->shipping_zip }}
+                                </p>
+                            @endif
+                        </div>
+                    </div>
 
                     @if($order->tracking_number)
                         <div class="mt-3 p-3 bg-light rounded">
