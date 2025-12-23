@@ -363,7 +363,7 @@
                         </div>
                         @if($product->seller_amount)
                             <div class="col-md-6">
-                                <label class="form-label text-muted small">{{ app()->getLocale() == 'ar' ? 'نصيب الموزع' : 'Distributor Share' }}</label>
+                                <label class="form-label text-muted small">{{ app()->getLocale() == 'ar' ? 'نصيب المتجر' : 'Distributor Share' }}</label>
                                 <p class="mb-0 text-success">
                                     <span class="d-inline-flex align-items-center gap-1">
                                         @if($product->currency == 'AED')

@@ -335,7 +335,7 @@ class DistributorRegistrationController extends Controller
         Mail::send('emails.otp-verification', ['otp' => $otp], function($message) use ($email) {
             $message->to($email)
                     ->subject(app()->getLocale() == 'ar'
-                        ? 'رمز التحقق - تسجيل الموزع'
+                        ? 'رمز التحقق - تسجيل المتجر'
                         : 'Email Verification Code - Distributor Registration');
         });
     }

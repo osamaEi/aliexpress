@@ -12,7 +12,7 @@
                         {{ app()->getLocale() == 'ar' ? 'إنشاء طلب جديد' : 'Create New Order' }}
                     </h3>
                     <p class="text-muted mb-0">
-                        {{ app()->getLocale() == 'ar' ? 'طلب من موزع محلي' : 'Order from Local Distributor' }}
+                        {{ app()->getLocale() == 'ar' ? 'طلب من متجر محلي' : 'Order from Local Distributor' }}
                     </p>
                 </div>
                 <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">

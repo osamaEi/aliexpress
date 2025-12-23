@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ app()->getLocale() == 'ar' ? 'تسجيل موزع جديد - الخطوة 4' : 'Distributor Registration - Step 4' }}</title>
+    <title>{{ app()->getLocale() == 'ar' ? 'تسجيل متجر جديد - الخطوة 4' : 'Distributor Registration - Step 4' }}</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('logo/logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
@@ -465,10 +465,10 @@
                 <div class="sidebar-footer">
                     <img src="{{ asset('foot.png') }}" alt="EVORQ">
                 </div>
-                <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل موزع جديد' : 'Distributor Registration' }}</h3>
+                <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل متجر جديد' : 'Distributor Registration' }}</h3>
                 <div class="distributor-badge">
                     <i class="ri-truck-line"></i>
-                    <span>{{ app()->getLocale() == 'ar' ? 'حساب موزع' : 'Distributor Account' }}</span>
+                    <span>{{ app()->getLocale() == 'ar' ? 'حساب متجر' : 'Distributor Account' }}</span>
                 </div>
             </div>
 

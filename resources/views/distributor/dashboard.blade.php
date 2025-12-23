@@ -4,7 +4,7 @@
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <!-- Page Header -->
     <div class="mb-4">
-        <h4 class="mb-1">{{ app()->getLocale() == 'ar' ? 'لوحة تحكم الموزع' : 'Distributor Dashboard' }}</h4>
+        <h4 class="mb-1">{{ app()->getLocale() == 'ar' ? 'لوحة تحكم المتجر' : 'Distributor Dashboard' }}</h4>
         <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'مرحباً بك في لوحة التحكم الخاصة بك' : 'Welcome to your distributor panel' }}</p>
     </div>
 

@@ -46,7 +46,7 @@ return [
     // User Types
     'admin' => 'مدير',
     'seller' => 'بائع',
-    'distributor' => 'موزع',
+    'distributor' => 'متجر',
     'buyer' => 'مشتري',
 
     // Countries
