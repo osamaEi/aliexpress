@@ -122,7 +122,7 @@
         <li class="menu-item {{ request()->routeIs('distributor.orders') ? 'active' : '' }}">
             <a href="{{ route('distributor.orders') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-file-list-3-line"></i>
-                <div>{{ app()->getLocale() == 'ar' ? 'طلباتي' : 'My Orders' }}</div>
+                <div>{{ app()->getLocale() == 'ar' ? 'الطلبات' : 'My Orders' }}</div>
             </a>
         </li>
 
