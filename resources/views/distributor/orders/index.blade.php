@@ -171,8 +171,20 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div>{{ $order->customer_name }}</div>
-                                                <small class="text-muted">{{ $order->customer_phone }}</small>
+                                                <div class="d-flex align-items-center">
+                                                    @if($order->user && $order->user->logo)
+                                                        <img src="{{ asset('storage/' . $order->user->logo) }}"
+                                                             alt="{{ $order->user->company_name ?? $order->user->name }}"
+                                                             class="rounded me-2"
+                                                             style="width: 30px; height: 30px; object-fit: cover;">
+                                                    @else
+                                                        <div class="rounded bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                                             style="width: 30px; height: 30px; font-size: 12px;">
+                                                            <i class="ri-store-2-line"></i>
+                                                        </div>
+                                                    @endif
+                                                    <span>{{ $order->user->company_name ?? $order->user->name ?? 'N/A' }}</span>
+                                                </div>
                                             </td>
                                             <td>
                                                 <a href="{{ route('products.show', $order->product) }}" class="text-decoration-none">
@@ -195,7 +207,7 @@
                                                 <small class="text-muted">{{ $order->created_at->format('h:i A') }}</small>
                                             </td>
                                             <td>
-                                                <div class="btn-group">
+                                                <div class="d-flex gap-2 align-items-center">
                                                     {{-- View Order --}}
                                                     <a href="{{ route('orders.show', $order) }}"
                                                        class="btn btn-sm btn-info"
@@ -204,12 +216,13 @@
                                                     </a>
 
                                                     {{-- Change Status Dropdown --}}
-                                                    <div class="btn-group" role="group">
+                                                    <div class="dropdown">
                                                         <button type="button"
-                                                                class="btn btn-sm btn-primary dropdown-toggle"
+                                                                class="btn btn-sm btn-warning dropdown-toggle"
                                                                 data-bs-toggle="dropdown"
-                                                                title="{{ app()->getLocale() == 'ar' ? 'تغيير الحالة' : 'Change Status' }}">
-                                                            <i class="ri-arrow-up-down-line"></i>
+                                                                aria-expanded="false">
+                                                            <i class="ri-refresh-line me-1"></i>
+                                                            {{ app()->getLocale() == 'ar' ? 'تغيير الحالة' : 'Change Status' }}
                                                         </button>
                                                         <ul class="dropdown-menu">
                                                             @if($order->status !== 'pending')
