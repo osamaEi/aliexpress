@@ -168,7 +168,7 @@ class AliExpressService
             );
 
         } catch (\Exception $e) {
-            Log::error('AliExpress API Error', [
+            Log::error(' API Error', [
                 'method' => $method,
                 'error' => $e->getMessage()
             ]);

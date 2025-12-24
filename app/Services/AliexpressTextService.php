@@ -230,7 +230,7 @@ class AliexpressTextService
         // Check for error
         if (isset($body['error_response'])) {
             throw new \Exception(
-                "AliExpress API Error: " .
+                    " API Error: " .
                 ($body['error_response']['msg'] ?? 'Unknown error')
             );
         }
