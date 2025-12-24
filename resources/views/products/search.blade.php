@@ -252,15 +252,7 @@
             @if(isset($products) && count($products) > 0)
                 <!-- Product Type Filter Notice -->
              
-                    <div class="alert mb-3 d-flex align-items-center" style="background: linear-gradient(135deg, #17a2b820 0%, #00897b20 100%); border: 2px solid #00897b;">
-                        <i class="ri-store-line me-2" style="font-size: 1.5rem; color: #00897b;"></i>
-                        <div>
-                            <strong style="color: #00695c;">{{ app()->getLocale() == 'ar' ? 'فلتر المنتجات العادية نشط:' : 'Regular Products Filter Active:' }}</strong>
-                            {{ app()->getLocale() == 'ar' ? 'يتم عرض منتجات عادية من البائعين' : 'Showing regular products from sellers' }}
-                            <br>
-                            <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'منتجات بأسعار تنافسية وخيارات متنوعة' : 'Competitive prices and diverse options' }}</small>
-                        </div>
-                    </div>
+              
           
 
                 <!-- Shipping Filter Notice -->
