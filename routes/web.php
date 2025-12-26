@@ -155,13 +155,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('categories', CategoryController::class);
 
     // AliExpress Text Search Routes (must be before resource routes)
-    Route::get('/products/search-aliexpress', [ProductController::class, 'searchPage'])->name('products.search-page');
+    Route::get('/products/search-china', [ProductController::class, 'searchPage'])->name('products.search-page');
     Route::get('/products/search-text', [ProductController::class, 'searchByText'])->name('products.search-text');
 
     // AliExpress integration routes (must be before resource routes)
-    Route::get('/products/aliexpress/import', [ProductController::class, 'import'])->name('products.aliexpress.import');
-    Route::post('/products/aliexpress/search', [ProductController::class, 'searchAliexpress'])->name('products.aliexpress.search');
-    Route::post('/products/aliexpress/import-product', [ProductController::class, 'importFromAliexpress'])->name('products.aliexpress.import-product');
+    Route::get('/products/china/import', [ProductController::class, 'import'])->name('products.china.import');
+    Route::post('/products/china/search', [ProductController::class, 'searchChina'])->name('products.china.search');
+    Route::post('/products/china/import-product', [ProductController::class, 'importFromChina'])->name('products.china.import-product');
 
     // Product assignment routes (for sellers)
     Route::post('/products/assign', [ProductController::class, 'assignProduct'])->name('products.assign');
