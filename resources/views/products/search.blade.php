@@ -118,18 +118,25 @@
                     </div>
                 </div>
 
-                <!-- Choice Products (China Premium) -->
+                <!-- China Products -->
                 <div class="col-md-4">
-                    <div class="source-card choice-card {{ request('choice_only') ? 'active' : '' }}" onclick="selectSource('choice')" data-source="choice">
+                    <div class="source-card china-card {{ !request('ship_from') && !request('choice_only') && request('keyword') ? 'active' : '' }}" onclick="selectSource('china')" data-source="china">
                         <div class="source-checkbox">
-                            <input type="checkbox" {{ request('choice_only') ? 'checked' : '' }} readonly>
+                            <input type="checkbox" {{ !request('ship_from') && !request('choice_only') && request('keyword') ? 'checked' : '' }} readonly>
                         </div>
                         <div class="source-content">
-                            <div class="choice-badge-large">
-                                <i class="ri-checkbox-circle-fill"></i>
-                                <span>Choice</span>
-                            </div>
-                            <h5 class="source-title">{{ app()->getLocale() == 'ar' ? 'منتجات مميزة من الصين' : 'Premium from China' }}</h5>
+                            <!-- China Flag SVG -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80" class="source-flag">
+                                <rect width="120" height="80" fill="#de2910"/>
+                                <g fill="#ffde00">
+                                    <path d="M20,15 l3,9.3 l9.7,0 l-7.9,5.7 l3,9.3 l-7.9,-5.7 l-7.9,5.7 l3,-9.3 l-7.9,-5.7 l9.7,0z"/>
+                                    <path d="M40,8 l1,3.1 l3.2,0 l-2.6,1.9 l1,3.1 l-2.6,-1.9 l-2.6,1.9 l1,-3.1 l-2.6,-1.9 l3.2,0z"/>
+                                    <path d="M48,18 l1,3.1 l3.2,0 l-2.6,1.9 l1,3.1 l-2.6,-1.9 l-2.6,1.9 l1,-3.1 l-2.6,-1.9 l3.2,0z"/>
+                                    <path d="M48,32 l1,3.1 l3.2,0 l-2.6,1.9 l1,3.1 l-2.6,-1.9 l-2.6,1.9 l1,-3.1 l-2.6,-1.9 l3.2,0z"/>
+                                    <path d="M40,42 l1,3.1 l3.2,0 l-2.6,1.9 l1,3.1 l-2.6,-1.9 l-2.6,1.9 l1,-3.1 l-2.6,-1.9 l3.2,0z"/>
+                                </g>
+                            </svg>
+                            <h5 class="source-title">{{ app()->getLocale() == 'ar' ? 'منتجات من الصين' : 'Products from China' }}</h5>
                         </div>
                     </div>
                 </div>
@@ -138,8 +145,7 @@
             <!-- Free Shipping Banner -->
             <div class="shipping-banner mb-4">
                 <i class="ri-truck-line"></i>
-                <span>{{ app()->getLocale() == 'ar' ? 'شحن مجاني أكثر من 240 ر.س . على كل منتجات' : 'Free shipping over 240 SAR on all' }}</span>
-                <span class="choice-tag">Choice</span>
+                <span>{{ app()->getLocale() == 'ar' ? 'شحن مجاني للطلبات أكثر من 240 ر.س' : 'Free shipping on orders over 240 SAR' }}</span>
             </div>
 
             <!-- Subcategories Container (shown when main category selected) -->
@@ -223,7 +229,7 @@
             @endif
 
             <!-- Active Filters Display -->
-            @if(request('ship_from') || request('choice_only') || request('category_id'))
+            @if(request('ship_from') || request('category_id'))
                 <div class="active-filters mb-3">
                     <span class="filter-label">{{ app()->getLocale() == 'ar' ? 'الفلاتر النشطة:' : 'Active Filters:' }}</span>
                     @if(request('ship_from') == 'AE')
@@ -236,12 +242,6 @@
                         <span class="filter-tag">
                             <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi' }}
                             <button type="button" onclick="removeFilter('ship_from')"><i class="ri-close-line"></i></button>
-                        </span>
-                    @endif
-                    @if(request('choice_only'))
-                        <span class="filter-tag choice">
-                            <i class="ri-vip-crown-fill"></i> Choice
-                            <button type="button" onclick="removeFilter('choice_only')"><i class="ri-close-line"></i></button>
                         </span>
                     @endif
                     @if(request('category_id'))
@@ -385,19 +385,10 @@
                                         @endif
                                     </div>
 
-                                    <!-- Choice Badge -->
-                                    @if(request('choice_only'))
-                                        <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 shadow choice-badge"
-                                              style="font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; font-weight: 700; border: 2px solid white; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);">
-                                            <i class="ri-vip-crown-fill me-1" style="color: #8B4513;"></i>
-                                            <span style="letter-spacing: 0.5px;">Premium</span>
-                                        </span>
-                                    @endif
-
                                     <!-- Discount Badge -->
                                     @if($product['discount'])
-                                        <span class="badge bg-danger position-absolute {{ request('choice_only') ? 'top-0' : 'top-0' }} end-0 m-3 px-3 py-2 shadow-sm"
-                                              style="font-size: 0.85rem; border-radius: 8px; {{ request('choice_only') ? 'margin-top: 3.5rem !important;' : '' }}">
+                                        <span class="badge bg-danger position-absolute top-0 end-0 m-3 px-3 py-2 shadow-sm"
+                                              style="font-size: 0.85rem; border-radius: 8px;">
                                             <i class="ri-percent-line me-1"></i>{{ $product['discount'] }} OFF
                                         </span>
                                     @endif
@@ -406,11 +397,6 @@
                                 <div class="card-body d-flex flex-column">
                                     <!-- Product Title -->
                                     <h6 class="card-title" style="height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                        @if(request('choice_only'))
-                                            <span class="badge me-1" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; font-size: 0.65rem; vertical-align: middle; font-weight: 700;">
-                                                <i class="ri-vip-crown-fill" style="color: #8B4513;"></i>
-                                            </span>
-                                        @endif
                                         {{ app()->getLocale() == 'ar' ? ($product['title_ar'] ?? $product['title']) : ($product['title_en'] ?? $product['title']) }}
                                     </h6>
 
@@ -428,12 +414,6 @@
                                                 {{ number_format((float)$product['sale_price'], 2) }}
                                             @endif
                                         </h5>
-                                        @if(request('choice_only'))
-                                            <small class="d-block mt-1" style="color: #FFD700; font-weight: 600;">
-                                                <i class="ri-vip-crown-fill"></i>
-                                                {{ app()->getLocale() == 'ar' ? 'شحن سريع 3-7 أيام' : 'Fast shipping 3-7 days' }}
-                                            </small>
-                                        @endif
                                         @if(isset($product['admin_profit']) && $product['admin_profit'] > 0)
                                             <small class="text-success d-block d-flex align-items-center">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
@@ -724,9 +704,9 @@
             document.getElementById('shipFromInput').value = 'SA';
             document.getElementById('countryInput').value = 'SA';
             document.getElementById('currencyInput').value = 'SAR';
-        } else if (source === 'choice') {
-            document.querySelector('[data-source="choice"]').classList.add('active');
-            document.getElementById('choiceOnlyInput').value = '1';
+        } else if (source === 'china') {
+            document.querySelector('[data-source="china"]').classList.add('active');
+            // China products - no specific ship_from filter, just regular search
         } else if (source === 'all') {
             document.querySelector('[data-source="all"]')?.classList.add('active');
         }
@@ -745,7 +725,6 @@
     function clearAllFilters() {
         const url = new URL(window.location.href);
         url.searchParams.delete('ship_from');
-        url.searchParams.delete('choice_only');
         url.searchParams.delete('category_id');
         window.location.href = url.toString();
     }
@@ -1141,32 +1120,20 @@
         margin: 0;
     }
 
-    .choice-card .source-content {
+    .china-card .source-content {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
-    .choice-badge-large {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        padding: 15px 30px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    .china-card .source-flag {
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(222, 41, 16, 0.3);
     }
 
-    .choice-badge-large i {
-        font-size: 24px;
-        color: #006400;
-    }
-
-    .choice-badge-large span {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #000;
+    .china-card.active {
+        border-color: #de2910;
+        box-shadow: 0 8px 25px rgba(222, 41, 16, 0.3);
     }
 
     /* Shipping Banner */
@@ -1183,15 +1150,6 @@
 
     .shipping-banner i {
         font-size: 1.5rem;
-    }
-
-    .choice-tag {
-        background: white;
-        color: #333;
-        padding: 4px 12px;
-        border-radius: 6px;
-        font-weight: 700;
-        font-size: 0.9rem;
     }
 
     /* Subcategories */
@@ -1296,11 +1254,6 @@
         gap: 5px;
     }
 
-    .filter-tag.choice {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        color: #000;
-    }
-
     .filter-tag button {
         background: none;
         border: none;
@@ -1361,16 +1314,6 @@
 
     .btn-warning:hover {
         background: linear-gradient(135deg, #FFA500 0%, #e59400 100%);
-    }
-
-    /* Choice Badge Animation */
-    .choice-badge {
-        animation: choicePulse 2s ease-in-out infinite;
-    }
-
-    @keyframes choicePulse {
-        0%, 100% { box-shadow: 0 4px 15px rgba(229, 99, 0, 0.4); }
-        50% { box-shadow: 0 6px 20px rgba(229, 99, 0, 0.6); transform: scale(1.02); }
     }
 
     /* Pagination */
