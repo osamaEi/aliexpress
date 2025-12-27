@@ -1246,54 +1246,74 @@
         background: rgba(255,255,255,0.3);
     }
 
-    .badge-aliexpress {
-        background: #de2910;
-        color: white;
-        font-size: 0.65rem;
-        padding: 2px 6px;
-        border-radius: 8px;
-        font-weight: 600;
+    /* Distributors Dropdown */
+    .distributors-dropdown {
+        margin-top: 12px;
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        animation: slideDown 0.2s ease;
     }
 
-    /* Distributors Modal */
-    .distributors-list {
-        max-height: 400px;
-        overflow-y: auto;
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
-    .distributor-item {
+    .distributors-dropdown-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        padding: 15px 20px;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
         border-bottom: 1px solid #f0f0f0;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .distributors-inline-list {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .distributor-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
         cursor: pointer;
         transition: all 0.2s ease;
+        min-width: 90px;
     }
 
-    .distributor-item:hover {
-        background: #f8f9fa;
+    .distributor-card:hover {
+        background: #fff3e0;
+        border-color: #e56300;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(229, 99, 0, 0.15);
     }
 
-    .distributor-item:last-child {
-        border-bottom: none;
-    }
-
-    .distributor-avatar {
+    .distributor-card-avatar {
         width: 50px;
         height: 50px;
-        border-radius: 12px;
+        border-radius: 50%;
         overflow: hidden;
-        flex-shrink: 0;
+        margin-bottom: 8px;
     }
 
-    .distributor-avatar img {
+    .distributor-card-avatar img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-    .distributor-avatar .avatar-placeholder {
+    .distributor-card-avatar .avatar-placeholder {
         width: 100%;
         height: 100%;
         background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
@@ -1301,16 +1321,18 @@
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 1.5rem;
+        font-size: 1.2rem;
     }
 
-    .distributor-info {
-        flex: 1;
-    }
-
-    .distributor-info h6 {
-        font-weight: 600;
+    .distributor-card-name {
+        font-size: 0.8rem;
+        font-weight: 500;
         color: #333;
+        text-align: center;
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     /* Legacy Source Cards (kept for compatibility) */
