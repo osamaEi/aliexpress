@@ -173,7 +173,7 @@
                             <i class="ri-wallet-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">${{ number_format($stats['wallet_balance'], 2) }}</h5>
+                            <h5 class="mb-0">{!! format_currency($stats['wallet_balance'], 'AED', 2, true) !!}</h5>
                             <small>{{ __('messages.wallet_balance') }}</small>
                         </div>
                     </div>
@@ -241,7 +241,7 @@
                             <i class="ri-money-dollar-circle-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">${{ number_format($stats['total_revenue'], 2) }}</h5>
+                            <h5 class="mb-0">{!! format_currency($stats['total_revenue'], 'AED', 2, true) !!}</h5>
                             <small>{{ __('messages.total_revenue') }}</small>
                         </div>
                     </div>
@@ -310,7 +310,7 @@
                                             {{ __('messages.' . $order->status) }}
                                         </span>
                                     </td>
-                                    <td>${{ number_format($order->total_amount, 2) }}</td>
+                                    <td>{!! format_currency($order->total_amount, 'AED', 2, true) !!}</td>
                                 </tr>
                                 @empty
                                 <tr>
@@ -348,7 +348,7 @@
                                 @forelse($recentProducts as $product)
                                 <tr>
                                     <td>{{ $product->name }}</td>
-                                    <td>${{ number_format($product->price, 2) }}</td>
+                                    <td>{!! format_currency($product->price, 'AED', 2, true) !!}</td>
                                     <td>
                                         @if($product->track_inventory)
                                             <span class="badge bg-{{ $product->stock > 10 ? 'success' : ($product->stock > 0 ? 'warning' : 'danger') }}">
