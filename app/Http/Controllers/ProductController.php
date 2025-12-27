@@ -1545,6 +1545,147 @@ class ProductController extends Controller
     }
 
     /**
+     * Search products from distributors by country (UAE/Saudi)
+     */
+    public function searchDistributorProducts(Request $request)
+    {
+        $countryCode = $request->get('country_code'); // AE or SA
+
+        if (!in_array($countryCode, ['AE', 'SA'])) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid country code'
+                ], 400);
+            }
+            return back()->with('error', 'Invalid country code');
+        }
+
+        // Query products from distributors in the specified country
+        $query = Product::with('category')
+            ->where('is_active', true)
+            ->fromCountry($countryCode);
+
+        // Search by keyword if provided
+        $keyword = $request->get('keyword');
+        if (!empty($keyword)) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('name_ar', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->filled('category_id')) {
+            // Find local category by AliExpress ID
+            $category = Category::where('aliexpress_category_id', $request->category_id)->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at,desc');
+        $sortParts = explode(',', $sortBy);
+        $sortField = $sortParts[0] ?? 'created_at';
+        $sortDirection = $sortParts[1] ?? 'desc';
+
+        // Map sort fields
+        $allowedSortFields = ['created_at', 'price', 'name'];
+        if (in_array($sortField, $allowedSortFields)) {
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // Pagination
+        $perPage = $request->get('per_page', 50);
+        $page = $request->get('page', 1);
+
+        $products = $query->paginate($perPage);
+
+        // Transform products to match AliExpress format for frontend compatibility
+        $transformedProducts = $products->map(function ($product) use ($request) {
+            $currency = $request->get('currency', 'AED');
+            return [
+                'item_id' => $product->id,
+                'aliexpress_id' => $product->aliexpress_id,
+                'title' => $product->name,
+                'title_en' => $product->name,
+                'title_ar' => $product->name_ar ?? $product->name,
+                'item_main_pic' => $product->images[0] ?? ($product->photo ? asset('storage/' . $product->photo) : null),
+                'sale_price' => $product->price,
+                'sale_price_format' => $currency . ' ' . number_format($product->price, 2),
+                'original_price' => $product->original_price ?? $product->price,
+                'original_price_format' => $currency . ' ' . number_format($product->original_price ?? $product->price, 2),
+                'original_sale_price' => $product->original_price ?? $product->price,
+                'discount' => $product->original_price && $product->original_price > $product->price
+                    ? round((($product->original_price - $product->price) / $product->original_price) * 100) . '%'
+                    : null,
+                'evaluate_rate' => null,
+                'orders' => null,
+                'item_url' => $product->aliexpress_url,
+                'admin_profit' => $product->admin_amount ?? 0,
+                'is_distributor_product' => true,
+            ];
+        });
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'products' => $transformedProducts,
+                'total_count' => $products->total(),
+                'current_page' => $products->currentPage(),
+                'page_size' => $products->perPage(),
+            ]);
+        }
+
+        // Get categories for the view
+        $categoryQuery = Category::where('aliexpress_category_id', '!=', null)
+            ->where('is_active', true);
+
+        $user = auth()->user();
+        if ($user && $user->user_type === 'seller') {
+            $mainActivities = json_decode($user->main_activity, true) ?? [];
+            $subActivities = json_decode($user->sub_activity, true) ?? [];
+            $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+            if (!empty($allowedCategoryIds)) {
+                $categoryQuery->whereIn('id', $allowedCategoryIds);
+            } else {
+                $categoryQuery->whereRaw('1 = 0');
+            }
+        }
+
+        $allCategories = $categoryQuery->orderBy('order')->get();
+        $mainCategories = $allCategories->whereNull('parent_id');
+        $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
+            $parent->children = $allCategories->where('parent_id', $parent->id)->values();
+            return $parent;
+        });
+
+        // Get assigned products for current user
+        $assignedProductIds = [];
+        if (auth()->check() && auth()->user()->user_type === 'seller') {
+            $assignedProductIds = \DB::table('product_user')
+                ->where('user_id', auth()->id())
+                ->pluck('aliexpress_product_id')
+                ->toArray();
+        }
+
+        return view('products.search', [
+            'products' => $transformedProducts->toArray(),
+            'total_count' => $products->total(),
+            'keyword' => $keyword,
+            'categories' => $categoriesWithChildren,
+            'allCategories' => $allCategories,
+            'assignedProductIds' => $assignedProductIds,
+            'source_country' => $countryCode,
+        ]);
+    }
+
+    /**
      * Get filtered categories for the current user (sellers see only their selected categories)
      */
     protected function getFilteredCategoriesForUser()

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -192,5 +193,26 @@ class Product extends Model
         return app()->getLocale() === 'ar' && !empty($this->short_description_ar)
             ? $this->short_description_ar
             : $this->short_description;
+    }
+
+    /**
+     * Get the users (distributors/sellers) who have this product assigned.
+     */
+    public function assignedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'product_user')
+            ->withPivot(['aliexpress_product_id', 'status', 'is_choice'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Scope a query to only include products from distributors in a specific country.
+     */
+    public function scopeFromCountry($query, string $countryCode)
+    {
+        return $query->whereHas('assignedUsers', function ($q) use ($countryCode) {
+            $q->where('country', $countryCode)
+              ->where('user_type', 'distributor');
+        });
     }
 }

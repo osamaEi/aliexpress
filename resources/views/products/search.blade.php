@@ -77,13 +77,18 @@
             </div>
             @endif
 
-            <!-- Product Source Cards (UAE, Saudi, Choice) -->
+            <!-- Product Source Cards (UAE, Saudi, China) -->
+            @php
+                $isUaeActive = request('country_code') == 'AE' || (isset($source_country) && $source_country == 'AE');
+                $isSaudiActive = request('country_code') == 'SA' || (isset($source_country) && $source_country == 'SA');
+                $isChinaActive = request('ship_from') == 'CN';
+            @endphp
             <div class="row g-3 mb-4">
-                <!-- UAE Products -->
+                <!-- UAE Products (from local distributors) -->
                 <div class="col-md-4">
-                    <div class="source-card {{ request('ship_from') == 'AE' ? 'active' : '' }}" onclick="selectSource('AE')" data-source="AE">
+                    <div class="source-card {{ $isUaeActive ? 'active' : '' }}" onclick="selectSource('AE')" data-source="AE">
                         <div class="source-checkbox">
-                            <input type="checkbox" {{ request('ship_from') == 'AE' ? 'checked' : '' }} readonly>
+                            <input type="checkbox" {{ $isUaeActive ? 'checked' : '' }} readonly>
                         </div>
                         <div class="source-content">
                             <!-- UAE Flag SVG -->
@@ -99,11 +104,11 @@
                     </div>
                 </div>
 
-                <!-- Saudi Products -->
+                <!-- Saudi Products (from local distributors) -->
                 <div class="col-md-4">
-                    <div class="source-card {{ request('ship_from') == 'SA' ? 'active' : '' }}" onclick="selectSource('SA')" data-source="SA">
+                    <div class="source-card {{ $isSaudiActive ? 'active' : '' }}" onclick="selectSource('SA')" data-source="SA">
                         <div class="source-checkbox">
-                            <input type="checkbox" {{ request('ship_from') == 'SA' ? 'checked' : '' }} readonly>
+                            <input type="checkbox" {{ $isSaudiActive ? 'checked' : '' }} readonly>
                         </div>
                         <div class="source-content">
                             <!-- Saudi Flag SVG -->
@@ -118,11 +123,11 @@
                     </div>
                 </div>
 
-                <!-- China Products -->
+                <!-- China Products (from AliExpress) -->
                 <div class="col-md-4">
-                    <div class="source-card china-card {{ request('ship_from') == 'CN' ? 'active' : '' }}" onclick="selectSource('china')" data-source="china">
+                    <div class="source-card china-card {{ $isChinaActive ? 'active' : '' }}" onclick="selectSource('china')" data-source="china">
                         <div class="source-checkbox">
-                            <input type="checkbox" {{ request('ship_from') == 'CN' ? 'checked' : '' }} readonly>
+                            <input type="checkbox" {{ $isChinaActive ? 'checked' : '' }} readonly>
                         </div>
                         <div class="source-content">
                             <!-- China Flag SVG -->
@@ -203,19 +208,19 @@
             @endif
 
             <!-- Active Filters Display -->
-            @if(request('ship_from') || request('category_id'))
+            @if(request('ship_from') || request('category_id') || request('country_code') || isset($source_country))
                 <div class="active-filters mb-3">
                     <span class="filter-label">{{ app()->getLocale() == 'ar' ? 'الفلاتر النشطة:' : 'Active Filters:' }}</span>
-                    @if(request('ship_from') == 'AE')
-                        <span class="filter-tag">
-                            <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}
-                            <button type="button" onclick="removeFilter('ship_from')"><i class="ri-close-line"></i></button>
+                    @if(request('country_code') == 'AE' || (isset($source_country) && $source_country == 'AE'))
+                        <span class="filter-tag" style="background: #e8f5e9;">
+                            <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'موزعين الإمارات' : 'UAE Distributors' }}
+                            <button type="button" onclick="window.location.href='{{ route('products.search-page') }}'"><i class="ri-close-line"></i></button>
                         </span>
                     @endif
-                    @if(request('ship_from') == 'SA')
-                        <span class="filter-tag">
-                            <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi' }}
-                            <button type="button" onclick="removeFilter('ship_from')"><i class="ri-close-line"></i></button>
+                    @if(request('country_code') == 'SA' || (isset($source_country) && $source_country == 'SA'))
+                        <span class="filter-tag" style="background: #e8f5e9;">
+                            <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'موزعين السعودية' : 'Saudi Distributors' }}
+                            <button type="button" onclick="window.location.href='{{ route('products.search-page') }}'"><i class="ri-close-line"></i></button>
                         </span>
                     @endif
                     @if(request('ship_from') == 'CN')
@@ -669,37 +674,63 @@
         document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
         document.getElementById('subcategoriesContainer').style.display = 'none';
 
-        // Reset form inputs
-        document.getElementById('shipFromInput').value = '';
-        document.getElementById('choiceOnlyInput').value = '';
-        document.getElementById('categoryIdInput').value = '';
-
-        // Set default keyword if empty (required for search to work)
+        // Get keyword value
         const keywordInput = document.getElementById('keyword');
-        if (!keywordInput.value || keywordInput.value.trim() === '') {
-            keywordInput.value = isArabic ? 'منتجات' : 'products'; // Default search keyword
+        const keyword = keywordInput.value.trim();
+
+        // UAE and Saudi: Get products from local distributors
+        if (source === 'AE' || source === 'SA') {
+            document.querySelector(`[data-source="${source}"]`).classList.add('active');
+
+            // Build URL for distributor products
+            let url = '{{ route("products.search-distributor") }}?country_code=' + source;
+            if (keyword) {
+                url += '&keyword=' + encodeURIComponent(keyword);
+            }
+            url += '&currency=' + (source === 'AE' ? 'AED' : 'SAR');
+
+            // Show loading and redirect
+            document.getElementById('loadingSpinner').style.display = 'block';
+            window.location.href = url;
+            return;
         }
 
-        if (source === 'AE') {
-            document.querySelector('[data-source="AE"]').classList.add('active');
-            document.getElementById('shipFromInput').value = 'AE';
-            document.getElementById('countryInput').value = 'AE';
-            document.getElementById('currencyInput').value = 'AED';
-        } else if (source === 'SA') {
-            document.querySelector('[data-source="SA"]').classList.add('active');
-            document.getElementById('shipFromInput').value = 'SA';
-            document.getElementById('countryInput').value = 'SA';
-            document.getElementById('currencyInput').value = 'SAR';
-        } else if (source === 'china') {
+        // China: Use AliExpress API
+        if (source === 'china') {
             document.querySelector('[data-source="china"]').classList.add('active');
+
+            // Reset form inputs
             document.getElementById('shipFromInput').value = 'CN';
+            document.getElementById('choiceOnlyInput').value = '';
+            document.getElementById('categoryIdInput').value = '';
             document.getElementById('countryInput').value = 'AE';
             document.getElementById('currencyInput').value = 'USD';
-        } else if (source === 'all') {
-            document.querySelector('[data-source="all"]')?.classList.add('active');
+
+            // Set default keyword if empty (required for AliExpress search)
+            if (!keyword) {
+                keywordInput.value = isArabic ? 'منتجات' : 'products';
+            }
+
+            document.getElementById('searchForm').submit();
+            return;
         }
 
-        document.getElementById('searchForm').submit();
+        // All: Reset and show all
+        if (source === 'all') {
+            document.querySelector('[data-source="all"]')?.classList.add('active');
+
+            // Reset form inputs
+            document.getElementById('shipFromInput').value = '';
+            document.getElementById('choiceOnlyInput').value = '';
+            document.getElementById('categoryIdInput').value = '';
+
+            // Set default keyword if empty
+            if (!keyword) {
+                keywordInput.value = isArabic ? 'منتجات' : 'products';
+            }
+
+            document.getElementById('searchForm').submit();
+        }
     }
 
     // Remove filter
