@@ -2067,17 +2067,24 @@ class AliExpressService
 
             // Create store-like entries from feed names
             if (!empty($feedNames['promos'])) {
-                foreach ($feedNames['promos'] as $index => $promo) {
+                $feedIndex = 1;
+                foreach ($feedNames['promos'] as $promo) {
+                    $promoName = $promo['promo_name'] ?? '';
+                    if (empty($promoName)) {
+                        $feedIndex++;
+                        continue;
+                    }
                     $stores[] = [
-                        'id' => 'feed_' . ($index + 1),
-                        'name' => $promo['promo_name'] ?? 'Store ' . ($index + 1),
-                        'name_ar' => $this->translateFeedName($promo['promo_name'] ?? ''),
+                        'id' => 'feed_' . $feedIndex,
+                        'name' => $promoName,
+                        'name_ar' => $this->translateFeedName($promoName),
                         'type' => 'feed',
-                        'feed_name' => $promo['promo_name'] ?? '',
-                        'image' => $this->getFeedImage($promo['promo_name'] ?? ''),
-                        'description' => $this->getFeedDescription($promo['promo_name'] ?? ''),
-                        'description_ar' => $this->getFeedDescriptionAr($promo['promo_name'] ?? ''),
+                        'feed_name' => $promoName,
+                        'image' => $this->getFeedImage($promoName),
+                        'description' => $this->getFeedDescription($promoName),
+                        'description_ar' => $this->getFeedDescriptionAr($promoName),
                     ];
+                    $feedIndex++;
                 }
             }
 
