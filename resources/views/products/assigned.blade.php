@@ -35,11 +35,15 @@
             @if($assignedProducts->count() > 0)
                 @php
                     // Separate AliExpress products from Distributor products
+                    // Real AliExpress IDs are long numeric strings (typically 13+ digits)
+                    // Local product IDs are short numbers
                     $aliexpressProducts = $assignedProducts->filter(function($product) {
-                        return !empty($product->aliexpress_id);
+                        // Check if aliexpress_id exists and is a real AliExpress ID (long numeric string)
+                        return !empty($product->aliexpress_id) && strlen((string)$product->aliexpress_id) >= 10;
                     });
                     $distributorProducts = $assignedProducts->filter(function($product) {
-                        return empty($product->aliexpress_id);
+                        // Products without aliexpress_id OR with short IDs (local products)
+                        return empty($product->aliexpress_id) || strlen((string)$product->aliexpress_id) < 10;
                     });
                 @endphp
 

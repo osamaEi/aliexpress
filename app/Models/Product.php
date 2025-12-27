@@ -128,10 +128,11 @@ class Product extends Model
 
     /**
      * Check if product is from AliExpress.
+     * Real AliExpress IDs are long numeric strings (typically 13+ digits)
      */
     public function isAliexpressProduct(): bool
     {
-        return !empty($this->aliexpress_id);
+        return !empty($this->aliexpress_id) && strlen((string)$this->aliexpress_id) >= 10;
     }
 
     /**
