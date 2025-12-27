@@ -167,32 +167,12 @@
                 <input type="hidden" name="currency" id="currencyInput" value="{{ request('currency', 'USD') }}">
 
                 <div class="search-box-container">
-                    <div class="row g-2 align-items-center">
+                    <div class="row g-2">
                         <div class="col">
                             <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="ri-image-line text-muted"></i>
+                                <span class="input-group-text bg-white">
+                                    <i class="ri-search-line text-muted"></i>
                                 </span>
-                                <input type="text" class="form-control border-start-0 border-end-0"
-                                       placeholder="{{ app()->getLocale() == 'ar' ? 'ابحث برابط المنتج' : 'Search by product link' }}"
-                                       id="productLinkInput">
-                                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                                    <i class="ri-link me-1"></i> {{ app()->getLocale() == 'ar' ? 'بحث برابط' : 'Search by link' }}
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#" onclick="searchByLink()"><i class="ri-link me-2"></i>{{ app()->getLocale() == 'ar' ? 'بحث برابط' : 'Search by Link' }}</a></li>
-                                </ul>
-                                <button type="button" class="btn btn-outline-secondary" onclick="openAdvancedFilters()">
-                                    <i class="ri-equalizer-line"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Keyword Search -->
-                    <div class="row g-2 mt-2">
-                        <div class="col">
-                            <div class="input-group input-group-lg">
                                 <input type="text" name="keyword" id="keyword" class="form-control"
                                        placeholder="{{ app()->getLocale() == 'ar' ? 'ابحث عن منتج...' : 'Search for products...' }}"
                                        value="{{ old('keyword', $keyword ?? '') }}">
