@@ -120,9 +120,9 @@
 
                 <!-- China Products -->
                 <div class="col-md-4">
-                    <div class="source-card china-card {{ !request('ship_from') && !request('choice_only') && request('keyword') ? 'active' : '' }}" onclick="selectSource('china')" data-source="china">
+                    <div class="source-card china-card {{ request('ship_from') == 'CN' ? 'active' : '' }}" onclick="selectSource('china')" data-source="china">
                         <div class="source-checkbox">
-                            <input type="checkbox" {{ !request('ship_from') && !request('choice_only') && request('keyword') ? 'checked' : '' }} readonly>
+                            <input type="checkbox" {{ request('ship_from') == 'CN' ? 'checked' : '' }} readonly>
                         </div>
                         <div class="source-content">
                             <!-- China Flag SVG -->
@@ -140,12 +140,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Free Shipping Banner -->
-            <div class="shipping-banner mb-4">
-                <i class="ri-truck-line"></i>
-                <span>{{ app()->getLocale() == 'ar' ? 'شحن مجاني للطلبات أكثر من 240 ر.س' : 'Free shipping on orders over 240 SAR' }}</span>
             </div>
 
             <!-- Subcategories Container (shown when main category selected) -->
@@ -241,6 +235,12 @@
                     @if(request('ship_from') == 'SA')
                         <span class="filter-tag">
                             <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi' }}
+                            <button type="button" onclick="removeFilter('ship_from')"><i class="ri-close-line"></i></button>
+                        </span>
+                    @endif
+                    @if(request('ship_from') == 'CN')
+                        <span class="filter-tag" style="background: #ffebee;">
+                            <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}
                             <button type="button" onclick="removeFilter('ship_from')"><i class="ri-close-line"></i></button>
                         </span>
                     @endif
@@ -682,7 +682,7 @@
         document.getElementById('categoryIdInput').value = '';
     }
 
-    // Select source (UAE, Saudi, Choice, All)
+    // Select source (UAE, Saudi, China, All)
     function selectSource(source) {
         // Clear all selections
         document.querySelectorAll('.source-card').forEach(card => card.classList.remove('active'));
@@ -706,7 +706,9 @@
             document.getElementById('currencyInput').value = 'SAR';
         } else if (source === 'china') {
             document.querySelector('[data-source="china"]').classList.add('active');
-            // China products - no specific ship_from filter, just regular search
+            document.getElementById('shipFromInput').value = 'CN';
+            document.getElementById('countryInput').value = 'AE';
+            document.getElementById('currencyInput').value = 'USD';
         } else if (source === 'all') {
             document.querySelector('[data-source="all"]')?.classList.add('active');
         }
@@ -1134,22 +1136,6 @@
     .china-card.active {
         border-color: #de2910;
         box-shadow: 0 8px 25px rgba(222, 41, 16, 0.3);
-    }
-
-    /* Shipping Banner */
-    .shipping-banner {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        padding: 12px 20px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        font-weight: 500;
-    }
-
-    .shipping-banner i {
-        font-size: 1.5rem;
     }
 
     /* Subcategories */
