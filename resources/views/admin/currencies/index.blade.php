@@ -51,7 +51,14 @@
                             <td>
                                 <span class="badge bg-primary">{{ $currency->code }}</span>
                             </td>
-                            <td>{{ $currency->name }}</td>
+                            <td>
+                                {{ $currency->localized_name }}
+                                @if($currency->name_ar && app()->getLocale() != 'ar')
+                                <small class="text-muted d-block" dir="rtl">{{ $currency->name_ar }}</small>
+                                @elseif($currency->name && app()->getLocale() == 'ar')
+                                <small class="text-muted d-block">{{ $currency->name }}</small>
+                                @endif
+                            </td>
                             <td>
                                 <x-currency-symbol :currency="$currency->code" width="28" height="28" class="fs-5" />
                             </td>

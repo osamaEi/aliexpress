@@ -33,6 +33,7 @@ class CurrencyManagementController extends Controller
         $request->validate([
             'code' => 'required|string|max:3|unique:currencies,code',
             'name' => 'required|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
             'symbol' => 'required|string|max:10',
             'exchange_rate' => 'required|numeric|min:0.0001',
             'is_active' => 'boolean',
@@ -73,6 +74,7 @@ class CurrencyManagementController extends Controller
         $request->validate([
             'code' => 'required|string|max:3|unique:currencies,code,' . $currency->id,
             'name' => 'required|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
             'symbol' => 'required|string|max:10',
             'exchange_rate' => 'required|numeric|min:0.0001',
             'is_active' => 'boolean',

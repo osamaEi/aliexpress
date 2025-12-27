@@ -399,6 +399,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/currencies/{currency}/toggle-active', [App\Http\Controllers\Admin\CurrencyManagementController::class, 'toggleActive'])->name('currencies.toggle-active');
         Route::post('/currencies/{currency}/set-default', [App\Http\Controllers\Admin\CurrencyManagementController::class, 'setDefault'])->name('currencies.set-default');
 
+        // Countries Management
+        Route::resource('countries', App\Http\Controllers\Admin\CountryController::class)->except(['show']);
+        Route::post('/countries/{country}/toggle-status', [App\Http\Controllers\Admin\CountryController::class, 'toggleStatus'])->name('countries.toggle-status');
+
         // Logs Management
         Route::get('/logs', [App\Http\Controllers\Admin\LogController::class, 'index'])->name('logs.index');
         Route::get('/logs/download', [App\Http\Controllers\Admin\LogController::class, 'download'])->name('logs.download');

@@ -104,8 +104,9 @@
                         <tr>
                             <th>{{ __('messages.request_id') }}</th>
                             <th>{{ __('messages.user') }}</th>
+                            <th>{{ app()->getLocale() == 'ar' ? 'نوع المستخدم' : 'User Type' }}</th>
                             <th>{{ __('messages.amount') }}</th>
-                            <th>{{ __('messages.paypal_email') }}</th>
+                            <th>{{ app()->getLocale() == 'ar' ? 'طريقة الدفع' : 'Payment Method' }}</th>
                             <th>{{ __('messages.date') }}</th>
                             <th>{{ __('messages.status') }}</th>
                             <th>{{ __('messages.actions') }}</th>
@@ -122,13 +123,40 @@
                                 </div>
                             </td>
                             <td>
+                                @if($request->user->user_type === 'seller')
+                                    <span class="badge bg-primary">{{ app()->getLocale() == 'ar' ? 'بائع' : 'Seller' }}</span>
+                                @elseif($request->user->user_type === 'distributor')
+                                    <span class="badge bg-success">{{ app()->getLocale() == 'ar' ? 'تاجر' : 'Distributor' }}</span>
+                                @elseif($request->user->user_type === 'buyer')
+                                    <span class="badge bg-info">{{ app()->getLocale() == 'ar' ? 'مشتري' : 'Buyer' }}</span>
+                                @else
+                                    <span class="badge bg-danger">{{ app()->getLocale() == 'ar' ? 'مدير' : 'Admin' }}</span>
+                                @endif
+                            </td>
+                            <td>
                                 <strong class="text-danger">AED {{ number_format($request->amount, 2) }}</strong>
                             </td>
                             <td>
-                                <i class="ri-paypal-line text-primary"></i>
-                                {{ $request->paypal_email }}
+                                @php
+                                    $paymentMethod = $request->payment_method ?? 'paypal';
+                                @endphp
+                                @if($paymentMethod === 'paypal')
+                                    <span class="badge bg-primary">
+                                        <i class="ri-paypal-line me-1"></i>PayPal
+                                    </span>
+                                    <div class="text-muted small">{{ $request->paypal_email }}</div>
+                                @elseif($paymentMethod === 'bank_transfer')
+                                    <span class="badge bg-secondary">
+                                        <i class="ri-bank-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تحويل بنكي' : 'Bank Transfer' }}
+                                    </span>
+                                    @if($request->bank_name)
+                                    <div class="text-muted small">{{ $request->bank_name }}</div>
+                                    @endif
+                                @else
+                                    <span class="badge bg-secondary">{{ ucfirst($paymentMethod) }}</span>
+                                @endif
                                 @if($request->seller_note)
-                                <div class="text-muted small mt-1">{{ __('messages.note') }}: {{ Str::limit($request->seller_note, 30) }}</div>
+                                <div class="text-muted small mt-1"><i class="ri-sticky-note-line"></i> {{ Str::limit($request->seller_note, 30) }}</div>
                                 @endif
                             </td>
                             <td>
@@ -256,7 +284,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center py-4">
+                            <td colspan="8" class="text-center py-4">
                                 {{ __('messages.no_withdrawal_requests') }}
                             </td>
                         </tr>

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Coupon;
 use App\Models\CouponUsage;
 use App\Models\UserSubscription;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -64,6 +65,21 @@ class AdminController extends Controller
             $q->where('user_type', 'distributor');
         })->count();
 
+        // Wallet/PayPal stats - unpaid store balances
+        $walletStats = [
+            'total_wallet_balance' => Wallet::sum('balance'),
+            'total_pending_balance' => Wallet::sum('pending_balance'),
+            'distributor_balance' => Wallet::whereHas('user', function($q) {
+                $q->where('user_type', 'distributor');
+            })->sum('balance'),
+            'seller_balance' => Wallet::whereHas('user', function($q) {
+                $q->where('user_type', 'seller');
+            })->sum('balance'),
+        ];
+
+        // Products with coupon (products that have been sold via affiliate coupons)
+        $productsWithCoupon = CouponUsage::distinct('product_id')->count('product_id');
+
         $recentOrders = Order::with(['user', 'product'])
             ->latest()
             ->take(10)
@@ -80,6 +96,8 @@ class AdminController extends Controller
             'affiliateStats',
             'aliexpressProducts',
             'distributorProducts',
+            'walletStats',
+            'productsWithCoupon',
             'recentOrders',
             'recentSubscriptions'
         ));

@@ -43,15 +43,29 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="name" class="form-label">{{ __('messages.currency_name') }} *</label>
+                        <label for="name" class="form-label">{{ __('messages.currency_name') }} (English) *</label>
                         <input type="text"
                                class="form-control @error('name') is-invalid @enderror"
                                id="name"
                                name="name"
                                value="{{ old('name') }}"
-                               placeholder="{{ __('messages.currency_name_placeholder') }}"
+                               placeholder="US Dollar"
                                required>
                         @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="name_ar" class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم العملة (عربي)' : 'Currency Name (Arabic)' }}</label>
+                        <input type="text"
+                               class="form-control @error('name_ar') is-invalid @enderror"
+                               id="name_ar"
+                               name="name_ar"
+                               value="{{ old('name_ar') }}"
+                               placeholder="دولار أمريكي"
+                               dir="rtl">
+                        @error('name_ar')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

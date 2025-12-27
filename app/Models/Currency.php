@@ -10,6 +10,7 @@ class Currency extends Model
     protected $fillable = [
         'code',
         'name',
+        'name_ar',
         'symbol',
         'exchange_rate',
         'is_active',
@@ -22,6 +23,17 @@ class Currency extends Model
         'is_active' => 'boolean',
         'is_default' => 'boolean',
     ];
+
+    /**
+     * Get localized name attribute
+     */
+    public function getLocalizedNameAttribute()
+    {
+        if (app()->getLocale() == 'ar' && !empty($this->name_ar)) {
+            return $this->name_ar;
+        }
+        return $this->name;
+    }
 
     /**
      * Get active currencies

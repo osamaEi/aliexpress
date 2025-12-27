@@ -325,6 +325,60 @@
                                 <small>{{ app()->getLocale() == 'ar' ? 'العمولات المعلقة' : 'Pending Commissions' }}</small>
                             </div>
                         </div>
+                        <div class="col-sm-6 col-md-4 col-lg-2">
+                            <div class="p-3 bg-info bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-info">{{ $productsWithCoupon }}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'منتجات بالكوبون' : 'Products with Coupon' }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet/PayPal Stats - Unpaid Store Balances -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h5 class="mb-0">
+                        <i class="ri-paypal-line me-2"></i>
+                        {{ app()->getLocale() == 'ar' ? 'أرصدة المتاجر المستحقة (PayPal)' : 'Store Balances Due (PayPal)' }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-primary bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-primary">{!! format_currency($walletStats['total_wallet_balance'], 'AED', 2, true) !!}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'إجمالي الأرصدة' : 'Total Balances' }}</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-warning bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-warning">{!! format_currency($walletStats['total_pending_balance'], 'AED', 2, true) !!}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'الأرصدة المعلقة' : 'Pending Balances' }}</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-success bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-success">{!! format_currency($walletStats['distributor_balance'], 'AED', 2, true) !!}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'أرصدة التجار' : 'Distributor Balances' }}</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-info bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-info">{!! format_currency($walletStats['seller_balance'], 'AED', 2, true) !!}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'أرصدة البائعين' : 'Seller Balances' }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <p class="text-muted mb-0">
+                            <i class="ri-information-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'هذه المبالغ يجب أن تكون متوفرة في حساب PayPal للدفع للمتاجر' : 'These amounts should be available in PayPal for store payouts' }}
+                        </p>
                     </div>
                 </div>
             </div>

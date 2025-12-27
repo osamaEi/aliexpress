@@ -100,6 +100,14 @@
             </a>
         </li>
 
+        <!-- Countries Management -->
+        <li class="menu-item {{ request()->routeIs('admin.countries.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.countries.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-global-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'إدارة الدول' : 'Countries' }}</div>
+            </a>
+        </li>
+
         <!-- Token Management -->
         <li class="menu-item {{ request()->routeIs('admin.tokens') ? 'active' : '' }}">
             <a href="{{ route('admin.tokens') }}" class="menu-link">

@@ -105,6 +105,257 @@
                 </div>
             </div>
 
+            <!-- Bilingual Site Name & Description -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="ri-translate-2 me-2"></i>
+                            {{ app()->getLocale() == 'ar' ? 'اسم ووصف الموقع (ثنائي اللغة)' : 'Site Name & Description (Bilingual)' }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $siteName = $settings->get('text', collect())->firstWhere('key', 'site_name');
+                            $siteNameAr = $settings->get('text', collect())->firstWhere('key', 'site_name_ar');
+                            $siteDesc = $settings->get('textarea', collect())->firstWhere('key', 'site_description');
+                            $siteDescAr = $settings->get('textarea', collect())->firstWhere('key', 'site_description_ar');
+                        @endphp
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="site_name" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'اسم الموقع (English)' : 'Site Name (English)' }}
+                                </label>
+                                <input type="text" name="settings[site_name]" id="site_name" class="form-control"
+                                    value="{{ old('settings.site_name', $siteName?->value) }}" placeholder="My E-Commerce">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="site_name_ar" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'اسم الموقع (عربي)' : 'Site Name (Arabic)' }}
+                                </label>
+                                <input type="text" name="settings[site_name_ar]" id="site_name_ar" class="form-control"
+                                    value="{{ old('settings.site_name_ar', $siteNameAr?->value) }}" placeholder="متجري الإلكتروني" dir="rtl">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="site_description" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'وصف الموقع (English)' : 'Site Description (English)' }}
+                                </label>
+                                <textarea name="settings[site_description]" id="site_description" class="form-control" rows="3"
+                                    placeholder="Your one-stop shop for everything">{{ old('settings.site_description', $siteDesc?->value) }}</textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="site_description_ar" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'وصف الموقع (عربي)' : 'Site Description (Arabic)' }}
+                                </label>
+                                <textarea name="settings[site_description_ar]" id="site_description_ar" class="form-control" rows="3"
+                                    placeholder="متجرك الشامل لكل احتياجاتك" dir="rtl">{{ old('settings.site_description_ar', $siteDescAr?->value) }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Banners -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="ri-image-2-line me-2"></i>
+                            {{ app()->getLocale() == 'ar' ? 'بنرات لوحة التحكم' : 'Dashboard Banners' }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $sellerBanner = $settings->get('image', collect())->firstWhere('key', 'seller_dashboard_banner');
+                            $distributorBanner = $settings->get('image', collect())->firstWhere('key', 'distributor_dashboard_banner');
+                            $buyerBanner = $settings->get('image', collect())->firstWhere('key', 'buyer_dashboard_banner');
+                        @endphp
+                        <div class="row">
+                            <!-- Seller Dashboard Banner -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'بنر لوحة تحكم البائع' : 'Seller Dashboard Banner' }}
+                                </label>
+                                @if($sellerBanner?->value)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $sellerBanner->value) }}" alt="Seller Banner" class="img-thumbnail" style="max-width: 100%; max-height: 150px;">
+                                    <button type="button" class="btn btn-sm btn-danger mt-1 delete-image" data-key="seller_dashboard_banner">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                                @endif
+                                <input type="file" name="settings[seller_dashboard_banner]" class="form-control" accept="image/*">
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحجم الموصى به: 1200x300 بكسل' : 'Recommended size: 1200x300px' }}</small>
+                            </div>
+
+                            <!-- Distributor Dashboard Banner -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'بنر لوحة تحكم التاجر' : 'Distributor Dashboard Banner' }}
+                                </label>
+                                @if($distributorBanner?->value)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $distributorBanner->value) }}" alt="Distributor Banner" class="img-thumbnail" style="max-width: 100%; max-height: 150px;">
+                                    <button type="button" class="btn btn-sm btn-danger mt-1 delete-image" data-key="distributor_dashboard_banner">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                                @endif
+                                <input type="file" name="settings[distributor_dashboard_banner]" class="form-control" accept="image/*">
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحجم الموصى به: 1200x300 بكسل' : 'Recommended size: 1200x300px' }}</small>
+                            </div>
+
+                            <!-- Buyer Dashboard Banner -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'بنر لوحة تحكم المشتري' : 'Buyer Dashboard Banner' }}
+                                </label>
+                                @if($buyerBanner?->value)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $buyerBanner->value) }}" alt="Buyer Banner" class="img-thumbnail" style="max-width: 100%; max-height: 150px;">
+                                    <button type="button" class="btn btn-sm btn-danger mt-1 delete-image" data-key="buyer_dashboard_banner">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                                @endif
+                                <input type="file" name="settings[buyer_dashboard_banner]" class="form-control" accept="image/*">
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحجم الموصى به: 1200x300 بكسل' : 'Recommended size: 1200x300px' }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Settings - Min Withdrawal/Deposit -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="ri-wallet-3-line me-2"></i>
+                            {{ app()->getLocale() == 'ar' ? 'إعدادات المحفظة' : 'Wallet Settings' }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $minWithdrawal = $settings->get('number', collect())->firstWhere('key', 'min_withdrawal_amount');
+                            $minDeposit = $settings->get('number', collect())->firstWhere('key', 'min_deposit_amount');
+                            $maxWithdrawal = $settings->get('number', collect())->firstWhere('key', 'max_withdrawal_amount');
+                            $withdrawalFee = $settings->get('number', collect())->firstWhere('key', 'withdrawal_fee_percentage');
+                        @endphp
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="min_withdrawal_amount" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'الحد الأدنى للسحب' : 'Min Withdrawal Amount' }}
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" name="settings[min_withdrawal_amount]" id="min_withdrawal_amount" class="form-control"
+                                        value="{{ old('settings.min_withdrawal_amount', $minWithdrawal?->value ?? 50) }}" step="0.01" min="0">
+                                    <span class="input-group-text">AED</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="max_withdrawal_amount" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'الحد الأقصى للسحب' : 'Max Withdrawal Amount' }}
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" name="settings[max_withdrawal_amount]" id="max_withdrawal_amount" class="form-control"
+                                        value="{{ old('settings.max_withdrawal_amount', $maxWithdrawal?->value ?? 10000) }}" step="0.01" min="0">
+                                    <span class="input-group-text">AED</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="min_deposit_amount" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'الحد الأدنى للإيداع' : 'Min Deposit Amount' }}
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" name="settings[min_deposit_amount]" id="min_deposit_amount" class="form-control"
+                                        value="{{ old('settings.min_deposit_amount', $minDeposit?->value ?? 10) }}" step="0.01" min="0">
+                                    <span class="input-group-text">AED</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="withdrawal_fee_percentage" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'رسوم السحب (%)' : 'Withdrawal Fee (%)' }}
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" name="settings[withdrawal_fee_percentage]" id="withdrawal_fee_percentage" class="form-control"
+                                        value="{{ old('settings.withdrawal_fee_percentage', $withdrawalFee?->value ?? 0) }}" step="0.01" min="0" max="100">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription Lock Settings -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="ri-lock-line me-2"></i>
+                            {{ app()->getLocale() == 'ar' ? 'قفل الاشتراك' : 'Subscription Lock Settings' }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $requireSubscriptionSeller = $settings->get('boolean', collect())->firstWhere('key', 'require_subscription_seller');
+                            $requireSubscriptionDistributor = $settings->get('boolean', collect())->firstWhere('key', 'require_subscription_distributor');
+                            $lockProductsOnExpiry = $settings->get('boolean', collect())->firstWhere('key', 'lock_products_on_subscription_expiry');
+                            $gracePeriodDays = $settings->get('number', collect())->firstWhere('key', 'subscription_grace_period_days');
+                        @endphp
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="require_subscription_seller" name="settings[require_subscription_seller]" value="1"
+                                        {{ old('settings.require_subscription_seller', $requireSubscriptionSeller?->value) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="require_subscription_seller">
+                                        {{ app()->getLocale() == 'ar' ? 'مطلوب اشتراك للبائعين' : 'Require Subscription for Sellers' }}
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block">
+                                    {{ app()->getLocale() == 'ar' ? 'يجب على البائعين الاشتراك لإضافة منتجات' : 'Sellers must subscribe to add products' }}
+                                </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="require_subscription_distributor" name="settings[require_subscription_distributor]" value="1"
+                                        {{ old('settings.require_subscription_distributor', $requireSubscriptionDistributor?->value) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="require_subscription_distributor">
+                                        {{ app()->getLocale() == 'ar' ? 'مطلوب اشتراك للتجار' : 'Require Subscription for Distributors' }}
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block">
+                                    {{ app()->getLocale() == 'ar' ? 'يجب على التجار الاشتراك للوصول للمنتجات' : 'Distributors must subscribe to access products' }}
+                                </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="lock_products_on_subscription_expiry" name="settings[lock_products_on_subscription_expiry]" value="1"
+                                        {{ old('settings.lock_products_on_subscription_expiry', $lockProductsOnExpiry?->value) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="lock_products_on_subscription_expiry">
+                                        {{ app()->getLocale() == 'ar' ? 'قفل المنتجات عند انتهاء الاشتراك' : 'Lock Products on Subscription Expiry' }}
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block">
+                                    {{ app()->getLocale() == 'ar' ? 'إخفاء منتجات المستخدم عند انتهاء اشتراكه' : 'Hide user products when their subscription expires' }}
+                                </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="subscription_grace_period_days" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'فترة السماح (أيام)' : 'Grace Period (Days)' }}
+                                </label>
+                                <input type="number" name="settings[subscription_grace_period_days]" id="subscription_grace_period_days" class="form-control"
+                                    value="{{ old('settings.subscription_grace_period_days', $gracePeriodDays?->value ?? 3) }}" min="0" max="30">
+                                <small class="text-muted">
+                                    {{ app()->getLocale() == 'ar' ? 'عدد الأيام المسموحة بعد انتهاء الاشتراك' : 'Number of days allowed after subscription expiry' }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- General Settings -->
             <div class="col-12 mb-4">
                 <div class="card">
@@ -113,8 +364,11 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
+                            @php
+                                $excludeKeys = ['admin_profit_type', 'site_name', 'site_name_ar', 'site_description', 'site_description_ar'];
+                            @endphp
                             @foreach($settings->get('text', collect())->merge($settings->get('textarea', collect())) as $setting)
-                            @if(!in_array($setting->key, ['admin_profit_type']))
+                            @if(!in_array($setting->key, $excludeKeys))
                             <div class="col-md-6 mb-3">
                                 <label for="{{ $setting->key }}" class="form-label">
                                     {{ ucwords(str_replace('_', ' ', $setting->key)) }}
