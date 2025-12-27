@@ -730,6 +730,7 @@ return [
     'site_settings' => 'إعدادات الموقع',
     'manage_site_settings' => 'إدارة إعدادات موقعك',
     'general_settings' => 'الإعدادات العامة',
+    'payment_gateway_settings' => 'إعدادات بوابة الدفع',
     'email_settings' => 'إعدادات البريد الإلكتروني',
     'image_settings' => 'الصور والعلامة التجارية',
     'save_settings' => 'حفظ الإعدادات',

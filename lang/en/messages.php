@@ -746,6 +746,7 @@ return [
     'site_settings' => 'Site Settings',
     'manage_site_settings' => 'Manage your site configuration',
     'general_settings' => 'General Settings',
+    'payment_gateway_settings' => 'Payment Gateway Settings',
     'email_settings' => 'Email Settings',
     'image_settings' => 'Image & Branding',
     'save_settings' => 'Save Settings',

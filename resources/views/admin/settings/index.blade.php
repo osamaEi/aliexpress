@@ -356,6 +356,49 @@
                 </div>
             </div>
 
+            <!-- Payment Gateway Settings -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="ri-secure-payment-line me-2"></i>
+                            {{ __('messages.payment_gateway_settings') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @php
+                                $ziinaApiKey = $settings->get('text', collect())->firstWhere('key', 'ziina_api_key');
+                            @endphp
+
+                            <!-- Ziina API Key -->
+                            <div class="col-md-12 mb-3">
+                                <label for="ziina_api_key" class="form-label">
+                                    <i class="ri-lock-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'مفتاح API لـ Ziina' : 'Ziina API Key' }}
+                                </label>
+                                <input
+                                    type="password"
+                                    name="settings[ziina_api_key]"
+                                    id="ziina_api_key"
+                                    class="form-control"
+                                    value="{{ old('settings.ziina_api_key', $ziinaApiKey?->value ?? '') }}"
+                                    placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل مفتاح API الخاص بـ Ziina' : 'Enter your Ziina API Key' }}">
+                                <small class="text-muted d-block mt-2">
+                                    {{ app()->getLocale() == 'ar' ? 'الحصول على مفتاح API من لوحة تحكم Ziina' : 'Get your API key from Ziina dashboard' }}
+                                </small>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="show_ziina_key" onclick="togglePasswordVisibility('ziina_api_key')">
+                                    <label class="form-check-label" for="show_ziina_key">
+                                        {{ app()->getLocale() == 'ar' ? 'إظهار المفتاح' : 'Show Key' }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- General Settings -->
             <div class="col-12 mb-4">
                 <div class="card">
@@ -365,7 +408,7 @@
                     <div class="card-body">
                         <div class="row">
                             @php
-                                $excludeKeys = ['admin_profit_type', 'site_name', 'site_name_ar', 'site_description', 'site_description_ar'];
+                                $excludeKeys = ['admin_profit_type', 'site_name', 'site_name_ar', 'site_description', 'site_description_ar', 'ziina_api_key'];
                             @endphp
                             @foreach($settings->get('text', collect())->merge($settings->get('textarea', collect())) as $setting)
                             @if(!in_array($setting->key, $excludeKeys))
@@ -1197,6 +1240,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize button previews on load
     updateAllButtonPreviews();
 });
+
+// Toggle password visibility
+function togglePasswordVisibility(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field.type === 'password') {
+        field.type = 'text';
+    } else {
+        field.type = 'password';
+    }
+}
 </script>
 @endpush
 @endsection
