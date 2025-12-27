@@ -210,6 +210,158 @@
         </div>
     </div>
 
+    <!-- Coupon Stats Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border: none; border-radius: 12px 12px 0 0;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <h5 class="mb-0 text-white fw-bold">
+                            <i class="ri-coupon-2-line me-2"></i>
+                            {{ app()->getLocale() == 'ar' ? 'إحصائيات الكوبونات الخاصة بي' : 'My Coupons Statistics' }}
+                        </h5>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <!-- Total Coupons -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #561C04; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إجمالي الكوبونات' : 'Total Coupons' }}</h6>
+                                        <h3 class="mb-0" style="color: #561C04; font-weight: 700;">{{ $stats['total_coupons'] }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-coupon-2-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Coupons -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #10b981; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}</h6>
+                                        <h3 class="mb-0" style="color: #10b981; font-weight: 700;">{{ $stats['active_coupons'] }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-coupon-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expired Coupons -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #ef4444; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}</h6>
+                                        <h3 class="mb-0" style="color: #ef4444; font-weight: 700;">{{ $stats['expired_coupons'] }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-coupon-3-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Commission Earned -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #f59e0b; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إجمالي العمولات' : 'Total Commissions' }}</h6>
+                                        <h3 class="mb-0" style="color: #f59e0b; font-weight: 700;">{{ number_format($stats['total_commission_earned'], 2) }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-money-dollar-circle-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Commission -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #8b5cf6; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'العمولات المعلقة' : 'Pending Commissions' }}</h6>
+                                        <h3 class="mb-0" style="color: #8b5cf6; font-weight: 700;">{{ number_format($stats['pending_commission'], 2) }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-time-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Coupons Table -->
+    @if($recentCoupons && $recentCoupons->count() > 0)
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border: none; border-radius: 12px 12px 0 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-white fw-bold">
+                            <i class="ri-coupon-2-line me-2"></i>
+                            {{ app()->getLocale() == 'ar' ? 'أحدث الكوبونات' : 'Recent Coupons' }}
+                        </h5>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead style="background: #f8f9fa;">
+                            <tr>
+                                <th style="border: none;">{{ app()->getLocale() == 'ar' ? 'الكود' : 'Code' }}</th>
+                                <th style="border: none;">{{ app()->getLocale() == 'ar' ? 'العنوان' : 'Title' }}</th>
+                                <th style="border: none;">{{ app()->getLocale() == 'ar' ? 'الحالة' : 'Status' }}</th>
+                                <th style="border: none;">{{ app()->getLocale() == 'ar' ? 'المستخدمة' : 'Used' }}</th>
+                                <th style="border: none;">{{ app()->getLocale() == 'ar' ? 'العمولة' : 'Commission' }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($recentCoupons as $coupon)
+                            <tr>
+                                <td style="border: none; vertical-align: middle;">
+                                    <span class="badge bg-light text-dark" style="font-family: monospace;">{{ $coupon->code }}</span>
+                                </td>
+                                <td style="border: none; vertical-align: middle;">
+                                    {{ app()->getLocale() == 'ar' ? $coupon->title_ar : $coupon->title_en }}
+                                </td>
+                                <td style="border: none; vertical-align: middle;">
+                                    @if($coupon->isValid())
+                                        <span class="badge bg-success">{{ app()->getLocale() == 'ar' ? 'فعال' : 'Active' }}</span>
+                                    @elseif($coupon->isExpired())
+                                        <span class="badge bg-danger">{{ app()->getLocale() == 'ar' ? 'منتهي' : 'Expired' }}</span>
+                                    @else
+                                        <span class="badge bg-warning">{{ app()->getLocale() == 'ar' ? 'معطل' : 'Inactive' }}</span>
+                                    @endif
+                                </td>
+                                <td style="border: none; vertical-align: middle;">
+                                    <span class="badge bg-light text-dark">{{ $coupon->used_count }}/{{ $coupon->max_uses }}</span>
+                                </td>
+                                <td style="border: none; vertical-align: middle;">
+                                    <strong style="color: #10b981;">{{ number_format($coupon->total_commission_earned, 2) }}</strong>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Recent Orders & Products -->
     <div class="row g-4">
         <!-- Recent Orders -->

@@ -7,6 +7,8 @@ use App\Models\ProductImage;
 use App\Models\ProductVariation;
 use App\Models\Order;
 use App\Models\Category;
+use App\Models\Coupon;
+use App\Models\CouponUsage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -37,6 +39,16 @@ class DistributorController extends Controller
                 ->sum('total_price'),
         ];
 
+        // Get coupon statistics for this distributor
+        $coupons = Coupon::where('store_id', $user->id)->get();
+        $stats['total_coupons'] = $coupons->count();
+        $stats['active_coupons'] = $coupons->filter(fn($c) => $c->isValid())->count();
+        $stats['expired_coupons'] = $coupons->filter(fn($c) => $c->isExpired())->count();
+        $stats['total_commission_earned'] = $coupons->sum('total_commission_earned');
+        $stats['pending_commission'] = CouponUsage::whereHas('coupon', function ($q) use ($user) {
+            $q->where('store_id', $user->id);
+        })->pending()->sum('commission_amount');
+
         // Get recent orders for distributor's products
         $recentOrders = Order::whereIn('product_id', $assignedProductIds)
             ->with('product')
@@ -50,7 +62,13 @@ class DistributorController extends Controller
             ->take(10)
             ->get();
 
-        return view('distributor.dashboard', compact('stats', 'recentOrders', 'recentProducts'));
+        // Get recent coupons for this distributor
+        $recentCoupons = Coupon::where('store_id', $user->id)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('distributor.dashboard', compact('stats', 'recentOrders', 'recentProducts', 'recentCoupons'));
     }
 
     /**
