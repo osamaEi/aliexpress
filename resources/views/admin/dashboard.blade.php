@@ -272,57 +272,105 @@
     <!-- Affiliate Marketing Stats -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header gradient-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-white">
-                        <i class="ri-coupon-2-line me-2"></i>
-                        {{ app()->getLocale() == 'ar' ? 'إحصائيات التسويق بالعمولة' : 'Affiliate Marketing Stats' }}
-                    </h5>
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('admin.affiliate.stores') }}" class="btn btn-sm btn-light">
-                            <i class="ri-store-2-line me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'المتاجر' : 'Stores' }}
-                        </a>
-                        <a href="{{ route('admin.affiliate.coupons.active') }}" class="btn btn-sm btn-light">
-                            <i class="ri-coupon-line me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}
-                        </a>
-                        <a href="{{ route('admin.affiliate.coupons.expired') }}" class="btn btn-sm btn-light">
-                            <i class="ri-coupon-3-line me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}
-                        </a>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border: none; border-radius: 12px 12px 0 0;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <h5 class="mb-0 text-white fw-bold">
+                            <i class="ri-coupon-2-line me-2"></i>
+                            {{ app()->getLocale() == 'ar' ? 'إحصائيات التسويق بالعمولة' : 'Affiliate Marketing Stats' }}
+                        </h5>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ route('admin.affiliate.stores') }}" class="btn btn-sm" style="background: white; color: #561C04; border: none; font-weight: 500;">
+                                <i class="ri-store-2-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'المتاجر' : 'Stores' }}
+                            </a>
+                            <a href="{{ route('admin.affiliate.coupons.active') }}" class="btn btn-sm" style="background: white; color: #561C04; border: none; font-weight: 500;">
+                                <i class="ri-coupon-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}
+                            </a>
+                            <a href="{{ route('admin.affiliate.coupons.expired') }}" class="btn btn-sm" style="background: white; color: #561C04; border: none; font-weight: 500;">
+                                <i class="ri-coupon-3-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-sm-6 col-md-4 col-lg-2">
-                            <div class="p-3 mini-stat gradient-1 rounded text-center">
-                                <h4 class="mb-1 text-white">{{ $affiliateStats['total_coupons'] }}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'إجمالي الكوبونات' : 'Total Coupons' }}</small>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <!-- Total Coupons -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #561C04; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إجمالي الكوبونات' : 'Total Coupons' }}</h6>
+                                        <h3 class="mb-0" style="color: #561C04; font-weight: 700;">{{ $affiliateStats['total_coupons'] }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-coupon-2-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-4 col-lg-2">
-                            <div class="p-3 mini-stat gradient-2 rounded text-center">
-                                <h4 class="mb-1 text-white">{{ $affiliateStats['active_coupons'] }}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}</small>
+
+                        <!-- Active Coupons -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #10b981; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}</h6>
+                                        <h3 class="mb-0" style="color: #10b981; font-weight: 700;">{{ $affiliateStats['active_coupons'] }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-coupon-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-4 col-lg-2">
-                            <div class="p-3 mini-stat gradient-3 rounded text-center">
-                                <h4 class="mb-1 text-white">{{ $affiliateStats['expired_coupons'] }}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}</small>
+
+                        <!-- Expired Coupons -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #ef4444; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}</h6>
+                                        <h3 class="mb-0" style="color: #ef4444; font-weight: 700;">{{ $affiliateStats['expired_coupons'] }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-coupon-3-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-4 col-lg-3">
-                            <div class="p-3 mini-stat gradient-4 rounded text-center">
-                                <h4 class="mb-1 text-white">{{ number_format($affiliateStats['total_commission_earned'], 2) }}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'إجمالي العمولات' : 'Total Commissions' }}</small>
+
+                        <!-- Total Commissions -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #f59e0b; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إجمالي العمولات' : 'Total Commissions' }}</h6>
+                                        <h3 class="mb-0" style="color: #f59e0b; font-weight: 700;">{{ number_format($affiliateStats['total_commission_earned'], 2) }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-money-dollar-circle-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-4 col-lg-3">
-                            <div class="p-3 mini-stat gradient-1 rounded text-center">
-                                <h4 class="mb-1 text-white">{{ number_format($affiliateStats['pending_commission'], 2) }}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'العمولات المعلقة' : 'Pending Commissions' }}</small>
+                    </div>
+
+                    <!-- Pending Commission (Full Width on Next Row) -->
+                    <div class="row g-4 mt-2">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #8b5cf6; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'العمولات المعلقة' : 'Pending Commissions' }}</h6>
+                                        <h3 class="mb-0" style="color: #8b5cf6; font-weight: 700;">{{ number_format($affiliateStats['pending_commission'], 2) }}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-time-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -334,45 +382,86 @@
     <!-- Wallet/PayPal Stats - Unpaid Store Balances -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header gradient-header">
-                    <h5 class="mb-0 text-white">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border: none; border-radius: 12px 12px 0 0;">
+                    <h5 class="mb-0 text-white fw-bold">
                         <i class="ri-paypal-line me-2"></i>
                         {{ app()->getLocale() == 'ar' ? 'أرصدة المتاجر المستحقة (PayPal)' : 'Store Balances Due (PayPal)' }}
                     </h5>
                 </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-sm-6 col-md-3">
-                            <div class="p-3 mini-stat gradient-1 rounded text-center">
-                                <h4 class="mb-1 text-white">{!! format_currency($walletStats['total_wallet_balance'], 'AED', 2, true) !!}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'إجمالي الأرصدة' : 'Total Balances' }}</small>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <!-- Total Balances -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #561C04; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إجمالي الأرصدة' : 'Total Balances' }}</h6>
+                                        <h3 class="mb-0" style="color: #561C04; font-weight: 700;">{!! format_currency($walletStats['total_wallet_balance'], 'AED', 2, true) !!}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-wallet-3-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3">
-                            <div class="p-3 mini-stat gradient-2 rounded text-center">
-                                <h4 class="mb-1 text-white">{!! format_currency($walletStats['total_pending_balance'], 'AED', 2, true) !!}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'الأرصدة المعلقة' : 'Pending Balances' }}</small>
+
+                        <!-- Pending Balances -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #f59e0b; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'الأرصدة المعلقة' : 'Pending Balances' }}</h6>
+                                        <h3 class="mb-0" style="color: #f59e0b; font-weight: 700;">{!! format_currency($walletStats['total_pending_balance'], 'AED', 2, true) !!}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-time-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3">
-                            <div class="p-3 mini-stat gradient-3 rounded text-center">
-                                <h4 class="mb-1 text-white">{!! format_currency($walletStats['distributor_balance'], 'AED', 2, true) !!}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'أرصدة التجار' : 'Distributor Balances' }}</small>
+
+                        <!-- Distributor Balances -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #3b82f6; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'أرصدة التجار' : 'Distributor Balances' }}</h6>
+                                        <h3 class="mb-0" style="color: #3b82f6; font-weight: 700;">{!! format_currency($walletStats['distributor_balance'], 'AED', 2, true) !!}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-store-2-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-3">
-                            <div class="p-3 mini-stat gradient-4 rounded text-center">
-                                <h4 class="mb-1 text-white">{!! format_currency($walletStats['seller_balance'], 'AED', 2, true) !!}</h4>
-                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'أرصدة البائعين' : 'Seller Balances' }}</small>
+
+                        <!-- Seller Balances -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-left: 4px solid #10b981; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted fw-500 mb-1" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'أرصدة البائعين' : 'Seller Balances' }}</h6>
+                                        <h3 class="mb-0" style="color: #10b981; font-weight: 700;">{!! format_currency($walletStats['seller_balance'], 'AED', 2, true) !!}</h3>
+                                    </div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ri-user-3-line text-white ri-24px"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-3 text-center">
-                        <p class="text-muted mb-0">
-                            <i class="ri-information-line me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'هذه المبالغ يجب أن تكون متوفرة في حساب PayPal للدفع للمتاجر' : 'These amounts should be available in PayPal for store payouts' }}
-                        </p>
+
+                    <!-- Info Message -->
+                    <div class="alert alert-info mt-4 mb-0" style="background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 8px;">
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="ri-information-line mt-1" style="color: #3b82f6; font-size: 18px;"></i>
+                            <div>
+                                <p class="mb-0" style="color: #1e40af; font-weight: 500;">
+                                    {{ app()->getLocale() == 'ar' ? 'هذه المبالغ يجب أن تكون متوفرة في حساب PayPal للدفع للمتاجر والبائعين' : 'These amounts should be available in PayPal for store and seller payouts' }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -382,36 +471,122 @@
     <!-- Quick Actions -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header gradient-header">
-                    <h5 class="mb-0 text-white">{{ __('messages.quick_actions') }}</h5>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border: none; border-radius: 12px 12px 0 0;">
+                    <h5 class="mb-0 text-white fw-bold">
+                        <i class="ri-lightbulb-flash-line me-2"></i>
+                        {{ __('messages.quick_actions') }}
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ route('admin.tokens') }}" class="btn action-btn">
-                            <i class="ri-key-2-line me-1"></i>
-                            {{ __('messages.manage_tokens') }}
-                        </a>
-                        <a href="{{ route('admin.subscriptions.index') }}" class="btn action-btn">
-                            <i class="ri-vip-crown-line me-1"></i>
-                            {{ __('messages.manage_subscriptions') }}
-                        </a>
-                        <a href="{{ route('admin.orders.index') }}" class="btn action-btn">
-                            <i class="ri-file-list-3-line me-1"></i>
-                            {{ __('messages.manage_orders') }}
-                        </a>
-                        <a href="{{ route('admin.categories.index') }}" class="btn action-btn">
-                            <i class="ri-price-tag-3-line me-1"></i>
-                            {{ __('messages.manage_categories') }}
-                        </a>
-                        <a href="{{ route('admin.affiliate.stores') }}" class="btn action-btn">
-                            <i class="ri-store-2-line me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'إدارة المتاجر' : 'Manage Stores' }}
-                        </a>
-                        <a href="{{ route('admin.affiliate.coupons.create') }}" class="btn action-btn">
-                            <i class="ri-coupon-2-line me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'إضافة كوبون' : 'Add Coupon' }}
-                        </a>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <a href="{{ route('admin.tokens') }}" class="text-decoration-none">
+                                <div style="background: #f8f9fa; border-left: 4px solid #561C04; padding: 18px; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;" 
+                                     onmouseover="this.style.background='#f0f4f8'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(86, 28, 4, 0.1)'" 
+                                     onmouseout="this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #561C04 0%, #7A3206 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="ri-key-2-line text-white ri-18px"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" style="color: #561C04; font-weight: 600; font-size: 14px;">{{ __('messages.manage_tokens') }}</h6>
+                                            <small class="text-muted" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إدارة التوكنات' : 'Manage tokens' }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <a href="{{ route('admin.subscriptions.index') }}" class="text-decoration-none">
+                                <div style="background: #f8f9fa; border-left: 4px solid #f59e0b; padding: 18px; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;" 
+                                     onmouseover="this.style.background='#fffbf0'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.1)'" 
+                                     onmouseout="this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="ri-vip-crown-line text-white ri-18px"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" style="color: #f59e0b; font-weight: 600; font-size: 14px;">{{ __('messages.manage_subscriptions') }}</h6>
+                                            <small class="text-muted" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إدارة الاشتراكات' : 'Manage subscriptions' }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <a href="{{ route('admin.orders.index') }}" class="text-decoration-none">
+                                <div style="background: #f8f9fa; border-left: 4px solid #3b82f6; padding: 18px; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;" 
+                                     onmouseover="this.style.background='#eff6ff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.1)'" 
+                                     onmouseout="this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="ri-file-list-3-line text-white ri-18px"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" style="color: #3b82f6; font-weight: 600; font-size: 14px;">{{ __('messages.manage_orders') }}</h6>
+                                            <small class="text-muted" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إدارة الطلبات' : 'Manage orders' }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <a href="{{ route('admin.categories.index') }}" class="text-decoration-none">
+                                <div style="background: #f8f9fa; border-left: 4px solid #10b981; padding: 18px; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;" 
+                                     onmouseover="this.style.background='#f0fdf4'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.1)'" 
+                                     onmouseout="this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="ri-price-tag-3-line text-white ri-18px"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" style="color: #10b981; font-weight: 600; font-size: 14px;">{{ __('messages.manage_categories') }}</h6>
+                                            <small class="text-muted" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'إدارة الفئات' : 'Manage categories' }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <a href="{{ route('admin.affiliate.stores') }}" class="text-decoration-none">
+                                <div style="background: #f8f9fa; border-left: 4px solid #8b5cf6; padding: 18px; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;" 
+                                     onmouseover="this.style.background='#faf5ff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.1)'" 
+                                     onmouseout="this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="ri-store-2-line text-white ri-18px"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" style="color: #8b5cf6; font-weight: 600; font-size: 14px;">{{ app()->getLocale() == 'ar' ? 'إدارة المتاجر' : 'Manage Stores' }}</h6>
+                                            <small class="text-muted" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'المتاجر التابعة' : 'Affiliate stores' }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <a href="{{ route('admin.affiliate.coupons.create') }}" class="text-decoration-none">
+                                <div style="background: #f8f9fa; border-left: 4px solid #ef4444; padding: 18px; border-radius: 8px; transition: all 0.3s ease; cursor: pointer;" 
+                                     onmouseover="this.style.background='#fef2f2'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.1)'" 
+                                     onmouseout="this.style.background='#f8f9fa'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="ri-coupon-2-line text-white ri-18px"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" style="color: #ef4444; font-weight: 600; font-size: 14px;">{{ app()->getLocale() == 'ar' ? 'إضافة كوبون' : 'Add Coupon' }}</h6>
+                                            <small class="text-muted" style="font-size: 12px;">{{ app()->getLocale() == 'ar' ? 'كوبون جديد' : 'New coupon' }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -12,8 +12,25 @@
     @if(setting_image('buyer_dashboard_banner'))
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card p-0 overflow-hidden">
-                    <img src="{{ setting_image('buyer_dashboard_banner') }}" alt="Buyer Dashboard Banner" class="img-fluid w-100" style="max-height: 300px; object-fit: cover;">
+                <div class="position-relative" style="border-radius: 12px; overflow: hidden; height: 280px; background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);">
+                    <!-- Banner Image -->
+                    <img src="{{ setting_image('buyer_dashboard_banner') }}" alt="Buyer Dashboard Banner" class="img-fluid w-100 h-100" style="object-fit: cover; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                    
+                    <!-- Overlay Gradient -->
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(86, 28, 4, 0.6) 0%, rgba(122, 50, 6, 0.4) 100%);"></div>
+                    
+                    <!-- Content -->
+                    <div class="position-relative h-100 d-flex align-items-center p-5" style="z-index: 2;">
+                        <div>
+                            <h2 class="text-white fw-bold mb-2" style="font-size: 32px;">
+                                <i class="ri-shopping-cart-2-line me-2"></i>
+                                {{ app()->getLocale() == 'ar' ? 'لوحة تحكم المشتري' : 'Customer Dashboard' }}
+                            </h2>
+                            <p class="text-white-50 mb-0" style="font-size: 16px;">
+                                {{ app()->getLocale() == 'ar' ? 'تسوق الآن واستمتع بأفضل العروض والخدمات' : 'Shop now and enjoy the best offers and services' }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
