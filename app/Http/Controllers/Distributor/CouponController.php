@@ -104,8 +104,9 @@ class CouponController extends Controller
             $validated['promo_video'] = $request->file('promo_video')->store('coupons/videos', 'public');
         }
 
-        // Set the store_id to the authenticated user
+        // Set the store_id and created_by to the authenticated user
         $validated['store_id'] = $user->id;
+        $validated['created_by'] = $user->id;
         $validated['is_active'] = true;
 
         Coupon::create($validated);
