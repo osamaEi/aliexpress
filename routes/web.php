@@ -403,6 +403,15 @@ Route::middleware('auth')->group(function () {
         Route::resource('countries', App\Http\Controllers\Admin\CountryController::class)->except(['show']);
         Route::post('/countries/{country}/toggle-status', [App\Http\Controllers\Admin\CountryController::class, 'toggleStatus'])->name('countries.toggle-status');
 
+        // Distributor Products Moderation
+        Route::prefix('distributor-products')->name('distributor-products.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\DistributorProductController::class, 'index'])->name('index');
+            Route::get('/{productId}/{userId}', [App\Http\Controllers\Admin\DistributorProductController::class, 'show'])->name('show');
+            Route::post('/{productId}/{userId}/approve', [App\Http\Controllers\Admin\DistributorProductController::class, 'approve'])->name('approve');
+            Route::post('/{productId}/{userId}/reject', [App\Http\Controllers\Admin\DistributorProductController::class, 'reject'])->name('reject');
+            Route::post('/bulk-approve', [App\Http\Controllers\Admin\DistributorProductController::class, 'bulkApprove'])->name('bulk-approve');
+        });
+
         // Logs Management
         Route::get('/logs', [App\Http\Controllers\Admin\LogController::class, 'index'])->name('logs.index');
         Route::get('/logs/download', [App\Http\Controllers\Admin\LogController::class, 'download'])->name('logs.download');

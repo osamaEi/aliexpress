@@ -108,6 +108,14 @@
             </a>
         </li>
 
+        <!-- Distributor Products Moderation -->
+        <li class="menu-item {{ request()->routeIs('admin.distributor-products.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.distributor-products.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-shield-check-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'مراجعة منتجات التجار' : 'Product Moderation' }}</div>
+            </a>
+        </li>
+
         <!-- Token Management -->
         <li class="menu-item {{ request()->routeIs('admin.tokens') ? 'active' : '' }}">
             <a href="{{ route('admin.tokens') }}" class="menu-link">

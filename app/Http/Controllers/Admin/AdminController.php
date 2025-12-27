@@ -77,8 +77,8 @@ class AdminController extends Controller
             })->sum('balance'),
         ];
 
-        // Products with coupon (products that have been sold via affiliate coupons)
-        $productsWithCoupon = CouponUsage::distinct('product_id')->count('product_id');
+        // Orders with coupon (orders that used affiliate coupons)
+        $productsWithCoupon = CouponUsage::distinct('order_id')->count('order_id');
 
         $recentOrders = Order::with(['user', 'product'])
             ->latest()

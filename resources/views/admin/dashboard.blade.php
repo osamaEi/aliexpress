@@ -328,7 +328,7 @@
                         <div class="col-sm-6 col-md-4 col-lg-2">
                             <div class="p-3 bg-info bg-opacity-10 rounded text-center">
                                 <h4 class="mb-1 text-info">{{ $productsWithCoupon }}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'منتجات بالكوبون' : 'Products with Coupon' }}</small>
+                                <small>{{ app()->getLocale() == 'ar' ? 'طلبات بالكوبون' : 'Orders with Coupon' }}</small>
                             </div>
                         </div>
                     </div>
