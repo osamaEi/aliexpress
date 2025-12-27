@@ -1775,4 +1775,175 @@ class ProductController extends Controller
 
         return $query->get();
     }
+
+    /**
+     * Get featured China stores (feeds/categories from AliExpress)
+     */
+    public function getChinaStores(Request $request)
+    {
+        try {
+            $stores = $this->aliexpressCategoryService->getFeaturedChinaStores();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'stores' => $stores,
+                ]);
+            }
+
+            return $stores;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get China stores', ['error' => $e->getMessage()]);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Failed to load stores',
+                    'stores' => [],
+                ], 500);
+            }
+
+            return [];
+        }
+    }
+
+    /**
+     * Search products from a specific China store (feed or category)
+     */
+    public function searchChinaStoreProducts(Request $request)
+    {
+        $storeId = $request->get('store_id');
+        $keyword = $request->get('keyword');
+
+        if (empty($storeId) && empty($keyword)) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Store ID or keyword is required'
+                ], 400);
+            }
+            return back()->with('error', 'Store ID or keyword is required');
+        }
+
+        try {
+            $options = [
+                'page' => $request->get('page', 1),
+                'limit' => $request->get('per_page', 20),
+                'country' => $request->get('country', 'AE'),
+                'currency' => $request->get('currency', 'AED'),
+                'locale' => app()->getLocale() == 'ar' ? 'ar_SA' : 'en_US',
+            ];
+
+            // If keyword is provided, use text search
+            if (!empty($keyword)) {
+                $result = $this->aliexpressTextService->searchProductsByText($keyword, $options);
+                $products = $result['products'] ?? [];
+                $totalCount = $result['total_count'] ?? count($products);
+            }
+            // Otherwise, get products from the store (feed/category)
+            else {
+                $result = $this->aliexpressCategoryService->getChinaStoreProducts($storeId, $options);
+                $products = $result['products'] ?? [];
+                $totalCount = $result['total_count'] ?? count($products);
+            }
+
+            // Get store info for display
+            $stores = $this->aliexpressCategoryService->getFeaturedChinaStores();
+            $currentStore = collect($stores)->firstWhere('id', $storeId);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'products' => $products,
+                    'total_count' => $totalCount,
+                    'current_page' => $options['page'],
+                    'page_size' => $options['limit'],
+                    'store' => $currentStore,
+                ]);
+            }
+
+            // Get categories for the view
+            $categoryQuery = Category::where('aliexpress_category_id', '!=', null)
+                ->where('is_active', true);
+
+            $user = auth()->user();
+            if ($user && $user->user_type === 'seller') {
+                $mainActivities = json_decode($user->main_activity, true) ?? [];
+                $subActivities = json_decode($user->sub_activity, true) ?? [];
+                $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+                if (!empty($allowedCategoryIds)) {
+                    $categoryQuery->whereIn('id', $allowedCategoryIds);
+                } else {
+                    $categoryQuery->whereRaw('1 = 0');
+                }
+            }
+
+            $allCategories = $categoryQuery->orderBy('order')->get();
+            $mainCategories = $allCategories->whereNull('parent_id');
+            $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
+                $parent->children = $allCategories->where('parent_id', $parent->id)->values();
+                return $parent;
+            });
+
+            // Get assigned products for current user
+            $assignedProductIds = [];
+            if (auth()->check() && auth()->user()->user_type === 'seller') {
+                $assignedProductIds = \DB::table('product_user')
+                    ->where('user_id', auth()->id())
+                    ->pluck('aliexpress_product_id')
+                    ->toArray();
+            }
+
+            // Get distributor countries for the view
+            $distributorCountries = \App\Models\User::where('user_type', 'distributor')
+                ->whereNotNull('country')
+                ->select('country')
+                ->selectRaw('COUNT(*) as distributor_count')
+                ->groupBy('country')
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'code' => $item->country,
+                        'count' => $item->distributor_count,
+                    ];
+                });
+
+            $distributorsByCountry = \App\Models\User::where('user_type', 'distributor')
+                ->whereNotNull('country')
+                ->select('id', 'name', 'store_name', 'avatar', 'country')
+                ->get()
+                ->groupBy('country');
+
+            return view('products.search', [
+                'products' => $products,
+                'total_count' => $totalCount,
+                'keyword' => $keyword,
+                'categories' => $categoriesWithChildren,
+                'allCategories' => $allCategories,
+                'assignedProductIds' => $assignedProductIds,
+                'chinaStores' => $stores,
+                'currentChinaStore' => $currentStore,
+                'distributorCountries' => $distributorCountries,
+                'distributorsByCountry' => $distributorsByCountry,
+                'source_type' => 'china_store',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to search China store products', [
+                'store_id' => $storeId,
+                'error' => $e->getMessage()
+            ]);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Failed to search products: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return back()->with('error', 'Failed to search products');
+        }
+    }
 }

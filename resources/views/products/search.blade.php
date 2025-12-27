@@ -116,7 +116,7 @@
 
                     <!-- China Card - Always Show -->
                     <div class="source-card-mini china {{ $isChinaActive ? 'active' : '' }}"
-                         onclick="selectSource('china')"
+                         onclick="toggleChinaStores()"
                          data-source="china">
                         <span class="country-flag">🇨🇳</span>
                         <span class="country-name">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
@@ -135,12 +135,33 @@
                         <!-- Distributors will be loaded here -->
                     </div>
                 </div>
+
+                <!-- China Stores Dropdown (shown below country cards when China is clicked) -->
+                <div id="chinaStoresDropdown" class="distributors-dropdown china-stores-dropdown" style="display: none;">
+                    <div class="distributors-dropdown-header">
+                        <span>🇨🇳 {{ app()->getLocale() == 'ar' ? 'متاجر الصين' : 'China Stores' }}</span>
+                        <button type="button" class="btn btn-sm btn-link text-muted p-0" onclick="hideChinaStores()">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                    <div id="chinaStoresList" class="distributors-inline-list">
+                        <!-- Loading state -->
+                        <div class="text-center py-3" id="chinaStoresLoading">
+                            <div class="spinner-border spinner-border-sm text-danger" role="status">
+                                <span class="visually-hidden">{{ app()->getLocale() == 'ar' ? 'جاري التحميل...' : 'Loading...' }}</span>
+                            </div>
+                            <span class="ms-2 text-muted">{{ app()->getLocale() == 'ar' ? 'جاري تحميل المتاجر...' : 'Loading stores...' }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Store distributors data for JavaScript -->
             <script>
                 const distributorsByCountry = @json($distributorsByCountry ?? []);
                 const countryNames = @json($countryNames);
+                let chinaStoresLoaded = false;
+                let chinaStoresData = [];
             </script>
 
             <!-- Subcategories Container (shown when main category selected) -->
@@ -794,6 +815,8 @@
         document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
         document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
         document.getElementById('subcategoriesContainer').style.display = 'none';
+        hideChinaStores();
+        hideDistributors();
 
         // Get keyword value
         const keywordInput = document.getElementById('keyword');
@@ -835,6 +858,124 @@
 
             document.getElementById('searchForm').submit();
         }
+    }
+
+    // Toggle China stores dropdown
+    function toggleChinaStores() {
+        const dropdown = document.getElementById('chinaStoresDropdown');
+        const isCurrentlyOpen = dropdown.style.display !== 'none';
+
+        // Hide distributors dropdown first
+        hideDistributors();
+
+        // If already open, close it
+        if (isCurrentlyOpen) {
+            hideChinaStores();
+            return;
+        }
+
+        // Remove active from all cards first, then activate China
+        document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
+        document.querySelector('[data-source="china"]')?.classList.add('active');
+
+        // Show dropdown
+        dropdown.style.display = 'block';
+
+        // Load stores if not loaded
+        if (!chinaStoresLoaded) {
+            loadChinaStores();
+        }
+    }
+
+    // Load China stores from API
+    function loadChinaStores() {
+        const loadingEl = document.getElementById('chinaStoresLoading');
+        const listEl = document.getElementById('chinaStoresList');
+
+        fetch('{{ route("products.china-stores") }}', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.stores) {
+                chinaStoresData = data.stores;
+                chinaStoresLoaded = true;
+                renderChinaStores(data.stores);
+            } else {
+                listEl.innerHTML = `<div class="text-center py-3">
+                    <p class="text-muted mb-0">${isArabic ? 'لا توجد متاجر متاحة' : 'No stores available'}</p>
+                </div>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading China stores:', error);
+            listEl.innerHTML = `<div class="text-center py-3">
+                <p class="text-danger mb-0">${isArabic ? 'فشل تحميل المتاجر' : 'Failed to load stores'}</p>
+            </div>`;
+        });
+    }
+
+    // Render China stores in dropdown
+    function renderChinaStores(stores) {
+        const listEl = document.getElementById('chinaStoresList');
+
+        if (!stores || stores.length === 0) {
+            listEl.innerHTML = `<div class="text-center py-3">
+                <p class="text-muted mb-0">${isArabic ? 'لا توجد متاجر متاحة' : 'No stores available'}</p>
+            </div>`;
+            return;
+        }
+
+        let html = '';
+        stores.forEach(store => {
+            const name = isArabic && store.name_ar ? store.name_ar : store.name;
+            const description = isArabic && store.description_ar ? store.description_ar : store.description;
+            const storeType = store.type === 'feed' ? 'feed' : 'category';
+            const icon = store.type === 'feed' ? 'ri-fire-line' : 'ri-folder-line';
+            const iconColor = store.type === 'feed' ? '#de2910' : '#e56300';
+
+            html += `
+                <div class="china-store-card" onclick="viewChinaStoreProducts('${store.id}', '${storeType}')" title="${description}">
+                    <div class="china-store-icon" style="background: linear-gradient(135deg, ${store.type === 'feed' ? '#de2910' : '#561C04'} 0%, ${store.type === 'feed' ? '#ff5722' : '#e56300'} 100%);">
+                        <i class="${icon}" style="color: white; font-size: 1.5rem;"></i>
+                    </div>
+                    <span class="china-store-name">${name}</span>
+                    <span class="china-store-type">${store.type === 'feed' ? (isArabic ? 'مجموعة' : 'Collection') : (isArabic ? 'فئة' : 'Category')}</span>
+                </div>
+            `;
+        });
+
+        listEl.innerHTML = html;
+    }
+
+    // Hide China stores dropdown
+    function hideChinaStores() {
+        const dropdown = document.getElementById('chinaStoresDropdown');
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
+        // Only remove active if not on china store products page
+        if (!window.location.search.includes('store_id=')) {
+            document.querySelector('[data-source="china"]')?.classList.remove('active');
+        }
+    }
+
+    // View products from a specific China store
+    function viewChinaStoreProducts(storeId, storeType) {
+        const keywordInput = document.getElementById('keyword');
+        const keyword = keywordInput ? keywordInput.value.trim() : '';
+
+        let url = '{{ route("products.china-store-products") }}?store_id=' + encodeURIComponent(storeId);
+        if (keyword) {
+            url += '&keyword=' + encodeURIComponent(keyword);
+        }
+
+        document.getElementById('loadingSpinner').style.display = 'block';
+        window.location.href = url;
     }
 
     // Remove filter
@@ -1333,6 +1474,65 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    /* China Stores Dropdown */
+    .china-stores-dropdown {
+        border-color: #ffcdd2;
+        background: #fff5f5;
+    }
+
+    .china-store-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px 16px;
+        background: white;
+        border: 2px solid #ffcdd2;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 100px;
+        max-width: 120px;
+    }
+
+    .china-store-card:hover {
+        background: #ffebee;
+        border-color: #de2910;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(222, 41, 16, 0.2);
+    }
+
+    .china-store-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 8px rgba(222, 41, 16, 0.2);
+    }
+
+    .china-store-name {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-bottom: 4px;
+    }
+
+    .china-store-type {
+        font-size: 0.65rem;
+        color: #de2910;
+        background: #ffebee;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 500;
     }
 
     /* Legacy Source Cards (kept for compatibility) */

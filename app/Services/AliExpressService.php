@@ -2052,4 +2052,348 @@ class AliExpressService
 
         return $this->getOrderShippingInfo($order->aliexpress_order_id);
     }
+
+    /**
+     * Get featured China stores (simulated using feed names and categories)
+     * Since AliExpress doesn't have a direct "get stores" API, we use feeds as store categories
+     */
+    public function getFeaturedChinaStores(): array
+    {
+        try {
+            // Get available feed names from AliExpress
+            $feedNames = $this->getAvailableFeedNames();
+
+            $stores = [];
+
+            // Create store-like entries from feed names
+            if (!empty($feedNames['promos'])) {
+                foreach ($feedNames['promos'] as $index => $promo) {
+                    $stores[] = [
+                        'id' => 'feed_' . ($index + 1),
+                        'name' => $promo['promo_name'] ?? 'Store ' . ($index + 1),
+                        'name_ar' => $this->translateFeedName($promo['promo_name'] ?? ''),
+                        'type' => 'feed',
+                        'feed_name' => $promo['promo_name'] ?? '',
+                        'image' => $this->getFeedImage($promo['promo_name'] ?? ''),
+                        'description' => $this->getFeedDescription($promo['promo_name'] ?? ''),
+                        'description_ar' => $this->getFeedDescriptionAr($promo['promo_name'] ?? ''),
+                    ];
+                }
+            }
+
+            // Add popular category-based stores
+            $popularCategories = [
+                ['id' => 'cat_200003482', 'name' => 'Electronics', 'name_ar' => 'الإلكترونيات', 'category_id' => '200003482', 'image' => 'https://ae01.alicdn.com/kf/S7c7a8b8c8c8c8c8c8c8c8c8c8c8c8c8c.png'],
+                ['id' => 'cat_200000297', 'name' => 'Fashion', 'name_ar' => 'الأزياء', 'category_id' => '200000297', 'image' => 'https://ae01.alicdn.com/kf/S8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d8d.png'],
+                ['id' => 'cat_200001996', 'name' => 'Home & Garden', 'name_ar' => 'المنزل والحديقة', 'category_id' => '200001996', 'image' => 'https://ae01.alicdn.com/kf/S9e9e9e9e9e9e9e9e9e9e9e9e9e9e9e9e.png'],
+                ['id' => 'cat_200000343', 'name' => 'Beauty', 'name_ar' => 'الجمال', 'category_id' => '200000343', 'image' => 'https://ae01.alicdn.com/kf/Sa0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0.png'],
+                ['id' => 'cat_200003495', 'name' => 'Sports', 'name_ar' => 'الرياضة', 'category_id' => '200003495', 'image' => 'https://ae01.alicdn.com/kf/Sb1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1.png'],
+                ['id' => 'cat_200001355', 'name' => 'Toys & Games', 'name_ar' => 'الألعاب', 'category_id' => '200001355', 'image' => 'https://ae01.alicdn.com/kf/Sc2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2.png'],
+            ];
+
+            foreach ($popularCategories as $category) {
+                $stores[] = [
+                    'id' => $category['id'],
+                    'name' => $category['name'],
+                    'name_ar' => $category['name_ar'],
+                    'type' => 'category',
+                    'category_id' => $category['category_id'],
+                    'image' => $category['image'],
+                    'description' => 'Browse ' . $category['name'] . ' products from China',
+                    'description_ar' => 'تصفح منتجات ' . $category['name_ar'] . ' من الصين',
+                ];
+            }
+
+            Log::info('Featured China stores fetched', ['count' => count($stores)]);
+
+            return $stores;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get featured China stores', ['error' => $e->getMessage()]);
+            return $this->getDefaultChinaStores();
+        }
+    }
+
+    /**
+     * Get products from a specific China store (feed or category)
+     */
+    public function getChinaStoreProducts(string $storeId, array $options = []): array
+    {
+        try {
+            $products = [];
+            $totalCount = 0;
+
+            // Check if it's a feed-based store
+            if (str_starts_with($storeId, 'feed_')) {
+                // Get feed name from the store ID
+                $stores = $this->getFeaturedChinaStores();
+                $store = collect($stores)->firstWhere('id', $storeId);
+
+                if ($store && !empty($store['feed_name'])) {
+                    $result = $this->getProductsByFeed($store['feed_name'], $options);
+                    $products = $result['products'] ?? [];
+                    $totalCount = $result['total_count'] ?? count($products);
+                }
+            }
+            // Check if it's a category-based store
+            elseif (str_starts_with($storeId, 'cat_')) {
+                $categoryId = str_replace('cat_', '', $storeId);
+                $result = $this->getProductsByCategory((int)$categoryId, $options);
+                $products = $result['products'] ?? [];
+                $totalCount = $result['total_count'] ?? count($products);
+            }
+            // Direct category ID
+            elseif (is_numeric($storeId)) {
+                $result = $this->getProductsByCategory((int)$storeId, $options);
+                $products = $result['products'] ?? [];
+                $totalCount = $result['total_count'] ?? count($products);
+            }
+            // Direct feed name
+            else {
+                $result = $this->getProductsByFeed($storeId, $options);
+                $products = $result['products'] ?? [];
+                $totalCount = $result['total_count'] ?? count($products);
+            }
+
+            return [
+                'products' => $products,
+                'total_count' => $totalCount,
+                'current_page' => $options['page'] ?? 1,
+                'page_size' => $options['limit'] ?? 20,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get China store products', [
+                'store_id' => $storeId,
+                'error' => $e->getMessage()
+            ]);
+            return [
+                'products' => [],
+                'total_count' => 0,
+                'current_page' => 1,
+                'page_size' => 0,
+            ];
+        }
+    }
+
+    /**
+     * Get products by feed name
+     */
+    public function getProductsByFeed(string $feedName, array $options = []): array
+    {
+        $params = [
+            'app_signature' => 'dropshipping',
+            'country' => $options['country'] ?? 'AE',
+            'feed_name' => $feedName,
+            'page_no' => $options['page'] ?? 1,
+            'page_size' => min($options['limit'] ?? 20, 50),
+            'sort' => $options['sort'] ?? 'volumeDesc',
+            'target_currency' => $options['currency'] ?? 'AED',
+            'target_language' => $options['locale'] ?? 'EN',
+        ];
+
+        Log::debug('AliExpress Feed Products Request', [
+            'method' => 'aliexpress.ds.recommend.feed.get',
+            'feed_name' => $feedName,
+            'params' => $params,
+        ]);
+
+        try {
+            $data = $this->makeRequest('aliexpress.ds.recommend.feed.get', $params, true);
+
+            if (isset($data['aliexpress_ds_recommend_feed_get_response']['resp_result']['result'])) {
+                $result = $data['aliexpress_ds_recommend_feed_get_response']['resp_result']['result'];
+
+                if (isset($result['products']['product'])) {
+                    $products = $result['products']['product'];
+
+                    // Ensure it's an array
+                    if (!is_array($products)) {
+                        $products = [$products];
+                    }
+
+                    return [
+                        'products' => $this->formatCategoryProducts($products),
+                        'total_count' => $result['total_record_count'] ?? count($products),
+                        'current_page' => $params['page_no'],
+                        'page_size' => $params['page_size'],
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Feed products request failed', [
+                'feed_name' => $feedName,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return [
+            'products' => [],
+            'total_count' => 0,
+            'current_page' => 1,
+            'page_size' => 0,
+        ];
+    }
+
+    /**
+     * Translate feed name to Arabic
+     */
+    private function translateFeedName(string $feedName): string
+    {
+        $translations = [
+            'DS Best Seller' => 'الأكثر مبيعاً',
+            'DS New Arrival' => 'وصل حديثاً',
+            'DS Featured' => 'منتجات مميزة',
+            'DS Hot Products' => 'منتجات رائجة',
+            'Best Seller' => 'الأكثر مبيعاً',
+            'New Arrival' => 'وصل حديثاً',
+            'Featured' => 'مميز',
+            'Hot Products' => 'منتجات رائجة',
+            'Top Rated' => 'الأعلى تقييماً',
+            'Price Drop' => 'تخفيضات',
+        ];
+
+        foreach ($translations as $en => $ar) {
+            if (stripos($feedName, $en) !== false) {
+                return $ar;
+            }
+        }
+
+        return $feedName;
+    }
+
+    /**
+     * Get feed image based on feed name
+     */
+    private function getFeedImage(string $feedName): string
+    {
+        $images = [
+            'best' => 'https://ae01.alicdn.com/kf/S1234567890abcdef1234567890abcdef.png',
+            'new' => 'https://ae01.alicdn.com/kf/S2345678901abcdef2345678901abcdef.png',
+            'featured' => 'https://ae01.alicdn.com/kf/S3456789012abcdef3456789012abcdef.png',
+            'hot' => 'https://ae01.alicdn.com/kf/S4567890123abcdef4567890123abcdef.png',
+        ];
+
+        $lowerName = strtolower($feedName);
+        foreach ($images as $key => $image) {
+            if (strpos($lowerName, $key) !== false) {
+                return $image;
+            }
+        }
+
+        return 'https://ae01.alicdn.com/kf/Sdefault1234567890abcdef1234567890.png';
+    }
+
+    /**
+     * Get feed description in English
+     */
+    private function getFeedDescription(string $feedName): string
+    {
+        $descriptions = [
+            'best' => 'Top selling products with highest customer satisfaction',
+            'new' => 'Latest arrivals and trending products',
+            'featured' => 'Hand-picked featured products',
+            'hot' => 'Most popular products right now',
+        ];
+
+        $lowerName = strtolower($feedName);
+        foreach ($descriptions as $key => $desc) {
+            if (strpos($lowerName, $key) !== false) {
+                return $desc;
+            }
+        }
+
+        return 'Browse quality products from trusted suppliers';
+    }
+
+    /**
+     * Get feed description in Arabic
+     */
+    private function getFeedDescriptionAr(string $feedName): string
+    {
+        $descriptions = [
+            'best' => 'المنتجات الأكثر مبيعاً برضا عملاء عالي',
+            'new' => 'أحدث الوصولات والمنتجات الرائجة',
+            'featured' => 'منتجات مميزة مختارة بعناية',
+            'hot' => 'المنتجات الأكثر شعبية حالياً',
+        ];
+
+        $lowerName = strtolower($feedName);
+        foreach ($descriptions as $key => $desc) {
+            if (strpos($lowerName, $key) !== false) {
+                return $desc;
+            }
+        }
+
+        return 'تصفح منتجات عالية الجودة من موردين موثوقين';
+    }
+
+    /**
+     * Get default China stores when API fails
+     */
+    private function getDefaultChinaStores(): array
+    {
+        return [
+            [
+                'id' => 'feed_bestseller',
+                'name' => 'Best Sellers',
+                'name_ar' => 'الأكثر مبيعاً',
+                'type' => 'feed',
+                'feed_name' => 'DS Best Seller',
+                'image' => null,
+                'description' => 'Top selling products with highest customer satisfaction',
+                'description_ar' => 'المنتجات الأكثر مبيعاً برضا عملاء عالي',
+            ],
+            [
+                'id' => 'feed_newarrival',
+                'name' => 'New Arrivals',
+                'name_ar' => 'وصل حديثاً',
+                'type' => 'feed',
+                'feed_name' => 'DS New Arrival',
+                'image' => null,
+                'description' => 'Latest arrivals and trending products',
+                'description_ar' => 'أحدث الوصولات والمنتجات الرائجة',
+            ],
+            [
+                'id' => 'cat_200003482',
+                'name' => 'Electronics',
+                'name_ar' => 'الإلكترونيات',
+                'type' => 'category',
+                'category_id' => '200003482',
+                'image' => null,
+                'description' => 'Browse Electronics products from China',
+                'description_ar' => 'تصفح منتجات الإلكترونيات من الصين',
+            ],
+            [
+                'id' => 'cat_200000297',
+                'name' => 'Fashion',
+                'name_ar' => 'الأزياء',
+                'type' => 'category',
+                'category_id' => '200000297',
+                'image' => null,
+                'description' => 'Browse Fashion products from China',
+                'description_ar' => 'تصفح منتجات الأزياء من الصين',
+            ],
+            [
+                'id' => 'cat_200001996',
+                'name' => 'Home & Garden',
+                'name_ar' => 'المنزل والحديقة',
+                'type' => 'category',
+                'category_id' => '200001996',
+                'image' => null,
+                'description' => 'Browse Home & Garden products from China',
+                'description_ar' => 'تصفح منتجات المنزل والحديقة من الصين',
+            ],
+            [
+                'id' => 'cat_200000343',
+                'name' => 'Beauty',
+                'name_ar' => 'الجمال',
+                'type' => 'category',
+                'category_id' => '200000343',
+                'image' => null,
+                'description' => 'Browse Beauty products from China',
+                'description_ar' => 'تصفح منتجات الجمال من الصين',
+            ],
+        ];
+    }
 }

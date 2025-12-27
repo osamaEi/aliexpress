@@ -12,15 +12,15 @@
     <div class="row g-4 mb-4">
         <!-- Total Users -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-1">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-success me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-user-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['total_users'] }}</h5>
-                            <small>{{ __('messages.total_users') }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['total_users'] }}</h5>
+                            <small class="text-white-50">{{ __('messages.total_users') }}</small>
                         </div>
                     </div>
                 </div>
@@ -29,15 +29,15 @@
 
         <!-- Total Sellers -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-2">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-success me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-store-2-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['total_sellers'] }}</h5>
-                            <small>{{ __('messages.total_sellers') }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['total_sellers'] }}</h5>
+                            <small class="text-white-50">{{ __('messages.total_sellers') }}</small>
                         </div>
                     </div>
                 </div>
@@ -46,15 +46,15 @@
 
         <!-- Total Distributors -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-3">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-primary me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-truck-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['total_distributors'] }}</h5>
-                            <small>{{ app()->getLocale() == 'ar' ? 'إجمالي التجار' : 'Total Distributors' }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['total_distributors'] }}</h5>
+                            <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'إجمالي التجار' : 'Total Distributors' }}</small>
                         </div>
                     </div>
                 </div>
@@ -63,15 +63,15 @@
 
         <!-- Total Merchants -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-4">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-info me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-shopping-cart-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['total_merchants'] }}</h5>
-                            <small>{{ __('messages.total_merchants') }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['total_merchants'] }}</h5>
+                            <small class="text-white-50">{{ __('messages.total_merchants') }}</small>
                         </div>
                     </div>
                 </div>
@@ -83,15 +83,15 @@
     <div class="row g-4 mb-4">
         <!-- Total Products -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-2">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-shopping-bag-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['total_products'] }}</h5>
-                            <small>{{ __('messages.total_products') }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['total_products'] }}</h5>
+                            <small class="text-white-50">{{ __('messages.total_products') }}</small>
                         </div>
                     </div>
                 </div>
@@ -100,15 +100,15 @@
 
         <!-- AliExpress Products -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-3">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-danger me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-global-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $aliexpressProducts }}</h5>
-                            <small>{{ app()->getLocale() == 'ar' ? 'منتجات الصين' : 'AliExpress Products' }}</small>
+                            <h5 class="mb-0 text-white">{{ $aliexpressProducts }}</h5>
+                            <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'منتجات الصين' : 'AliExpress Products' }}</small>
                         </div>
                     </div>
                 </div>
@@ -117,15 +117,15 @@
 
         <!-- Distributor Products -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-4">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-success me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-store-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $distributorProducts }}</h5>
-                            <small>{{ app()->getLocale() == 'ar' ? 'منتجات التجار' : 'Distributor Products' }}</small>
+                            <h5 class="mb-0 text-white">{{ $distributorProducts }}</h5>
+                            <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'منتجات التجار' : 'Distributor Products' }}</small>
                         </div>
                     </div>
                 </div>
@@ -134,15 +134,15 @@
 
         <!-- Total Orders -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-1">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-file-list-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['total_orders'] }}</h5>
-                            <small>{{ __('messages.total_orders') }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['total_orders'] }}</h5>
+                            <small class="text-white-50">{{ __('messages.total_orders') }}</small>
                         </div>
                     </div>
                 </div>
@@ -154,15 +154,15 @@
     <div class="row g-4 mb-4">
         <!-- Pending Orders -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-3">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-danger me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-time-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['pending_orders'] }}</h5>
-                            <small>{{ __('messages.pending_orders') }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['pending_orders'] }}</h5>
+                            <small class="text-white-50">{{ __('messages.pending_orders') }}</small>
                         </div>
                     </div>
                 </div>
@@ -171,15 +171,15 @@
 
         <!-- Active Subscriptions -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-4">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-success me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-vip-crown-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['active_subscriptions'] }}</h5>
-                            <small>{{ __('messages.active_subscriptions') }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['active_subscriptions'] }}</h5>
+                            <small class="text-white-50">{{ __('messages.active_subscriptions') }}</small>
                         </div>
                     </div>
                 </div>
@@ -188,15 +188,15 @@
 
         <!-- Total Categories -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-1">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-warning me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-price-tag-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['total_categories'] }}</h5>
-                            <small>{{ __('messages.total_categories') }}</small>
+                            <h5 class="mb-0 text-white">{{ $stats['total_categories'] }}</h5>
+                            <small class="text-white-50">{{ __('messages.total_categories') }}</small>
                         </div>
                     </div>
                 </div>
@@ -205,15 +205,15 @@
 
         <!-- Total Revenue -->
         <div class="col-sm-6 col-lg-3">
-            <div class="card">
+            <div class="card stat-card gradient-2">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-success me-3 p-2">
+                        <div class="stat-icon">
                             <i class="ri-money-dollar-circle-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{!! format_currency($stats['total_revenue'], 'AED', 2, true) !!}</h5>
-                            <small>{{ __('messages.total_revenue') }}</small>
+                            <h5 class="mb-0 text-white">{!! format_currency($stats['total_revenue'], 'AED', 2, true) !!}</h5>
+                            <small class="text-white-50">{{ __('messages.total_revenue') }}</small>
                         </div>
                     </div>
                 </div>
@@ -226,8 +226,8 @@
     <div class="row g-4 mb-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="card-header gradient-header">
+                    <h5 class="mb-0 text-white">
                         <i class="ri-global-line me-2"></i>
                         {{ app()->getLocale() == 'ar' ? 'المنتجات حسب الدولة' : 'Products by Country' }}
                     </h5>
@@ -253,11 +253,11 @@
                                 $country = $countryFlags[$code] ?? ['flag' => '🏳️', 'ar' => $code, 'en' => $code];
                             @endphp
                             <div class="col-sm-6 col-md-4 col-lg-3">
-                                <div class="p-3 border rounded d-flex align-items-center">
+                                <div class="p-3 country-card rounded d-flex align-items-center">
                                     <span style="font-size: 2rem;" class="me-3">{{ $country['flag'] }}</span>
                                     <div>
-                                        <h6 class="mb-0">{{ app()->getLocale() == 'ar' ? $country['ar'] : $country['en'] }}</h6>
-                                        <small class="text-muted">{{ $data->count }} {{ app()->getLocale() == 'ar' ? 'منتج' : 'products' }}</small>
+                                        <h6 class="mb-0 text-white">{{ app()->getLocale() == 'ar' ? $country['ar'] : $country['en'] }}</h6>
+                                        <small class="text-white-50">{{ $data->count }} {{ app()->getLocale() == 'ar' ? 'منتج' : 'products' }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -273,21 +273,21 @@
     <div class="row g-4 mb-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
+                <div class="card-header gradient-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white">
                         <i class="ri-coupon-2-line me-2"></i>
                         {{ app()->getLocale() == 'ar' ? 'إحصائيات التسويق بالعمولة' : 'Affiliate Marketing Stats' }}
                     </h5>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('admin.affiliate.stores') }}" class="btn btn-sm btn-outline-primary">
+                        <a href="{{ route('admin.affiliate.stores') }}" class="btn btn-sm btn-light">
                             <i class="ri-store-2-line me-1"></i>
                             {{ app()->getLocale() == 'ar' ? 'المتاجر' : 'Stores' }}
                         </a>
-                        <a href="{{ route('admin.affiliate.coupons.active') }}" class="btn btn-sm btn-outline-success">
+                        <a href="{{ route('admin.affiliate.coupons.active') }}" class="btn btn-sm btn-light">
                             <i class="ri-coupon-line me-1"></i>
                             {{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}
                         </a>
-                        <a href="{{ route('admin.affiliate.coupons.expired') }}" class="btn btn-sm btn-outline-danger">
+                        <a href="{{ route('admin.affiliate.coupons.expired') }}" class="btn btn-sm btn-light">
                             <i class="ri-coupon-3-line me-1"></i>
                             {{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}
                         </a>
@@ -296,39 +296,33 @@
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-sm-6 col-md-4 col-lg-2">
-                            <div class="p-3 bg-primary bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-primary">{{ $affiliateStats['total_coupons'] }}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'إجمالي الكوبونات' : 'Total Coupons' }}</small>
+                            <div class="p-3 mini-stat gradient-1 rounded text-center">
+                                <h4 class="mb-1 text-white">{{ $affiliateStats['total_coupons'] }}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'إجمالي الكوبونات' : 'Total Coupons' }}</small>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-2">
-                            <div class="p-3 bg-success bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-success">{{ $affiliateStats['active_coupons'] }}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}</small>
+                            <div class="p-3 mini-stat gradient-2 rounded text-center">
+                                <h4 class="mb-1 text-white">{{ $affiliateStats['active_coupons'] }}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}</small>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-2">
-                            <div class="p-3 bg-danger bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-danger">{{ $affiliateStats['expired_coupons'] }}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}</small>
+                            <div class="p-3 mini-stat gradient-3 rounded text-center">
+                                <h4 class="mb-1 text-white">{{ $affiliateStats['expired_coupons'] }}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}</small>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-3">
-                            <div class="p-3 bg-success bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-success">{{ number_format($affiliateStats['total_commission_earned'], 2) }}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'إجمالي العمولات' : 'Total Commissions' }}</small>
+                            <div class="p-3 mini-stat gradient-4 rounded text-center">
+                                <h4 class="mb-1 text-white">{{ number_format($affiliateStats['total_commission_earned'], 2) }}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'إجمالي العمولات' : 'Total Commissions' }}</small>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-3">
-                            <div class="p-3 bg-warning bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-warning">{{ number_format($affiliateStats['pending_commission'], 2) }}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'العمولات المعلقة' : 'Pending Commissions' }}</small>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-md-4 col-lg-2">
-                            <div class="p-3 bg-info bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-info">{{ $productsWithCoupon }}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'طلبات بالكوبون' : 'Orders with Coupon' }}</small>
+                            <div class="p-3 mini-stat gradient-1 rounded text-center">
+                                <h4 class="mb-1 text-white">{{ number_format($affiliateStats['pending_commission'], 2) }}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'العمولات المعلقة' : 'Pending Commissions' }}</small>
                             </div>
                         </div>
                     </div>
@@ -340,9 +334,9 @@
     <!-- Wallet/PayPal Stats - Unpaid Store Balances -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card border-warning">
-                <div class="card-header bg-warning bg-opacity-10">
-                    <h5 class="mb-0">
+            <div class="card">
+                <div class="card-header gradient-header">
+                    <h5 class="mb-0 text-white">
                         <i class="ri-paypal-line me-2"></i>
                         {{ app()->getLocale() == 'ar' ? 'أرصدة المتاجر المستحقة (PayPal)' : 'Store Balances Due (PayPal)' }}
                     </h5>
@@ -350,27 +344,27 @@
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-sm-6 col-md-3">
-                            <div class="p-3 bg-primary bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-primary">{!! format_currency($walletStats['total_wallet_balance'], 'AED', 2, true) !!}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'إجمالي الأرصدة' : 'Total Balances' }}</small>
+                            <div class="p-3 mini-stat gradient-1 rounded text-center">
+                                <h4 class="mb-1 text-white">{!! format_currency($walletStats['total_wallet_balance'], 'AED', 2, true) !!}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'إجمالي الأرصدة' : 'Total Balances' }}</small>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <div class="p-3 bg-warning bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-warning">{!! format_currency($walletStats['total_pending_balance'], 'AED', 2, true) !!}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'الأرصدة المعلقة' : 'Pending Balances' }}</small>
+                            <div class="p-3 mini-stat gradient-2 rounded text-center">
+                                <h4 class="mb-1 text-white">{!! format_currency($walletStats['total_pending_balance'], 'AED', 2, true) !!}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'الأرصدة المعلقة' : 'Pending Balances' }}</small>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <div class="p-3 bg-success bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-success">{!! format_currency($walletStats['distributor_balance'], 'AED', 2, true) !!}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'أرصدة التجار' : 'Distributor Balances' }}</small>
+                            <div class="p-3 mini-stat gradient-3 rounded text-center">
+                                <h4 class="mb-1 text-white">{!! format_currency($walletStats['distributor_balance'], 'AED', 2, true) !!}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'أرصدة التجار' : 'Distributor Balances' }}</small>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <div class="p-3 bg-info bg-opacity-10 rounded text-center">
-                                <h4 class="mb-1 text-info">{!! format_currency($walletStats['seller_balance'], 'AED', 2, true) !!}</h4>
-                                <small>{{ app()->getLocale() == 'ar' ? 'أرصدة البائعين' : 'Seller Balances' }}</small>
+                            <div class="p-3 mini-stat gradient-4 rounded text-center">
+                                <h4 class="mb-1 text-white">{!! format_currency($walletStats['seller_balance'], 'AED', 2, true) !!}</h4>
+                                <small class="text-white-50">{{ app()->getLocale() == 'ar' ? 'أرصدة البائعين' : 'Seller Balances' }}</small>
                             </div>
                         </div>
                     </div>
@@ -389,32 +383,32 @@
     <div class="row g-4 mb-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">{{ __('messages.quick_actions') }}</h5>
+                <div class="card-header gradient-header">
+                    <h5 class="mb-0 text-white">{{ __('messages.quick_actions') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ route('admin.tokens') }}" class="btn btn-success">
+                        <a href="{{ route('admin.tokens') }}" class="btn action-btn">
                             <i class="ri-key-2-line me-1"></i>
                             {{ __('messages.manage_tokens') }}
                         </a>
-                        <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-warning">
+                        <a href="{{ route('admin.subscriptions.index') }}" class="btn action-btn">
                             <i class="ri-vip-crown-line me-1"></i>
                             {{ __('messages.manage_subscriptions') }}
                         </a>
-                        <a href="{{ route('admin.orders.index') }}" class="btn btn-danger">
+                        <a href="{{ route('admin.orders.index') }}" class="btn action-btn">
                             <i class="ri-file-list-3-line me-1"></i>
                             {{ __('messages.manage_orders') }}
                         </a>
-                        <a href="{{ route('admin.categories.index') }}" class="btn btn-dark">
+                        <a href="{{ route('admin.categories.index') }}" class="btn action-btn">
                             <i class="ri-price-tag-3-line me-1"></i>
                             {{ __('messages.manage_categories') }}
                         </a>
-                        <a href="{{ route('admin.affiliate.stores') }}" class="btn btn-primary">
+                        <a href="{{ route('admin.affiliate.stores') }}" class="btn action-btn">
                             <i class="ri-store-2-line me-1"></i>
                             {{ app()->getLocale() == 'ar' ? 'إدارة المتاجر' : 'Manage Stores' }}
                         </a>
-                        <a href="{{ route('admin.affiliate.coupons.create') }}" class="btn btn-info">
+                        <a href="{{ route('admin.affiliate.coupons.create') }}" class="btn action-btn">
                             <i class="ri-coupon-2-line me-1"></i>
                             {{ app()->getLocale() == 'ar' ? 'إضافة كوبون' : 'Add Coupon' }}
                         </a>
@@ -429,9 +423,9 @@
         <!-- Recent Orders -->
         <div class="col-lg-6">
             <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <h5 class="mb-0">{{ __('messages.recent_orders') }}</h5>
-                    <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-success">
+                <div class="card-header gradient-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white">{{ __('messages.recent_orders') }}</h5>
+                    <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-light">
                         {{ __('messages.view_all') }}
                     </a>
                 </div>
@@ -452,7 +446,7 @@
                                     <td><strong>{{ $order->order_number }}</strong></td>
                                     <td>{{ $order->user->name }}</td>
                                     <td>
-                                        <span class="badge bg-{{ $order->status === 'pending' ? 'warning' : ($order->status === 'delivered' ? 'success' : 'secondary') }}">
+                                        <span class="badge status-badge">
                                             {{ __('messages.' . $order->status) }}
                                         </span>
                                     </td>
@@ -473,9 +467,9 @@
         <!-- Recent Subscriptions -->
         <div class="col-lg-6">
             <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <h5 class="mb-0">{{ __('messages.recent_subscriptions') }}</h5>
-                    <a href="{{ route('admin.subscriptions.users') }}" class="btn btn-sm btn-outline-success">
+                <div class="card-header gradient-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white">{{ __('messages.recent_subscriptions') }}</h5>
+                    <a href="{{ route('admin.subscriptions.users') }}" class="btn btn-sm btn-light">
                         {{ __('messages.view_all') }}
                     </a>
                 </div>
@@ -495,12 +489,12 @@
                                 <tr>
                                     <td>{{ $subscription->user->name }}</td>
                                     <td>
-                                        <span class="badge" style="background-color: {{ $subscription->subscription->color }}">
+                                        <span class="badge status-badge">
                                             {{ $subscription->subscription->localized_name }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-{{ $subscription->status === 'active' ? 'success' : 'secondary' }}">
+                                        <span class="badge status-badge">
                                             {{ __('messages.' . $subscription->status) }}
                                         </span>
                                     </td>
@@ -521,65 +515,118 @@
 </div>
 
 <style>
-    /* Card Hover Effects */
-    .card {
+    /* Gradient Definitions */
+    .gradient-1 {
+        background: linear-gradient(135deg, #561C04 0%, #8B3508 100%);
+    }
+
+    .gradient-2 {
+        background: linear-gradient(135deg, #e56300 0%, #ff8c33 100%);
+    }
+
+    .gradient-3 {
+        background: linear-gradient(135deg, #8B3508 0%, #e56300 100%);
+    }
+
+    .gradient-4 {
+        background: linear-gradient(135deg, #3d1503 0%, #561C04 100%);
+    }
+
+    .gradient-header {
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
         transition: all 0.3s ease;
     }
 
-    .card:hover {
+    .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(86, 28, 4, 0.3);
+        box-shadow: 0 10px 30px rgba(86, 28, 4, 0.4);
     }
 
-    /* Button Hover Styles - Primary and Info to #561C04 */
-    .btn-primary:hover,
-    .btn-info:hover,
-    .btn-warning:hover,
-    .btn-danger:hover,
-    .btn-secondary:hover {
-        background-color: #561C04 !important;
-        border-color: #561C04 !important;
-        color: white !important;
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: white;
+    }
+
+    [dir="rtl"] .stat-icon {
+        margin-right: 0;
+        margin-left: 15px;
+    }
+
+    /* Mini Stats */
+    .mini-stat {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .mini-stat:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.3);
+    }
+
+    /* Country Cards */
+    .country-card {
+        background: linear-gradient(135deg, #561C04 0%, #8B3508 100%);
+        transition: all 0.3s ease;
+    }
+
+    .country-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.3);
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background: linear-gradient(135deg, #3d1503 0%, #561C04 100%);
+        color: white;
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
     }
 
-    /* Success buttons to #e56300 */
-    .btn-success:hover {
-        background-color: #e56300 !important;
-        border-color: #e56300 !important;
-        color: white !important;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(229, 99, 0, 0.4);
+    /* Status Badges */
+    .status-badge {
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        color: white;
+        border-radius: 6px;
+        padding: 5px 10px;
     }
 
-    .btn-outline-primary:hover,
-    .btn-outline-info:hover {
-        background-color: #561C04 !important;
-        border-color: #561C04 !important;
-        color: white !important;
-    }
-
-    .btn-outline-success:hover {
-        background-color: #e56300 !important;
-        border-color: #e56300 !important;
-        color: white !important;
-    }
-
-    /* Badge Hover */
-    .badge {
+    /* Card Hover Effects */
+    .card {
         transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
     }
 
-    .badge:hover {
-        transform: scale(1.1);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    .card:hover {
+        box-shadow: 0 8px 25px rgba(86, 28, 4, 0.2);
     }
 
-    /* Success Badge to #e56300 */
-    .badge.bg-success:hover {
-        background-color: #e56300 !important;
-        box-shadow: 0 4px 10px rgba(229, 99, 0, 0.3);
+    /* Card Headers */
+    .card-header.gradient-header {
+        border-bottom: none;
     }
 
     /* Table Row Hover */
@@ -589,6 +636,22 @@
 
     .table tbody tr:hover {
         background-color: rgba(86, 28, 4, 0.05);
+    }
+
+    /* Text Colors */
+    .text-white-50 {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    /* SVG Icons in currency symbols should be white */
+    .stat-card .card-info h5 svg,
+    .mini-stat h4 svg {
+        fill: white !important;
+    }
+
+    .stat-card .card-info h5 svg path,
+    .mini-stat h4 svg path {
+        fill: white !important;
     }
 </style>
 @endsection

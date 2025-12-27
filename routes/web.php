@@ -161,6 +161,10 @@ Route::middleware('auth')->group(function () {
     // Distributor Products Search (UAE/Saudi) - products from local distributors
     Route::get('/products/search-distributor', [ProductController::class, 'searchDistributorProducts'])->name('products.search-distributor');
 
+    // China Stores Routes - AliExpress feeds/categories as stores
+    Route::get('/products/china-stores', [ProductController::class, 'getChinaStores'])->name('products.china-stores');
+    Route::get('/products/china-store-products', [ProductController::class, 'searchChinaStoreProducts'])->name('products.china-store-products');
+
     // AliExpress integration routes (must be before resource routes)
     Route::get('/products/china/import', [ProductController::class, 'import'])->name('products.china.import');
     Route::post('/products/china/search', [ProductController::class, 'searchChina'])->name('products.china.search');
