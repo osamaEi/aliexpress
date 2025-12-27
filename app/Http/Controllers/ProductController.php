@@ -829,7 +829,7 @@ class ProductController extends Controller
         // Get distributors grouped by country for the modal
         $distributorsByCountry = \App\Models\User::where('user_type', 'distributor')
             ->whereNotNull('country')
-            ->select('id', 'name', 'store_name', 'logo', 'country')
+            ->select('id', 'name', 'store_name', 'avatar', 'country')
             ->get()
             ->groupBy('country');
 
