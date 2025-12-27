@@ -8,6 +8,17 @@
         <p class="text-muted">{{ __('messages.welcome_seller_panel') }}</p>
     </div>
 
+    <!-- Dashboard Banner -->
+    @if(setting_image('seller_dashboard_banner'))
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card p-0 overflow-hidden">
+                    <img src="{{ setting_image('seller_dashboard_banner') }}" alt="Seller Dashboard Banner" class="img-fluid w-100" style="max-height: 300px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Subscription Countdown Timer -->
     @php
         $activeSubscription = auth()->user()->activeSubscription;

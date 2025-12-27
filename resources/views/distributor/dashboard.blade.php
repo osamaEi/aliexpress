@@ -8,6 +8,17 @@
         <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'مرحباً بك في لوحة التحكم الخاصة بك' : 'Welcome to your distributor panel' }}</p>
     </div>
 
+    <!-- Dashboard Banner -->
+    @if(setting_image('distributor_dashboard_banner'))
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card p-0 overflow-hidden">
+                    <img src="{{ setting_image('distributor_dashboard_banner') }}" alt="Distributor Dashboard Banner" class="img-fluid w-100" style="max-height: 300px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Statistics Cards -->
     <div class="row g-4 mb-4">
         <!-- Total Products -->

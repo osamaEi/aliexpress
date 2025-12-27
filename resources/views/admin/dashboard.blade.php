@@ -515,25 +515,18 @@
 </div>
 
 <style>
-    /* Gradient Definitions */
-    .gradient-1 {
-        background: linear-gradient(135deg, #561C04 0%, #6B2405 100%);
-    }
-
-    .gradient-2 {
-        background: linear-gradient(135deg, #7A3206 0%, #561C04 100%);
-    }
-
-    .gradient-3 {
-        background: linear-gradient(135deg, #3d1503 0%, #561C04 100%);
-    }
-
+    /* Gradient Definitions - Professional White Cards with Color Accents */
+    .gradient-1,
+    .gradient-2,
+    .gradient-3,
     .gradient-4 {
-        background: linear-gradient(135deg, #6B2405 0%, #7A3206 100%);
+        background: white !important;
+        border-left: 4px solid #561C04 !important;
+        box-shadow: 0 2px 8px rgba(86, 28, 4, 0.1);
     }
 
     .gradient-header {
-        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
+        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%) !important;
     }
 
     /* Stat Cards */
@@ -542,18 +535,34 @@
         border-radius: 12px;
         overflow: hidden;
         transition: all 0.3s ease;
+        background: white !important;
+        border-left: 4px solid #561C04 !important;
+        box-shadow: 0 2px 8px rgba(86, 28, 4, 0.1);
     }
 
     .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(86, 28, 4, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(86, 28, 4, 0.2);
+    }
+
+    /* Stat Card Text Colors */
+    .stat-card .card-info h5,
+    .mini-stat h4 {
+        color: #561C04 !important;
+        font-weight: 600;
+    }
+
+    .stat-card .card-info small,
+    .mini-stat small {
+        color: #6c757d !important;
+        font-weight: 500;
     }
 
     .stat-icon {
         width: 50px;
         height: 50px;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.2);
+        background: #561C04;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -570,16 +579,19 @@
     .mini-stat {
         border-radius: 10px;
         transition: all 0.3s ease;
+        background: white !important;
+        border-left: 3px solid #561C04 !important;
+        box-shadow: 0 2px 8px rgba(86, 28, 4, 0.1);
     }
 
     .mini-stat:hover {
         transform: scale(1.02);
-        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.3);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.2);
     }
 
     /* Country Cards */
     .country-card {
-        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
+        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%) !important;
         transition: all 0.3s ease;
     }
 
@@ -590,7 +602,7 @@
 
     /* Action Buttons */
     .action-btn {
-        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
+        background: #561C04;
         color: white;
         border: none;
         border-radius: 8px;
@@ -599,18 +611,19 @@
     }
 
     .action-btn:hover {
-        background: linear-gradient(135deg, #3d1503 0%, #561C04 100%);
+        background: #3d1503;
         color: white;
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.4);
+        box-shadow: 0 5px 15px rgba(86, 28, 4, 0.3);
     }
 
     /* Status Badges */
     .status-badge {
-        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
+        background: #561C04;
         color: white;
         border-radius: 6px;
         padding: 5px 10px;
+        font-weight: 500;
     }
 
     /* Card Hover Effects */
@@ -618,10 +631,12 @@
         transition: all 0.3s ease;
         border-radius: 12px;
         overflow: hidden;
+        border: 1px solid #e9ecef;
+        background: white;
     }
 
     .card:hover {
-        box-shadow: 0 8px 25px rgba(86, 28, 4, 0.2);
+        box-shadow: 0 8px 25px rgba(86, 28, 4, 0.15);
     }
 
     /* Card Headers */
@@ -640,18 +655,18 @@
 
     /* Text Colors */
     .text-white-50 {
-        color: rgba(255, 255, 255, 0.7) !important;
+        color: #6c757d !important;
     }
 
-    /* SVG Icons in currency symbols should be white */
+    /* SVG Icons in currency symbols should match text color */
     .stat-card .card-info h5 svg,
     .mini-stat h4 svg {
-        fill: white !important;
+        fill: #561C04 !important;
     }
 
     .stat-card .card-info h5 svg path,
     .mini-stat h4 svg path {
-        fill: white !important;
+        fill: #561C04 !important;
     }
 </style>
 @endsection

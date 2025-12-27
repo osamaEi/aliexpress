@@ -104,7 +104,8 @@ Route::get('/dashboard', function () {
         return redirect()->route('distributor.dashboard');
     }
 
-    return view('dashboard');
+    // Show customer/buyer dashboard
+    return view('customer.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // NEW AliExpress Dropshipping Routes (accessible without auth for testing)
