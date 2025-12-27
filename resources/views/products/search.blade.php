@@ -106,11 +106,10 @@
                                 $countryInfo = $countryNames[$countryCode] ?? ['ar' => $countryCode, 'en' => $countryCode, 'flag' => '🏳️'];
                             @endphp
                             <div class="source-card-mini {{ $isActive ? 'active' : '' }}"
-                                 onclick="showDistributors('{{ $countryCode }}')"
+                                 onclick="toggleDistributors('{{ $countryCode }}')"
                                  data-source="{{ $countryCode }}">
                                 <span class="country-flag">{{ $countryInfo['flag'] }}</span>
                                 <span class="country-name">{{ app()->getLocale() == 'ar' ? $countryInfo['ar'] : $countryInfo['en'] }}</span>
-                                <span class="distributor-count">{{ $country['count'] }}</span>
                             </div>
                         @endforeach
                     @endif
@@ -123,33 +122,17 @@
                         <span class="country-name">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
                     </div>
                 </div>
-            </div>
 
-            <!-- Distributors Modal -->
-            <div class="modal fade" id="distributorsModal" tabindex="-1" aria-labelledby="distributorsModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%);">
-                            <h5 class="modal-title text-white" id="distributorsModalLabel">
-                                <i class="ri-store-2-line me-2"></i>
-                                <span id="modalCountryName">{{ app()->getLocale() == 'ar' ? 'الموزعين' : 'Distributors' }}</span>
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body p-0">
-                            <div id="distributorsList" class="distributors-list">
-                                <!-- Distributors will be loaded here -->
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                {{ app()->getLocale() == 'ar' ? 'إغلاق' : 'Close' }}
-                            </button>
-                            <button type="button" class="btn btn-primary" id="viewAllProductsBtn" onclick="viewAllCountryProducts()">
-                                <i class="ri-shopping-bag-line me-1"></i>
-                                {{ app()->getLocale() == 'ar' ? 'عرض كل المنتجات' : 'View All Products' }}
-                            </button>
-                        </div>
+                <!-- Distributors Dropdown (shown below country cards) -->
+                <div id="distributorsDropdown" class="distributors-dropdown" style="display: none;">
+                    <div class="distributors-dropdown-header">
+                        <span id="dropdownCountryName"></span>
+                        <button type="button" class="btn btn-sm btn-link text-muted p-0" onclick="hideDistributors()">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                    <div id="distributorsList" class="distributors-inline-list">
+                        <!-- Distributors will be loaded here -->
                     </div>
                 </div>
             </div>
@@ -700,38 +683,52 @@
         document.getElementById('categoryIdInput').value = '';
     }
 
-    // Current selected country for modal
+    // Current selected country for dropdown
     let selectedCountryCode = null;
 
-    // Show distributors modal
-    function showDistributors(countryCode) {
+    // Toggle distributors dropdown
+    function toggleDistributors(countryCode) {
+        const dropdown = document.getElementById('distributorsDropdown');
+        const isCurrentlyOpen = dropdown.style.display !== 'none' && selectedCountryCode === countryCode;
+
+        // If clicking same country, close it
+        if (isCurrentlyOpen) {
+            hideDistributors();
+            return;
+        }
+
         selectedCountryCode = countryCode;
+
+        // Remove active from all cards first
+        document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
+
+        // Add active to clicked card
+        document.querySelector(`[data-source="${countryCode}"]`)?.classList.add('active');
 
         // Get country info
         const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode, flag: '🏳️' };
         const countryName = isArabic ? countryInfo.ar : countryInfo.en;
 
-        // Update modal title
-        document.getElementById('modalCountryName').textContent =
-            (isArabic ? 'موزعين ' : 'Distributors in ') + countryName + ' ' + countryInfo.flag;
+        // Update dropdown header
+        document.getElementById('dropdownCountryName').innerHTML =
+            `${countryInfo.flag} ${isArabic ? 'موزعين ' + countryName : countryName + ' Distributors'}`;
 
         // Get distributors for this country
         const distributors = distributorsByCountry[countryCode] || [];
 
-        // Build distributors list HTML
+        // Build distributors list HTML (inline horizontal cards)
         let html = '';
         if (distributors.length === 0) {
-            html = `<div class="text-center py-4">
-                <i class="ri-store-2-line" style="font-size: 3rem; color: #ccc;"></i>
-                <p class="text-muted mt-2">${isArabic ? 'لا يوجد موزعين حالياً' : 'No distributors available'}</p>
+            html = `<div class="text-center py-3">
+                <p class="text-muted mb-0">${isArabic ? 'لا يوجد موزعين حالياً' : 'No distributors available'}</p>
             </div>`;
         } else {
             distributors.forEach(dist => {
                 const avatar = dist.avatar ? `{{ asset('storage') }}/${dist.avatar}` : null;
                 const name = dist.store_name || dist.name;
                 html += `
-                    <div class="distributor-item" onclick="viewDistributorProducts(${dist.id}, '${countryCode}')">
-                        <div class="distributor-avatar">
+                    <div class="distributor-card" onclick="viewDistributorProducts(${dist.id}, '${countryCode}')">
+                        <div class="distributor-card-avatar">
                             ${avatar
                                 ? `<img src="${avatar}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
                                 : ''
@@ -740,11 +737,7 @@
                                 <i class="ri-store-2-line"></i>
                             </div>
                         </div>
-                        <div class="distributor-info">
-                            <h6 class="mb-0">${name}</h6>
-                            <small class="text-muted">${countryInfo.flag} ${countryName}</small>
-                        </div>
-                        <i class="ri-arrow-right-s-line text-muted"></i>
+                        <span class="distributor-card-name">${name}</span>
                     </div>
                 `;
             });
@@ -752,9 +745,15 @@
 
         document.getElementById('distributorsList').innerHTML = html;
 
-        // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('distributorsModal'));
-        modal.show();
+        // Show dropdown
+        dropdown.style.display = 'block';
+    }
+
+    // Hide distributors dropdown
+    function hideDistributors() {
+        document.getElementById('distributorsDropdown').style.display = 'none';
+        document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
+        selectedCountryCode = null;
     }
 
     // View products from a specific distributor
@@ -767,13 +766,11 @@
             url += '&keyword=' + encodeURIComponent(keyword);
         }
 
-        // Close modal and redirect
-        bootstrap.Modal.getInstance(document.getElementById('distributorsModal'))?.hide();
         document.getElementById('loadingSpinner').style.display = 'block';
         window.location.href = url;
     }
 
-    // View all products from a country
+    // View all products from a country (not used in dropdown mode, kept for compatibility)
     function viewAllCountryProducts() {
         if (!selectedCountryCode) return;
 
