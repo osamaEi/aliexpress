@@ -413,6 +413,27 @@ Route::middleware('auth')->group(function () {
             Route::post('/{ticket}/status', [App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('update-status');
             Route::post('/{ticket}/assign', [App\Http\Controllers\Admin\TicketController::class, 'assign'])->name('assign');
         });
+
+        // Affiliate Marketing Management
+        Route::prefix('affiliate')->name('affiliate.')->group(function () {
+            // Stores Management
+            Route::get('/stores', [App\Http\Controllers\Admin\AffiliateController::class, 'stores'])->name('stores');
+            Route::get('/stores/create', [App\Http\Controllers\Admin\AffiliateController::class, 'createStore'])->name('stores.create');
+            Route::post('/stores', [App\Http\Controllers\Admin\AffiliateController::class, 'storeStore'])->name('stores.store');
+            Route::get('/stores/{store}', [App\Http\Controllers\Admin\AffiliateController::class, 'showStore'])->name('stores.show');
+
+            // Coupons Management
+            Route::get('/coupons/active', [App\Http\Controllers\Admin\AffiliateController::class, 'activeCoupons'])->name('coupons.active');
+            Route::get('/coupons/expired', [App\Http\Controllers\Admin\AffiliateController::class, 'expiredCoupons'])->name('coupons.expired');
+            Route::get('/coupons/create', [App\Http\Controllers\Admin\AffiliateController::class, 'createCoupon'])->name('coupons.create');
+            Route::post('/coupons', [App\Http\Controllers\Admin\AffiliateController::class, 'storeCoupon'])->name('coupons.store');
+            Route::get('/coupons/generate-code', [App\Http\Controllers\Admin\AffiliateController::class, 'generateCode'])->name('coupons.generate-code');
+            Route::get('/coupons/{coupon}', [App\Http\Controllers\Admin\AffiliateController::class, 'showCoupon'])->name('coupons.show');
+            Route::get('/coupons/{coupon}/edit', [App\Http\Controllers\Admin\AffiliateController::class, 'editCoupon'])->name('coupons.edit');
+            Route::put('/coupons/{coupon}', [App\Http\Controllers\Admin\AffiliateController::class, 'updateCoupon'])->name('coupons.update');
+            Route::delete('/coupons/{coupon}', [App\Http\Controllers\Admin\AffiliateController::class, 'destroyCoupon'])->name('coupons.destroy');
+            Route::post('/coupons/{coupon}/toggle-status', [App\Http\Controllers\Admin\AffiliateController::class, 'toggleCouponStatus'])->name('coupons.toggle-status');
+        });
     });
 });
 

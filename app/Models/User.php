@@ -174,6 +174,14 @@ class User extends Authenticatable
             ->first();
     }
 
+    /**
+     * Get coupons for this distributor/store
+     */
+    public function coupons(): HasMany
+    {
+        return $this->hasMany(Coupon::class, 'store_id');
+    }
+
     public function hasRole(string|array $roles): bool
     {
         if (is_string($roles)) {

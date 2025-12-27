@@ -711,7 +711,7 @@
 
         // Update dropdown header
         document.getElementById('dropdownCountryName').innerHTML =
-            `${countryInfo.flag} ${isArabic ? 'موزعين ' + countryName : countryName + ' Distributors'}`;
+            `${countryInfo.flag} ${isArabic ? 'متاجر ' + countryName : countryName + ' Stores'}`;
 
         // Get distributors for this country
         const distributors = distributorsByCountry[countryCode] || [];
