@@ -25,7 +25,7 @@
 
     <!-- Diagnostic Information -->
     <div class="card mb-4 border-info">
-        <div class="card-header bg-info text-white">
+        <div class="card-header text-white" style="background-color: #561C04;">
             <h5 class="mb-0">
                 <i class="ri-information-line me-2"></i>{{ __('messages.configuration_diagnostics') }}
             </h5>

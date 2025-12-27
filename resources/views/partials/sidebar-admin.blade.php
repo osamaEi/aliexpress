@@ -92,6 +92,14 @@
             </a>
         </li>
 
+        <!-- Payment Gateway Settings -->
+        <li class="menu-item">
+            <a href="{{ route('admin.settings.index') }}#payment-gateway-settings" class="menu-link">
+                <i class="menu-icon tf-icons ri-secure-payment-line"></i>
+                <div>{{ __('messages.payment_gateway_settings') }}</div>
+            </a>
+        </li>
+
         <!-- Currency Management -->
         <li class="menu-item {{ request()->routeIs('admin.currencies.*') ? 'active' : '' }}">
             <a href="{{ route('admin.currencies.index') }}" class="menu-link">

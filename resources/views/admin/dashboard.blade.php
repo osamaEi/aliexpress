@@ -517,23 +517,23 @@
 <style>
     /* Gradient Definitions */
     .gradient-1 {
-        background: linear-gradient(135deg, #561C04 0%, #8B3508 100%);
+        background: linear-gradient(135deg, #561C04 0%, #6B2405 100%);
     }
 
     .gradient-2 {
-        background: linear-gradient(135deg, #e56300 0%, #ff8c33 100%);
+        background: linear-gradient(135deg, #7A3206 0%, #561C04 100%);
     }
 
     .gradient-3 {
-        background: linear-gradient(135deg, #8B3508 0%, #e56300 100%);
-    }
-
-    .gradient-4 {
         background: linear-gradient(135deg, #3d1503 0%, #561C04 100%);
     }
 
+    .gradient-4 {
+        background: linear-gradient(135deg, #6B2405 0%, #7A3206 100%);
+    }
+
     .gradient-header {
-        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
     }
 
     /* Stat Cards */
@@ -579,7 +579,7 @@
 
     /* Country Cards */
     .country-card {
-        background: linear-gradient(135deg, #561C04 0%, #8B3508 100%);
+        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
         transition: all 0.3s ease;
     }
 
@@ -590,7 +590,7 @@
 
     /* Action Buttons */
     .action-btn {
-        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
         color: white;
         border: none;
         border-radius: 8px;
@@ -607,7 +607,7 @@
 
     /* Status Badges */
     .status-badge {
-        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
         color: white;
         border-radius: 6px;
         padding: 5px 10px;
