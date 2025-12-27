@@ -677,7 +677,7 @@
         // Set default keyword if empty (required for search to work)
         const keywordInput = document.getElementById('keyword');
         if (!keywordInput.value || keywordInput.value.trim() === '') {
-            keywordInput.value = 'products'; // Default search keyword
+            keywordInput.value = isArabic ? 'منتجات' : 'products'; // Default search keyword
         }
 
         if (source === 'AE') {
@@ -724,20 +724,6 @@
             url.searchParams.set('sort_by', value);
             window.location.href = url.toString();
         }
-    }
-
-    // Search by link
-    function searchByLink() {
-        const link = document.getElementById('productLinkInput').value;
-        if (link) {
-            window.location.href = `{{ route('products.search-text') }}?product_url=${encodeURIComponent(link)}`;
-        }
-    }
-
-    // Open advanced filters
-    function openAdvancedFilters() {
-        // TODO: Implement advanced filters modal
-        alert(isArabic ? 'قريباً...' : 'Coming soon...');
     }
 
     // Show loading on form submit
