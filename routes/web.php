@@ -197,6 +197,7 @@ Route::middleware('auth')->group(function () {
     // Distributor order routes (non-AliExpress)
     Route::get('/orders/distributor/create', [OrderController::class, 'createDistributorOrder'])->name('orders.distributor.create');
     Route::post('/orders/distributor', [OrderController::class, 'storeDistributorOrder'])->name('orders.distributor.store');
+    Route::post('/orders/distributor/validate-coupon', [OrderController::class, 'validateCoupon'])->name('orders.distributor.validate-coupon');
 
     Route::get('/orders/product/{product}/info', [OrderController::class, 'getProductInfo'])->name('orders.product-info');
     Route::post('/orders/calculate-freight', [OrderController::class, 'calculateFreight'])->name('orders.calculate-freight');

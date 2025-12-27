@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\OrderCreated;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\AliExpressService;
@@ -966,6 +967,9 @@ class OrderController extends Controller
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+            'coupon_id' => 'nullable|exists:coupons,id',
+            'coupon_code' => 'nullable|string|max:50',
+            'discount_amount' => 'nullable|numeric|min:0',
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'nullable|email|max:255',
             'customer_phone' => 'required|string|max:20',
@@ -1009,7 +1013,36 @@ class OrderController extends Controller
             // Calculate pricing (no shipping cost for distributor orders)
             $quantity = $validated['quantity'];
             $unitPrice = $product->price;
-            $totalPrice = $unitPrice * $quantity;
+            $subtotal = $unitPrice * $quantity;
+
+            // Apply coupon discount if provided
+            $discountAmount = 0;
+            $couponId = null;
+            $couponCode = null;
+
+            if (!empty($validated['coupon_id'])) {
+                $coupon = Coupon::find($validated['coupon_id']);
+                if ($coupon && $coupon->isValid()) {
+                    // Recalculate discount to ensure it's accurate
+                    $discountAmount = $coupon->calculateDiscount($subtotal);
+                    $couponId = $coupon->id;
+                    $couponCode = $coupon->code;
+
+                    // Increment coupon usage
+                    $coupon->increment('used_count');
+                    $coupon->increment('total_discount_given', $discountAmount);
+
+                    Log::info('Coupon applied to order', [
+                        'coupon_id' => $coupon->id,
+                        'coupon_code' => $coupon->code,
+                        'discount_amount' => $discountAmount,
+                        'subtotal' => $subtotal
+                    ]);
+                }
+            }
+
+            $totalPrice = $subtotal - $discountAmount;
+            if ($totalPrice < 0) $totalPrice = 0;
 
             Log::info('Checking wallet balance', [
                 'user_id' => $user->id,
@@ -1062,10 +1095,13 @@ class OrderController extends Controller
                 'user_id' => $user->id,
                 'order_number' => Order::generateOrderNumber(),
                 'product_id' => $product->id,
+                'coupon_id' => $couponId,
+                'coupon_code' => $couponCode,
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
                 'total_price' => $totalPrice,
                 'total_amount' => $totalPrice,
+                'discount_amount' => $discountAmount,
                 'currency' => $product->currency ?? 'AED',
                 'customer_name' => $validated['customer_name'],
                 'customer_email' => $validated['customer_email'],
@@ -1138,6 +1174,88 @@ class OrderController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Failed to create order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Validate a coupon code for distributor orders.
+     */
+    public function validateCoupon(Request $request)
+    {
+        $validated = $request->validate([
+            'coupon_code' => 'required|string',
+            'product_id' => 'required|exists:products,id',
+            'subtotal' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            $product = Product::findOrFail($validated['product_id']);
+            $coupon = Coupon::where('code', strtoupper($validated['coupon_code']))->first();
+
+            if (!$coupon) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar' ? 'كود الخصم غير صالح' : 'Invalid coupon code'
+                ], 400);
+            }
+
+            // Check if coupon is valid (active, within date range, not expired)
+            if (!$coupon->isValid()) {
+                if ($coupon->isExpired()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => app()->getLocale() == 'ar' ? 'كود الخصم منتهي الصلاحية' : 'This coupon has expired'
+                    ], 400);
+                }
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar' ? 'كود الخصم غير فعال' : 'This coupon is not active'
+                ], 400);
+            }
+
+            // Check minimum order amount
+            if ($coupon->min_order_amount && $validated['subtotal'] < $coupon->min_order_amount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'الحد الأدنى للطلب هو ' . number_format($coupon->min_order_amount, 2)
+                        : 'Minimum order amount is ' . number_format($coupon->min_order_amount, 2)
+                ], 400);
+            }
+
+            // Check if coupon is for a specific store/distributor
+            if ($coupon->store_id && $coupon->store_id != $product->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar' ? 'كود الخصم غير صالح لهذا المتجر' : 'This coupon is not valid for this store'
+                ], 400);
+            }
+
+            // Calculate discount amount
+            $discountAmount = $coupon->calculateDiscount($validated['subtotal']);
+
+            return response()->json([
+                'success' => true,
+                'coupon' => [
+                    'id' => $coupon->id,
+                    'code' => $coupon->code,
+                    'discount_type' => $coupon->discount_type,
+                    'discount_value' => $coupon->discount_value,
+                    'title' => $coupon->title,
+                ],
+                'discount_amount' => $discountAmount,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Coupon validation error', [
+                'error' => $e->getMessage(),
+                'coupon_code' => $validated['coupon_code'] ?? null
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => app()->getLocale() == 'ar' ? 'حدث خطأ أثناء التحقق من الكود' : 'An error occurred while validating the coupon'
+            ], 500);
         }
     }
 }

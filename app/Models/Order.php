@@ -16,6 +16,8 @@ class Order extends Model
         'order_number',
         'aliexpress_order_id',
         'product_id',
+        'coupon_id',
+        'coupon_code',
         'quantity',
         'selected_sku_attr',
         'selected_variant_details',
@@ -47,6 +49,7 @@ class Order extends Model
         'customer_notes',
         'admin_notes',
         'aliexpress_response',
+        'discount_amount',
     ];
 
     protected $casts = [
@@ -63,6 +66,7 @@ class Order extends Model
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
         'aliexpress_response' => 'array',
+        'discount_amount' => 'decimal:2',
     ];
 
     /**
@@ -91,6 +95,14 @@ class Order extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Get the coupon used for this order.
+     */
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     /**

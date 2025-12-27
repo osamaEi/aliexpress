@@ -122,6 +122,34 @@
                             </div>
                         </div>
 
+                        {{-- Coupon Code --}}
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-3 text-muted">
+                                    <i class="ri-coupon-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'كود الخصم' : 'Coupon Code' }}
+                                </h6>
+                                <div class="input-group">
+                                    <input type="text"
+                                           class="form-control @error('coupon_code') is-invalid @enderror"
+                                           id="coupon_code"
+                                           name="coupon_code"
+                                           value="{{ old('coupon_code') }}"
+                                           placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل كود الخصم' : 'Enter coupon code' }}">
+                                    <button type="button" class="btn btn-outline-primary" id="applyCouponBtn" onclick="applyCoupon()">
+                                        <i class="ri-check-line me-1"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'تطبيق' : 'Apply' }}
+                                    </button>
+                                </div>
+                                <input type="hidden" id="coupon_id" name="coupon_id" value="">
+                                <input type="hidden" id="discount_amount" name="discount_amount" value="0">
+                                @error('coupon_code')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                                <div id="coupon-message" class="mt-2"></div>
+                            </div>
+                        </div>
+
                         {{-- Customer Information --}}
                         <div class="card shadow-sm mb-4">
                             <div class="card-body">
@@ -333,6 +361,14 @@
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'الكمية:' : 'Quantity:' }}</span>
                                         <strong id="quantity_display">1</strong>
                                     </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'المجموع الفرعي:' : 'Subtotal:' }}</span>
+                                        <strong id="subtotal_display">{{ $product->currency }} {{ number_format($product->price, 2) }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2" id="discount_row" style="display: none !important;">
+                                        <span class="text-success">{{ app()->getLocale() == 'ar' ? 'الخصم:' : 'Discount:' }}</span>
+                                        <strong class="text-success" id="discount_display">- {{ $product->currency }} 0.00</strong>
+                                    </div>
                                     <hr>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'الإجمالي:' : 'Total:' }}</h5>
@@ -385,6 +421,9 @@
 
 @push('scripts')
 <script>
+let appliedCoupon = null;
+let discountAmount = 0;
+
 function calculateTotal() {
     const unitPrice = {{ $product->price }};
     const currency = '{{ $product->currency }}';
@@ -392,11 +431,25 @@ function calculateTotal() {
     const walletBalance = {{ auth()->user()->wallet ? auth()->user()->wallet->balance : 0 }};
     const locale = '{{ app()->getLocale() }}';
 
-    const grandTotal = unitPrice * quantity;
+    const subtotal = unitPrice * quantity;
+    let grandTotal = subtotal - discountAmount;
+    if (grandTotal < 0) grandTotal = 0;
 
     // Update display
     document.getElementById('quantity_display').textContent = quantity;
+    document.getElementById('subtotal_display').textContent = currency + ' ' + subtotal.toFixed(2);
     document.getElementById('grand_total').textContent = currency + ' ' + grandTotal.toFixed(2);
+
+    // Show/hide discount row
+    const discountRow = document.getElementById('discount_row');
+    if (discountAmount > 0) {
+        discountRow.style.display = 'flex';
+        discountRow.style.setProperty('display', 'flex', 'important');
+        document.getElementById('discount_display').textContent = '- ' + currency + ' ' + discountAmount.toFixed(2);
+    } else {
+        discountRow.style.display = 'none';
+        discountRow.style.setProperty('display', 'none', 'important');
+    }
 
     // Check if wallet balance is sufficient
     const submitBtn = document.getElementById('submitBtn');
@@ -427,6 +480,112 @@ function calculateTotal() {
         submitBtn.classList.remove('btn-secondary');
         submitBtn.classList.add('btn-primary');
     }
+}
+
+function applyCoupon() {
+    const couponCode = document.getElementById('coupon_code').value.trim();
+    const couponMessage = document.getElementById('coupon-message');
+    const applyCouponBtn = document.getElementById('applyCouponBtn');
+    const locale = '{{ app()->getLocale() }}';
+    const productId = {{ $product->id }};
+
+    if (!couponCode) {
+        couponMessage.innerHTML = `<div class="alert alert-warning py-2 mb-0">
+            <small>${locale === 'ar' ? 'يرجى إدخال كود الخصم' : 'Please enter a coupon code'}</small>
+        </div>`;
+        return;
+    }
+
+    // Disable button while processing
+    applyCouponBtn.disabled = true;
+    applyCouponBtn.innerHTML = '<i class="ri-loader-4-line me-1"></i>' + (locale === 'ar' ? 'جاري التحقق...' : 'Checking...');
+
+    // Calculate subtotal
+    const unitPrice = {{ $product->price }};
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const subtotal = unitPrice * quantity;
+
+    // Send AJAX request to validate coupon
+    fetch('{{ route("orders.distributor.validate-coupon") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            coupon_code: couponCode,
+            product_id: productId,
+            subtotal: subtotal
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        applyCouponBtn.disabled = false;
+        applyCouponBtn.innerHTML = '<i class="ri-check-line me-1"></i>' + (locale === 'ar' ? 'تطبيق' : 'Apply');
+
+        if (data.success) {
+            appliedCoupon = data.coupon;
+            discountAmount = parseFloat(data.discount_amount);
+
+            // Update hidden fields
+            document.getElementById('coupon_id').value = data.coupon.id;
+            document.getElementById('discount_amount').value = discountAmount;
+
+            // Show success message
+            const discountText = data.coupon.discount_type === 'percentage'
+                ? data.coupon.discount_value + '%'
+                : '{{ $product->currency }} ' + parseFloat(data.coupon.discount_value).toFixed(2);
+
+            couponMessage.innerHTML = `<div class="alert alert-success py-2 mb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="ri-check-circle-line me-1"></i>
+                        <small>${locale === 'ar' ? 'تم تطبيق الخصم: ' : 'Discount applied: '}${discountText}</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeCoupon()">
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+            </div>`;
+
+            // Disable coupon input
+            document.getElementById('coupon_code').disabled = true;
+            applyCouponBtn.style.display = 'none';
+
+            // Recalculate total
+            calculateTotal();
+        } else {
+            couponMessage.innerHTML = `<div class="alert alert-danger py-2 mb-0">
+                <small><i class="ri-error-warning-line me-1"></i>${data.message}</small>
+            </div>`;
+        }
+    })
+    .catch(error => {
+        applyCouponBtn.disabled = false;
+        applyCouponBtn.innerHTML = '<i class="ri-check-line me-1"></i>' + (locale === 'ar' ? 'تطبيق' : 'Apply');
+        couponMessage.innerHTML = `<div class="alert alert-danger py-2 mb-0">
+            <small>${locale === 'ar' ? 'حدث خطأ أثناء التحقق من الكود' : 'An error occurred while validating the coupon'}</small>
+        </div>`;
+    });
+}
+
+function removeCoupon() {
+    appliedCoupon = null;
+    discountAmount = 0;
+
+    // Clear hidden fields
+    document.getElementById('coupon_id').value = '';
+    document.getElementById('discount_amount').value = '0';
+
+    // Clear coupon input and message
+    document.getElementById('coupon_code').value = '';
+    document.getElementById('coupon_code').disabled = false;
+    document.getElementById('coupon-message').innerHTML = '';
+    document.getElementById('applyCouponBtn').style.display = 'block';
+
+    // Recalculate total
+    calculateTotal();
 }
 
 // Calculate on page load
