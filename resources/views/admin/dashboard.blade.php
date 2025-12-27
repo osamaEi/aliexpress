@@ -8,7 +8,7 @@
         <p class="text-muted">{{ __('messages.welcome_admin_panel') }}</p>
     </div>
 
-    <!-- Statistics Cards -->
+    <!-- Statistics Cards - Row 1: Users -->
     <div class="row g-4 mb-4">
         <!-- Total Users -->
         <div class="col-sm-6 col-lg-3">
@@ -44,6 +44,43 @@
             </div>
         </div>
 
+        <!-- Total Distributors -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="badge rounded-pill bg-label-primary me-3 p-2">
+                            <i class="ri-truck-line ri-24px"></i>
+                        </div>
+                        <div class="card-info">
+                            <h5 class="mb-0">{{ $stats['total_distributors'] }}</h5>
+                            <small>{{ app()->getLocale() == 'ar' ? 'إجمالي التجار' : 'Total Distributors' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Merchants -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="badge rounded-pill bg-label-info me-3 p-2">
+                            <i class="ri-shopping-cart-line ri-24px"></i>
+                        </div>
+                        <div class="card-info">
+                            <h5 class="mb-0">{{ $stats['total_merchants'] }}</h5>
+                            <small>{{ __('messages.total_merchants') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards - Row 2: Products & Orders -->
+    <div class="row g-4 mb-4">
         <!-- Total Products -->
         <div class="col-sm-6 col-lg-3">
             <div class="card">
@@ -55,6 +92,40 @@
                         <div class="card-info">
                             <h5 class="mb-0">{{ $stats['total_products'] }}</h5>
                             <small>{{ __('messages.total_products') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AliExpress Products -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="badge rounded-pill bg-label-danger me-3 p-2">
+                            <i class="ri-global-line ri-24px"></i>
+                        </div>
+                        <div class="card-info">
+                            <h5 class="mb-0">{{ $aliexpressProducts }}</h5>
+                            <small>{{ app()->getLocale() == 'ar' ? 'منتجات الصين' : 'AliExpress Products' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distributor Products -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="badge rounded-pill bg-label-success me-3 p-2">
+                            <i class="ri-store-line ri-24px"></i>
+                        </div>
+                        <div class="card-info">
+                            <h5 class="mb-0">{{ $distributorProducts }}</h5>
+                            <small>{{ app()->getLocale() == 'ar' ? 'منتجات التجار' : 'Distributor Products' }}</small>
                         </div>
                     </div>
                 </div>
@@ -77,7 +148,10 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <!-- Statistics Cards - Row 3: Subscriptions & Revenue -->
+    <div class="row g-4 mb-4">
         <!-- Pending Orders -->
         <div class="col-sm-6 col-lg-3">
             <div class="card">
@@ -145,18 +219,111 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Total Merchants -->
-        <div class="col-sm-6 col-lg-3">
+    <!-- Products by Country -->
+    @if($productsByCountry->count() > 0)
+    <div class="row g-4 mb-4">
+        <div class="col-12">
             <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ri-global-line me-2"></i>
+                        {{ app()->getLocale() == 'ar' ? 'المنتجات حسب الدولة' : 'Products by Country' }}
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="badge rounded-pill bg-label-primary me-3 p-2">
-                            <i class="ri-shopping-cart-line ri-24px"></i>
+                    <div class="row g-3">
+                        @php
+                            $countryFlags = [
+                                'AE' => ['flag' => '🇦🇪', 'ar' => 'الإمارات', 'en' => 'UAE'],
+                                'SA' => ['flag' => '🇸🇦', 'ar' => 'السعودية', 'en' => 'Saudi Arabia'],
+                                'KW' => ['flag' => '🇰🇼', 'ar' => 'الكويت', 'en' => 'Kuwait'],
+                                'QA' => ['flag' => '🇶🇦', 'ar' => 'قطر', 'en' => 'Qatar'],
+                                'BH' => ['flag' => '🇧🇭', 'ar' => 'البحرين', 'en' => 'Bahrain'],
+                                'OM' => ['flag' => '🇴🇲', 'ar' => 'عمان', 'en' => 'Oman'],
+                                'EG' => ['flag' => '🇪🇬', 'ar' => 'مصر', 'en' => 'Egypt'],
+                                'JO' => ['flag' => '🇯🇴', 'ar' => 'الأردن', 'en' => 'Jordan'],
+                                'LB' => ['flag' => '🇱🇧', 'ar' => 'لبنان', 'en' => 'Lebanon'],
+                                'CN' => ['flag' => '🇨🇳', 'ar' => 'الصين', 'en' => 'China'],
+                            ];
+                        @endphp
+                        @foreach($productsByCountry as $code => $data)
+                            @php
+                                $country = $countryFlags[$code] ?? ['flag' => '🏳️', 'ar' => $code, 'en' => $code];
+                            @endphp
+                            <div class="col-sm-6 col-md-4 col-lg-3">
+                                <div class="p-3 border rounded d-flex align-items-center">
+                                    <span style="font-size: 2rem;" class="me-3">{{ $country['flag'] }}</span>
+                                    <div>
+                                        <h6 class="mb-0">{{ app()->getLocale() == 'ar' ? $country['ar'] : $country['en'] }}</h6>
+                                        <small class="text-muted">{{ $data->count }} {{ app()->getLocale() == 'ar' ? 'منتج' : 'products' }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Affiliate Marketing Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="ri-coupon-2-line me-2"></i>
+                        {{ app()->getLocale() == 'ar' ? 'إحصائيات التسويق بالعمولة' : 'Affiliate Marketing Stats' }}
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('admin.affiliate.stores') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="ri-store-2-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'المتاجر' : 'Stores' }}
+                        </a>
+                        <a href="{{ route('admin.affiliate.coupons.active') }}" class="btn btn-sm btn-outline-success">
+                            <i class="ri-coupon-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}
+                        </a>
+                        <a href="{{ route('admin.affiliate.coupons.expired') }}" class="btn btn-sm btn-outline-danger">
+                            <i class="ri-coupon-3-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-4 col-lg-2">
+                            <div class="p-3 bg-primary bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-primary">{{ $affiliateStats['total_coupons'] }}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'إجمالي الكوبونات' : 'Total Coupons' }}</small>
+                            </div>
                         </div>
-                        <div class="card-info">
-                            <h5 class="mb-0">{{ $stats['total_merchants'] }}</h5>
-                            <small>{{ __('messages.total_merchants') }}</small>
+                        <div class="col-sm-6 col-md-4 col-lg-2">
+                            <div class="p-3 bg-success bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-success">{{ $affiliateStats['active_coupons'] }}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-2">
+                            <div class="p-3 bg-danger bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-danger">{{ $affiliateStats['expired_coupons'] }}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="p-3 bg-success bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-success">{{ number_format($affiliateStats['total_commission_earned'], 2) }}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'إجمالي العمولات' : 'Total Commissions' }}</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="p-3 bg-warning bg-opacity-10 rounded text-center">
+                                <h4 class="mb-1 text-warning">{{ number_format($affiliateStats['pending_commission'], 2) }}</h4>
+                                <small>{{ app()->getLocale() == 'ar' ? 'العمولات المعلقة' : 'Pending Commissions' }}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -188,6 +355,14 @@
                         <a href="{{ route('admin.categories.index') }}" class="btn btn-dark">
                             <i class="ri-price-tag-3-line me-1"></i>
                             {{ __('messages.manage_categories') }}
+                        </a>
+                        <a href="{{ route('admin.affiliate.stores') }}" class="btn btn-primary">
+                            <i class="ri-store-2-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'إدارة المتاجر' : 'Manage Stores' }}
+                        </a>
+                        <a href="{{ route('admin.affiliate.coupons.create') }}" class="btn btn-info">
+                            <i class="ri-coupon-2-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'إضافة كوبون' : 'Add Coupon' }}
                         </a>
                     </div>
                 </div>

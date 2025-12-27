@@ -197,6 +197,44 @@
             </a>
         </li>
 
+        <!-- Affiliate Marketing -->
+        <li class="menu-header mt-5">
+            <span class="menu-header-text">{{ app()->getLocale() == 'ar' ? 'التسويق بالعمولة' : 'Affiliate Marketing' }}</span>
+        </li>
+
+        <!-- Stores -->
+        <li class="menu-item {{ request()->routeIs('admin.affiliate.stores*') ? 'active' : '' }}">
+            <a href="{{ route('admin.affiliate.stores') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-store-2-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'المتاجر' : 'Stores' }}</div>
+            </a>
+        </li>
+
+        <!-- Coupons Management -->
+        <li class="menu-item {{ request()->routeIs('admin.affiliate.coupons.*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ri-coupon-2-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'الكوبونات' : 'Coupons' }}</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.affiliate.coupons.active') ? 'active' : '' }}">
+                    <a href="{{ route('admin.affiliate.coupons.active') }}" class="menu-link">
+                        <div>{{ app()->getLocale() == 'ar' ? 'الكوبونات الفعالة' : 'Active Coupons' }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.affiliate.coupons.expired') ? 'active' : '' }}">
+                    <a href="{{ route('admin.affiliate.coupons.expired') }}" class="menu-link">
+                        <div>{{ app()->getLocale() == 'ar' ? 'الكوبونات المنتهية' : 'Expired Coupons' }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.affiliate.coupons.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.affiliate.coupons.create') }}" class="menu-link">
+                        <div>{{ app()->getLocale() == 'ar' ? 'إضافة كوبون' : 'Add Coupon' }}</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- User Management -->
         <li class="menu-header mt-5">
             <span class="menu-header-text" >{{ __('messages.users') }}</span>

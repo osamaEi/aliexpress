@@ -7,8 +7,11 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Coupon;
+use App\Models\CouponUsage;
 use App\Models\UserSubscription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -17,10 +20,12 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
+        // Basic stats
         $stats = [
             'total_users' => User::count(),
             'total_sellers' => User::where('user_type', 'seller')->count(),
-            'total_merchants' => User::where('user_type', 'buyer')->count(), // عدد التجار
+            'total_merchants' => User::where('user_type', 'buyer')->count(),
+            'total_distributors' => User::where('user_type', 'distributor')->count(),
             'total_products' => Product::count(),
             'total_categories' => Category::count(),
             'total_orders' => Order::count(),
@@ -28,6 +33,35 @@ class AdminController extends Controller
             'active_subscriptions' => UserSubscription::where('status', 'active')->count(),
             'total_revenue' => UserSubscription::where('status', 'active')->sum('amount_paid'),
         ];
+
+        // Products by country (based on distributor's country)
+        $productsByCountry = DB::table('products')
+            ->join('users', 'products.user_id', '=', 'users.id')
+            ->where('users.user_type', 'distributor')
+            ->whereNotNull('users.country')
+            ->select('users.country', DB::raw('count(products.id) as count'))
+            ->groupBy('users.country')
+            ->get()
+            ->keyBy('country');
+
+        // Products with commission (from affiliate coupons)
+        $affiliateStats = [
+            'total_coupons' => Coupon::count(),
+            'active_coupons' => Coupon::active()->count(),
+            'expired_coupons' => Coupon::expired()->count(),
+            'total_commission_earned' => Coupon::sum('total_commission_earned'),
+            'pending_commission' => CouponUsage::pending()->sum('commission_amount'),
+        ];
+
+        // Products from AliExpress (have aliexpress_id with 10+ digits)
+        $aliexpressProducts = Product::whereNotNull('aliexpress_id')
+            ->whereRaw('LENGTH(aliexpress_id) >= 10')
+            ->count();
+
+        // Local distributor products
+        $distributorProducts = Product::whereHas('user', function($q) {
+            $q->where('user_type', 'distributor');
+        })->count();
 
         $recentOrders = Order::with(['user', 'product'])
             ->latest()
@@ -39,7 +73,15 @@ class AdminController extends Controller
             ->take(10)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'recentOrders', 'recentSubscriptions'));
+        return view('admin.dashboard', compact(
+            'stats',
+            'productsByCountry',
+            'affiliateStats',
+            'aliexpressProducts',
+            'distributorProducts',
+            'recentOrders',
+            'recentSubscriptions'
+        ));
     }
 
     /**
