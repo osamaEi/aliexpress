@@ -89,7 +89,7 @@
                                             <p class="text-muted small mb-2">{{ $product->name_ar }}</p>
                                         @endif
                                         <div class="d-flex align-items-center gap-3">
-                                            <h4 class="text-primary mb-0">{{ $product->currency }} {{ number_format($product->price, 2) }}</h4>
+                                            <h4 class="text-primary mb-0">{{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}</h4>
                                             <span class="badge bg-success">
                                                 <i class="ri-store-line me-1"></i>
                                                 {{ app()->getLocale() == 'ar' ? 'محلي' : 'Local' }}
@@ -355,7 +355,7 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'سعر الوحدة:' : 'Unit Price:' }}</span>
-                                        <strong>{{ $product->currency }} {{ number_format($product->price, 2) }}</strong>
+                                        <strong>{{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'الكمية:' : 'Quantity:' }}</span>
