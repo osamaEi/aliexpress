@@ -59,8 +59,8 @@
                                  onclick="selectMainCategory('{{ $category->aliexpress_category_id }}')"
                                  data-category-id="{{ $category->aliexpress_category_id }}">
                                 <div class="category-icon">
-                                    @if($category->image)
-                                        <img src="{{ $category->image }}" alt="{{ $category->name }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @if($category->photo)
+                                        <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name }}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <i class="ri-folder-line" style="display: none;"></i>
                                     @else
                                         <i class="ri-folder-line"></i>
