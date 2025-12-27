@@ -34,12 +34,13 @@ class AdminController extends Controller
             'total_revenue' => UserSubscription::where('status', 'active')->sum('amount_paid'),
         ];
 
-        // Products by country (based on distributor's country)
+        // Products by country (based on distributor's country via product_user pivot)
         $productsByCountry = DB::table('products')
-            ->join('users', 'products.user_id', '=', 'users.id')
+            ->join('product_user', 'products.id', '=', 'product_user.product_id')
+            ->join('users', 'product_user.user_id', '=', 'users.id')
             ->where('users.user_type', 'distributor')
             ->whereNotNull('users.country')
-            ->select('users.country', DB::raw('count(products.id) as count'))
+            ->select('users.country', DB::raw('count(DISTINCT products.id) as count'))
             ->groupBy('users.country')
             ->get()
             ->keyBy('country');
@@ -58,8 +59,8 @@ class AdminController extends Controller
             ->whereRaw('LENGTH(aliexpress_id) >= 10')
             ->count();
 
-        // Local distributor products
-        $distributorProducts = Product::whereHas('user', function($q) {
+        // Local distributor products (via product_user pivot)
+        $distributorProducts = Product::whereHas('assignedUsers', function($q) {
             $q->where('user_type', 'distributor');
         })->count();
 
