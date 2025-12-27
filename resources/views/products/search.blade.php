@@ -694,6 +694,12 @@
         document.getElementById('choiceOnlyInput').value = '';
         document.getElementById('categoryIdInput').value = '';
 
+        // Set default keyword if empty (required for search to work)
+        const keywordInput = document.getElementById('keyword');
+        if (!keywordInput.value || keywordInput.value.trim() === '') {
+            keywordInput.value = 'products'; // Default search keyword
+        }
+
         if (source === 'AE') {
             document.querySelector('[data-source="AE"]').classList.add('active');
             document.getElementById('shipFromInput').value = 'AE';
