@@ -610,7 +610,8 @@
                                     id: '{{ $child->aliexpress_category_id }}',
                                     name: '{{ addslashes($child->name) }}',
                                     name_ar: '{{ addslashes($child->name_ar ?? '') }}',
-                                    image: '{{ $child->image ?? '' }}'
+                                    image: '{{ $child->image ?? '' }}',
+                                    photo: '{{ $child->photo ? asset("storage/" . $child->photo) : "" }}'
                                 },
                             @endforeach
                         @endif
@@ -665,7 +666,7 @@
 
         let html = `
             <div class="subcategory-item" onclick="searchByCategory('${categoryId}')">
-                <div class="subcategory-icon">
+                <div class="subcategory-icon all-icon">
                     <i class="ri-apps-line"></i>
                 </div>
                 <span>${isArabic ? 'الكل' : 'All'}</span>
@@ -674,11 +675,15 @@
 
         category.children.forEach(child => {
             const name = isArabic && child.name_ar ? child.name_ar : child.name;
+            // Prioritize photo (from database storage) over image (external URL)
+            const imageUrl = child.photo || child.image || '';
+            const hasImage = imageUrl && imageUrl.length > 0;
+
             html += `
                 <div class="subcategory-item" onclick="searchByCategory('${child.id}')">
-                    <div class="subcategory-icon">
-                        ${child.image ? `<img src="${child.image}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">` : ''}
-                        <i class="ri-folder-line" ${child.image ? 'style="display:none;"' : ''}></i>
+                    <div class="subcategory-icon ${hasImage ? 'has-image' : ''}">
+                        ${hasImage ? `<img src="${imageUrl}" alt="${name}" onerror="this.style.display='none'; this.parentElement.classList.remove('has-image'); this.nextElementSibling.style.display='flex';">` : ''}
+                        <i class="ri-folder-line" ${hasImage ? 'style="display:none;"' : ''}></i>
                     </div>
                     <span>${name}</span>
                 </div>
@@ -1625,56 +1630,89 @@
     .subcategories-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 15px;
+        padding: 10px 0;
     }
 
     .subcategory-item {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 10px 15px;
+        padding: 12px 16px;
         background: white;
-        border-radius: 10px;
+        border-radius: 12px;
         cursor: pointer;
-        transition: all 0.2s ease;
-        min-width: 80px;
-        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        min-width: 100px;
+        max-width: 120px;
+        border: 2px solid #e9ecef;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
     .subcategory-item:hover {
         background: #fff3e0;
         border-color: #e56300;
-        transform: translateY(-2px);
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(229, 99, 0, 0.15);
     }
 
     .subcategory-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
-        background: #f8f9fa;
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 8px;
         overflow: hidden;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .subcategory-icon.has-image {
+        background: white;
+        border-color: #ddd;
+        padding: 4px;
+    }
+
+    .subcategory-icon.all-icon {
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        border-color: #561C04;
+    }
+
+    .subcategory-icon.all-icon i {
+        color: white;
+        font-size: 24px;
+    }
+
+    .subcategory-item:hover .subcategory-icon {
+        border-color: #e56300;
+        box-shadow: 0 4px 12px rgba(229, 99, 0, 0.2);
+        transform: scale(1.05);
     }
 
     .subcategory-icon img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        border-radius: 8px;
     }
 
     .subcategory-icon i {
-        font-size: 20px;
-        color: #666;
+        font-size: 24px;
+        color: #561C04;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .subcategory-item span {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         text-align: center;
         color: #333;
-        max-width: 80px;
+        font-weight: 500;
+        max-width: 90px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
