@@ -22,6 +22,44 @@ class SubscriptionManagementController extends Controller
     }
 
     /**
+     * Show create form
+     */
+    public function create()
+    {
+        return view('admin.subscriptions.create');
+    }
+
+    /**
+     * Store new subscription
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'description_ar' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'duration_days' => 'required|integer|min:1',
+            'sort_order' => 'nullable|integer',
+            'color' => 'required|string',
+            'max_products' => 'required|integer|min:1',
+            'max_orders_per_month' => 'required|integer|min:1',
+            'commission_rate' => 'required|numeric|min:0|max:100',
+            'priority_support' => 'boolean',
+            'analytics_access' => 'boolean',
+            'bulk_import' => 'boolean',
+            'api_access' => 'boolean',
+            'is_active' => 'boolean',
+        ]);
+
+        Subscription::create($validated);
+
+        return redirect()->route('admin.subscriptions.index')
+            ->with('success', __('messages.subscription_created_successfully'));
+    }
+
+    /**
      * Edit subscription
      */
     public function edit(Subscription $subscription)
@@ -68,5 +106,26 @@ class SubscriptionManagementController extends Controller
             ->paginate(20);
 
         return view('admin.subscriptions.users', compact('userSubscriptions'));
+    }
+
+    /**
+     * Close a user subscription
+     */
+    public function closeSubscription(UserSubscription $userSubscription)
+    {
+        // Only allow closing active subscriptions
+        if ($userSubscription->status !== 'active') {
+            return redirect()->route('admin.subscriptions.users')
+                ->with('error', __('messages.subscription_already_closed'));
+        }
+
+        $userSubscription->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => 'Closed by admin'
+        ]);
+
+        return redirect()->route('admin.subscriptions.users')
+            ->with('success', __('messages.subscription_closed_successfully'));
     }
 }

@@ -3,9 +3,15 @@
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <!-- Page Header -->
-    <div class="mb-4">
-        <h4 class="mb-1">{{ __('messages.subscription_management') }}</h4>
-        <p class="text-muted">{{ __('messages.manage_subscriptions') }}</p>
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1">{{ __('messages.subscription_management') }}</h4>
+            <p class="text-muted">{{ __('messages.manage_subscriptions') }}</p>
+        </div>
+        <a href="{{ route('admin.subscriptions.create') }}" class="btn btn-success">
+            <i class="ri-add-line me-1"></i>
+            {{ __('messages.add_new_plan') }}
+        </a>
     </div>
 
     <!-- Subscription Plans -->

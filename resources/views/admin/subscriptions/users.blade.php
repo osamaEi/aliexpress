@@ -29,6 +29,7 @@
                             <th>{{ __('messages.status') }}</th>
                             <th>{{ __('messages.amount_paid') }}</th>
                             <th>{{ __('messages.payment_method') }}</th>
+                            <th>{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -70,6 +71,19 @@
                                 <span class="badge bg-label-info">
                                     {{ ucfirst($userSubscription->payment_method) }}
                                 </span>
+                            </td>
+                            <td>
+                                @if($userSubscription->status === 'active')
+                                    <form method="POST" action="{{ route('admin.subscriptions.close', $userSubscription->id) }}" style="display: inline;" onsubmit="return confirm('{{ __('messages.confirm_close_subscription') }}');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="ri-close-line me-1"></i>
+                                            {{ __('messages.close') }}
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
                             </td>
                         </tr>
                         @empty

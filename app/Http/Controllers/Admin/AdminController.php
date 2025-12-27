@@ -46,6 +46,26 @@ class AdminController extends Controller
             ->get()
             ->keyBy('country');
 
+        // Add China products count (AliExpress products)
+        $chinaProductsCount = Product::whereNotNull('aliexpress_id')
+            ->whereRaw('LENGTH(aliexpress_id) >= 10')
+            ->count();
+
+        // Products with commission (products that have admin_amount or seller_amount set)
+        $productsWithCommission = Product::where(function($q) {
+            $q->where('admin_amount', '>', 0)
+              ->orWhere('seller_amount', '>', 0);
+        })->count();
+
+        // Products with coupon - products that have been sold using coupons
+        $productsWithCoupon = DB::table('coupon_usages')
+            ->join('orders', 'coupon_usages.order_id', '=', 'orders.id')
+            ->distinct('orders.product_id')
+            ->count('orders.product_id');
+
+        // Orders with coupon count
+        $ordersWithCoupon = CouponUsage::distinct('order_id')->count('order_id');
+
         // Products with commission (from affiliate coupons)
         $affiliateStats = [
             'total_coupons' => Coupon::count(),
@@ -53,12 +73,13 @@ class AdminController extends Controller
             'expired_coupons' => Coupon::expired()->count(),
             'total_commission_earned' => Coupon::sum('total_commission_earned'),
             'pending_commission' => CouponUsage::pending()->sum('commission_amount'),
+            'products_with_commission' => $productsWithCommission,
+            'products_with_coupon' => $productsWithCoupon,
+            'orders_with_coupon' => $ordersWithCoupon,
         ];
 
         // Products from AliExpress (have aliexpress_id with 10+ digits)
-        $aliexpressProducts = Product::whereNotNull('aliexpress_id')
-            ->whereRaw('LENGTH(aliexpress_id) >= 10')
-            ->count();
+        $aliexpressProducts = $chinaProductsCount;
 
         // Local distributor products (via product_user pivot)
         $distributorProducts = Product::whereHas('assignedUsers', function($q) {
@@ -75,10 +96,19 @@ class AdminController extends Controller
             'seller_balance' => Wallet::whereHas('user', function($q) {
                 $q->where('user_type', 'seller');
             })->sum('balance'),
+            // Total amount that should be available in PayPal (all store balances not yet withdrawn)
+            'paypal_required_balance' => Wallet::whereHas('user', function($q) {
+                $q->whereIn('user_type', ['distributor', 'seller']);
+            })->sum('balance'),
         ];
 
-        // Orders with coupon (orders that used affiliate coupons)
-        $productsWithCoupon = CouponUsage::distinct('order_id')->count('order_id');
+        // Distributors by country
+        $distributorsByCountry = User::where('user_type', 'distributor')
+            ->whereNotNull('country')
+            ->select('country', DB::raw('COUNT(*) as count'))
+            ->groupBy('country')
+            ->get()
+            ->keyBy('country');
 
         $recentOrders = Order::with(['user', 'product'])
             ->latest()
@@ -93,11 +123,12 @@ class AdminController extends Controller
         return view('admin.dashboard', compact(
             'stats',
             'productsByCountry',
+            'chinaProductsCount',
             'affiliateStats',
             'aliexpressProducts',
             'distributorProducts',
             'walletStats',
-            'productsWithCoupon',
+            'distributorsByCountry',
             'recentOrders',
             'recentSubscriptions'
         ));
