@@ -469,6 +469,9 @@ return [
 
     // Subscription Management
     'subscription_management' => 'Subscription Management',
+    'add_new_plan' => 'Add New Plan',
+    'create_new_subscription_plan' => 'Create a new subscription plan',
+    'create_subscription' => 'Create Subscription',
     'edit_subscription' => 'Edit Subscription',
     'subscription_details' => 'Subscription Details',
     'plan_features' => 'Plan Features',
@@ -477,11 +480,15 @@ return [
     'sort_order' => 'Sort Order',
     'plan_color' => 'Plan Color',
     'subscription_updated_successfully' => 'Subscription updated successfully',
+    'subscription_created_successfully' => 'Subscription created successfully',
     'user_subscriptions' => 'User Subscriptions',
     'subscriber' => 'Subscriber',
     'subscription_date' => 'Subscription Date',
     'total_subscriptions' => 'Total Subscriptions',
     'active_users' => 'Active Users',
+    'confirm_close_subscription' => 'Are you sure you want to close this subscription?',
+    'subscription_already_closed' => 'This subscription is already closed',
+    'subscription_closed_successfully' => 'Subscription closed successfully',
 
     // Order Management
     'order_management' => 'Order Management',

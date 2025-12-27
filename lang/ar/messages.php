@@ -461,11 +461,18 @@ return [
     'sort_order' => 'ترتيب الفرز',
     'plan_color' => 'لون الخطة',
     'subscription_updated_successfully' => 'تم تحديث الاشتراك بنجاح',
+    'subscription_created_successfully' => 'تم إنشاء الاشتراك بنجاح',
     'user_subscriptions' => 'اشتراكات المستخدمين',
+    'add_new_plan' => 'إضافة خطة جديدة',
+    'create_new_subscription_plan' => 'إنشاء خطة اشتراك جديدة',
+    'create_subscription' => 'إنشاء الاشتراك',
     'subscriber' => 'المشترك',
     'subscription_date' => 'تاريخ الاشتراك',
     'total_subscriptions' => 'إجمالي الاشتراكات',
     'active_users' => 'المستخدمون النشطون',
+    'confirm_close_subscription' => 'هل أنت متأكد من رغبتك في إغلاق هذا الاشتراك؟',
+    'subscription_already_closed' => 'هذا الاشتراك مغلق بالفعل',
+    'subscription_closed_successfully' => 'تم إغلاق الاشتراك بنجاح',
 
     // Order Management
     'order_management' => 'إدارة الطلبات',
