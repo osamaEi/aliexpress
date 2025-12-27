@@ -812,10 +812,33 @@ class ProductController extends Controller
                 ->toArray();
         }
 
+        // Get distributor countries dynamically from registered distributors
+        $distributorCountries = \App\Models\User::where('user_type', 'distributor')
+            ->whereNotNull('country')
+            ->select('country')
+            ->selectRaw('COUNT(*) as distributor_count')
+            ->groupBy('country')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'code' => $item->country,
+                    'count' => $item->distributor_count,
+                ];
+            });
+
+        // Get distributors grouped by country for the modal
+        $distributorsByCountry = \App\Models\User::where('user_type', 'distributor')
+            ->whereNotNull('country')
+            ->select('id', 'name', 'store_name', 'logo', 'country')
+            ->get()
+            ->groupBy('country');
+
         return view('products.search', [
             'categories' => $categoriesWithChildren,
             'allCategories' => $allCategories,
             'assignedProductIds' => $assignedProductIds,
+            'distributorCountries' => $distributorCountries,
+            'distributorsByCountry' => $distributorsByCountry,
         ]);
     }
 
@@ -1575,22 +1598,35 @@ class ProductController extends Controller
      */
     public function searchDistributorProducts(Request $request)
     {
-        $countryCode = $request->get('country_code'); // AE or SA
+        $countryCode = $request->get('country_code');
+        $distributorId = $request->get('distributor_id');
 
-        if (!in_array($countryCode, ['AE', 'SA'])) {
+        // Validate that we have at least a country code
+        if (empty($countryCode)) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Invalid country code'
+                    'error' => 'Country code is required'
                 ], 400);
             }
-            return back()->with('error', 'Invalid country code');
+            return back()->with('error', 'Country code is required');
         }
 
-        // Query products from distributors in the specified country
+        // Query products from distributors
         $query = Product::with('category')
-            ->where('is_active', true)
-            ->fromCountry($countryCode);
+            ->where('is_active', true);
+
+        // Filter by specific distributor if provided
+        if (!empty($distributorId)) {
+            $query->whereHas('assignedUsers', function ($q) use ($distributorId, $countryCode) {
+                $q->where('users.id', $distributorId)
+                  ->where('country', $countryCode)
+                  ->where('user_type', 'distributor');
+            });
+        } else {
+            // Filter by country
+            $query->fromCountry($countryCode);
+        }
 
         // Search by keyword if provided
         $keyword = $request->get('keyword');

@@ -77,75 +77,89 @@
             </div>
             @endif
 
-            <!-- Product Source Cards (UAE, Saudi, China) -->
+            <!-- Product Source Cards (Dynamic from Distributors + China) -->
             @php
-                $isUaeActive = request('country_code') == 'AE' || (isset($source_country) && $source_country == 'AE');
-                $isSaudiActive = request('country_code') == 'SA' || (isset($source_country) && $source_country == 'SA');
                 $isChinaActive = request('ship_from') == 'CN';
+                $activeCountryCode = request('country_code') ?? (isset($source_country) ? $source_country : null);
+
+                // Country names mapping
+                $countryNames = [
+                    'AE' => ['ar' => 'الإمارات', 'en' => 'UAE', 'flag' => '🇦🇪'],
+                    'SA' => ['ar' => 'السعودية', 'en' => 'Saudi', 'flag' => '🇸🇦'],
+                    'KW' => ['ar' => 'الكويت', 'en' => 'Kuwait', 'flag' => '🇰🇼'],
+                    'QA' => ['ar' => 'قطر', 'en' => 'Qatar', 'flag' => '🇶🇦'],
+                    'BH' => ['ar' => 'البحرين', 'en' => 'Bahrain', 'flag' => '🇧🇭'],
+                    'OM' => ['ar' => 'عمان', 'en' => 'Oman', 'flag' => '🇴🇲'],
+                    'EG' => ['ar' => 'مصر', 'en' => 'Egypt', 'flag' => '🇪🇬'],
+                    'JO' => ['ar' => 'الأردن', 'en' => 'Jordan', 'flag' => '🇯🇴'],
+                    'LB' => ['ar' => 'لبنان', 'en' => 'Lebanon', 'flag' => '🇱🇧'],
+                ];
             @endphp
-            <div class="row g-3 mb-4">
-                <!-- UAE Products (from local distributors) -->
-                <div class="col-md-4">
-                    <div class="source-card {{ $isUaeActive ? 'active' : '' }}" onclick="selectSource('AE')" data-source="AE">
-                        <div class="source-checkbox">
-                            <input type="checkbox" {{ $isUaeActive ? 'checked' : '' }} readonly>
-                        </div>
-                        <div class="source-content">
-                            <!-- UAE Flag SVG -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80" class="source-flag">
-                                <rect width="120" height="80" fill="#00732f"/>
-                                <rect y="0" width="120" height="26.67" fill="#00732f"/>
-                                <rect y="26.67" width="120" height="26.67" fill="#fff"/>
-                                <rect y="53.33" width="120" height="26.67" fill="#000"/>
-                                <rect x="0" y="0" width="30" height="80" fill="#ff0000"/>
-                            </svg>
-                            <h5 class="source-title">{{ app()->getLocale() == 'ar' ? 'منتجات من الامارات' : 'Products from UAE' }}</h5>
-                        </div>
+            <div class="source-cards-container mb-4">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <!-- Dynamic Country Cards from Distributors -->
+                    @if(isset($distributorCountries) && count($distributorCountries) > 0)
+                        @foreach($distributorCountries as $country)
+                            @php
+                                $countryCode = $country['code'];
+                                $isActive = $activeCountryCode == $countryCode;
+                                $countryInfo = $countryNames[$countryCode] ?? ['ar' => $countryCode, 'en' => $countryCode, 'flag' => '🏳️'];
+                            @endphp
+                            <div class="source-card-mini {{ $isActive ? 'active' : '' }}"
+                                 onclick="showDistributors('{{ $countryCode }}')"
+                                 data-source="{{ $countryCode }}">
+                                <span class="country-flag">{{ $countryInfo['flag'] }}</span>
+                                <span class="country-name">{{ app()->getLocale() == 'ar' ? $countryInfo['ar'] : $countryInfo['en'] }}</span>
+                                <span class="distributor-count">{{ $country['count'] }}</span>
+                            </div>
+                        @endforeach
+                    @endif
+
+                    <!-- China Card (AliExpress) - Always Show -->
+                    <div class="source-card-mini china {{ $isChinaActive ? 'active' : '' }}"
+                         onclick="selectSource('china')"
+                         data-source="china">
+                        <span class="country-flag">🇨🇳</span>
+                        <span class="country-name">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
+                        <span class="badge-aliexpress">AliExpress</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Saudi Products (from local distributors) -->
-                <div class="col-md-4">
-                    <div class="source-card {{ $isSaudiActive ? 'active' : '' }}" onclick="selectSource('SA')" data-source="SA">
-                        <div class="source-checkbox">
-                            <input type="checkbox" {{ $isSaudiActive ? 'checked' : '' }} readonly>
+            <!-- Distributors Modal -->
+            <div class="modal fade" id="distributorsModal" tabindex="-1" aria-labelledby="distributorsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background: linear-gradient(135deg, #561C04 0%, #e56300 100%);">
+                            <h5 class="modal-title text-white" id="distributorsModalLabel">
+                                <i class="ri-store-2-line me-2"></i>
+                                <span id="modalCountryName">{{ app()->getLocale() == 'ar' ? 'الموزعين' : 'Distributors' }}</span>
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="source-content">
-                            <!-- Saudi Flag SVG -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80" class="source-flag">
-                                <rect width="120" height="80" fill="#006c35"/>
-                                <text x="60" y="35" font-family="Arial" font-size="8" fill="white" text-anchor="middle" font-weight="bold">لا إله إلا الله</text>
-                                <text x="60" y="45" font-family="Arial" font-size="6" fill="white" text-anchor="middle">محمد رسول الله</text>
-                                <rect x="45" y="50" width="30" height="3" fill="white"/>
-                            </svg>
-                            <h5 class="source-title">{{ app()->getLocale() == 'ar' ? 'منتجات من السعودية' : 'Products from Saudi' }}</h5>
+                        <div class="modal-body p-0">
+                            <div id="distributorsList" class="distributors-list">
+                                <!-- Distributors will be loaded here -->
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- China Products (from AliExpress) -->
-                <div class="col-md-4">
-                    <div class="source-card china-card {{ $isChinaActive ? 'active' : '' }}" onclick="selectSource('china')" data-source="china">
-                        <div class="source-checkbox">
-                            <input type="checkbox" {{ $isChinaActive ? 'checked' : '' }} readonly>
-                        </div>
-                        <div class="source-content">
-                            <!-- China Flag SVG -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80" class="source-flag">
-                                <rect width="120" height="80" fill="#de2910"/>
-                                <g fill="#ffde00">
-                                    <path d="M20,15 l3,9.3 l9.7,0 l-7.9,5.7 l3,9.3 l-7.9,-5.7 l-7.9,5.7 l3,-9.3 l-7.9,-5.7 l9.7,0z"/>
-                                    <path d="M40,8 l1,3.1 l3.2,0 l-2.6,1.9 l1,3.1 l-2.6,-1.9 l-2.6,1.9 l1,-3.1 l-2.6,-1.9 l3.2,0z"/>
-                                    <path d="M48,18 l1,3.1 l3.2,0 l-2.6,1.9 l1,3.1 l-2.6,-1.9 l-2.6,1.9 l1,-3.1 l-2.6,-1.9 l3.2,0z"/>
-                                    <path d="M48,32 l1,3.1 l3.2,0 l-2.6,1.9 l1,3.1 l-2.6,-1.9 l-2.6,1.9 l1,-3.1 l-2.6,-1.9 l3.2,0z"/>
-                                    <path d="M40,42 l1,3.1 l3.2,0 l-2.6,1.9 l1,3.1 l-2.6,-1.9 l-2.6,1.9 l1,-3.1 l-2.6,-1.9 l3.2,0z"/>
-                                </g>
-                            </svg>
-                            <h5 class="source-title">{{ app()->getLocale() == 'ar' ? 'منتجات من الصين' : 'Products from China' }}</h5>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                {{ app()->getLocale() == 'ar' ? 'إغلاق' : 'Close' }}
+                            </button>
+                            <button type="button" class="btn btn-primary" id="viewAllProductsBtn" onclick="viewAllCountryProducts()">
+                                <i class="ri-shopping-bag-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'عرض كل المنتجات' : 'View All Products' }}
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Store distributors data for JavaScript -->
+            <script>
+                const distributorsByCountry = @json($distributorsByCountry ?? []);
+                const countryNames = @json($countryNames);
+            </script>
 
             <!-- Subcategories Container (shown when main category selected) -->
             <div id="subcategoriesContainer" class="mb-4" style="display: none;">
@@ -345,29 +359,49 @@
                                         onerror="this.src='https://via.placeholder.com/280x280?text=No+Image'"
                                     >
 
-                                    <!-- Source Badge -->
+                                    <!-- Source Badge (Dynamic based on source_country or ship_from) -->
+                                    @php
+                                        $sourceCountry = request('country_code') ?? (isset($source_country) ? $source_country : null);
+                                        $isChina = request('ship_from') == 'CN' || empty($sourceCountry);
+
+                                        // Get flag and name based on source
+                                        $flagEmoji = '🇨🇳';
+                                        $countryLabel = app()->getLocale() == 'ar' ? 'الصين' : 'China';
+
+                                        if ($sourceCountry) {
+                                            $countryFlags = [
+                                                'AE' => '🇦🇪', 'SA' => '🇸🇦', 'KW' => '🇰🇼', 'QA' => '🇶🇦',
+                                                'BH' => '🇧🇭', 'OM' => '🇴🇲', 'EG' => '🇪🇬', 'JO' => '🇯🇴', 'LB' => '🇱🇧'
+                                            ];
+                                            $countryLabelsAr = [
+                                                'AE' => 'الإمارات', 'SA' => 'السعودية', 'KW' => 'الكويت', 'QA' => 'قطر',
+                                                'BH' => 'البحرين', 'OM' => 'عمان', 'EG' => 'مصر', 'JO' => 'الأردن', 'LB' => 'لبنان'
+                                            ];
+                                            $countryLabelsEn = [
+                                                'AE' => 'UAE', 'SA' => 'Saudi', 'KW' => 'Kuwait', 'QA' => 'Qatar',
+                                                'BH' => 'Bahrain', 'OM' => 'Oman', 'EG' => 'Egypt', 'JO' => 'Jordan', 'LB' => 'Lebanon'
+                                            ];
+                                            $flagEmoji = $countryFlags[$sourceCountry] ?? '🏳️';
+                                            $countryLabel = app()->getLocale() == 'ar'
+                                                ? ($countryLabelsAr[$sourceCountry] ?? $sourceCountry)
+                                                : ($countryLabelsEn[$sourceCountry] ?? $sourceCountry);
+                                            $isChina = false;
+                                        }
+                                    @endphp
                                     <div class="position-absolute bottom-0 start-0 m-2" style="z-index: 5;">
-                                        @if(request('ship_from') == 'AE')
-                                            <div class="d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm" style="border: 1px solid #e0e0e0;">
-                                                <span style="font-size: 0.8rem;">🇦🇪</span>
-                                                <span style="font-size: 0.7rem; color: #666; font-weight: 500; margin-left: 4px;">{{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}</span>
-                                            </div>
-                                        @elseif(request('ship_from') == 'SA')
-                                            <div class="d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm" style="border: 1px solid #e0e0e0;">
-                                                <span style="font-size: 0.8rem;">🇸🇦</span>
-                                                <span style="font-size: 0.7rem; color: #666; font-weight: 500; margin-left: 4px;">{{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi' }}</span>
-                                            </div>
-                                        @else
-                                            <div class="d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm" style="border: 1px solid #e0e0e0;">
+                                        <div class="d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm" style="border: 1px solid #e0e0e0;">
+                                            @if($isChina)
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="margin-right: 4px;">
                                                     <rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#de2910"></rect>
                                                     <g fill="#ffde00">
                                                         <path d="M7.5,9.5 l0.9,2.8 l2.9,0 l-2.4,1.7 l0.9,2.8 l-2.4,-1.7 l-2.4,1.7 l0.9,-2.8 l-2.4,-1.7 l2.9,0z"/>
                                                     </g>
                                                 </svg>
-                                                <span style="font-size: 0.7rem; color: #666; font-weight: 500;">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
-                                            </div>
-                                        @endif
+                                            @else
+                                                <span style="font-size: 0.8rem;">{{ $flagEmoji }}</span>
+                                            @endif
+                                            <span style="font-size: 0.7rem; color: #666; font-weight: 500; margin-left: 4px;">{{ $countryLabel }}</span>
+                                        </div>
                                     </div>
 
                                     <!-- Discount Badge -->
@@ -387,7 +421,7 @@
 
                                     <!-- Price -->
                                     <div class="mb-2">
-                                        <h5 class="text-primary mb-0 d-flex align-items-center">
+                                        <h5 class="text-primary mb-0 d-flex align-items-center" style="direction: ltr; justify-content: flex-start;">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
                                                 <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
                                                 <path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -667,33 +701,107 @@
         document.getElementById('categoryIdInput').value = '';
     }
 
-    // Select source (UAE, Saudi, China, All)
+    // Current selected country for modal
+    let selectedCountryCode = null;
+
+    // Show distributors modal
+    function showDistributors(countryCode) {
+        selectedCountryCode = countryCode;
+
+        // Get country info
+        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode, flag: '🏳️' };
+        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+
+        // Update modal title
+        document.getElementById('modalCountryName').textContent =
+            (isArabic ? 'موزعين ' : 'Distributors in ') + countryName + ' ' + countryInfo.flag;
+
+        // Get distributors for this country
+        const distributors = distributorsByCountry[countryCode] || [];
+
+        // Build distributors list HTML
+        let html = '';
+        if (distributors.length === 0) {
+            html = `<div class="text-center py-4">
+                <i class="ri-store-2-line" style="font-size: 3rem; color: #ccc;"></i>
+                <p class="text-muted mt-2">${isArabic ? 'لا يوجد موزعين حالياً' : 'No distributors available'}</p>
+            </div>`;
+        } else {
+            distributors.forEach(dist => {
+                const logo = dist.logo ? `{{ asset('storage') }}/${dist.logo}` : null;
+                const name = dist.store_name || dist.name;
+                html += `
+                    <div class="distributor-item" onclick="viewDistributorProducts(${dist.id}, '${countryCode}')">
+                        <div class="distributor-avatar">
+                            ${logo
+                                ? `<img src="${logo}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                                : ''
+                            }
+                            <div class="avatar-placeholder" ${logo ? 'style="display:none;"' : ''}>
+                                <i class="ri-store-2-line"></i>
+                            </div>
+                        </div>
+                        <div class="distributor-info">
+                            <h6 class="mb-0">${name}</h6>
+                            <small class="text-muted">${countryInfo.flag} ${countryName}</small>
+                        </div>
+                        <i class="ri-arrow-right-s-line text-muted"></i>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('distributorsList').innerHTML = html;
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('distributorsModal'));
+        modal.show();
+    }
+
+    // View products from a specific distributor
+    function viewDistributorProducts(distributorId, countryCode) {
+        const keywordInput = document.getElementById('keyword');
+        const keyword = keywordInput ? keywordInput.value.trim() : '';
+
+        let url = '{{ route("products.search-distributor") }}?country_code=' + countryCode + '&distributor_id=' + distributorId;
+        if (keyword) {
+            url += '&keyword=' + encodeURIComponent(keyword);
+        }
+
+        // Close modal and redirect
+        bootstrap.Modal.getInstance(document.getElementById('distributorsModal'))?.hide();
+        document.getElementById('loadingSpinner').style.display = 'block';
+        window.location.href = url;
+    }
+
+    // View all products from a country
+    function viewAllCountryProducts() {
+        if (!selectedCountryCode) return;
+
+        const keywordInput = document.getElementById('keyword');
+        const keyword = keywordInput ? keywordInput.value.trim() : '';
+
+        let url = '{{ route("products.search-distributor") }}?country_code=' + selectedCountryCode;
+        if (keyword) {
+            url += '&keyword=' + encodeURIComponent(keyword);
+        }
+
+        // Close modal and redirect
+        bootstrap.Modal.getInstance(document.getElementById('distributorsModal'))?.hide();
+        document.getElementById('loadingSpinner').style.display = 'block';
+        window.location.href = url;
+    }
+
+    // Select source (China, All)
     function selectSource(source) {
         // Clear all selections
-        document.querySelectorAll('.source-card').forEach(card => card.classList.remove('active'));
+        document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
         document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
         document.getElementById('subcategoriesContainer').style.display = 'none';
 
         // Get keyword value
         const keywordInput = document.getElementById('keyword');
         const keyword = keywordInput.value.trim();
-
-        // UAE and Saudi: Get products from local distributors
-        if (source === 'AE' || source === 'SA') {
-            document.querySelector(`[data-source="${source}"]`).classList.add('active');
-
-            // Build URL for distributor products
-            let url = '{{ route("products.search-distributor") }}?country_code=' + source;
-            if (keyword) {
-                url += '&keyword=' + encodeURIComponent(keyword);
-            }
-            url += '&currency=' + (source === 'AE' ? 'AED' : 'SAR');
-
-            // Show loading and redirect
-            document.getElementById('loadingSpinner').style.display = 'block';
-            window.location.href = url;
-            return;
-        }
 
         // China: Use AliExpress API
         if (source === 'china') {
@@ -1068,7 +1176,148 @@
         background: #f8f9fa;
     }
 
-    /* Source Cards */
+    /* Source Cards Mini */
+    .source-cards-container {
+        padding: 10px 0;
+    }
+
+    .source-card-mini {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .source-card-mini:hover {
+        background: #fff3e0;
+        border-color: #e56300;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(229, 99, 0, 0.2);
+    }
+
+    .source-card-mini.active {
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        border-color: #561C04;
+        color: white;
+    }
+
+    .source-card-mini.active .country-name,
+    .source-card-mini.active .distributor-count {
+        color: white;
+    }
+
+    .source-card-mini.china {
+        background: #fff5f5;
+        border-color: #ffcdd2;
+    }
+
+    .source-card-mini.china:hover {
+        background: #ffebee;
+        border-color: #de2910;
+    }
+
+    .source-card-mini.china.active {
+        background: linear-gradient(135deg, #de2910 0%, #ff5722 100%);
+        border-color: #de2910;
+    }
+
+    .country-flag {
+        font-size: 1.3rem;
+    }
+
+    .country-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .distributor-count {
+        background: #e56300;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .source-card-mini.active .distributor-count {
+        background: rgba(255,255,255,0.3);
+    }
+
+    .badge-aliexpress {
+        background: #de2910;
+        color: white;
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    /* Distributors Modal */
+    .distributors-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .distributor-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .distributor-item:hover {
+        background: #f8f9fa;
+    }
+
+    .distributor-item:last-child {
+        border-bottom: none;
+    }
+
+    .distributor-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .distributor-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .distributor-avatar .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .distributor-info {
+        flex: 1;
+    }
+
+    .distributor-info h6 {
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Legacy Source Cards (kept for compatibility) */
     .source-card {
         background: #2d3748;
         border-radius: 16px;
