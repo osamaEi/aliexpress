@@ -115,13 +115,12 @@
                         @endforeach
                     @endif
 
-                    <!-- China Card (AliExpress) - Always Show -->
+                    <!-- China Card - Always Show -->
                     <div class="source-card-mini china {{ $isChinaActive ? 'active' : '' }}"
                          onclick="selectSource('china')"
                          data-source="china">
                         <span class="country-flag">🇨🇳</span>
                         <span class="country-name">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
-                        <span class="badge-aliexpress">AliExpress</span>
                     </div>
                 </div>
             </div>
@@ -728,16 +727,16 @@
             </div>`;
         } else {
             distributors.forEach(dist => {
-                const logo = dist.logo ? `{{ asset('storage') }}/${dist.logo}` : null;
+                const avatar = dist.avatar ? `{{ asset('storage') }}/${dist.avatar}` : null;
                 const name = dist.store_name || dist.name;
                 html += `
                     <div class="distributor-item" onclick="viewDistributorProducts(${dist.id}, '${countryCode}')">
                         <div class="distributor-avatar">
-                            ${logo
-                                ? `<img src="${logo}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                            ${avatar
+                                ? `<img src="${avatar}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
                                 : ''
                             }
-                            <div class="avatar-placeholder" ${logo ? 'style="display:none;"' : ''}>
+                            <div class="avatar-placeholder" ${avatar ? 'style="display:none;"' : ''}>
                                 <i class="ri-store-2-line"></i>
                             </div>
                         </div>
