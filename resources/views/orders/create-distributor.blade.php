@@ -89,7 +89,7 @@
                                             <p class="text-muted small mb-2">{{ $product->name_ar }}</p>
                                         @endif
                                         <div class="d-flex align-items-center gap-3">
-                                            <h4 class="text-primary mb-0">{{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}</h4>
+                                            <h4 class="text-primary mb-0"><x-currency-symbol :currency="$product->currency ?? 'AED'" /> {{ number_format($product->price, 2) }}</h4>
                                             <span class="badge bg-success">
                                                 <i class="ri-store-line me-1"></i>
                                                 {{ app()->getLocale() == 'ar' ? 'محلي' : 'Local' }}
@@ -355,7 +355,7 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'سعر الوحدة:' : 'Unit Price:' }}</span>
-                                        <strong>{{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}</strong>
+                                        <strong><x-currency-symbol :currency="$product->currency ?? 'AED'" /> {{ number_format($product->price, 2) }}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'الكمية:' : 'Quantity:' }}</span>
@@ -363,16 +363,16 @@
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'المجموع الفرعي:' : 'Subtotal:' }}</span>
-                                        <strong id="subtotal_display">{{ $product->currency }} {{ number_format($product->price, 2) }}</strong>
+                                        <strong id="subtotal_display"><x-currency-symbol :currency="$product->currency ?? 'AED'" :showIcon="false" /> {{ number_format($product->price, 2) }}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2" id="discount_row" style="display: none !important;">
                                         <span class="text-success">{{ app()->getLocale() == 'ar' ? 'الخصم:' : 'Discount:' }}</span>
-                                        <strong class="text-success" id="discount_display">- {{ $product->currency }} 0.00</strong>
+                                        <strong class="text-success" id="discount_display">- <x-currency-symbol :currency="$product->currency ?? 'AED'" :showIcon="false" /> 0.00</strong>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'الإجمالي:' : 'Total:' }}</h5>
-                                        <h4 class="mb-0 text-primary" id="grand_total">{{ $product->currency }} {{ number_format($product->price, 2) }}</h4>
+                                        <h4 class="mb-0 text-primary" id="grand_total"><x-currency-symbol :currency="$product->currency ?? 'AED'" :showIcon="false" /> {{ number_format($product->price, 2) }}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -426,7 +426,8 @@ let discountAmount = 0;
 
 function calculateTotal() {
     const unitPrice = {{ $product->price }};
-    const currency = '{{ $product->currency }}';
+    const currency = '{{ $product->currency ?? "AED" }}';
+    const currencySymbol = currency === 'AED' ? 'د.إ' : (currency === 'SAR' ? 'ر.س' : (currency === 'USD' ? '$' : currency));
     const quantity = parseInt(document.getElementById('quantity').value) || 1;
     const walletBalance = {{ auth()->user()->wallet ? auth()->user()->wallet->balance : 0 }};
     const locale = '{{ app()->getLocale() }}';
@@ -437,15 +438,15 @@ function calculateTotal() {
 
     // Update display
     document.getElementById('quantity_display').textContent = quantity;
-    document.getElementById('subtotal_display').textContent = currency + ' ' + subtotal.toFixed(2);
-    document.getElementById('grand_total').textContent = currency + ' ' + grandTotal.toFixed(2);
+    document.getElementById('subtotal_display').textContent = currencySymbol + ' ' + subtotal.toFixed(2);
+    document.getElementById('grand_total').textContent = currencySymbol + ' ' + grandTotal.toFixed(2);
 
     // Show/hide discount row
     const discountRow = document.getElementById('discount_row');
     if (discountAmount > 0) {
         discountRow.style.display = 'flex';
         discountRow.style.setProperty('display', 'flex', 'important');
-        document.getElementById('discount_display').textContent = '- ' + currency + ' ' + discountAmount.toFixed(2);
+        document.getElementById('discount_display').textContent = '- ' + currencySymbol + ' ' + discountAmount.toFixed(2);
     } else {
         discountRow.style.display = 'none';
         discountRow.style.setProperty('display', 'none', 'important');
@@ -533,9 +534,11 @@ function applyCoupon() {
             document.getElementById('discount_amount').value = discountAmount;
 
             // Show success message
+            const currencyCode = '{{ $product->currency ?? "AED" }}';
+            const couponCurrencySymbol = currencyCode === 'AED' ? 'د.إ' : (currencyCode === 'SAR' ? 'ر.س' : (currencyCode === 'USD' ? '$' : currencyCode));
             const discountText = data.coupon.discount_type === 'percentage'
                 ? data.coupon.discount_value + '%'
-                : '{{ $product->currency }} ' + parseFloat(data.coupon.discount_value).toFixed(2);
+                : couponCurrencySymbol + ' ' + parseFloat(data.coupon.discount_value).toFixed(2);
 
             couponMessage.innerHTML = `<div class="alert alert-success py-2 mb-0">
                 <div class="d-flex justify-content-between align-items-center">
@@ -605,6 +608,11 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 12px 12px 0 0 !important;
 }
 
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #561C04 0%, #7A3206 100%) !important;
+    border: none;
+}
+
 .form-control, .form-select {
     border-radius: 8px;
 }
@@ -613,8 +621,56 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 8px;
 }
 
+.btn-primary {
+    background-color: #561C04 !important;
+    border-color: #561C04 !important;
+}
+
+.btn-primary:hover {
+    background-color: #7A3206 !important;
+    border-color: #7A3206 !important;
+}
+
+.btn-outline-primary {
+    color: #561C04 !important;
+    border-color: #561C04 !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #561C04 !important;
+    border-color: #561C04 !important;
+    color: #fff !important;
+}
+
+.btn-info {
+    background-color: #561C04 !important;
+    border-color: #561C04 !important;
+}
+
+.btn-info:hover {
+    background-color: #7A3206 !important;
+    border-color: #7A3206 !important;
+}
+
+.text-primary {
+    color: #561C04 !important;
+}
+
+.text-info {
+    color: #561C04 !important;
+}
+
+.bg-primary {
+    background-color: #561C04 !important;
+}
+
 .sticky-top {
     z-index: 1020;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #561C04;
+    box-shadow: 0 0 0 0.2rem rgba(86, 28, 4, 0.25);
 }
 </style>
 @endsection

@@ -6,69 +6,6 @@
 
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
-    <!-- Language & Currency Switchers -->
-    <div class="d-flex justify-content-between align-items-center mb-3 gap-3">
-        <!-- Currency Switcher -->
-        <div class="btn-group" role="group">
-            @php
-                $activeCurrencies = \App\Models\Currency::active();
-            @endphp
-            @foreach($activeCurrencies as $currency)
-                <a href="{{ route('currency.switch', $currency->code) }}"
-                   class="btn btn-sm {{ $currentCurrency->code == $currency->code ? 'btn-success' : 'btn-outline-success' }}"
-                   onclick="event.preventDefault(); switchCurrency('{{ $currency->code }}')">
-                    <x-currency-symbol :currency="$currency->code" width="16" height="16" :showText="false" />
-                    {{ $currency->code }}
-                </a>
-            @endforeach
-        </div>
-
-        <!-- Language Switcher -->
-        <!-- <div class="btn-group" role="group">
-            <a href="{{ url()->current() }}?lang=en&currency={{ $currentCurrency->code }}"
-               class="btn btn-sm {{ app()->getLocale() == 'en' ? 'btn-primary' : 'btn-outline-primary' }}"
-               onclick="event.preventDefault(); switchLanguage('en')">
-                English
-            </a>
-            <a href="{{ url()->current() }}?lang=ar&currency={{ $currentCurrency->code }}"
-               class="btn btn-sm {{ app()->getLocale() == 'ar' ? 'btn-primary' : 'btn-outline-primary' }}"
-               onclick="event.preventDefault(); switchLanguage('ar')">
-                العربية
-            </a>
-        </div> -->
-    </div>
-
-    @push('scripts')
-    <script>
-        function switchLanguage(lang) {
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('lang', lang);
-            currentUrl.searchParams.set('currency', '{{ $currentCurrency->code }}');
-            window.location.href = currentUrl.toString();
-        }
-
-        function switchCurrency(currencyCode) {
-            // First, switch the currency in session
-            fetch(`/currency/${currencyCode}`, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(() => {
-                // Reload the page with the new currency parameter
-                const currentUrl = new URL(window.location.href);
-                currentUrl.searchParams.set('currency', currencyCode);
-                currentUrl.searchParams.set('lang', '{{ app()->getLocale() }}');
-                window.location.href = currentUrl.toString();
-            })
-            .catch(error => {
-                console.error('Error switching currency:', error);
-            });
-        }
-    </script>
-    @endpush
-
     <!-- Product Hero Section -->
     <div class="card shadow-lg mb-4" style="border-radius: 20px; overflow: hidden; border: none;">
         <div class="card-body p-0">
@@ -208,20 +145,6 @@
                             </a>
                         @endif
 
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <a href="{{ route('products.edit', $product) }}" class="btn btn-outline-primary w-100" style="border-radius: 10px;">
-                                    <i class="ri-edit-line me-1"></i> {{ __('messages.edit_product') }}
-                                </a>
-                            </div>
-                            <div class="col-6">
-                                @if($product->isAliexpressProduct())
-                                    <button type="button" class="btn btn-outline-info w-100" id="syncProductBtn" onclick="syncProduct()" style="border-radius: 10px;">
-                                        <i class="ri-refresh-line me-1"></i> {{ __('messages.sync_data') }}
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
                     </div>
 
                     @if($product->isAliexpressProduct() && $product->aliexpress_url)
@@ -1616,42 +1539,6 @@ function displayDirectOrderError(data) {
 function retryDirectOrder() {
     document.getElementById('direct-order-result').style.display = 'none';
     document.getElementById('directOrderForm').style.display = 'block';
-}
-
-function syncProduct() {
-    const btn = document.getElementById('syncProductBtn');
-    const originalContent = btn.innerHTML;
-
-    if (!confirm('Sync this product with latest China data?')) {
-        return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ri-loader-4-line me-1"></i> Syncing...';
-
-    fetch('{{ route("products.sync", $product) }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data && data.success) {
-            btn.innerHTML = '<i class="ri-check-line me-1"></i> Synced!';
-            setTimeout(() => window.location.reload(), 1000);
-        } else {
-            btn.innerHTML = originalContent;
-            btn.disabled = false;
-            alert('Error: ' + (data.error || 'Sync failed'));
-        }
-    })
-    .catch(error => {
-        btn.innerHTML = originalContent;
-        btn.disabled = false;
-        alert('Failed to sync product');
-    });
 }
 
 // Reset modal on close
