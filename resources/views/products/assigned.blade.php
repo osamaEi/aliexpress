@@ -177,13 +177,8 @@
                                                 </td>
                                                 <td>
                                                     <a href="{{ route('products.detail', $product->id) }}"
-                                                       class="btn btn-sm btn-primary mb-1">
-                                                        <i class="ri-ship-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن' : 'View & Ship' }}
-                                                    </a>
-                                                    <a href="https://www.aliexpress.com/item/{{ $aliexpressProductId ?? $product->aliexpress_id }}.html"
-                                                       target="_blank"
-                                                       class="btn btn-sm btn-outline-danger mb-1">
-                                                        <i class="ri-external-link-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'المصدر' : 'Source' }}
+                                                       class="btn btn-sm btn-danger mb-1">
+                                                        <i class="ri-ship-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن دولي' : 'View & International Ship' }}
                                                     </a>
                                                 </td>
                                             </tr>
@@ -279,11 +274,7 @@
                                                 <td>
                                                     <a href="{{ route('orders.distributor.create') }}?product_id={{ $product->id }}"
                                                        class="btn btn-sm btn-success mb-1">
-                                                        <i class="ri-shopping-cart-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'إنشاء طلب' : 'Create Order' }}
-                                                    </a>
-                                                    <a href="{{ route('products.show', $product->id) }}"
-                                                       class="btn btn-sm btn-outline-primary mb-1">
-                                                        <i class="ri-eye-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض' : 'View' }}
+                                                        <i class="ri-truck-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن محلي' : 'View & Local Ship' }}
                                                     </a>
                                                 </td>
                                             </tr>
