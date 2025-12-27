@@ -154,6 +154,14 @@
             </a>
         </li>
 
+        <!-- Coupons -->
+        <li class="menu-item {{ request()->routeIs('distributor.coupons*') ? 'active' : '' }}">
+            <a href="{{ route('distributor.coupons.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-coupon-3-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'الكوبونات' : 'Coupons' }}</div>
+            </a>
+        </li>
+
         <!-- Logout -->
         <li class="menu-item">
             <form method="POST" action="{{ route('logout') }}">

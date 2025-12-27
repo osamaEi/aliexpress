@@ -296,6 +296,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders', [App\Http\Controllers\DistributorController::class, 'orders'])->name('orders');
         Route::post('/orders/{order}/update-status', [App\Http\Controllers\DistributorController::class, 'updateOrderStatus'])->name('orders.update-status');
 
+        // Coupons Management
+        Route::prefix('coupons')->name('coupons.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Distributor\CouponController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Distributor\CouponController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Distributor\CouponController::class, 'store'])->name('store');
+            Route::get('/{coupon}', [App\Http\Controllers\Distributor\CouponController::class, 'show'])->name('show');
+            Route::get('/{coupon}/edit', [App\Http\Controllers\Distributor\CouponController::class, 'edit'])->name('edit');
+            Route::put('/{coupon}', [App\Http\Controllers\Distributor\CouponController::class, 'update'])->name('update');
+            Route::delete('/{coupon}', [App\Http\Controllers\Distributor\CouponController::class, 'destroy'])->name('destroy');
+            Route::post('/{coupon}/toggle-status', [App\Http\Controllers\Distributor\CouponController::class, 'toggleStatus'])->name('toggle-status');
+            Route::get('/api/generate-code', [App\Http\Controllers\Distributor\CouponController::class, 'generateCode'])->name('generate-code');
+        });
+
         // Support Tickets
         Route::prefix('tickets')->name('tickets.')->group(function () {
             Route::get('/', [App\Http\Controllers\Distributor\TicketController::class, 'index'])->name('index');
