@@ -216,6 +216,32 @@ class ProductController extends Controller
     }
 
     /**
+     * Show product detail for distributor products (local products).
+     */
+    public function detailDistributor(Product $product, Request $request)
+    {
+        // Handle language switching
+        if ($request->has('lang')) {
+            $lang = $request->get('lang');
+            if (in_array($lang, ['en', 'ar'])) {
+                app()->setLocale($lang);
+                session()->put('locale', $lang);
+            }
+        } elseif (session()->has('locale')) {
+            app()->setLocale(session()->get('locale'));
+        }
+
+        $product->load(['category', 'variations', 'assignedUsers']);
+
+        // Get the distributor (first assigned user who is a distributor)
+        $distributor = $product->assignedUsers()
+            ->where('user_type', 'distributor')
+            ->first();
+
+        return view('products.detail-distributor', compact('product', 'distributor'));
+    }
+
+    /**
      * Debug SKUs to find numeric SKU IDs.
      */
     public function debugSkus(Product $product)

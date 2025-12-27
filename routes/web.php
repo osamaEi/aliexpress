@@ -172,6 +172,7 @@ Route::middleware('auth')->group(function () {
 
     // Product routes (must be after specific routes to avoid conflicts)
     Route::get('/products/{product}/detail', [ProductController::class, 'detail'])->name('products.detail');
+    Route::get('/products/{product}/distributor-detail', [ProductController::class, 'detailDistributor'])->name('products.detail-distributor');
     Route::get('/products/{product}/debug-skus', [ProductController::class, 'debugSkus'])->name('products.debug-skus');
 
     // Admin-only product management routes

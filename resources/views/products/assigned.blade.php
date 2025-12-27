@@ -272,7 +272,7 @@
                                                     </small>
                                                 </td>
                                                 <td>
-                                                    <a href="{{ route('orders.distributor.create') }}?product_id={{ $product->id }}"
+                                                    <a href="{{ route('products.detail-distributor', $product->id) }}"
                                                        class="btn btn-sm btn-success mb-1">
                                                         <i class="ri-truck-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن محلي' : 'View & Local Ship' }}
                                                     </a>
