@@ -176,17 +176,11 @@
                                                     </small>
                                                 </td>
                                                 <td>
-                                                    @if($product->aliexpress_id)
-                                                        <a href="{{ route('products.detail', $product->id) }}"
-                                                           class="btn btn-sm btn-danger mb-1">
-                                                            <i class="ri-ship-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن دولي' : 'View & International Ship' }}
-                                                        </a>
-                                                    @else
-                                                        <a href="{{ route('products.detail-distributor', $product->id) }}"
-                                                           class="btn btn-sm btn-success mb-1">
-                                                            <i class="ri-truck-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن محلي' : 'View & Local Ship' }}
-                                                        </a>
-                                                    @endif
+                                                    <!-- AliExpress products always go to AliExpress detail view -->
+                                                    <a href="{{ route('products.detail', $product->id) }}"
+                                                       class="btn btn-sm btn-danger mb-1">
+                                                        <i class="ri-ship-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن دولي' : 'View & International Ship' }}
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -279,17 +273,11 @@
                                                     </small>
                                                 </td>
                                                 <td>
-                                                    @if($product->aliexpress_id)
-                                                        <a href="{{ route('products.detail', $product->id) }}"
-                                                           class="btn btn-sm btn-danger mb-1">
-                                                            <i class="ri-ship-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن دولي' : 'View & International Ship' }}
-                                                        </a>
-                                                    @else
-                                                        <a href="{{ route('products.detail-distributor', $product->id) }}"
-                                                           class="btn btn-sm btn-success mb-1">
-                                                            <i class="ri-truck-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن محلي' : 'View & Local Ship' }}
-                                                        </a>
-                                                    @endif
+                                                    <!-- Distributor products always go to distributor detail view -->
+                                                    <a href="{{ route('products.detail-distributor', $product->id) }}"
+                                                       class="btn btn-sm btn-success mb-1">
+                                                        <i class="ri-truck-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'عرض وشحن محلي' : 'View & Local Ship' }}
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @endforeach
