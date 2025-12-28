@@ -45,15 +45,6 @@
                         <i class="ri-arrow-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }}-s-line"></i>
                     </button>
                     <div class="categories-scroll flex-grow-1" id="categoriesScroll">
-                        <!-- All Categories Button -->
-                        <div class="category-item {{ !request('category_id') && !request('ship_from') && !request('choice_only') ? 'active' : '' }}"
-                             onclick="selectSource('all')" data-source="all">
-                            <div class="category-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                <i class="ri-apps-line"></i>
-                            </div>
-                            <span class="category-name">{{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}</span>
-                        </div>
-
                         @foreach($categories as $category)
                             <div class="category-item {{ request('category_id') == $category->aliexpress_category_id ? 'active' : '' }}"
                                  onclick="selectMainCategory('{{ $category->aliexpress_category_id }}')"
@@ -656,6 +647,89 @@
         }
     }
 
+    // Subcategory icons mapping based on keywords
+    const subcategoryIcons = {
+        // Fashion & Clothing
+        'dress': 'ri-t-shirt-line', 'فستان': 'ri-t-shirt-line',
+        'shirt': 'ri-t-shirt-line', 'قميص': 'ri-t-shirt-line',
+        'pants': 'ri-t-shirt-line', 'بنطلون': 'ri-t-shirt-line',
+        'shoes': 'ri-footprint-line', 'حذاء': 'ri-footprint-line', 'أحذية': 'ri-footprint-line',
+        'bag': 'ri-handbag-line', 'حقيبة': 'ri-handbag-line', 'حقائب': 'ri-handbag-line',
+        'watch': 'ri-time-line', 'ساعة': 'ri-time-line', 'ساعات': 'ri-time-line',
+        'jewelry': 'ri-vip-diamond-line', 'مجوهرات': 'ri-vip-diamond-line',
+        'ring': 'ri-vip-diamond-line', 'خاتم': 'ri-vip-diamond-line',
+        'necklace': 'ri-vip-diamond-line', 'قلادة': 'ri-vip-diamond-line',
+        'glasses': 'ri-glasses-line', 'نظارة': 'ri-glasses-line', 'نظارات': 'ri-glasses-line',
+        'hat': 'ri-baseball-cap-line', 'قبعة': 'ri-baseball-cap-line',
+        // Electronics
+        'phone': 'ri-smartphone-line', 'هاتف': 'ri-smartphone-line', 'جوال': 'ri-smartphone-line',
+        'laptop': 'ri-macbook-line', 'لابتوب': 'ri-macbook-line',
+        'computer': 'ri-computer-line', 'كمبيوتر': 'ri-computer-line',
+        'tablet': 'ri-tablet-line', 'تابلت': 'ri-tablet-line',
+        'headphone': 'ri-headphone-line', 'سماعة': 'ri-headphone-line', 'سماعات': 'ri-headphone-line',
+        'camera': 'ri-camera-line', 'كاميرا': 'ri-camera-line',
+        'tv': 'ri-tv-line', 'تلفزيون': 'ri-tv-line',
+        'speaker': 'ri-speaker-line', 'مكبر': 'ri-speaker-line',
+        'charger': 'ri-battery-charge-line', 'شاحن': 'ri-battery-charge-line',
+        'cable': 'ri-plug-line', 'كابل': 'ri-plug-line',
+        // Home & Garden
+        'furniture': 'ri-hotel-bed-line', 'أثاث': 'ri-hotel-bed-line',
+        'bed': 'ri-hotel-bed-line', 'سرير': 'ri-hotel-bed-line',
+        'sofa': 'ri-sofa-line', 'كنب': 'ri-sofa-line',
+        'table': 'ri-layout-grid-line', 'طاولة': 'ri-layout-grid-line',
+        'chair': 'ri-armchair-line', 'كرسي': 'ri-armchair-line',
+        'lamp': 'ri-lightbulb-line', 'مصباح': 'ri-lightbulb-line', 'إضاءة': 'ri-lightbulb-line',
+        'kitchen': 'ri-restaurant-line', 'مطبخ': 'ri-restaurant-line',
+        'bathroom': 'ri-water-flash-line', 'حمام': 'ri-water-flash-line',
+        'garden': 'ri-plant-line', 'حديقة': 'ri-plant-line',
+        'decoration': 'ri-home-smile-line', 'ديكور': 'ri-home-smile-line',
+        // Sports & Outdoors
+        'sport': 'ri-basketball-line', 'رياضة': 'ri-basketball-line', 'رياضي': 'ri-basketball-line',
+        'fitness': 'ri-run-line', 'لياقة': 'ri-run-line',
+        'yoga': 'ri-mental-health-line', 'يوغا': 'ri-mental-health-line',
+        'cycling': 'ri-riding-line', 'دراجة': 'ri-riding-line',
+        'camping': 'ri-camping-line', 'تخييم': 'ri-camping-line',
+        'fishing': 'ri-anchor-line', 'صيد': 'ri-anchor-line',
+        // Kids & Toys
+        'toy': 'ri-gamepad-line', 'لعبة': 'ri-gamepad-line', 'ألعاب': 'ri-gamepad-line',
+        'baby': 'ri-emotion-happy-line', 'طفل': 'ri-emotion-happy-line', 'أطفال': 'ri-emotion-happy-line',
+        'kids': 'ri-emotion-happy-line',
+        // Beauty & Health
+        'beauty': 'ri-sparkling-line', 'جمال': 'ri-sparkling-line',
+        'makeup': 'ri-brush-line', 'مكياج': 'ri-brush-line',
+        'skincare': 'ri-heart-pulse-line', 'عناية': 'ri-heart-pulse-line',
+        'perfume': 'ri-spray-line', 'عطر': 'ri-spray-line', 'عطور': 'ri-spray-line',
+        'hair': 'ri-scissors-line', 'شعر': 'ri-scissors-line',
+        // Cars & Motorcycles
+        'car': 'ri-car-line', 'سيارة': 'ri-car-line', 'سيارات': 'ri-car-line',
+        'motorcycle': 'ri-motorbike-line', 'دراجة نارية': 'ri-motorbike-line',
+        'auto': 'ri-car-washing-line',
+        // Office & School
+        'office': 'ri-briefcase-line', 'مكتب': 'ri-briefcase-line',
+        'school': 'ri-book-line', 'مدرسة': 'ri-book-line',
+        'stationery': 'ri-pencil-line', 'قرطاسية': 'ri-pencil-line',
+        'book': 'ri-book-open-line', 'كتاب': 'ri-book-open-line',
+        // Food & Drinks
+        'food': 'ri-restaurant-2-line', 'طعام': 'ri-restaurant-2-line',
+        'drink': 'ri-cup-line', 'مشروب': 'ri-cup-line',
+        'coffee': 'ri-cup-line', 'قهوة': 'ri-cup-line',
+        // Security
+        'security': 'ri-shield-check-line', 'أمن': 'ri-shield-check-line', 'حماية': 'ri-shield-check-line',
+        'lock': 'ri-lock-line', 'قفل': 'ri-lock-line',
+        // Default
+        'default': 'ri-price-tag-3-line'
+    };
+
+    function getSubcategoryIcon(name) {
+        const lowerName = name.toLowerCase();
+        for (const [keyword, icon] of Object.entries(subcategoryIcons)) {
+            if (lowerName.includes(keyword)) {
+                return icon;
+            }
+        }
+        return subcategoryIcons['default'];
+    }
+
     // Show subcategories
     function showSubcategories(categoryId, category) {
         const container = document.getElementById('subcategoriesContainer');
@@ -664,28 +738,22 @@
 
         nameSpan.textContent = isArabic && category.name_ar ? category.name_ar : category.name;
 
-        let html = `
-            <div class="subcategory-item" onclick="searchByCategory('${categoryId}')">
-                <div class="subcategory-icon all-icon">
-                    <i class="ri-apps-line"></i>
-                </div>
-                <span>${isArabic ? 'الكل' : 'All'}</span>
-            </div>
-        `;
+        let html = '';
 
         category.children.forEach(child => {
             const name = isArabic && child.name_ar ? child.name_ar : child.name;
             // Prioritize photo (from database storage) over image (external URL)
             const imageUrl = child.photo || child.image || '';
             const hasImage = imageUrl && imageUrl.length > 0;
+            const icon = getSubcategoryIcon(child.name);
 
             html += `
                 <div class="subcategory-item" onclick="searchByCategory('${child.id}')">
                     <div class="subcategory-icon ${hasImage ? 'has-image' : ''}">
                         ${hasImage ? `<img src="${imageUrl}" alt="${name}" onerror="this.style.display='none'; this.parentElement.classList.remove('has-image'); this.nextElementSibling.style.display='flex';">` : ''}
-                        <i class="ri-folder-line" ${hasImage ? 'style="display:none;"' : ''}></i>
+                        <i class="${icon}" ${hasImage ? 'style="display:none;"' : ''}></i>
                     </div>
-                    <span>${name}</span>
+                    <span class="subcategory-name">${name}</span>
                 </div>
             `;
         });
