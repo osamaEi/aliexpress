@@ -1612,10 +1612,12 @@
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
-        justify-content: flex-end;
+        flex-direction: row-reverse;
+        justify-content: flex-start;
     }
 
     [dir="ltr"] .distributors-inline-list {
+        flex-direction: row;
         justify-content: flex-start;
     }
 
