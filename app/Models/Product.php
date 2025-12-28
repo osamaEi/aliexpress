@@ -36,6 +36,7 @@ class Product extends Model
         'video',
         'aliexpress_id',
         'aliexpress_url',
+        'country_code',
         'aliexpress_price',
         'aliexpress_product_status',
         'aliexpress_variants',
