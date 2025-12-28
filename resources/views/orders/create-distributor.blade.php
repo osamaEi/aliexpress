@@ -347,7 +347,7 @@
                             {{-- Order Summary --}}
                             <div class="card shadow-sm mb-3">
                                 <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0">
+                                    <h6 class="mb-0" style="color :#fff;">
                                         <i class="ri-file-list-line me-1"></i>
                                         {{ app()->getLocale() == 'ar' ? 'ملخص الطلب' : 'Order Summary' }}
                                     </h6>
@@ -424,10 +424,11 @@
 let appliedCoupon = null;
 let discountAmount = 0;
 
+// AED SVG Icon
+const aedIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+
 function calculateTotal() {
     const unitPrice = {{ $product->price }};
-    const currency = '{{ $product->currency ?? "AED" }}';
-    const currencySymbol = currency === 'AED' ? 'د.إ' : (currency === 'SAR' ? 'ر.س' : (currency === 'USD' ? '$' : currency));
     const quantity = parseInt(document.getElementById('quantity').value) || 1;
     const walletBalance = {{ auth()->user()->wallet ? auth()->user()->wallet->balance : 0 }};
     const locale = '{{ app()->getLocale() }}';
@@ -438,15 +439,15 @@ function calculateTotal() {
 
     // Update display
     document.getElementById('quantity_display').textContent = quantity;
-    document.getElementById('subtotal_display').textContent = currencySymbol + ' ' + subtotal.toFixed(2);
-    document.getElementById('grand_total').textContent = currencySymbol + ' ' + grandTotal.toFixed(2);
+    document.getElementById('subtotal_display').innerHTML = aedIcon + ' ' + subtotal.toFixed(2);
+    document.getElementById('grand_total').innerHTML = aedIcon + ' ' + grandTotal.toFixed(2);
 
     // Show/hide discount row
     const discountRow = document.getElementById('discount_row');
     if (discountAmount > 0) {
         discountRow.style.display = 'flex';
         discountRow.style.setProperty('display', 'flex', 'important');
-        document.getElementById('discount_display').textContent = '- ' + currencySymbol + ' ' + discountAmount.toFixed(2);
+        document.getElementById('discount_display').innerHTML = '- ' + aedIcon + ' ' + discountAmount.toFixed(2);
     } else {
         discountRow.style.display = 'none';
         discountRow.style.setProperty('display', 'none', 'important');
@@ -534,11 +535,9 @@ function applyCoupon() {
             document.getElementById('discount_amount').value = discountAmount;
 
             // Show success message
-            const currencyCode = '{{ $product->currency ?? "AED" }}';
-            const couponCurrencySymbol = currencyCode === 'AED' ? 'د.إ' : (currencyCode === 'SAR' ? 'ر.س' : (currencyCode === 'USD' ? '$' : currencyCode));
             const discountText = data.coupon.discount_type === 'percentage'
                 ? data.coupon.discount_value + '%'
-                : couponCurrencySymbol + ' ' + parseFloat(data.coupon.discount_value).toFixed(2);
+                : aedIcon + ' ' + parseFloat(data.coupon.discount_value).toFixed(2);
 
             couponMessage.innerHTML = `<div class="alert alert-success py-2 mb-0">
                 <div class="d-flex justify-content-between align-items-center">
@@ -611,6 +610,12 @@ document.addEventListener('DOMContentLoaded', function() {
 .card-header.bg-primary {
     background: linear-gradient(135deg, #561C04 0%, #7A3206 100%) !important;
     border: none;
+}
+
+.card-header.bg-primary h6,
+.card-header.bg-primary .mb-0,
+.card-header.text-white h6 {
+    color: #fff !important;
 }
 
 .form-control, .form-select {
