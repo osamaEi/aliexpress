@@ -857,13 +857,20 @@
 
     // Search by category
     function searchByCategory(categoryId) {
-        // Reset to AliExpress search when selecting category
-        document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
         document.getElementById('categoryIdInput').value = categoryId;
-        document.getElementById('shipFromInput').value = '';
-        document.getElementById('choiceOnlyInput').value = '';
-        document.getElementById('countryCodeInput').value = '';
-        document.getElementById('distributorIdInput').value = '';
+
+        // Keep distributor/country settings if currently viewing distributor products
+        if (currentSourceCountry) {
+            // Stay on distributor search with category filter
+            document.getElementById('searchForm').action = '{{ route("products.search-distributor") }}';
+        } else {
+            // Reset to AliExpress search when selecting category
+            document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
+            document.getElementById('shipFromInput').value = '';
+            document.getElementById('choiceOnlyInput').value = '';
+            document.getElementById('countryCodeInput').value = '';
+            document.getElementById('distributorIdInput').value = '';
+        }
         document.getElementById('searchForm').submit();
     }
 
@@ -1605,6 +1612,11 @@
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    [dir="ltr"] .distributors-inline-list {
+        justify-content: flex-start;
     }
 
     .distributor-card {
