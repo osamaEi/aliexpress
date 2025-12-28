@@ -359,7 +359,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-wrapper">
-                <img src="{{ asset('images/white-logo.png') }}" alt="Logo">
+                <img src="{{ asset('logo/logo10.png') }}" alt="Logo">
                 <h3>{{ app()->getLocale() == 'ar' ? 'مرحباً بعودتك' : 'Welcome Back' }}</h3>
                 <p>{{ app()->getLocale() == 'ar' ? 'سجّل دخولك للوصول إلى حسابك ومتابعة أعمالك' : 'Sign in to access your account and continue your work' }}</p>
             </div>

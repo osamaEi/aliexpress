@@ -514,7 +514,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-wrapper">
-                <img src="{{ asset('images/white-logo.png') }}" alt="Logo">
+                <img src="{{ asset('logo/logo10.png') }}" alt="Logo">
 
                 <!-- Footer in Sidebar -->
                 <div class="sidebar-footer">
