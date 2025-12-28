@@ -355,7 +355,7 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'سعر الوحدة:' : 'Unit Price:' }}</span>
-                                        <strong><x-currency-symbol :currency="$product->currency ?? 'AED'" /> {{ number_format($product->price, 2) }}</strong>
+                                        <strong><x-dirham-icon width="18" height="18" /> {{ number_format($product->price, 2) }}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'الكمية:' : 'Quantity:' }}</span>
@@ -363,16 +363,16 @@
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'المجموع الفرعي:' : 'Subtotal:' }}</span>
-                                        <strong id="subtotal_display"><x-currency-symbol :currency="$product->currency ?? 'AED'" :showIcon="false" /> {{ number_format($product->price, 2) }}</strong>
+                                        <strong id="subtotal_display"><span class="currency-icon-wrapper"></span> {{ number_format($product->price, 2) }}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2" id="discount_row" style="display: none !important;">
                                         <span class="text-success">{{ app()->getLocale() == 'ar' ? 'الخصم:' : 'Discount:' }}</span>
-                                        <strong class="text-success" id="discount_display">- <x-currency-symbol :currency="$product->currency ?? 'AED'" :showIcon="false" /> 0.00</strong>
+                                        <strong class="text-success" id="discount_display">- <span class="currency-icon-wrapper"></span> 0.00</strong>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'الإجمالي:' : 'Total:' }}</h5>
-                                        <h4 class="mb-0 text-primary" id="grand_total"><x-currency-symbol :currency="$product->currency ?? 'AED'" :showIcon="false" /> {{ number_format($product->price, 2) }}</h4>
+                                        <h4 class="mb-0 text-primary" id="grand_total"><span class="currency-icon-wrapper"></span> {{ number_format($product->price, 2) }}</h4>
                                     </div>
                                 </div>
                             </div>
