@@ -49,7 +49,7 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ route('products.assigned', ['tab' => 'china']) }}" class="text-decoration-none">
+                        <a href="{{ route('products.my-assigned', ['tab' => 'china']) }}" class="text-decoration-none">
                             <div class="card text-white" style="background-color: #de2910;">
                                 <div class="card-body">
                                     <h3 class="mb-0" style="color: white;">{{ $chinaCount ?? 0 }}</h3>
@@ -59,7 +59,7 @@
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ route('products.assigned', ['tab' => 'uae']) }}" class="text-decoration-none">
+                        <a href="{{ route('products.my-assigned', ['tab' => 'uae']) }}" class="text-decoration-none">
                             <div class="card text-white" style="background-color: #00732f;">
                                 <div class="card-body">
                                     <h3 class="mb-0" style="color: white;">{{ $uaeCount ?? 0 }}</h3>
@@ -69,7 +69,7 @@
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{{ route('products.assigned', ['tab' => 'saudi']) }}" class="text-decoration-none">
+                        <a href="{{ route('products.my-assigned', ['tab' => 'saudi']) }}" class="text-decoration-none">
                             <div class="card text-white" style="background-color: #006c35;">
                                 <div class="card-body">
                                     <h3 class="mb-0" style="color: white;">{{ $saudiCount ?? 0 }}</h3>
@@ -83,7 +83,7 @@
                 <!-- Tabs Navigation -->
                 <ul class="nav nav-tabs mb-4" role="tablist" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $currentTab === 'china' ? 'active' : '' }}" href="{{ route('products.assigned', ['tab' => 'china']) }}">
+                        <a class="nav-link {{ $currentTab === 'china' ? 'active' : '' }}" href="{{ route('products.my-assigned', ['tab' => 'china']) }}">
                             <span class="d-flex align-items-center">
                                 <img src="https://flagcdn.com/w20/cn.png" alt="CN" class="me-2" style="width: 20px; height: 15px; object-fit: cover; border-radius: 2px;">
                                 {{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}
@@ -92,7 +92,7 @@
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $currentTab === 'uae' ? 'active' : '' }}" href="{{ route('products.assigned', ['tab' => 'uae']) }}">
+                        <a class="nav-link {{ $currentTab === 'uae' ? 'active' : '' }}" href="{{ route('products.my-assigned', ['tab' => 'uae']) }}">
                             <span class="d-flex align-items-center">
                                 <img src="https://flagcdn.com/w20/ae.png" alt="AE" class="me-2" style="width: 20px; height: 15px; object-fit: cover; border-radius: 2px;">
                                 {{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}
@@ -101,7 +101,7 @@
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $currentTab === 'saudi' ? 'active' : '' }}" href="{{ route('products.assigned', ['tab' => 'saudi']) }}">
+                        <a class="nav-link {{ $currentTab === 'saudi' ? 'active' : '' }}" href="{{ route('products.my-assigned', ['tab' => 'saudi']) }}">
                             <span class="d-flex align-items-center">
                                 <img src="https://flagcdn.com/w20/sa.png" alt="SA" class="me-2" style="width: 20px; height: 15px; object-fit: cover; border-radius: 2px;">
                                 {{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi' }}
