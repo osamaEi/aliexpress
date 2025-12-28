@@ -157,9 +157,9 @@
                                             <strong>{{ app()->getLocale() == 'ar' && $product->name_ar ? $product->name_ar : $product->name }}</strong>
                                             <br>
                                             @if($currentTab === 'china')
-                                                <small class="text-muted">
-                                                    <i class="ri-barcode-line me-1"></i>
-                                                    AliExpress ID: {{ $aliexpressProductId ?? $product->aliexpress_id }}
+                                                <small class="text-success">
+                                                    <img src="https://flagcdn.com/w16/cn.png" alt="CN" class="me-1" style="width: 16px;">
+                                                    {{ app()->getLocale() == 'ar' ? 'منتج الصين' : 'China Product' }}
                                                 </small>
                                             @elseif($currentTab === 'uae')
                                                 <small class="text-success">
