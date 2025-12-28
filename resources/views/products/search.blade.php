@@ -115,15 +115,39 @@
                 </div>
 
                 <!-- Distributors Dropdown (shown below country cards) -->
-                <div id="distributorsDropdown" class="distributors-dropdown" style="display: none;">
+                @php
+                    $showDistributorDropdown = isset($source_country) && !empty($source_country);
+                @endphp
+                <div id="distributorsDropdown" class="distributors-dropdown" style="display: {{ $showDistributorDropdown ? 'block' : 'none' }};">
                     <div class="distributors-dropdown-header">
-                        <span id="dropdownCountryName"></span>
+                        <span id="dropdownCountryName">
+                            @if($showDistributorDropdown)
+                                @php
+                                    $dropdownCountryInfo = $countryNames[$source_country] ?? ['ar' => $source_country, 'en' => $source_country, 'flag' => '🏳️'];
+                                @endphp
+                                {{ $dropdownCountryInfo['flag'] }} {{ app()->getLocale() == 'ar' ? 'متاجر ' . $dropdownCountryInfo['ar'] : $dropdownCountryInfo['en'] . ' Stores' }}
+                            @endif
+                        </span>
                         <button type="button" class="btn btn-sm btn-link text-muted p-0" onclick="hideDistributors()">
                             <i class="ri-close-line"></i>
                         </button>
                     </div>
                     <div id="distributorsList" class="distributors-inline-list">
-                        <!-- Distributors will be loaded here -->
+                        @if($showDistributorDropdown && isset($distributorsByCountry[$source_country]))
+                            @foreach($distributorsByCountry[$source_country] as $dist)
+                                <div class="distributor-card" onclick="viewDistributorProducts({{ $dist['id'] }}, '{{ $source_country }}')">
+                                    <div class="distributor-card-avatar">
+                                        @if(!empty($dist['avatar']))
+                                            <img src="{{ asset('storage/' . $dist['avatar']) }}" alt="{{ $dist['store_name'] ?? $dist['name'] }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        @endif
+                                        <div class="avatar-placeholder" @if(!empty($dist['avatar'])) style="display:none;" @endif>
+                                            <i class="ri-store-2-line"></i>
+                                        </div>
+                                    </div>
+                                    <span class="distributor-card-name">{{ $dist['store_name'] ?? $dist['name'] }}</span>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
 
@@ -790,12 +814,12 @@
         document.getElementById('categoryIdInput').value = '';
     }
 
-    // Current selected country for dropdown
-    let selectedCountryCode = null;
-
     // Check if we're currently viewing distributor products
     const currentSourceCountry = '{{ isset($source_country) ? $source_country : "" }}';
     const currentDistributorId = '{{ request("distributor_id", "") }}';
+
+    // Current selected country for dropdown - initialize with current source country if viewing distributor products
+    let selectedCountryCode = currentSourceCountry || null;
 
     // Toggle distributors dropdown
     function toggleDistributors(countryCode) {
@@ -1393,10 +1417,13 @@
         text-align: center;
         color: #333;
         font-weight: 500;
-        max-width: 80px;
+        max-width: 90px;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.3;
+        height: 2.6em;
     }
 
     .scroll-btn {
