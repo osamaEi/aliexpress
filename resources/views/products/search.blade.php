@@ -793,14 +793,23 @@
     // Current selected country for dropdown
     let selectedCountryCode = null;
 
+    // Check if we're currently viewing distributor products
+    const currentSourceCountry = '{{ isset($source_country) ? $source_country : "" }}';
+    const currentDistributorId = '{{ request("distributor_id", "") }}';
+
     // Toggle distributors dropdown
     function toggleDistributors(countryCode) {
         const dropdown = document.getElementById('distributorsDropdown');
         const isCurrentlyOpen = dropdown.style.display !== 'none' && selectedCountryCode === countryCode;
 
-        // If clicking same country, close it
+        // If clicking same country and dropdown is open, just close dropdown (don't affect products)
         if (isCurrentlyOpen) {
-            hideDistributors();
+            dropdown.style.display = 'none';
+            // Keep the active state if we're viewing products from this country
+            if (currentSourceCountry !== countryCode) {
+                document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
+            }
+            selectedCountryCode = null;
             return;
         }
 
