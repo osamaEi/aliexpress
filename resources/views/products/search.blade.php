@@ -498,10 +498,14 @@
                                 </div>
 
                                 <div class="card-body d-flex flex-column">
-                                    <!-- Product Title -->
-                                    <h6 class="card-title" style="height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                        {{ app()->getLocale() == 'ar' ? ($product['title_ar'] ?? $product['title']) : ($product['title_en'] ?? $product['title']) }}
+                                    <!-- Product Title - Arabic -->
+                                    <h6 class="card-title mb-1" style="height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; direction: rtl; text-align: right;">
+                                        {{ $product['title_ar'] ?? $product['title'] }}
                                     </h6>
+                                    <!-- Product Title - English -->
+                                    <p class="text-muted small mb-2" style="height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; direction: ltr; text-align: left; font-size: 0.75rem;">
+                                        {{ $product['title_en'] ?? $product['title'] }}
+                                    </p>
 
                                     <!-- Price -->
                                     <div class="mb-2">
