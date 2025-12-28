@@ -89,7 +89,7 @@
                                             <p class="text-muted small mb-2">{{ $product->name_ar }}</p>
                                         @endif
                                         <div class="d-flex align-items-center gap-3">
-                                            <h4 class="text-primary mb-0"><x-currency-symbol :currency="$product->currency ?? 'AED'" /> {{ number_format($product->price, 2) }}</h4>
+                                            <h4 class="text-primary mb-0"><x-dirham-icon width="24" height="24" /> {{ number_format($product->price, 2) }}</h4>
                                             <span class="badge bg-success">
                                                 <i class="ri-store-line me-1"></i>
                                                 {{ app()->getLocale() == 'ar' ? 'محلي' : 'Local' }}
