@@ -45,6 +45,14 @@
                         // Products without aliexpress_id OR with short IDs (local products)
                         return empty($product->aliexpress_id) || strlen((string)$product->aliexpress_id) < 10;
                     });
+
+                    // Separate UAE and Saudi products from distributor products
+                    $uaeProducts = $distributorProducts->filter(function($p) {
+                        return ($p->country_code ?? 'AE') === 'AE';
+                    });
+                    $saudiProducts = $distributorProducts->filter(function($p) {
+                        return ($p->country_code ?? '') === 'SA';
+                    });
                 @endphp
 
                 <!-- Stats Cards -->
@@ -99,11 +107,6 @@
                             <span class="d-flex align-items-center">
                                 <img src="https://flagcdn.com/w20/ae.png" alt="AE" class="me-2" style="width: 20px; height: 15px; object-fit: cover; border-radius: 2px;">
                                 {{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}
-                                @php
-                                    $uaeProducts = $distributorProducts->filter(function($p) {
-                                        return ($p->country_code ?? 'AE') === 'AE';
-                                    });
-                                @endphp
                                 <span class="badge bg-success ms-2">{{ $uaeProducts->count() }}</span>
                             </span>
                         </button>
@@ -113,11 +116,6 @@
                             <span class="d-flex align-items-center">
                                 <img src="https://flagcdn.com/w20/sa.png" alt="SA" class="me-2" style="width: 20px; height: 15px; object-fit: cover; border-radius: 2px;">
                                 {{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi' }}
-                                @php
-                                    $saudiProducts = $distributorProducts->filter(function($p) {
-                                        return ($p->country_code ?? '') === 'SA';
-                                    });
-                                @endphp
                                 <span class="badge bg-success ms-2">{{ $saudiProducts->count() }}</span>
                             </span>
                         </button>
