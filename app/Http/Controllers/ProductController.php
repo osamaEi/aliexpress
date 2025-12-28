@@ -1583,7 +1583,7 @@ class ProductController extends Controller
     /**
      * Get assigned products for current seller
      */
-    public function myAssignedProducts()
+    public function myAssignedProducts(Request $request)
     {
         $user = auth()->user();
 
@@ -1591,12 +1591,68 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Only sellers can view assigned products.');
         }
 
-        $assignedProducts = $user->assignedProducts()
+        // Get all assigned products for counting
+        $allAssignedProducts = $user->assignedProducts()
             ->withPivot('aliexpress_product_id', 'status')
-            ->orderBy('product_user.created_at', 'desc')
-            ->paginate(20);
+            ->get();
 
-        return view('products.assigned', compact('assignedProducts'));
+        // Count products by type
+        $chinaCount = $allAssignedProducts->filter(function($product) {
+            return !empty($product->aliexpress_id) && strlen((string)$product->aliexpress_id) >= 10;
+        })->count();
+
+        $uaeCount = $allAssignedProducts->filter(function($product) {
+            $isLocal = empty($product->aliexpress_id) || strlen((string)$product->aliexpress_id) < 10;
+            return $isLocal && ($product->country_code ?? 'AE') === 'AE';
+        })->count();
+
+        $saudiCount = $allAssignedProducts->filter(function($product) {
+            $isLocal = empty($product->aliexpress_id) || strlen((string)$product->aliexpress_id) < 10;
+            return $isLocal && ($product->country_code ?? '') === 'SA';
+        })->count();
+
+        // Get current tab filter
+        $tab = $request->get('tab', 'china');
+
+        // Build query based on tab
+        $query = $user->assignedProducts()
+            ->withPivot('aliexpress_product_id', 'status');
+
+        if ($tab === 'china') {
+            $query->where(function($q) {
+                $q->whereNotNull('aliexpress_id')
+                  ->whereRaw('LENGTH(aliexpress_id) >= 10');
+            });
+        } elseif ($tab === 'uae') {
+            $query->where(function($q) {
+                $q->where(function($inner) {
+                    $inner->whereNull('aliexpress_id')
+                          ->orWhereRaw('LENGTH(aliexpress_id) < 10');
+                })->where(function($inner) {
+                    $inner->where('country_code', 'AE')
+                          ->orWhereNull('country_code');
+                });
+            });
+        } elseif ($tab === 'saudi') {
+            $query->where(function($q) {
+                $q->where(function($inner) {
+                    $inner->whereNull('aliexpress_id')
+                          ->orWhereRaw('LENGTH(aliexpress_id) < 10');
+                })->where('country_code', 'SA');
+            });
+        }
+
+        $assignedProducts = $query->orderBy('product_user.created_at', 'desc')
+            ->paginate(20)
+            ->appends(['tab' => $tab]);
+
+        return view('products.assigned', compact(
+            'assignedProducts',
+            'chinaCount',
+            'uaeCount',
+            'saudiCount',
+            'tab'
+        ));
     }
 
     /**

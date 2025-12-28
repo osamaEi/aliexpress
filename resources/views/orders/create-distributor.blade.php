@@ -1,6 +1,13 @@
 @extends('dashboard')
 
 @section('content')
+@php
+    // Convert product price to selected currency
+    $priceConverted = $currentCurrency->convertFrom($product->price, $product->currency ?? 'AED');
+    // Wallet balance is always in AED
+    $walletBalanceAED = auth()->user()->wallet ? auth()->user()->wallet->balance : 0;
+    $walletBalanceConverted = $currentCurrency->convertFrom($walletBalanceAED, 'AED');
+@endphp
 <div class="container-fluid" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
@@ -89,7 +96,7 @@
                                             <p class="text-muted small mb-2">{{ $product->name_ar }}</p>
                                         @endif
                                         <div class="d-flex align-items-center gap-3">
-                                            <h4 class="text-primary mb-0"><x-dirham-icon width="24" height="24" /> {{ number_format($product->price, 2) }}</h4>
+                                            <h4 class="text-primary mb-0">{!! $currentCurrency->format($priceConverted) !!}</h4>
                                             <span class="badge bg-success">
                                                 <i class="ri-store-line me-1"></i>
                                                 {{ app()->getLocale() == 'ar' ? 'محلي' : 'Local' }}
@@ -355,7 +362,7 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'سعر الوحدة:' : 'Unit Price:' }}</span>
-                                        <strong><x-dirham-icon width="18" height="18" /> {{ number_format($product->price, 2) }}</strong>
+                                        <strong id="unit_price_display">{!! $currentCurrency->format($priceConverted) !!}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'الكمية:' : 'Quantity:' }}</span>
@@ -363,16 +370,16 @@
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'المجموع الفرعي:' : 'Subtotal:' }}</span>
-                                        <strong id="subtotal_display"><span class="currency-icon-wrapper"></span> {{ number_format($product->price, 2) }}</strong>
+                                        <strong id="subtotal_display">{!! $currentCurrency->format($priceConverted) !!}</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2" id="discount_row" style="display: none !important;">
                                         <span class="text-success">{{ app()->getLocale() == 'ar' ? 'الخصم:' : 'Discount:' }}</span>
-                                        <strong class="text-success" id="discount_display">- <span class="currency-icon-wrapper"></span> 0.00</strong>
+                                        <strong class="text-success" id="discount_display">- {{ $currentCurrency->symbol }} 0.00</strong>
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'الإجمالي:' : 'Total:' }}</h5>
-                                        <h4 class="mb-0 text-primary" id="grand_total"><span class="currency-icon-wrapper"></span> {{ number_format($product->price, 2) }}</h4>
+                                        <h4 class="mb-0 text-primary" id="grand_total">{!! $currentCurrency->format($priceConverted) !!}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -386,7 +393,7 @@
                                                 <small class="text-muted d-block">{{ app()->getLocale() == 'ar' ? 'رصيدك الحالي' : 'Your Balance' }}</small>
                                                 <h5 class="mb-0 text-success">
                                                     <i class="ri-wallet-3-line me-1"></i>
-                                                    AED {{ number_format(auth()->user()->wallet->balance, 2) }}
+                                                    {!! $currentCurrency->format($walletBalanceConverted) !!}
                                                 </h5>
                                             </div>
                                         </div>
@@ -424,13 +431,38 @@
 let appliedCoupon = null;
 let discountAmount = 0;
 
-// AED SVG Icon
-const aedIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+// Currency data
+const currentCurrency = {
+    code: '{{ $currentCurrency->code }}',
+    symbol: '{{ $currentCurrency->symbol }}',
+    exchangeRate: {{ $currentCurrency->exchange_rate }}
+};
+
+// Currency icon SVGs
+const currencyIcons = {
+    'AED': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+    'SAR': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><text x="4" y="17" font-size="14" fill="currentColor">﷼</text></svg>',
+    'USD': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+// Format amount with currency icon
+function formatCurrency(amount) {
+    const formattedAmount = parseFloat(amount).toFixed(2);
+    const icon = currencyIcons[currentCurrency.code] || currentCurrency.symbol;
+    const isArabic = '{{ app()->getLocale() }}' === 'ar';
+
+    if (isArabic) {
+        return formattedAmount + ' ' + icon;
+    }
+    return icon + ' ' + formattedAmount;
+}
 
 function calculateTotal() {
-    const unitPrice = {{ $product->price }};
+    // Price already converted to current currency
+    const unitPrice = {{ $priceConverted }};
     const quantity = parseInt(document.getElementById('quantity').value) || 1;
-    const walletBalance = {{ auth()->user()->wallet ? auth()->user()->wallet->balance : 0 }};
+    // Wallet balance converted to current currency
+    const walletBalance = {{ $walletBalanceConverted }};
     const locale = '{{ app()->getLocale() }}';
 
     const subtotal = unitPrice * quantity;
@@ -439,15 +471,15 @@ function calculateTotal() {
 
     // Update display
     document.getElementById('quantity_display').textContent = quantity;
-    document.getElementById('subtotal_display').innerHTML = aedIcon + ' ' + subtotal.toFixed(2);
-    document.getElementById('grand_total').innerHTML = aedIcon + ' ' + grandTotal.toFixed(2);
+    document.getElementById('subtotal_display').innerHTML = formatCurrency(subtotal);
+    document.getElementById('grand_total').innerHTML = formatCurrency(grandTotal);
 
     // Show/hide discount row
     const discountRow = document.getElementById('discount_row');
     if (discountAmount > 0) {
         discountRow.style.display = 'flex';
         discountRow.style.setProperty('display', 'flex', 'important');
-        document.getElementById('discount_display').innerHTML = '- ' + aedIcon + ' ' + discountAmount.toFixed(2);
+        document.getElementById('discount_display').innerHTML = '- ' + formatCurrency(discountAmount);
     } else {
         discountRow.style.display = 'none';
         discountRow.style.setProperty('display', 'none', 'important');
@@ -502,8 +534,8 @@ function applyCoupon() {
     applyCouponBtn.disabled = true;
     applyCouponBtn.innerHTML = '<i class="ri-loader-4-line me-1"></i>' + (locale === 'ar' ? 'جاري التحقق...' : 'Checking...');
 
-    // Calculate subtotal
-    const unitPrice = {{ $product->price }};
+    // Calculate subtotal (using converted price)
+    const unitPrice = {{ $priceConverted }};
     const quantity = parseInt(document.getElementById('quantity').value) || 1;
     const subtotal = unitPrice * quantity;
 
@@ -537,7 +569,7 @@ function applyCoupon() {
             // Show success message
             const discountText = data.coupon.discount_type === 'percentage'
                 ? data.coupon.discount_value + '%'
-                : aedIcon + ' ' + parseFloat(data.coupon.discount_value).toFixed(2);
+                : formatCurrency(parseFloat(data.coupon.discount_value));
 
             couponMessage.innerHTML = `<div class="alert alert-success py-2 mb-0">
                 <div class="d-flex justify-content-between align-items-center">

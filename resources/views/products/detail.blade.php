@@ -238,12 +238,7 @@
 
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    @if(isset($sku['offer_sale_price']) && $sku['offer_sale_price'] < $sku['sku_price'])
-                                                        <div class="text-primary fw-bold fs-5">${{ $sku['offer_sale_price'] }}</div>
-                                                        <small class="text-muted text-decoration-line-through">${{ $sku['sku_price'] }}</small>
-                                                    @else
-                                                        <div class="text-primary fw-bold fs-5">${{ $sku['sku_price'] ?? 'N/A' }}</div>
-                                                    @endif
+                                                    <div class="text-primary fw-bold fs-5">{!! $currentCurrency->format($convertedPrice) !!}</div>
                                                 </div>
                                                 <span class="badge {{ $sku['sku_available_stock'] > 0 ? 'bg-success' : 'bg-danger' }} px-3 py-2">
                                                     {{ $sku['sku_available_stock'] > 0 ? $sku['sku_available_stock'] . ' in stock' : 'Out of Stock' }}
@@ -395,7 +390,7 @@
                                                             </div>
                                                             <div class="d-flex justify-content-between align-items-center">
                                                                 <div class="text-primary fw-bold">
-                                                                    ${{ $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 'N/A' }}
+                                                                    {!! $currentCurrency->format($convertedPrice) !!}
                                                                 </div>
                                                                 <span class="badge {{ $sku['sku_available_stock'] > 0 ? 'bg-success' : 'bg-danger' }}">
                                                                     {{ $sku['sku_available_stock'] > 0 ? 'In Stock' : 'Out' }}

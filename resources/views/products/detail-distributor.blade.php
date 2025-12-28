@@ -101,18 +101,22 @@
                     @endif
 
                     <!-- Pricing -->
+                    @php
+                        $priceConverted = $currentCurrency->convertFrom($product->price, $product->currency ?? 'AED');
+                        $originalPriceConverted = $product->original_price ? $currentCurrency->convertFrom($product->original_price, $product->currency ?? 'AED') : null;
+                    @endphp
                     <div class="card text-white mb-4 border-0" style="border-radius: 16px; background: linear-gradient(135deg, #00732f 0%, #00a040 100%);">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-baseline mb-2">
                                 <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px; color:white;">
-                                    {{ $product->currency ?? 'AED' }} {{ number_format($product->price, 2) }}
+                                    {!! $currentCurrency->format($priceConverted) !!}
                                 </h2>
-                                @if($product->original_price && $product->original_price > $product->price)
+                                @if($originalPriceConverted && $originalPriceConverted > $priceConverted)
                                     <span class="text-white-50 text-decoration-line-through me-2" style="font-size: 20px;">
-                                        {{ $product->currency ?? 'AED' }} {{ number_format($product->original_price, 2) }}
+                                        {!! $currentCurrency->format($originalPriceConverted) !!}
                                     </span>
                                     <span class="badge bg-danger" style="font-size: 14px;">
-                                        {{ round((($product->original_price - $product->price) / $product->original_price) * 100) }}% OFF
+                                        {{ round((($originalPriceConverted - $priceConverted) / $originalPriceConverted) * 100) }}% OFF
                                     </span>
                                 @endif
                             </div>
@@ -248,8 +252,11 @@
                                             </div>
 
                                             <div class="d-flex justify-content-between align-items-center">
+                                                @php
+                                                    $variationPriceConverted = $currentCurrency->convertFrom($variation->price ?? $product->price, $product->currency ?? 'AED');
+                                                @endphp
                                                 <div class="text-primary fw-bold fs-5">
-                                                    {{ $product->currency ?? 'AED' }} {{ number_format($variation->price ?? $product->price, 2) }}
+                                                    {!! $currentCurrency->format($variationPriceConverted) !!}
                                                 </div>
                                                 <span class="badge {{ ($variation->stock ?? 0) > 0 ? 'bg-success' : 'bg-danger' }} px-3 py-2">
                                                     {{ ($variation->stock ?? 0) > 0 ? (($variation->stock ?? 0) . ' ' . (app()->getLocale() == 'ar' ? 'متوفر' : 'in stock')) : (app()->getLocale() == 'ar' ? 'غير متوفر' : 'Out of Stock') }}
