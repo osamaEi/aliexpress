@@ -1798,6 +1798,36 @@ class ProductController extends Controller
                 ->toArray();
         }
 
+        // Get distributor countries for the country filter buttons
+        $distributorCountries = \App\Models\User::where('user_type', 'distributor')
+            ->whereNotNull('country')
+            ->where('country', '!=', '')
+            ->select('country')
+            ->distinct()
+            ->get()
+            ->map(function ($user) {
+                return ['code' => $user->country];
+            })
+            ->toArray();
+
+        // Get distributors grouped by country for the dropdown
+        $distributorsByCountry = \App\Models\User::where('user_type', 'distributor')
+            ->whereNotNull('country')
+            ->where('country', '!=', '')
+            ->get()
+            ->groupBy('country')
+            ->map(function ($distributors) {
+                return $distributors->map(function ($dist) {
+                    return [
+                        'id' => $dist->id,
+                        'name' => $dist->name,
+                        'store_name' => $dist->store_name,
+                        'avatar' => $dist->avatar,
+                    ];
+                })->toArray();
+            })
+            ->toArray();
+
         return view('products.search', [
             'products' => $transformedProducts->toArray(),
             'total_count' => $products->total(),
@@ -1806,6 +1836,8 @@ class ProductController extends Controller
             'allCategories' => $allCategories,
             'assignedProductIds' => $assignedProductIds,
             'source_country' => $countryCode,
+            'distributorCountries' => $distributorCountries,
+            'distributorsByCountry' => $distributorsByCountry,
         ]);
     }
 
