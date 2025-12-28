@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Services\AliExpressDropshippingService;
 use App\Services\AliexpressTextService;
 use App\Services\AliExpressService;
+use App\Services\TranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -16,16 +17,19 @@ class ProductController extends Controller
     protected $aliexpressService;
     protected $aliexpressTextService;
     protected $aliexpressCategoryService;
+    protected $translationService;
 
     public function __construct(
         AliExpressDropshippingService $aliexpressService,
         AliexpressTextService $aliexpressTextService,
-        AliExpressService $aliexpressCategoryService
+        AliExpressService $aliexpressCategoryService,
+        TranslationService $translationService
     )
     {
         $this->aliexpressService = $aliexpressService;
         $this->aliexpressTextService = $aliexpressTextService;
         $this->aliexpressCategoryService = $aliexpressCategoryService;
+        $this->translationService = $translationService;
     }
 
     /**
@@ -1162,7 +1166,15 @@ class ProductController extends Controller
                         // Add Arabic titles to original products (English is already there)
                         foreach ($result['products'] as &$product) {
                             $product['title_en'] = $product['title']; // Original English title
-                            $product['title_ar'] = $arabicTitles[$product['item_id']] ?? $product['title'];
+                            $arabicFromApi = $arabicTitles[$product['item_id']] ?? null;
+
+                            // Check if Arabic title is actually different from English
+                            if ($arabicFromApi && $arabicFromApi !== $product['title']) {
+                                $product['title_ar'] = $arabicFromApi;
+                            } else {
+                                // Use Google Translate
+                                $product['title_ar'] = $this->translationService->translate($product['title'], 'ar', 'en');
+                            }
                         }
                         unset($product);
 
@@ -1174,13 +1186,13 @@ class ProductController extends Controller
                     Log::warning('Failed to fetch bilingual titles', [
                         'error' => $e->getMessage()
                     ]);
-                    // Fallback: use current title for both languages
+                    // Fallback: use Google Translate
                     foreach ($result['products'] as &$product) {
                         if (!isset($product['title_en'])) {
                             $product['title_en'] = $product['title'];
                         }
                         if (!isset($product['title_ar'])) {
-                            $product['title_ar'] = $product['title'];
+                            $product['title_ar'] = $this->translationService->translate($product['title'], 'ar', 'en');
                         }
                     }
                     unset($product);

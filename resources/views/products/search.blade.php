@@ -499,11 +499,11 @@
 
                                 <div class="card-body d-flex flex-column">
                                     <!-- Product Title - Arabic -->
-                                    <h6 class="card-title mb-1" style="height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; direction: rtl; text-align: right;">
+                                    <h6 class="card-title mb-1" style="height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; direction: rtl; text-align: right; font-size: 0.85rem;">
                                         {{ $product['title_ar'] ?? $product['title'] }}
                                     </h6>
                                     <!-- Product Title - English -->
-                                    <p class="text-muted small mb-2" style="height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; direction: ltr; text-align: left; font-size: 0.75rem;">
+                                    <p class="text-muted mb-2" style="height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; direction: ltr; text-align: left; font-size: 0.7rem; line-height: 1.3;">
                                         {{ $product['title_en'] ?? $product['title'] }}
                                     </p>
 
