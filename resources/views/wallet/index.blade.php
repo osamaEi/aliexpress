@@ -1,6 +1,12 @@
 @extends('dashboard')
 
 @section('content')
+@php
+    // Convert wallet balances to selected currency
+    $balanceConverted = $currentCurrency->convertFrom($wallet->balance, 'AED');
+    $availableBalanceConverted = $currentCurrency->convertFrom($wallet->available_balance, 'AED');
+    $pendingBalanceConverted = $currentCurrency->convertFrom($wallet->pending_balance, 'AED');
+@endphp
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <!-- Page Header -->
     <div class="mb-4">
@@ -22,7 +28,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <h5 class="mb-1">{!! format_currency($wallet->balance, 'AED', 2, true) !!}</h5>
+                        <h5 class="mb-1">{!! $currentCurrency->format($balanceConverted) !!}</h5>
                         <small class="text-muted">{{ __('messages.total_balance') }}</small>
                     </div>
                 </div>
@@ -41,7 +47,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <h5 class="mb-1">{!! format_currency($wallet->available_balance, 'AED', 2, true) !!}</h5>
+                        <h5 class="mb-1">{!! $currentCurrency->format($availableBalanceConverted) !!}</h5>
                         <small class="text-muted">{{ __('messages.available_balance') }}</small>
                     </div>
                 </div>
@@ -60,7 +66,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <h5 class="mb-1">{!! format_currency($wallet->pending_balance, 'AED', 2, true) !!}</h5>
+                        <h5 class="mb-1">{!! $currentCurrency->format($pendingBalanceConverted) !!}</h5>
                         <small class="text-muted">{{ __('messages.pending_balance') }}</small>
                     </div>
                 </div>
@@ -290,12 +296,18 @@
                                 </div>
                             </td>
                             <td>
+                                @php
+                                    $amountConverted = $currentCurrency->convertFrom(abs($transaction->amount), 'AED');
+                                @endphp
                                 <span class="{{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
-                                    {!! ($transaction->type === 'credit' ? '+' : '-') . ' ' . format_currency(abs($transaction->amount), 'AED', 2, true) !!}
+                                    {!! ($transaction->type === 'credit' ? '+' : '-') . ' ' . $currentCurrency->format($amountConverted) !!}
                                 </span>
                             </td>
                             <td>
-                                {!! format_currency($transaction->balance_after, 'AED', 2, true) !!}
+                                @php
+                                    $balanceAfterConverted = $currentCurrency->convertFrom($transaction->balance_after, 'AED');
+                                @endphp
+                                {!! $currentCurrency->format($balanceAfterConverted) !!}
                             </td>
                             <td>
                                 @if($transaction->status === 'completed')

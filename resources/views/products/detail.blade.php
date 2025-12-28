@@ -942,6 +942,10 @@ const currentCurrency = {
 // Wallet balance (in AED - base currency)
 const walletBalanceAED = {{ $walletBalance ?? 0 }};
 
+// Product price from system (already converted to current currency in blade)
+const productPrice = {{ $currentCurrency->convertFrom($product->price, $product->currency ?? 'USD') }};
+const productCurrency = '{{ $currentCurrency->code }}';
+
 // Currency icon SVGs
 const currencyIcons = {
     'AED': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
@@ -1068,17 +1072,13 @@ function populateOrderSummary() {
         province
     });
 
-    // Get product price in USD
-    const unitPriceUSD = parseFloat(selectedVariantData.offer_sale_price || selectedVariantData.price || 0);
-    const productTotalUSD = unitPriceUSD * quantity;
+    // Use product price from system (already in current currency)
+    const unitPriceConverted = productPrice;
+    const productTotalConverted = productPrice * quantity;
 
-    // Get shipping cost (API returns in USD)
+    // Get shipping cost (API returns in USD) and convert to current currency
     const shippingCostUSD = parseFloat(calculatedShippingData.freight_amount || 0);
     const freightCurrency = calculatedShippingData.freight_currency || 'USD';
-
-    // Convert to selected currency
-    const unitPriceConverted = convertToCurrentCurrency(unitPriceUSD, 'USD');
-    const productTotalConverted = convertToCurrentCurrency(productTotalUSD, 'USD');
     const shippingCostConverted = convertToCurrentCurrency(shippingCostUSD, freightCurrency);
 
     // Calculate total in selected currency
