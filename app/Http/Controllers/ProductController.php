@@ -212,7 +212,13 @@ class ProductController extends Controller
             }
         }
 
-        return view('products.detail', compact('product', 'aliexpressData'));
+        // Get user's wallet balance
+        $walletBalance = 0;
+        if (auth()->check() && auth()->user()->wallet) {
+            $walletBalance = auth()->user()->wallet->balance;
+        }
+
+        return view('products.detail', compact('product', 'aliexpressData', 'walletBalance'));
     }
 
     /**

@@ -511,6 +511,19 @@
                                 <strong>{{ __('messages.total_amount') }}:</strong>
                                 <strong class="text-primary fs-5" id="order-total-price"></strong>
                             </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>{{ app()->getLocale() == 'ar' ? 'رصيد المحفظة:' : 'Wallet Balance:' }}</span>
+                                <strong id="order-wallet-balance" class="text-success"></strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>{{ app()->getLocale() == 'ar' ? 'الرصيد المتبقي:' : 'Remaining Balance:' }}</span>
+                                <strong id="order-remaining-balance"></strong>
+                            </div>
+                            <div id="insufficient-balance-warning" class="alert alert-danger mt-3 mb-0" style="display: none;">
+                                <i class="ri-error-warning-line me-2"></i>
+                                <span>{{ app()->getLocale() == 'ar' ? 'رصيد المحفظة غير كافٍ. يرجى شحن محفظتك قبل إنشاء الطلب.' : 'Insufficient wallet balance. Please top up your wallet before creating the order.' }}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -918,6 +931,57 @@ let selectedVariantIndex = null;
 let selectedVariantData = null;
 let calculatedShippingData = null;
 
+// Currency data for conversion
+const currentCurrency = {
+    code: '{{ $currentCurrency->code }}',
+    symbol: '{{ $currentCurrency->symbol }}',
+    exchangeRate: {{ $currentCurrency->exchange_rate }},
+    name: '{{ $currentCurrency->name }}'
+};
+
+// Wallet balance (in AED - base currency)
+const walletBalanceAED = {{ $walletBalance ?? 0 }};
+
+// Currency icon SVGs
+const currencyIcons = {
+    'AED': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+    'SAR': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><text x="4" y="17" font-size="14" fill="currentColor">﷼</text></svg>',
+    'USD': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+// Convert amount from USD to current currency
+function convertToCurrentCurrency(amount, fromCurrency = 'USD') {
+    if (fromCurrency === currentCurrency.code) {
+        return amount;
+    }
+
+    // Exchange rates relative to USD
+    const exchangeRates = {
+        'USD': 1,
+        'AED': 3.6725,
+        'SAR': 3.75
+    };
+
+    // Convert to USD first
+    const fromRate = exchangeRates[fromCurrency] || 1;
+    const usdAmount = amount / fromRate;
+
+    // Then convert to target currency
+    return usdAmount * currentCurrency.exchangeRate;
+}
+
+// Format amount with currency icon
+function formatCurrency(amount) {
+    const formattedAmount = parseFloat(amount).toFixed(2);
+    const icon = currencyIcons[currentCurrency.code] || currentCurrency.symbol;
+    const isArabic = '{{ app()->getLocale() }}' === 'ar';
+
+    if (isArabic) {
+        return formattedAmount + ' ' + icon;
+    }
+    return icon + ' ' + formattedAmount;
+}
+
 function selectShippingVariant(index) {
     // Remove previous selections
     document.querySelectorAll('.variant-option').forEach(card => {
@@ -1004,22 +1068,47 @@ function populateOrderSummary() {
         province
     });
 
-    // Get product price
-    const unitPrice = parseFloat(selectedVariantData.offer_sale_price || selectedVariantData.price || 0);
-    const productTotal = unitPrice * quantity;
+    // Get product price in USD
+    const unitPriceUSD = parseFloat(selectedVariantData.offer_sale_price || selectedVariantData.price || 0);
+    const productTotalUSD = unitPriceUSD * quantity;
 
-    // Get shipping cost
-    const shippingCost = parseFloat(calculatedShippingData.freight_amount || 0);
-    const currency = calculatedShippingData.freight_currency || '{{ $product->currency ?? "USD" }}';
+    // Get shipping cost (API returns in USD)
+    const shippingCostUSD = parseFloat(calculatedShippingData.freight_amount || 0);
+    const freightCurrency = calculatedShippingData.freight_currency || 'USD';
 
-    // Calculate total
-    const totalAmount = productTotal + shippingCost;
+    // Convert to selected currency
+    const unitPriceConverted = convertToCurrentCurrency(unitPriceUSD, 'USD');
+    const productTotalConverted = convertToCurrentCurrency(productTotalUSD, 'USD');
+    const shippingCostConverted = convertToCurrentCurrency(shippingCostUSD, freightCurrency);
 
-    // Update order summary display
-    document.getElementById('order-product-price').textContent = `${currency} ${productTotal.toFixed(2)} (${currency} ${unitPrice.toFixed(2)} × ${quantity})`;
-    document.getElementById('order-shipping-price').textContent = `${currency} ${shippingCost.toFixed(2)}`;
+    // Calculate total in selected currency
+    const totalAmountConverted = productTotalConverted + shippingCostConverted;
+
+    // Update order summary display with converted amounts and currency icons
+    document.getElementById('order-product-price').innerHTML = formatCurrency(productTotalConverted) + ` (${formatCurrency(unitPriceConverted)} × ${quantity})`;
+    document.getElementById('order-shipping-price').innerHTML = formatCurrency(shippingCostConverted);
     document.getElementById('order-quantity').textContent = quantity;
-    document.getElementById('order-total-price').textContent = `${currency} ${totalAmount.toFixed(2)}`;
+    document.getElementById('order-total-price').innerHTML = formatCurrency(totalAmountConverted);
+
+    // Calculate wallet balance in selected currency (wallet is stored in AED)
+    const walletBalanceConverted = convertToCurrentCurrency(walletBalanceAED, 'AED');
+    const remainingBalanceConverted = walletBalanceConverted - totalAmountConverted;
+
+    // Update wallet balance display
+    document.getElementById('order-wallet-balance').innerHTML = formatCurrency(walletBalanceConverted);
+
+    const remainingBalanceEl = document.getElementById('order-remaining-balance');
+    const insufficientWarning = document.getElementById('insufficient-balance-warning');
+
+    if (remainingBalanceConverted >= 0) {
+        remainingBalanceEl.innerHTML = formatCurrency(remainingBalanceConverted);
+        remainingBalanceEl.className = 'text-success';
+        insufficientWarning.style.display = 'none';
+    } else {
+        remainingBalanceEl.innerHTML = formatCurrency(remainingBalanceConverted);
+        remainingBalanceEl.className = 'text-danger';
+        insufficientWarning.style.display = 'block';
+    }
 
     // Populate hidden form fields
     const quantityField = document.getElementById('order-form-quantity');
@@ -1032,7 +1121,7 @@ function populateOrderSummary() {
     if (countryField) countryField.value = country;
     if (cityField) cityField.value = city;
     if (provinceField) provinceField.value = province;
-    if (freightField) freightField.value = shippingCost;
+    if (freightField) freightField.value = shippingCostUSD; // Send original USD amount to backend
 
     console.log('Hidden fields populated:', {
         'order-form-quantity': quantityField?.value,
@@ -1193,6 +1282,11 @@ function displayShippingSuccess(data) {
     const container = document.getElementById('shipping-success');
     const isArabic = '{{ app()->getLocale() }}' === 'ar';
 
+    // Convert shipping cost to selected currency
+    const freightCurrency = data.freight_currency || 'USD';
+    const freightAmountUSD = parseFloat(data.freight_amount);
+    const freightAmountConverted = convertToCurrentCurrency(freightAmountUSD, freightCurrency);
+
     let html = `
         <div class="text-center mb-4">
             <div class="mb-3">
@@ -1207,7 +1301,7 @@ function displayShippingSuccess(data) {
                 <div class="card border-0 bg-light text-center h-100">
                     <div class="card-body">
                         <i class="ri-money-dollar-circle-line text-primary mb-2" style="font-size: 32px;"></i>
-                        <h3 class="text-primary mb-1">${data.freight_currency} ${parseFloat(data.freight_amount).toFixed(2)}</h3>
+                        <h3 class="text-primary mb-1">${formatCurrency(freightAmountConverted)}</h3>
                         <small class="text-muted">{{ __('messages.shipping_cost') }}</small>
                     </div>
                 </div>
@@ -1225,7 +1319,7 @@ function displayShippingSuccess(data) {
                 <div class="card border-0 bg-light text-center h-100">
                     <div class="card-body">
                         <i class="ri-truck-line text-success mb-2" style="font-size: 32px;"></i>
-                       
+
                         <small class="text-muted">{{ __('messages.carrier') }}</small>
                     </div>
                 </div>
@@ -1337,24 +1431,30 @@ function submitOrder() {
 function displayOrderSuccess(data) {
     const container = document.getElementById('order-creation-success');
     const order = data.order || data;
+    const isArabic = '{{ app()->getLocale() }}' === 'ar';
+
+    // Convert total price to selected currency
+    const orderCurrency = order.currency || 'USD';
+    const totalPrice = parseFloat(order.total_price || 0);
+    const totalPriceConverted = convertToCurrentCurrency(totalPrice, orderCurrency);
 
     container.innerHTML = `
         <div class="text-center mb-3">
             <i class="ri-checkbox-circle-fill text-success" style="font-size: 64px;"></i>
         </div>
-        <h4 class="alert-heading text-center mb-3">Order Created Successfully!</h4>
+        <h4 class="alert-heading text-center mb-3">${isArabic ? 'تم إنشاء الطلب بنجاح!' : 'Order Created Successfully!'}</h4>
         <div class="mb-3">
-            <strong>Order Number:</strong> ${order.order_number || 'N/A'}<br>
-            <strong>Status:</strong> <span class="badge bg-warning">${order.status || 'Pending'}</span><br>
-            <strong>Total Amount:</strong> ${order.currency || 'USD'} ${parseFloat(order.total_price || 0).toFixed(2)}
+            <strong>${isArabic ? 'رقم الطلب:' : 'Order Number:'}</strong> ${order.order_number || 'N/A'}<br>
+            <strong>${isArabic ? 'الحالة:' : 'Status:'}</strong> <span class="badge bg-warning">${order.status || 'Pending'}</span><br>
+            <strong>${isArabic ? 'المبلغ الإجمالي:' : 'Total Amount:'}</strong> ${formatCurrency(totalPriceConverted)}
         </div>
-        <p class="mb-3">${data.message || 'Your order has been placed successfully and will be processed shortly.'}</p>
+        <p class="mb-3">${data.message || (isArabic ? 'تم إنشاء طلبك بنجاح وسيتم معالجته قريباً.' : 'Your order has been placed successfully and will be processed shortly.')}</p>
         <div class="d-grid gap-2">
             <a href="{{ route('seller.dashboard') }}" class="btn btn-primary">
-                <i class="ri-dashboard-line me-2"></i>View Dashboard
+                <i class="ri-dashboard-line me-2"></i>${isArabic ? 'عرض لوحة التحكم' : 'View Dashboard'}
             </a>
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                <i class="ri-close-line me-2"></i>Close
+                <i class="ri-close-line me-2"></i>${isArabic ? 'إغلاق' : 'Close'}
             </button>
         </div>
     `;
@@ -1482,6 +1582,11 @@ function displayDirectOrderSuccess(data) {
     const order = data.order || data;
     const isArabic = document.documentElement.lang === 'ar';
 
+    // Convert total price to selected currency
+    const orderCurrency = order.currency || 'USD';
+    const totalPrice = parseFloat(order.total_price || 0);
+    const totalPriceConverted = convertToCurrentCurrency(totalPrice, orderCurrency);
+
     container.innerHTML = `
         <div class="text-center mb-3">
             <i class="ri-checkbox-circle-fill text-success" style="font-size: 64px;"></i>
@@ -1490,7 +1595,7 @@ function displayDirectOrderSuccess(data) {
         <div class="mb-3">
             <strong>${isArabic ? 'رقم الطلب:' : 'Order Number:'}</strong> ${order.order_number || 'N/A'}<br>
             <strong>${isArabic ? 'الحالة:' : 'Status:'}</strong> <span class="badge bg-warning">${order.status || 'Pending'}</span><br>
-            <strong>${isArabic ? 'المبلغ الإجمالي:' : 'Total Amount:'}</strong> ${order.currency || 'USD'} ${parseFloat(order.total_price || 0).toFixed(2)}<br>
+            <strong>${isArabic ? 'المبلغ الإجمالي:' : 'Total Amount:'}</strong> ${formatCurrency(totalPriceConverted)}<br>
             <strong class="text-success">${isArabic ? 'الشحن: مجاني (منتج Choice)' : 'Shipping: Free (Choice Product)'}</strong>
         </div>
         <p class="mb-3">${data.message || (isArabic ? 'تم إنشاء طلبك بنجاح وسيتم معالجته قريباً.' : 'Your order has been placed successfully and will be processed shortly.')}</p>
