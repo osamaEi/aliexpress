@@ -107,7 +107,7 @@
 
                     <!-- China Card - Always Show -->
                     <div class="source-card-mini china {{ $isChinaActive ? 'active' : '' }}"
-                         onclick="toggleChinaStores()"
+                         onclick="selectSource('china')"
                          data-source="china">
                         <span class="country-flag">🇨🇳</span>
                         <span class="country-name">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
