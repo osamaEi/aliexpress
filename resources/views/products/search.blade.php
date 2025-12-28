@@ -134,8 +134,18 @@
                     </div>
                     <div id="distributorsList" class="distributors-inline-list">
                         @if($showDistributorDropdown && isset($distributorsByCountry[$source_country]))
+                            @php
+                                $currentDistributorId = request('distributor_id');
+                            @endphp
+                            <!-- All Products from this country -->
+                            <div class="distributor-card {{ empty($currentDistributorId) ? 'active' : '' }}" onclick="viewAllCountryProducts('{{ $source_country }}')">
+                                <div class="distributor-card-avatar all-avatar">
+                                    <i class="ri-apps-line"></i>
+                                </div>
+                                <span class="distributor-card-name">{{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}</span>
+                            </div>
                             @foreach($distributorsByCountry[$source_country] as $dist)
-                                <div class="distributor-card" onclick="viewDistributorProducts({{ $dist['id'] }}, '{{ $source_country }}')">
+                                <div class="distributor-card {{ $currentDistributorId == $dist['id'] ? 'active' : '' }}" onclick="viewDistributorProducts({{ $dist['id'] }}, '{{ $source_country }}')">
                                     <div class="distributor-card-avatar">
                                         @if(!empty($dist['avatar']))
                                             <img src="{{ asset('storage/' . $dist['avatar']) }}" alt="{{ $dist['store_name'] ?? $dist['name'] }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -180,18 +190,68 @@
             </script>
 
             <!-- Subcategories Container (shown when main category selected) -->
-            <div id="subcategoriesContainer" class="mb-4" style="display: none;">
+            @php
+                $currentCategoryId = request('category_id');
+                $parentCategory = null;
+                $showSubcategories = false;
+
+                if ($currentCategoryId && isset($categories)) {
+                    // Find the parent category that contains this subcategory
+                    foreach ($categories as $cat) {
+                        if ($cat->aliexpress_category_id == $currentCategoryId) {
+                            // Current category is a main category, show its children
+                            $parentCategory = $cat;
+                            $showSubcategories = $cat->children && count($cat->children) > 0;
+                            break;
+                        }
+                        // Check if current category is a child of this category
+                        if ($cat->children) {
+                            foreach ($cat->children as $child) {
+                                if ($child->aliexpress_category_id == $currentCategoryId || $child->id == $currentCategoryId) {
+                                    $parentCategory = $cat;
+                                    $showSubcategories = true;
+                                    break 2;
+                                }
+                            }
+                        }
+                    }
+                }
+            @endphp
+            <div id="subcategoriesContainer" class="mb-4" style="display: {{ $showSubcategories ? 'block' : 'none' }};">
                 <div class="subcategories-header">
                     <h6 class="mb-0">
                         <i class="ri-folder-open-line me-2"></i>
-                        <span id="selectedCategoryName">{{ app()->getLocale() == 'ar' ? 'الفئات الفرعية' : 'Subcategories' }}</span>
+                        <span id="selectedCategoryName">
+                            @if($parentCategory)
+                                {{ app()->getLocale() == 'ar' && $parentCategory->name_ar ? $parentCategory->name_ar : $parentCategory->name }}
+                            @else
+                                {{ app()->getLocale() == 'ar' ? 'الفئات الفرعية' : 'Subcategories' }}
+                            @endif
+                        </span>
                     </h6>
                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearCategorySelection()">
                         <i class="ri-close-line"></i> {{ app()->getLocale() == 'ar' ? 'إلغاء' : 'Clear' }}
                     </button>
                 </div>
                 <div class="subcategories-grid" id="subcategoriesGrid">
-                    <!-- Subcategories will be loaded here -->
+                    @if($showSubcategories && $parentCategory && $parentCategory->children)
+                        @foreach($parentCategory->children as $child)
+                            @php
+                                $isActiveSubcat = ($child->aliexpress_category_id == $currentCategoryId || $child->id == $currentCategoryId);
+                                $childName = app()->getLocale() == 'ar' && $child->name_ar ? $child->name_ar : $child->name;
+                                $childImage = $child->photo ? asset('storage/' . $child->photo) : ($child->image ?? '');
+                            @endphp
+                            <div class="subcategory-item {{ $isActiveSubcat ? 'active' : '' }}" onclick="searchByCategory('{{ $child->aliexpress_category_id ?? $child->id }}')">
+                                <div class="subcategory-icon {{ $childImage ? 'has-image' : '' }}">
+                                    @if($childImage)
+                                        <img src="{{ $childImage }}" alt="{{ $childName }}" onerror="this.style.display='none'; this.parentElement.classList.remove('has-image'); this.nextElementSibling.style.display='flex';">
+                                    @endif
+                                    <i class="ri-price-tag-3-line" @if($childImage) style="display:none;" @endif></i>
+                                </div>
+                                <span class="subcategory-name">{{ $childName }}</span>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
             </div>
 
@@ -910,20 +970,19 @@
         window.location.href = url;
     }
 
-    // View all products from a country (not used in dropdown mode, kept for compatibility)
-    function viewAllCountryProducts() {
-        if (!selectedCountryCode) return;
+    // View all products from a country
+    function viewAllCountryProducts(countryCode) {
+        const country = countryCode || selectedCountryCode;
+        if (!country) return;
 
         const keywordInput = document.getElementById('keyword');
         const keyword = keywordInput ? keywordInput.value.trim() : '';
 
-        let url = '{{ route("products.search-distributor") }}?country_code=' + selectedCountryCode;
+        let url = '{{ route("products.search-distributor") }}?country_code=' + country;
         if (keyword) {
             url += '&keyword=' + encodeURIComponent(keyword);
         }
 
-        // Close modal and redirect
-        bootstrap.Modal.getInstance(document.getElementById('distributorsModal'))?.hide();
         document.getElementById('loadingSpinner').style.display = 'block';
         window.location.href = url;
     }
@@ -1568,6 +1627,21 @@
         box-shadow: 0 4px 12px rgba(229, 99, 0, 0.15);
     }
 
+    .distributor-card.active {
+        background: #fff3e0;
+        border-color: #e56300;
+        box-shadow: 0 4px 12px rgba(229, 99, 0, 0.25);
+    }
+
+    .distributor-card-avatar.all-avatar {
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
     .distributor-card-avatar {
         width: 50px;
         height: 50px;
@@ -1777,6 +1851,17 @@
         border-color: #e56300;
         transform: translateY(-4px);
         box-shadow: 0 6px 16px rgba(229, 99, 0, 0.15);
+    }
+
+    .subcategory-item.active {
+        background: #fff3e0;
+        border-color: #e56300;
+        box-shadow: 0 6px 16px rgba(229, 99, 0, 0.2);
+    }
+
+    .subcategory-item.active .subcategory-icon {
+        border-color: #e56300;
+        box-shadow: 0 4px 12px rgba(229, 99, 0, 0.25);
     }
 
     .subcategory-icon {
