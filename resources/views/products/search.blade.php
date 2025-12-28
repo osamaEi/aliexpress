@@ -172,12 +172,18 @@
             </div>
 
             <!-- Search Form -->
-            <form id="searchForm" method="GET" action="{{ route('products.search-text') }}" class="mb-4">
+            @php
+                $isDistributorSearch = isset($source_country) || request('country_code');
+                $formAction = $isDistributorSearch ? route('products.search-distributor') : route('products.search-text');
+            @endphp
+            <form id="searchForm" method="GET" action="{{ $formAction }}" class="mb-4">
                 <input type="hidden" name="ship_from" id="shipFromInput" value="{{ request('ship_from') }}">
                 <input type="hidden" name="choice_only" id="choiceOnlyInput" value="{{ request('choice_only') }}">
                 <input type="hidden" name="category_id" id="categoryIdInput" value="{{ request('category_id') }}">
                 <input type="hidden" name="country" id="countryInput" value="{{ request('country', 'AE') }}">
                 <input type="hidden" name="currency" id="currencyInput" value="{{ request('currency', 'USD') }}">
+                <input type="hidden" name="country_code" id="countryCodeInput" value="{{ request('country_code') ?? ($source_country ?? '') }}">
+                <input type="hidden" name="distributor_id" id="distributorIdInput" value="{{ request('distributor_id', '') }}">
 
                 <div class="search-box-container">
                     <div class="row g-2">
@@ -639,10 +645,13 @@
             // Show subcategories
             showSubcategories(categoryId, category);
         } else {
-            // No subcategories, search directly
+            // No subcategories, search directly - reset to AliExpress search
+            document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
             document.getElementById('categoryIdInput').value = categoryId;
             document.getElementById('shipFromInput').value = '';
             document.getElementById('choiceOnlyInput').value = '';
+            document.getElementById('countryCodeInput').value = '';
+            document.getElementById('distributorIdInput').value = '';
             document.getElementById('searchForm').submit();
         }
     }
@@ -764,9 +773,13 @@
 
     // Search by category
     function searchByCategory(categoryId) {
+        // Reset to AliExpress search when selecting category
+        document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
         document.getElementById('categoryIdInput').value = categoryId;
         document.getElementById('shipFromInput').value = '';
         document.getElementById('choiceOnlyInput').value = '';
+        document.getElementById('countryCodeInput').value = '';
+        document.getElementById('distributorIdInput').value = '';
         document.getElementById('searchForm').submit();
     }
 
@@ -899,12 +912,15 @@
         if (source === 'china') {
             document.querySelector('[data-source="china"]').classList.add('active');
 
-            // Reset form inputs
+            // Reset form to AliExpress search
+            document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
             document.getElementById('shipFromInput').value = 'CN';
             document.getElementById('choiceOnlyInput').value = '';
             document.getElementById('categoryIdInput').value = '';
             document.getElementById('countryInput').value = 'AE';
             document.getElementById('currencyInput').value = 'USD';
+            document.getElementById('countryCodeInput').value = '';
+            document.getElementById('distributorIdInput').value = '';
 
             // Set default keyword if empty (required for AliExpress search)
             if (!keyword) {
@@ -919,10 +935,13 @@
         if (source === 'all') {
             document.querySelector('[data-source="all"]')?.classList.add('active');
 
-            // Reset form inputs
+            // Reset form to AliExpress search
+            document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
             document.getElementById('shipFromInput').value = '';
             document.getElementById('choiceOnlyInput').value = '';
             document.getElementById('categoryIdInput').value = '';
+            document.getElementById('countryCodeInput').value = '';
+            document.getElementById('distributorIdInput').value = '';
 
             // Set default keyword if empty
             if (!keyword) {
