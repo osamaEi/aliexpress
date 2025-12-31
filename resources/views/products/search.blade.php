@@ -1,5 +1,5 @@
 @extends('dashboard')
-
+ 
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card mb-6 shadow-sm border-0">
@@ -73,17 +73,30 @@
                 $isChinaActive = request('ship_from') == 'CN';
                 $activeCountryCode = request('country_code') ?? (isset($source_country) ? $source_country : null);
 
-                // Country names mapping
+                // Country names mapping with SVG flags
+                $countryFlags = [
+                    'AE' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#00732f" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="red" d="M0 0h220v480H0z"/></svg>',
+                    'SA' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#006c35" d="M0 0h640v480H0z"/><path fill="#fff" d="M170 195h300v90H170z"/></svg>',
+                    'KW' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#007a3d" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ce1126" d="M0 320h640v160H0z"/><path d="M0 0l180 240L0 480z"/></svg>',
+                    'QA' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#8d1b3d" d="M180 0l-60 26.7L180 53.3l-60 26.7L180 106.7l-60 26.6 60 26.7-60 26.7 60 26.6-60 26.7 60 26.7-60 26.6 60 26.7-60 26.7 60 26.6-60 26.7 60 26.7-60 26.6 60 26.7-60 26.7H640V0H180z"/></svg>',
+                    'BH' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#ce1126" d="M120 0l60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30H640V0H120z"/></svg>',
+                    'OM' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ef2b2d" d="M0 0h640v160H0z"/><path fill="#009025" d="M0 320h640v160H0z"/><path fill="#ef2b2d" d="M0 0h220v480H0z"/></svg>',
+                    'EG' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#ce1126" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/></svg>',
+                    'JO' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#007a3d" d="M0 320h640v160H0z"/><path fill="#ce1126" d="M0 0l320 240L0 480z"/><polygon fill="#fff" points="107,240 118,270 90,250 124,250 96,270" /></svg>',
+                    'LB' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#ed1c24" d="M0 0h640v120H0z"/><path fill="#fff" d="M0 120h640v240H0z"/><path fill="#ed1c24" d="M0 360h640v120H0z"/><path fill="#00a651" d="M270 120h100v240h-100z"/></svg>',
+                    'CN' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#de2910" d="M0 0h640v480H0z"/><path fill="#ffde00" d="M140 60l20 60h63l-51 37 20 60-52-38-52 38 20-60-51-37h63z"/></svg>',
+                ];
                 $countryNames = [
-                    'AE' => ['ar' => 'الإمارات', 'en' => 'UAE', 'flag' => '🇦🇪'],
-                    'SA' => ['ar' => 'السعودية', 'en' => 'Saudi', 'flag' => '🇸🇦'],
-                    'KW' => ['ar' => 'الكويت', 'en' => 'Kuwait', 'flag' => '🇰🇼'],
-                    'QA' => ['ar' => 'قطر', 'en' => 'Qatar', 'flag' => '🇶🇦'],
-                    'BH' => ['ar' => 'البحرين', 'en' => 'Bahrain', 'flag' => '🇧🇭'],
-                    'OM' => ['ar' => 'عمان', 'en' => 'Oman', 'flag' => '🇴🇲'],
-                    'EG' => ['ar' => 'مصر', 'en' => 'Egypt', 'flag' => '🇪🇬'],
-                    'JO' => ['ar' => 'الأردن', 'en' => 'Jordan', 'flag' => '🇯🇴'],
-                    'LB' => ['ar' => 'لبنان', 'en' => 'Lebanon', 'flag' => '🇱🇧'],
+                    'AE' => ['ar' => 'الإمارات', 'en' => 'UAE', 'flag' => $countryFlags['AE']],
+                    'SA' => ['ar' => 'السعودية', 'en' => 'Saudi', 'flag' => $countryFlags['SA']],
+                    'KW' => ['ar' => 'الكويت', 'en' => 'Kuwait', 'flag' => $countryFlags['KW']],
+                    'QA' => ['ar' => 'قطر', 'en' => 'Qatar', 'flag' => $countryFlags['QA']],
+                    'BH' => ['ar' => 'البحرين', 'en' => 'Bahrain', 'flag' => $countryFlags['BH']],
+                    'OM' => ['ar' => 'عمان', 'en' => 'Oman', 'flag' => $countryFlags['OM']],
+                    'EG' => ['ar' => 'مصر', 'en' => 'Egypt', 'flag' => $countryFlags['EG']],
+                    'JO' => ['ar' => 'الأردن', 'en' => 'Jordan', 'flag' => $countryFlags['JO']],
+                    'LB' => ['ar' => 'لبنان', 'en' => 'Lebanon', 'flag' => $countryFlags['LB']],
+                    'CN' => ['ar' => 'الصين', 'en' => 'China', 'flag' => $countryFlags['CN']],
                 ];
             @endphp
             <div class="source-cards-container mb-4">
@@ -94,12 +107,13 @@
                             @php
                                 $countryCode = $country['code'];
                                 $isActive = $activeCountryCode == $countryCode;
-                                $countryInfo = $countryNames[$countryCode] ?? ['ar' => $countryCode, 'en' => $countryCode, 'flag' => '🏳️'];
+                                $defaultFlag = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><rect fill="#ccc" width="640" height="480"/></svg>';
+                                $countryInfo = $countryNames[$countryCode] ?? ['ar' => $countryCode, 'en' => $countryCode, 'flag' => $defaultFlag];
                             @endphp
                             <div class="source-card-mini {{ $isActive ? 'active' : '' }}"
                                  onclick="toggleDistributors('{{ $countryCode }}')"
                                  data-source="{{ $countryCode }}">
-                                <span class="country-flag">{{ $countryInfo['flag'] }}</span>
+                                <span class="country-flag">{!! $countryInfo['flag'] !!}</span>
                                 <span class="country-name">{{ app()->getLocale() == 'ar' ? $countryInfo['ar'] : $countryInfo['en'] }}</span>
                             </div>
                         @endforeach
@@ -109,7 +123,7 @@
                     <div class="source-card-mini china {{ $isChinaActive ? 'active' : '' }}"
                          onclick="selectSource('china')"
                          data-source="china">
-                        <span class="country-flag">🇨🇳</span>
+                        <span class="country-flag">{!! $countryFlags['CN'] !!}</span>
                         <span class="country-name">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
                     </div>
                 </div>
@@ -123,9 +137,10 @@
                         <span id="dropdownCountryName">
                             @if($showDistributorDropdown)
                                 @php
-                                    $dropdownCountryInfo = $countryNames[$source_country] ?? ['ar' => $source_country, 'en' => $source_country, 'flag' => '🏳️'];
+                                    $defaultFlag = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><rect fill="#ccc" width="640" height="480"/></svg>';
+                                    $dropdownCountryInfo = $countryNames[$source_country] ?? ['ar' => $source_country, 'en' => $source_country, 'flag' => $defaultFlag];
                                 @endphp
-                                {{ $dropdownCountryInfo['flag'] }} {{ app()->getLocale() == 'ar' ? 'متاجر ' . $dropdownCountryInfo['ar'] : $dropdownCountryInfo['en'] . ' Stores' }}
+                                <span class="header-flag">{!! $dropdownCountryInfo['flag'] !!}</span> {{ app()->getLocale() == 'ar' ? 'متاجر ' . $dropdownCountryInfo['ar'] : $dropdownCountryInfo['en'] . ' Stores' }}
                             @endif
                         </span>
                         <button type="button" class="btn btn-sm btn-link text-muted p-0" onclick="hideDistributors()">
@@ -164,7 +179,7 @@
                 <!-- China Stores Dropdown (shown below country cards when China is clicked) -->
                 <div id="chinaStoresDropdown" class="distributors-dropdown china-stores-dropdown" style="display: none;">
                     <div class="distributors-dropdown-header">
-                        <span>🇨🇳 {{ app()->getLocale() == 'ar' ? 'متاجر الصين' : 'China Stores' }}</span>
+                        <span><span class="header-flag">{!! $countryFlags['CN'] !!}</span> {{ app()->getLocale() == 'ar' ? 'متاجر الصين' : 'China Stores' }}</span>
                         <button type="button" class="btn btn-sm btn-link text-muted p-0" onclick="hideChinaStores()">
                             <i class="ri-close-line"></i>
                         </button>
@@ -185,6 +200,20 @@
             <script>
                 const distributorsByCountry = @json($distributorsByCountry ?? []);
                 const countryNames = @json($countryNames);
+                // SVG flags for JavaScript
+                const countrySvgFlags = {
+                    'AE': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#00732f" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="red" d="M0 0h220v480H0z"/></svg>',
+                    'SA': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#006c35" d="M0 0h640v480H0z"/><path fill="#fff" d="M170 195h300v90H170z"/></svg>',
+                    'KW': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#007a3d" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ce1126" d="M0 320h640v160H0z"/><path d="M0 0l180 240L0 480z"/></svg>',
+                    'QA': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#8d1b3d" d="M180 0l-60 26.7L180 53.3l-60 26.7L180 106.7l-60 26.6 60 26.7-60 26.7 60 26.6-60 26.7 60 26.7-60 26.6 60 26.7-60 26.7 60 26.6-60 26.7 60 26.7-60 26.6 60 26.7-60 26.7H640V0H180z"/></svg>',
+                    'BH': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#ce1126" d="M120 0l60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30H640V0H120z"/></svg>',
+                    'OM': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ef2b2d" d="M0 0h640v160H0z"/><path fill="#009025" d="M0 320h640v160H0z"/><path fill="#ef2b2d" d="M0 0h220v480H0z"/></svg>',
+                    'EG': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#ce1126" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/></svg>',
+                    'JO': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#007a3d" d="M0 320h640v160H0z"/><path fill="#ce1126" d="M0 0l320 240L0 480z"/></svg>',
+                    'LB': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#ed1c24" d="M0 0h640v120H0z"/><path fill="#fff" d="M0 120h640v240H0z"/><path fill="#ed1c24" d="M0 360h640v120H0z"/><path fill="#00a651" d="M270 120h100v240h-100z"/></svg>',
+                    'CN': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#de2910" d="M0 0h640v480H0z"/><path fill="#ffde00" d="M140 60l20 60h63l-51 37 20 60-52-38-52 38 20-60-51-37h63z"/></svg>',
+                };
+                const defaultSvgFlag = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><rect fill="#ccc" width="640" height="480"/></svg>';
                 let chinaStoresLoaded = false;
                 let chinaStoresData = [];
             </script>
@@ -449,23 +478,32 @@
                                         $isChina = request('ship_from') == 'CN' || empty($sourceCountry);
 
                                         // Get flag and name based on source
-                                        $flagEmoji = '🇨🇳';
+                                        $productFlagSvgs = [
+                                            'AE' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#00732f" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="red" d="M0 0h220v480H0z"/></svg>',
+                                            'SA' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#006c35" d="M0 0h640v480H0z"/><path fill="#fff" d="M170 195h300v90H170z"/></svg>',
+                                            'KW' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#007a3d" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ce1126" d="M0 320h640v160H0z"/><path d="M0 0l180 240L0 480z"/></svg>',
+                                            'QA' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#8d1b3d" d="M180 0l-60 26.7L180 53.3l-60 26.7L180 106.7l-60 26.6 60 26.7-60 26.7 60 26.6-60 26.7 60 26.7-60 26.6 60 26.7-60 26.7 60 26.6-60 26.7 60 26.7-60 26.6 60 26.7-60 26.7H640V0H180z"/></svg>',
+                                            'BH' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#ce1126" d="M120 0l60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30 60 30-60 30H640V0H120z"/></svg>',
+                                            'OM' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ef2b2d" d="M0 0h640v160H0z"/><path fill="#009025" d="M0 320h640v160H0z"/><path fill="#ef2b2d" d="M0 0h220v480H0z"/></svg>',
+                                            'EG' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#ce1126" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/></svg>',
+                                            'JO' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#007a3d" d="M0 320h640v160H0z"/><path fill="#ce1126" d="M0 0l320 240L0 480z"/></svg>',
+                                            'LB' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#ed1c24" d="M0 0h640v120H0z"/><path fill="#fff" d="M0 120h640v240H0z"/><path fill="#ed1c24" d="M0 360h640v120H0z"/><path fill="#00a651" d="M270 120h100v240h-100z"/></svg>',
+                                            'CN' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="20" height="15"><path fill="#de2910" d="M0 0h640v480H0z"/><path fill="#ffde00" d="M140 60l20 60h63l-51 37 20 60-52-38-52 38 20-60-51-37h63z"/></svg>',
+                                        ];
+                                        $countryLabelsAr = [
+                                            'AE' => 'الإمارات', 'SA' => 'السعودية', 'KW' => 'الكويت', 'QA' => 'قطر',
+                                            'BH' => 'البحرين', 'OM' => 'عمان', 'EG' => 'مصر', 'JO' => 'الأردن', 'LB' => 'لبنان', 'CN' => 'الصين'
+                                        ];
+                                        $countryLabelsEn = [
+                                            'AE' => 'UAE', 'SA' => 'Saudi', 'KW' => 'Kuwait', 'QA' => 'Qatar',
+                                            'BH' => 'Bahrain', 'OM' => 'Oman', 'EG' => 'Egypt', 'JO' => 'Jordan', 'LB' => 'Lebanon', 'CN' => 'China'
+                                        ];
+
+                                        $productFlagSvg = $productFlagSvgs['CN'];
                                         $countryLabel = app()->getLocale() == 'ar' ? 'الصين' : 'China';
 
-                                        if ($sourceCountry) {
-                                            $countryFlags = [
-                                                'AE' => '🇦🇪', 'SA' => '🇸🇦', 'KW' => '🇰🇼', 'QA' => '🇶🇦',
-                                                'BH' => '🇧🇭', 'OM' => '🇴🇲', 'EG' => '🇪🇬', 'JO' => '🇯🇴', 'LB' => '🇱🇧'
-                                            ];
-                                            $countryLabelsAr = [
-                                                'AE' => 'الإمارات', 'SA' => 'السعودية', 'KW' => 'الكويت', 'QA' => 'قطر',
-                                                'BH' => 'البحرين', 'OM' => 'عمان', 'EG' => 'مصر', 'JO' => 'الأردن', 'LB' => 'لبنان'
-                                            ];
-                                            $countryLabelsEn = [
-                                                'AE' => 'UAE', 'SA' => 'Saudi', 'KW' => 'Kuwait', 'QA' => 'Qatar',
-                                                'BH' => 'Bahrain', 'OM' => 'Oman', 'EG' => 'Egypt', 'JO' => 'Jordan', 'LB' => 'Lebanon'
-                                            ];
-                                            $flagEmoji = $countryFlags[$sourceCountry] ?? '🏳️';
+                                        if ($sourceCountry && isset($productFlagSvgs[$sourceCountry])) {
+                                            $productFlagSvg = $productFlagSvgs[$sourceCountry];
                                             $countryLabel = app()->getLocale() == 'ar'
                                                 ? ($countryLabelsAr[$sourceCountry] ?? $sourceCountry)
                                                 : ($countryLabelsEn[$sourceCountry] ?? $sourceCountry);
@@ -474,16 +512,7 @@
                                     @endphp
                                     <div class="position-absolute bottom-0 start-0 m-2" style="z-index: 5;">
                                         <div class="d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm" style="border: 1px solid #e0e0e0;">
-                                            @if($isChina)
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" style="margin-right: 4px;">
-                                                    <rect x="1" y="4" width="30" height="24" rx="4" ry="4" fill="#de2910"></rect>
-                                                    <g fill="#ffde00">
-                                                        <path d="M7.5,9.5 l0.9,2.8 l2.9,0 l-2.4,1.7 l0.9,2.8 l-2.4,-1.7 l-2.4,1.7 l0.9,-2.8 l-2.4,-1.7 l2.9,0z"/>
-                                                    </g>
-                                                </svg>
-                                            @else
-                                                <span style="font-size: 0.8rem;">{{ $flagEmoji }}</span>
-                                            @endif
+                                            <span class="product-flag-icon">{!! $productFlagSvg !!}</span>
                                             <span style="font-size: 0.7rem; color: #666; font-weight: 500; margin-left: 4px;">{{ $countryLabel }}</span>
                                         </div>
                                     </div>
@@ -510,10 +539,9 @@
                                     <!-- Price -->
                                     <div class="mb-2">
                                         <h5 class="text-primary mb-0 d-flex align-items-center" style="direction: ltr; justify-content: flex-start;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
-                                                <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                <path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 1124.14 1256.39" fill="currentColor" class="me-1 sar-icon" style="vertical-align: middle;">
+                                                <path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/>
+                                                <path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/>
                                             </svg>
                                             @if($product['sale_price_format'])
                                                 {{ preg_replace('/[A-Z]{3}\s*/', '', $product['sale_price_format']) }}
@@ -523,20 +551,18 @@
                                         </h5>
                                         @if(isset($product['admin_profit']) && $product['admin_profit'] > 0)
                                             <small class="text-success d-block d-flex align-items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
-                                                    <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    <path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 1124.14 1256.39" fill="currentColor" class="me-1 sar-icon" style="vertical-align: middle;">
+                                                    <path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/>
+                                                    <path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/>
                                                 </svg>
                                                 {{ app()->getLocale() == 'ar' ? 'تشمل' : 'Includes' }} {{ number_format($product['admin_profit'], 2) }} {{ app()->getLocale() == 'ar' ? 'عمولة' : 'profit' }}
                                             </small>
                                         @endif
                                         @if($product['original_price'] > $product['sale_price'])
                                             <small class="text-muted text-decoration-line-through d-flex align-items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" class="me-1" style="vertical-align: middle;">
-                                                    <path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    <path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    <path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 1124.14 1256.39" fill="currentColor" class="me-1 sar-icon" style="vertical-align: middle;">
+                                                    <path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/>
+                                                    <path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/>
                                                 </svg>
                                                 @if($product['original_price_format'])
                                                     {{ preg_replace('/[A-Z]{3}\s*/', '', $product['original_price_format']) }}
@@ -917,12 +943,13 @@
         document.querySelector(`[data-source="${countryCode}"]`)?.classList.add('active');
 
         // Get country info
-        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode, flag: '🏳️' };
+        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
         const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+        const flagSvg = countrySvgFlags[countryCode] || defaultSvgFlag;
 
         // Update dropdown header
         document.getElementById('dropdownCountryName').innerHTML =
-            `${countryInfo.flag} ${isArabic ? 'متاجر ' + countryName : countryName + ' Stores'}`;
+            `<span class="header-flag">${flagSvg}</span> ${isArabic ? 'متاجر ' + countryName : countryName + ' Stores'}`;
 
         // Get distributors for this country
         const distributors = distributorsByCountry[countryCode] || [];
@@ -1563,7 +1590,44 @@
     }
 
     .country-flag {
-        font-size: 1.3rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .country-flag svg {
+        width: 24px;
+        height: 18px;
+        border-radius: 3px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .header-flag {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 6px;
+    }
+
+    .header-flag svg {
+        width: 20px;
+        height: 15px;
+        border-radius: 2px;
+    }
+
+    .product-flag-icon {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 4px;
+    }
+
+    .product-flag-icon svg {
+        width: 20px;
+        height: 15px;
+        border-radius: 2px;
+    }
+
+    .sar-icon {
+        flex-shrink: 0;
     }
 
     .country-name {
