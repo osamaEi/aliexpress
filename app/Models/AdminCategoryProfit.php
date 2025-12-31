@@ -31,33 +31,75 @@ class AdminCategoryProfit extends Model
      * Get admin profit for a specific category (with inheritance from parent)
      *
      * @param int $categoryId
+     * @param string|null $targetCurrency The currency to convert to
      * @return float
      */
-    public static function getProfitForCategory($categoryId): float
+    public static function getProfitForCategory($categoryId, ?string $targetCurrency = null): float
     {
         // Try to find profit for this specific category
         $profit = self::where('category_id', $categoryId)
             ->where('is_active', true)
             ->first();
 
-        if ($profit) {
-            return $profit->profit_amount;
-        }
-
-        // If not found and this is a subcategory, check parent category
-        $category = Category::find($categoryId);
-        if ($category && $category->parent_id) {
-            $parentProfit = self::where('category_id', $category->parent_id)
-                ->where('is_active', true)
-                ->first();
-
-            if ($parentProfit) {
-                return $parentProfit->profit_amount;
+        if (!$profit) {
+            // If not found and this is a subcategory, check parent category
+            $category = Category::find($categoryId);
+            if ($category && $category->parent_id) {
+                $profit = self::where('category_id', $category->parent_id)
+                    ->where('is_active', true)
+                    ->first();
             }
         }
 
-        // No profit configured
-        return 0;
+        if (!$profit) {
+            return 0;
+        }
+
+        // Convert currency if needed
+        $profitValue = $profit->profit_amount;
+        $savedCurrency = $profit->currency ?? 'USD';
+
+        if ($targetCurrency && $savedCurrency !== $targetCurrency) {
+            $targetCurrencyModel = Currency::where('code', $targetCurrency)->first();
+            $savedCurrencyModel = Currency::where('code', $savedCurrency)->first();
+
+            if ($targetCurrencyModel && $savedCurrencyModel) {
+                // Convert from saved currency to target currency via USD
+                $usdAmount = $profitValue / $savedCurrencyModel->exchange_rate;
+                $profitValue = $usdAmount * $targetCurrencyModel->exchange_rate;
+            }
+        }
+
+        return $profitValue;
+    }
+
+    /**
+     * Calculate profit amount with currency conversion
+     *
+     * @param string|null $targetCurrency The currency to convert to
+     * @return float
+     */
+    public function calculateProfit(?string $targetCurrency = null): float
+    {
+        if (!$this->is_active) {
+            return 0;
+        }
+
+        $profitValue = $this->profit_amount;
+        $savedCurrency = $this->currency ?? 'USD';
+
+        if ($targetCurrency && $savedCurrency !== $targetCurrency) {
+            $targetCurrencyModel = Currency::where('code', $targetCurrency)->first();
+            $savedCurrencyModel = Currency::where('code', $savedCurrency)->first();
+
+            if ($targetCurrencyModel && $savedCurrencyModel) {
+                // Convert from saved currency to target currency via USD
+                $usdAmount = $profitValue / $savedCurrencyModel->exchange_rate;
+                $profitValue = $usdAmount * $targetCurrencyModel->exchange_rate;
+            }
+        }
+
+        return $profitValue;
     }
 
     /**
