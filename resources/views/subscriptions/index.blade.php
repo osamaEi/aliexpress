@@ -130,12 +130,5 @@
         </div>
     </div>
 
-    <!-- Subscription History Link -->
-    <div class="text-center mt-4">
-        <a href="{{ route('subscriptions.history') }}" class="btn btn-outline-secondary">
-            <i class="ri-history-line me-1"></i>
-            {{ __('messages.view_subscription_history') }}
-        </a>
-    </div>
 </div>
 @endsection
