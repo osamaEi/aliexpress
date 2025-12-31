@@ -270,9 +270,6 @@
                             @endif
                         </span>
                     </h6>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearCategorySelection()">
-                        <i class="ri-close-line"></i> {{ app()->getLocale() == 'ar' ? 'إلغاء' : 'Clear' }}
-                    </button>
                 </div>
                 <div class="subcategories-grid" id="subcategoriesGrid">
                     @if($showSubcategories && $parentCategory && $parentCategory->children)
@@ -343,45 +340,6 @@
                     <i class="ri-error-warning-line me-2"></i>
                     {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            <!-- Active Filters Display -->
-            @if(request('ship_from') || request('category_id') || request('country_code') || isset($source_country))
-                <div class="active-filters mb-3">
-                    <span class="filter-label">{{ app()->getLocale() == 'ar' ? 'الفلاتر النشطة:' : 'Active Filters:' }}</span>
-                    @if(request('country_code') == 'AE' || (isset($source_country) && $source_country == 'AE'))
-                        <span class="filter-tag" style="background: #e8f5e9;">
-                            <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'موزعين الإمارات' : 'UAE Distributors' }}
-                            <button type="button" onclick="window.location.href='{{ route('products.search-page') }}'"><i class="ri-close-line"></i></button>
-                        </span>
-                    @endif
-                    @if(request('country_code') == 'SA' || (isset($source_country) && $source_country == 'SA'))
-                        <span class="filter-tag" style="background: #e8f5e9;">
-                            <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'موزعين السعودية' : 'Saudi Distributors' }}
-                            <button type="button" onclick="window.location.href='{{ route('products.search-page') }}'"><i class="ri-close-line"></i></button>
-                        </span>
-                    @endif
-                    @if(request('ship_from') == 'CN')
-                        <span class="filter-tag" style="background: #ffebee;">
-                            <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}
-                            <button type="button" onclick="removeFilter('ship_from')"><i class="ri-close-line"></i></button>
-                        </span>
-                    @endif
-                    @if(request('category_id'))
-                        @php
-                            $selectedCategory = $allCategories->firstWhere('aliexpress_category_id', request('category_id'));
-                        @endphp
-                        @if($selectedCategory)
-                            <span class="filter-tag">
-                                <i class="ri-folder-line"></i> {{ app()->getLocale() == 'ar' && $selectedCategory->name_ar ? $selectedCategory->name_ar : $selectedCategory->name }}
-                                <button type="button" onclick="removeFilter('category_id')"><i class="ri-close-line"></i></button>
-                            </span>
-                        @endif
-                    @endif
-                    <button type="button" class="btn btn-sm btn-link text-danger" onclick="clearAllFilters()">
-                        {{ app()->getLocale() == 'ar' ? 'مسح الكل' : 'Clear All' }}
-                    </button>
                 </div>
             @endif
 
