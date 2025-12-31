@@ -537,35 +537,9 @@
                                     </p>
 
                                     <!-- Price -->
-                                    @php
-                                        $currentCurrency = request('currency', session('currency_code', 'USD'));
-                                        $isSAR = $currentCurrency === 'SAR';
-                                        $isAED = $currentCurrency === 'AED';
-                                        $currencySymbols = [
-                                            'SAR' => '',
-                                            'AED' => '',
-                                            'USD' => '$',
-                                            'EUR' => '€',
-                                            'GBP' => '£',
-                                            'KWD' => 'د.ك',
-                                            'QAR' => 'ر.ق',
-                                            'BHD' => 'د.ب',
-                                            'OMR' => 'ر.ع',
-                                            'EGP' => 'ج.م',
-                                            'JOD' => 'د.أ',
-                                            'LBP' => 'ل.ل',
-                                        ];
-                                        $currencySymbol = $currencySymbols[$currentCurrency] ?? $currentCurrency;
-                                    @endphp
                                     <div class="mb-2">
                                         <h5 class="text-primary mb-0 d-flex align-items-center" style="direction: ltr; justify-content: flex-start;">
-                                            @if($isSAR)
-                                                <x-riyal-icon width="18" height="18" class="me-1" />
-                                            @elseif($isAED)
-                                                <x-dirham-icon width="18" height="18" class="me-1" />
-                                            @else
-                                                <span class="me-1" style="font-size: 0.9rem;">{{ $currencySymbol }}</span>
-                                            @endif
+                                            <x-session-currency-icon width="18" height="18" class="me-1" />
                                             @if($product['sale_price_format'])
                                                 {{ preg_replace('/[A-Z]{3}\s*/', '', $product['sale_price_format']) }}
                                             @else
@@ -574,25 +548,13 @@
                                         </h5>
                                         @if(isset($product['admin_profit']) && $product['admin_profit'] > 0)
                                             <small class="text-success d-block d-flex align-items-center">
-                                                @if($isSAR)
-                                                    <x-riyal-icon width="12" height="12" class="me-1" />
-                                                @elseif($isAED)
-                                                    <x-dirham-icon width="12" height="12" class="me-1" />
-                                                @else
-                                                    <span class="me-1" style="font-size: 0.7rem;">{{ $currencySymbol }}</span>
-                                                @endif
+                                                <x-session-currency-icon width="12" height="12" class="me-1" />
                                                 {{ app()->getLocale() == 'ar' ? 'تشمل' : 'Includes' }} {{ number_format($product['admin_profit'], 2) }} {{ app()->getLocale() == 'ar' ? 'عمولة' : 'profit' }}
                                             </small>
                                         @endif
                                         @if($product['original_price'] > $product['sale_price'])
                                             <small class="text-muted text-decoration-line-through d-flex align-items-center">
-                                                @if($isSAR)
-                                                    <x-riyal-icon width="12" height="12" class="me-1" />
-                                                @elseif($isAED)
-                                                    <x-dirham-icon width="12" height="12" class="me-1" />
-                                                @else
-                                                    <span class="me-1" style="font-size: 0.7rem;">{{ $currencySymbol }}</span>
-                                                @endif
+                                                <x-session-currency-icon width="12" height="12" class="me-1" />
                                                 @if($product['original_price_format'])
                                                     {{ preg_replace('/[A-Z]{3}\s*/', '', $product['original_price_format']) }}
                                                 @else

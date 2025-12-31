@@ -176,11 +176,7 @@
                                         <td>
                                             @if($product->price)
                                                 <span class="fw-bold d-flex align-items-center" style="color: #561C04;">
-                                                    @if($currentTab === 'saudi')
-                                                        <x-riyal-icon width="16" height="16" />
-                                                    @else
-                                                        <x-dirham-icon width="16" height="16" />
-                                                    @endif
+                                                    <x-session-currency-icon width="16" height="16" class="me-1" />
                                                     {{ number_format($product->price, 2) }}
                                                 </span>
                                             @endif
