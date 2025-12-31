@@ -160,8 +160,11 @@
                                         @endif
                                     </td>
                                     <td>{{ $order->quantity }}</td>
-                                    <td>
-                                        <strong>{{ $currentCurrency->format($displayAmount) }}</strong>
+                                    <td style="direction: ltr; text-align: left;">
+                                        <span class="fw-bold d-inline-flex align-items-center gap-1" style="color: #561C04;">
+                                            <x-session-currency-icon width="16" height="16" />
+                                            {{ number_format($displayAmount, 2) }}
+                                        </span>
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $order->getStatusBadgeColor() }}">

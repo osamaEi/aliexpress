@@ -173,10 +173,10 @@
                                                 </small>
                                             @endif
                                         </td>
-                                        <td>
+                                        <td style="direction: ltr; text-align: left;">
                                             @if($product->price)
-                                                <span class="fw-bold d-flex align-items-center" style="color: #561C04;">
-                                                    <x-session-currency-icon width="16" height="16" class="me-1" />
+                                                <span class="fw-bold d-inline-flex align-items-center gap-1" style="color: #561C04;">
+                                                    <x-session-currency-icon width="16" height="16" />
                                                     {{ number_format($product->price, 2) }}
                                                 </span>
                                             @endif

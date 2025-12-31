@@ -62,7 +62,7 @@
                                         @endif
                                         <div class="col">
                                             <h6 class="mb-1">{{ $product->name }}</h6>
-                                            <p class="mb-1 text-primary"><strong>{{ $product->currency }} {{ number_format($product->price, 2) }}</strong></p>
+                                            <p class="mb-1 d-inline-flex align-items-center gap-1" style="direction: ltr; color: #561C04;"><strong><x-session-currency-icon width="16" height="16" /> {{ number_format($currentCurrency->convertFrom($product->price, $product->currency ?? 'USD'), 2) }}</strong></p>
                                             @if($product->isAliexpressProduct())
                                                 <span class="badge bg-info"><i class="ri-global-line me-1"></i>AliExpress Product</span>
                                             @endif

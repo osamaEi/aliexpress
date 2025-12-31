@@ -68,13 +68,17 @@
                         <div class="flex-grow-1">
                             <h6>{{ $order->product->name }}</h6>
                             <p class="text-muted mb-2">{{ __('messages.quantity') }}: {{ $order->quantity }}</p>
-                            <p class="mb-0" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+                            <p class="mb-0">
                                 <strong>{{ app()->getLocale() == 'ar' ? 'سعر الوحدة:' : 'Unit Price:' }}</strong>
-                                {{ $order->currency }} {{ number_format($order->unit_price, 2) }}
+                                <span class="d-inline-flex align-items-center gap-1" style="direction: ltr;">
+                                    <x-session-currency-icon width="16" height="16" />
+                                    {{ number_format($currentCurrency->convertFrom($order->unit_price, $order->currency ?? 'USD'), 2) }}
+                                </span>
                                 <br>
                                 <strong>{{ app()->getLocale() == 'ar' ? 'الإجمالي:' : 'Total:' }}</strong>
-                                <span class="text-primary fs-5">
-                                    {{ $order->currency }} {{ number_format($order->total_price, 2) }}
+                                <span class="d-inline-flex align-items-center gap-1 fs-5" style="direction: ltr; color: #561C04;">
+                                    <x-session-currency-icon width="18" height="18" />
+                                    {{ number_format($currentCurrency->convertFrom($order->total_price, $order->currency ?? 'USD'), 2) }}
                                 </span>
                             </p>
                         </div>

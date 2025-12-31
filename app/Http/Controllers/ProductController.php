@@ -1326,9 +1326,12 @@ class ProductController extends Controller
 
         // Check if user is a seller
         if ($user->user_type !== 'seller') {
+            $message = app()->getLocale() == 'ar'
+                ? 'فقط البائعين يمكنهم إسناد المنتجات.'
+                : 'Only sellers can assign products.';
             return response()->json([
                 'success' => false,
-                'message' => 'Only sellers can assign products.'
+                'message' => $message
             ], 403);
         }
 
@@ -1364,9 +1367,12 @@ class ProductController extends Controller
         }
 
         if ($alreadyAssigned) {
+            $message = app()->getLocale() == 'ar'
+                ? 'هذا المنتج مسند إليك بالفعل.'
+                : 'This product is already assigned to you.';
             return response()->json([
                 'success' => false,
-                'message' => 'This product is already assigned to you.'
+                'message' => $message
             ], 400);
         }
 
@@ -1458,9 +1464,13 @@ class ProductController extends Controller
             'is_choice' => $isChoice
         ]);
 
+        $message = app()->getLocale() == 'ar'
+            ? 'تم إسناد المنتج بنجاح! يمكنك مشاهدته في "منتجاتي المسندة".'
+            : 'Product assigned successfully! You can now view it in "My Assigned Products".';
+
         return response()->json([
             'success' => true,
-            'message' => 'Product assigned successfully! You can now view it in "My Assigned Products".',
+            'message' => $message,
             'applied_profit' => $sellerAmount > 0,
             'profit_amount' => $sellerAmount,
             'final_price' => $finalPrice,
@@ -1606,12 +1616,24 @@ class ProductController extends Controller
             }
         }
 
-        $message = "Successfully assigned $assignedCount product(s)";
-        if ($skippedCount > 0) {
-            $message .= " ($skippedCount already assigned)";
-        }
-        if (count($errors) > 0) {
-            $message .= ". " . count($errors) . " failed";
+        $isArabic = app()->getLocale() == 'ar';
+
+        if ($isArabic) {
+            $message = "تم إسناد $assignedCount منتج بنجاح";
+            if ($skippedCount > 0) {
+                $message .= " ($skippedCount مسند مسبقاً)";
+            }
+            if (count($errors) > 0) {
+                $message .= ". " . count($errors) . " فشل";
+            }
+        } else {
+            $message = "Successfully assigned $assignedCount product(s)";
+            if ($skippedCount > 0) {
+                $message .= " ($skippedCount already assigned)";
+            }
+            if (count($errors) > 0) {
+                $message .= ". " . count($errors) . " failed";
+            }
         }
 
         return response()->json([
