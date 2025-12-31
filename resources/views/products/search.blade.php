@@ -294,7 +294,7 @@
                 <input type="hidden" name="choice_only" id="choiceOnlyInput" value="{{ request('choice_only') }}">
                 <input type="hidden" name="category_id" id="categoryIdInput" value="{{ request('category_id') }}">
                 <input type="hidden" name="country" id="countryInput" value="{{ request('country', 'AE') }}">
-                <input type="hidden" name="currency" id="currencyInput" value="{{ request('currency', 'USD') }}">
+                <input type="hidden" name="currency" id="currencyInput" value="{{ request('currency', session('currency_code', 'USD')) }}">
                 <input type="hidden" name="country_code" id="countryCodeInput" value="{{ request('country_code') ?? ($source_country ?? '') }}">
                 <input type="hidden" name="distributor_id" id="distributorIdInput" value="{{ request('distributor_id', '') }}">
 
@@ -456,7 +456,7 @@
                                                         data-title-ar="{{ addslashes($product['title_ar'] ?? $product['title']) }}"
                                                         data-image="{{ $product['item_main_pic'] }}"
                                                         data-price="{{ $product['original_sale_price'] ?? $product['sale_price'] }}"
-                                                        data-currency="{{ request('currency', 'AED') }}"
+                                                        data-currency="{{ request('currency', session('currency_code', 'USD')) }}"
                                                         data-category-id="{{ $bulkLocalCategoryId ?? '' }}"
                                                         style="width: 20px; height: 20px; cursor: pointer; background-color: white; border: 2px solid #667eea;">
                                                 </div>
@@ -538,7 +538,7 @@
 
                                     <!-- Price -->
                                     @php
-                                        $currentCurrency = request('currency', 'AED');
+                                        $currentCurrency = request('currency', session('currency_code', 'USD'));
                                         $isSAR = $currentCurrency === 'SAR';
                                         $isAED = $currentCurrency === 'AED';
                                         $currencySymbols = [
@@ -657,7 +657,7 @@
                                                     <button
                                                         type="button"
                                                         class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
-                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title_en'] ?? $product['title']) }}', '{{ addslashes($product['title_ar'] ?? $product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', 'AED') }}', '{{ $localCategoryId ?? '' }}', this)"
+                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title_en'] ?? $product['title']) }}', '{{ addslashes($product['title_ar'] ?? $product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', session('currency_code', 'USD')) }}', '{{ $localCategoryId ?? '' }}', this)"
                                                         data-product-id="{{ $product['item_id'] }}"
                                                         data-title-en="{{ addslashes($product['title_en'] ?? $product['title']) }}"
                                                         data-title-ar="{{ addslashes($product['title_ar'] ?? $product['title']) }}"
@@ -1077,7 +1077,7 @@
             document.getElementById('choiceOnlyInput').value = '';
             document.getElementById('categoryIdInput').value = '';
             document.getElementById('countryInput').value = 'AE';
-            document.getElementById('currencyInput').value = 'USD';
+            document.getElementById('currencyInput').value = '{{ session('currency_code', 'USD') }}';
             document.getElementById('countryCodeInput').value = '';
             document.getElementById('distributorIdInput').value = '';
 
