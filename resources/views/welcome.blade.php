@@ -32,6 +32,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            padding-top: 90px;
         }
 
         .main-container {
@@ -293,20 +294,137 @@
             .content-area {
                 padding: 30px 25px;
             }
+
+            .top-nav-bar {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 10px 15px;
+            }
+
+            .register-buttons {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-btn {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+
+            .nav-btn span {
+                display: none;
+            }
+
+            .nav-btn i {
+                font-size: 16px;
+            }
+
+            body {
+                padding-top: 130px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .register-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .register-buttons .nav-btn span {
+                display: inline;
+            }
+
+            .register-buttons .nav-btn {
+                justify-content: center;
+                width: 100%;
+            }
+
+            body {
+                padding-top: 180px;
+            }
+        }
+
+        /* Top Navigation Bar */
+        .top-nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn i {
+            font-size: 18px;
+        }
+
+        .home-btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(86, 28, 4, 0.3);
+            color: white;
+        }
+
+        .register-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .seller-btn {
+            background: #f0fdf4;
+            color: #166534;
+            border: 2px solid #22c55e;
+        }
+
+        .seller-btn:hover {
+            background: #22c55e;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .distributor-btn {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 2px solid #3b82f6;
+        }
+
+        .distributor-btn:hover {
+            background: #3b82f6;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
         }
 
         /* Language Switcher */
         .language-switcher {
-            position: absolute;
-            top: 20px;
-            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
-            z-index: 1000;
             display: flex;
             gap: 10px;
-            background: white;
+            background: #f8f9fa;
             padding: 8px 12px;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .lang-btn {
@@ -343,16 +461,37 @@
     </style>
 </head>
 <body>
-    <!-- Language Switcher -->
-    <div class="language-switcher">
-        <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
-            <img src="https://flagcdn.com/w20/gb.png" alt="English" style="width: 20px; height: 15px;">
-            <span>English</span>
+    <!-- Top Navigation Bar -->
+    <div class="top-nav-bar">
+        <!-- Home Button -->
+        <a href="https://selaa.ae" class="nav-btn home-btn">
+            <i class="ri-home-4-line"></i>
+            <span>{{ app()->getLocale() == 'ar' ? 'الرئيسية' : 'Home' }}</span>
         </a>
-        <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
-            <img src="https://flagcdn.com/w20/ae.png" alt="العربية" style="width: 20px; height: 15px;">
-            <span>العربية</span>
-        </a>
+
+        <!-- Register Buttons -->
+        <div class="register-buttons">
+            <a href="{{ route('seller.register.step1') }}" class="nav-btn seller-btn">
+                <i class="ri-user-add-line"></i>
+                <span>{{ app()->getLocale() == 'ar' ? 'سجل كبائع' : 'Register as Seller' }}</span>
+            </a>
+            <a href="{{ route('distributor.register.step1') }}" class="nav-btn distributor-btn">
+                <i class="ri-store-2-line"></i>
+                <span>{{ app()->getLocale() == 'ar' ? 'سجل كمتجر' : 'Register as Distributor' }}</span>
+            </a>
+        </div>
+
+        <!-- Language Switcher -->
+        <div class="language-switcher">
+            <a href="{{ route('lang.switch', 'en') }}" class="lang-btn {{ app()->getLocale() == 'en' ? 'active' : '' }}">
+                <img src="https://flagcdn.com/w20/gb.png" alt="English" style="width: 20px; height: 15px;">
+                <span>EN</span>
+            </a>
+            <a href="{{ route('lang.switch', 'ar') }}" class="lang-btn {{ app()->getLocale() == 'ar' ? 'active' : '' }}">
+                <img src="https://flagcdn.com/w20/ae.png" alt="العربية" style="width: 20px; height: 15px;">
+                <span>عربي</span>
+            </a>
+        </div>
     </div>
 
     <div class="main-container">

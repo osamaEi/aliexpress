@@ -46,7 +46,19 @@
                     </button>
                     <div class="categories-scroll flex-grow-1" id="categoriesScroll">
                         @foreach($categories as $category)
-                            <div class="category-item {{ request('category_id') == $category->aliexpress_category_id ? 'active' : '' }}"
+                            @php
+                                // Check if this main category is active (either directly selected or has active child)
+                                $isMainCatActive = request('category_id') == $category->aliexpress_category_id;
+                                if (!$isMainCatActive && $category->children) {
+                                    foreach ($category->children as $child) {
+                                        if ($child->aliexpress_category_id == request('category_id') || $child->id == request('category_id')) {
+                                            $isMainCatActive = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            @endphp
+                            <div class="category-item {{ $isMainCatActive ? 'active' : '' }}"
                                  onclick="selectMainCategory('{{ $category->aliexpress_category_id }}')"
                                  data-category-id="{{ $category->aliexpress_category_id }}">
                                 <div class="category-icon">
@@ -1258,7 +1270,7 @@
                 buttonElement.classList.add('btn-secondary');
                 buttonElement.innerHTML = '<i class="ri-check-line me-1"></i> ' + (isArabic ? 'تم الإسناد' : 'Assigned');
                 buttonElement.disabled = true;
-                showToast('success', data.message || (isArabic ? 'تم الإسناد بنجاح!' : 'Product assigned successfully!'));
+                showToast('success', data.message || (isArabic ? 'تم إسناد المنتج بنجاح! يمكنك مشاهدته في "منتجاتي المخصصة"' : 'Product assigned successfully! You can view it in "My Assigned Products"'));
             } else {
                 buttonElement.disabled = false;
                 buttonElement.innerHTML = originalHtml;
@@ -1279,25 +1291,62 @@
         if (!toastContainer) {
             toastContainer = document.createElement('div');
             toastContainer.id = 'toastContainer';
-            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+            toastContainer.style.cssText = `position: fixed; top: 80px; ${isArabic ? 'left' : 'right'}: 20px; z-index: 9999; direction: ${isArabic ? 'rtl' : 'ltr'};`;
             document.body.appendChild(toastContainer);
         }
 
         const toast = document.createElement('div');
-        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-        toast.style.cssText = 'min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
-        toast.innerHTML = `
-            <i class="ri-${type === 'success' ? 'checkbox-circle' : 'error-warning'}-line me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        const bgColor = type === 'success' ? '#28a745' : '#dc3545';
+        const icon = type === 'success' ? 'checkbox-circle' : 'error-warning';
+
+        toast.style.cssText = `
+            min-width: 320px;
+            max-width: 400px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            background: ${bgColor};
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: toastSlideIn 0.3s ease-out;
+            font-size: 14px;
+            font-weight: 500;
         `;
+
+        toast.innerHTML = `
+            <i class="ri-${icon}-line" style="font-size: 24px; flex-shrink: 0;"></i>
+            <span style="flex-grow: 1;">${message}</span>
+            <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 18px; opacity: 0.8;">
+                <i class="ri-close-line"></i>
+            </button>
+        `;
+
+        // Add animation keyframes if not exists
+        if (!document.getElementById('toastAnimationStyle')) {
+            const style = document.createElement('style');
+            style.id = 'toastAnimationStyle';
+            style.textContent = `
+                @keyframes toastSlideIn {
+                    from { transform: translateX(${isArabic ? '-100%' : '100%'}); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes toastSlideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(${isArabic ? '-100%' : '100%'}); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
 
         toastContainer.appendChild(toast);
 
         setTimeout(() => {
-            toast.classList.remove('show');
+            toast.style.animation = 'toastSlideOut 0.3s ease-in forwards';
             setTimeout(() => toast.remove(), 300);
-        }, 5000);
+        }, 4000);
     }
 
     // Bulk selection functionality
