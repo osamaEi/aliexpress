@@ -15,8 +15,8 @@
             --primary-color: #561C04;
             --secondary-color: #7a2805;
             --success-color: #10b981;
-            --distributor-color: #1e40af;
-            --distributor-secondary: #3b82f6;
+            --distributor-color: #561C04;
+            --distributor-secondary: #7a2805;
         }
 
         * {
@@ -27,7 +27,7 @@
 
         body {
             font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to bottom right, #f0f9ff 0%, #e0f2fe 100%);
+            background: linear-gradient(to bottom right, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -43,7 +43,7 @@
             background: white;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 25px 50px rgba(30, 64, 175, 0.12);
+            box-shadow: 0 25px 50px rgba(86, 28, 4, 0.12);
             animation: fadeInUp 0.6s ease-out;
         }
 
@@ -238,7 +238,7 @@
         .form-select:focus {
             outline: none;
             border-color: var(--distributor-color);
-            box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.08);
+            box-shadow: 0 0 0 4px rgba(86, 28, 4, 0.08);
         }
 
         .form-control.is-invalid {
@@ -271,7 +271,7 @@
 
         .btn-continue:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(30, 64, 175, 0.25);
+            box-shadow: 0 10px 25px rgba(86, 28, 4, 0.25);
         }
 
         .btn-back {
@@ -468,7 +468,7 @@
 
         .currency-option input:checked + label {
             border-color: var(--distributor-color);
-            background: #eff6ff;
+            background: #fef3f2;
         }
 
         .currency-option label:hover {
@@ -488,7 +488,7 @@
             justify-content: center;
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            background: linear-gradient(135deg, #fef3f2 0%, #fde8e4 100%);
             border-radius: 12px;
             margin-bottom: 12px;
             color: var(--distributor-color);
@@ -556,7 +556,7 @@
             align-items: center;
             gap: 8px;
             padding: 12px 20px;
-            background: #eff6ff;
+            background: #fef3f2;
             color: var(--distributor-color);
             border: 2px dashed var(--distributor-secondary);
             border-radius: 10px;
@@ -567,7 +567,7 @@
         }
 
         .btn-add-social:hover {
-            background: #dbeafe;
+            background: #fde8e4;
         }
 
         .social-icon {
