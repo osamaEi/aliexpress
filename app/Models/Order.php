@@ -294,7 +294,8 @@ class Order extends Model
             if ($sellerProfitSetting) {
                 // Use the actual total_price from the order as base price
                 $basePrice = $this->total_price ?? ($this->unit_price * $this->quantity);
-                $sellerProfit = $sellerProfitSetting->calculateProfit($basePrice);
+                // Pass the order currency so fixed amounts get converted properly
+                $sellerProfit = $sellerProfitSetting->calculateProfit($basePrice, $this->currency);
             }
         }
 

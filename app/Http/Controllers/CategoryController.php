@@ -40,6 +40,11 @@ class CategoryController extends Controller
             $assignedCategoryIds = array_merge($mainActivities, $subActivities);
         }
 
+        // For non-admin users, only show active categories
+        if ($user && $user->user_type !== 'admin') {
+            $query->where('is_active', true);
+        }
+
         if ($parentId) {
             // Show subcategories of a specific parent
             $query->where('parent_id', $parentId);

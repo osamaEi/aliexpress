@@ -1,6 +1,9 @@
 @extends('dashboard')
 
 @section('content')
+@php
+    $sessionCurrency = $currentCurrency->code ?? 'AED';
+@endphp
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
@@ -127,7 +130,11 @@
                                                    step="0.01"
                                                    required>
                                             <span class="input-group-text profit-unit" data-index="{{ $index }}">
-                                                {{ $profitType == 'percentage' ? '%' : currency_symbol('AED', false) }}
+                                                @if($profitType == 'percentage')
+                                                    %
+                                                @else
+                                                    <x-session-currency-icon width="16" height="16" />
+                                                @endif
                                             </span>
                                         </div>
                                     </td>
@@ -184,23 +191,23 @@
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label">{{ __('messages.example_base_price') }} ({!! currency_symbol('AED', true) !!})</label>
+                                <label class="form-label">{{ __('messages.example_base_price') }} (<x-session-currency-icon width="16" height="16" />)</label>
                                 <input type="number" class="form-control form-control-lg" id="previewBasePrice" value="100" min="0" step="0.01">
                             </div>
                             <div class="alert alert-light border">
                                 <div class="row g-3">
                                     <div class="col-6">
                                         <small class="text-muted d-block mb-1">{{ __('messages.base_price') }}</small>
-                                        <h6 class="mb-0" id="previewBasePriceDisplay">{!! format_currency(100, 'AED', 2, true) !!}</h6>
+                                        <h6 class="mb-0 d-inline-flex align-items-center gap-1" id="previewBasePriceDisplay" style="direction: ltr;"><x-session-currency-icon width="16" height="16" /> 100.00</h6>
                                     </div>
                                     <div class="col-6">
                                         <small class="text-muted d-block mb-1">{{ __('messages.profit_amount') }}</small>
-                                        <h6 class="mb-0 text-success" id="previewProfitAmount">{!! format_currency(0, 'AED', 2, true) !!}</h6>
+                                        <h6 class="mb-0 text-success d-inline-flex align-items-center gap-1" id="previewProfitAmount" style="direction: ltr;"><x-session-currency-icon width="16" height="16" /> 0.00</h6>
                                     </div>
                                     <div class="col-12">
                                         <hr>
                                         <small class="text-muted d-block mb-2">{{ __('messages.final_selling_price') }}</small>
-                                        <h4 class="mb-0 text-primary" id="previewFinalPrice">{!! format_currency(100, 'AED', 2, true) !!}</h4>
+                                        <h4 class="mb-0 text-primary d-inline-flex align-items-center gap-1" id="previewFinalPrice" style="direction: ltr;"><x-session-currency-icon width="18" height="18" /> 100.00</h4>
                                     </div>
                                 </div>
                             </div>
@@ -280,6 +287,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Currency icons for dynamic switching
+    const currencyIcons = {
+        'AED': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        'SAR': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align: middle;"><text x="3" y="18" font-size="16" font-weight="bold" fill="currentColor">&#xFDFC;</text></svg>',
+        'USD': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align: middle;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    };
+    const sessionCurrency = '{{ session("currency_code", "USD") }}';
+    const currencyIcon = currencyIcons[sessionCurrency] || sessionCurrency;
+
     // Handle profit type change
     document.querySelectorAll('.profit-type').forEach(function(select) {
         select.addEventListener('change', function() {
@@ -290,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.value === 'percentage') {
                 unit.textContent = '%';
             } else {
-                unit.innerHTML = '{!! currency_symbol("AED", false) !!}';
+                unit.innerHTML = currencyIcon;
             }
 
             row.dataset.type = this.value;
@@ -369,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function formatCurrency(amount) {
-        return `{!! currency_symbol("AED", true) !!} ${amount.toFixed(2)}`;
+        return `${currencyIcon} ${amount.toFixed(2)}`;
     }
 
     // Handle delete profit setting

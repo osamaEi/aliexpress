@@ -27,7 +27,7 @@ class SellerController extends Controller
             'total_orders' => Order::whereIn('product_id', $assignedProductIds)->count(),
             'pending_orders' => Order::whereIn('product_id', $assignedProductIds)->where('status', 'pending')->count(),
             'completed_orders' => Order::whereIn('product_id', $assignedProductIds)->where('status', 'delivered')->count(),
-            'total_categories' => Category::count(),
+            'total_categories' => Category::where('is_active', true)->count(),
             'wallet_balance' => $user->wallet ? $user->wallet->balance : 0,
             'total_revenue' => Order::whereIn('product_id', $assignedProductIds)
                 ->where('status', 'delivered')

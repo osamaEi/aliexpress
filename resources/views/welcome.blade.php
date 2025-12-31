@@ -393,29 +393,29 @@
         }
 
         .seller-btn {
-            background: #f0fdf4;
-            color: #166534;
-            border: 2px solid #22c55e;
+            background: #fef3f2;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
         }
 
         .seller-btn:hover {
-            background: #22c55e;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 6px 20px rgba(86, 28, 4, 0.3);
         }
 
         .distributor-btn {
-            background: #eff6ff;
-            color: #1e40af;
-            border: 2px solid #3b82f6;
+            background: #fef3f2;
+            color: var(--primary-color);
+            border: 2px solid var(--secondary-color);
         }
 
         .distributor-btn:hover {
-            background: #3b82f6;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 6px 20px rgba(86, 28, 4, 0.3);
         }
 
         /* Language Switcher */
@@ -581,7 +581,7 @@
                     {{ app()->getLocale() == 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?" }}
                     <a href="{{ route('seller.register.step1') }}">{{ app()->getLocale() == 'ar' ? 'سجل كبائع' : 'Register as Seller' }}</a>
                     <span style="margin: 0 8px; color: #999;">|</span>
-                    <a href="{{ route('distributor.register.step1') }}" style="color: #1e40af;">{{ app()->getLocale() == 'ar' ? 'سجل كمتجر' : 'Register as Distributor' }}</a>
+                    <a href="{{ route('distributor.register.step1') }}">{{ app()->getLocale() == 'ar' ? 'سجل كمتجر' : 'Register as Distributor' }}</a>
                 </div>
             </form>
         </div>

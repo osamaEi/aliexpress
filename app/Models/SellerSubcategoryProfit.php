@@ -41,9 +41,10 @@ class SellerSubcategoryProfit extends Model
      * Calculate the profit amount for a given base price
      *
      * @param float $basePrice
+     * @param string|null $targetCurrency The currency of the product/price
      * @return float
      */
-    public function calculateProfit(float $basePrice): float
+    public function calculateProfit(float $basePrice, ?string $targetCurrency = null): float
     {
         if (!$this->is_active) {
             return 0;
@@ -53,18 +54,35 @@ class SellerSubcategoryProfit extends Model
             return $basePrice * ($this->profit_value / 100);
         }
 
-        return $this->profit_value;
+        // For fixed amount, convert from session currency to target currency if needed
+        $profitValue = $this->profit_value;
+        $sessionCurrency = session('currency_code', 'USD');
+
+        if ($targetCurrency && $sessionCurrency !== $targetCurrency) {
+            $targetCurrencyModel = Currency::where('code', $targetCurrency)->first();
+            $sessionCurrencyModel = Currency::where('code', $sessionCurrency)->first();
+
+            if ($targetCurrencyModel && $sessionCurrencyModel) {
+                // Convert fixed amount from session currency to target currency
+                // First convert to USD, then to target currency
+                $usdAmount = $profitValue / $sessionCurrencyModel->exchange_rate;
+                $profitValue = $usdAmount * $targetCurrencyModel->exchange_rate;
+            }
+        }
+
+        return $profitValue;
     }
 
     /**
      * Calculate the final price including profit
      *
      * @param float $basePrice
+     * @param string|null $targetCurrency The currency of the product/price
      * @return float
      */
-    public function calculateFinalPrice(float $basePrice): float
+    public function calculateFinalPrice(float $basePrice, ?string $targetCurrency = null): float
     {
-        return $basePrice + $this->calculateProfit($basePrice);
+        return $basePrice + $this->calculateProfit($basePrice, $targetCurrency);
     }
 
     /**

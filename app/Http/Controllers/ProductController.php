@@ -1380,6 +1380,7 @@ class ProductController extends Controller
         $product = Product::where('aliexpress_id', $aliexpressProductId)->first();
 
         $basePrice = $request->product_price ?? 0;
+        $productCurrency = $request->currency ?? 'AED';
         $sellerAmount = 0;
         $adminAmount = 0;
         $finalPrice = $basePrice;
@@ -1389,13 +1390,16 @@ class ProductController extends Controller
             $profitSetting = $user->getProfitForSubcategory($request->category_id);
 
             if ($profitSetting) {
-                $sellerAmount = $profitSetting->calculateProfit($basePrice);
-                $finalPrice = $profitSetting->calculateFinalPrice($basePrice);
+                // Pass the product currency so fixed amounts get converted properly
+                $sellerAmount = $profitSetting->calculateProfit($basePrice, $productCurrency);
+                $finalPrice = $profitSetting->calculateFinalPrice($basePrice, $productCurrency);
 
                 \Log::info('Seller Profit Applied', [
                     'seller_id' => $user->id,
                     'category_id' => $request->category_id,
                     'base_price' => $basePrice,
+                    'product_currency' => $productCurrency,
+                    'session_currency' => session('currency_code', 'USD'),
                     'profit_type' => $profitSetting->profit_type,
                     'profit_value' => $profitSetting->profit_value,
                     'seller_amount' => $sellerAmount,
@@ -1523,6 +1527,7 @@ class ProductController extends Controller
                 $product = Product::where('aliexpress_id', $aliexpressProductId)->first();
 
                 $basePrice = $productData['product_price'] ?? 0;
+                $productCurrency = $productData['currency'] ?? 'AED';
                 $sellerAmount = 0;
                 $adminAmount = 0;
                 $finalPrice = $basePrice;
@@ -1533,13 +1538,16 @@ class ProductController extends Controller
                     $profitSetting = $user->getProfitForSubcategory($categoryId);
 
                     if ($profitSetting) {
-                        $sellerAmount = $profitSetting->calculateProfit($basePrice);
-                        $finalPrice = $profitSetting->calculateFinalPrice($basePrice);
+                        // Pass the product currency so fixed amounts get converted properly
+                        $sellerAmount = $profitSetting->calculateProfit($basePrice, $productCurrency);
+                        $finalPrice = $profitSetting->calculateFinalPrice($basePrice, $productCurrency);
 
                         \Log::info('Seller Profit Applied (Bulk)', [
                             'seller_id' => $user->id,
                             'category_id' => $categoryId,
                             'base_price' => $basePrice,
+                            'product_currency' => $productCurrency,
+                            'session_currency' => session('currency_code', 'USD'),
                             'profit_type' => $profitSetting->profit_type,
                             'profit_value' => $profitSetting->profit_value,
                             'seller_amount' => $sellerAmount,

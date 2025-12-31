@@ -254,14 +254,16 @@ class DistributorController extends Controller
 
         if ($parentId) {
             $parentCategory = Category::find($parentId);
-            // Show subcategories of the parent
+            // Show subcategories of the parent (only active)
             $categories = Category::where('parent_id', $parentId)
+                ->where('is_active', true)
                 ->withCount('children')
                 ->orderBy('name', 'asc')
                 ->paginate(20);
         } else {
-            // Show only root categories (no parent)
+            // Show only root categories (no parent, only active)
             $categories = Category::whereNull('parent_id')
+                ->where('is_active', true)
                 ->withCount('children')
                 ->orderBy('name', 'asc')
                 ->paginate(20);
