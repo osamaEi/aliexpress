@@ -57,6 +57,7 @@ class SellerSubcategoryProfitController extends Controller
             }
 
             // Create or update profit setting
+            // Save the session currency so we know what currency the fixed amount was entered in
             $profitSetting = SellerSubcategoryProfit::updateOrCreate(
                 [
                     'user_id' => $seller->id,
@@ -65,7 +66,7 @@ class SellerSubcategoryProfitController extends Controller
                 [
                     'profit_type' => $validated['profit_type'],
                     'profit_value' => $validated['profit_value'],
-                    'currency' => 'AED',
+                    'currency' => session('currency_code', 'AED'),
                     'is_active' => $validated['is_active'] ?? true,
                 ]
             );
@@ -116,6 +117,7 @@ class SellerSubcategoryProfitController extends Controller
                     // Handle is_active: checkbox sends "1" when checked, nothing when unchecked
                     $isActive = isset($profitData['is_active']) && $profitData['is_active'] == 1;
 
+                    // Save the session currency so we know what currency the fixed amount was entered in
                     SellerSubcategoryProfit::updateOrCreate(
                         [
                             'user_id' => $seller->id,
@@ -124,7 +126,7 @@ class SellerSubcategoryProfitController extends Controller
                         [
                             'profit_type' => $profitData['profit_type'],
                             'profit_value' => $profitData['profit_value'],
-                            'currency' => 'AED',
+                            'currency' => session('currency_code', 'AED'),
                             'is_active' => $isActive,
                         ]
                     );

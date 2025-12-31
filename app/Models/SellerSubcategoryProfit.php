@@ -54,18 +54,19 @@ class SellerSubcategoryProfit extends Model
             return $basePrice * ($this->profit_value / 100);
         }
 
-        // For fixed amount, convert from session currency to target currency if needed
+        // For fixed amount, convert from saved currency to target currency if needed
         $profitValue = $this->profit_value;
-        $sessionCurrency = session('currency_code', 'USD');
+        // Use the currency that was saved when the profit setting was created
+        $savedCurrency = $this->currency ?? 'AED';
 
-        if ($targetCurrency && $sessionCurrency !== $targetCurrency) {
+        if ($targetCurrency && $savedCurrency !== $targetCurrency) {
             $targetCurrencyModel = Currency::where('code', $targetCurrency)->first();
-            $sessionCurrencyModel = Currency::where('code', $sessionCurrency)->first();
+            $savedCurrencyModel = Currency::where('code', $savedCurrency)->first();
 
-            if ($targetCurrencyModel && $sessionCurrencyModel) {
-                // Convert fixed amount from session currency to target currency
+            if ($targetCurrencyModel && $savedCurrencyModel) {
+                // Convert fixed amount from saved currency to target currency
                 // First convert to USD, then to target currency
-                $usdAmount = $profitValue / $sessionCurrencyModel->exchange_rate;
+                $usdAmount = $profitValue / $savedCurrencyModel->exchange_rate;
                 $profitValue = $usdAmount * $targetCurrencyModel->exchange_rate;
             }
         }

@@ -45,7 +45,7 @@
                                 </span>
                             </td>
                             <td>
-                                <strong>{!! format_currency($subscription->amount_paid) !!}</strong>
+                                <strong class="d-inline-flex align-items-center gap-1" style="direction: ltr;"><x-session-currency-icon width="14" height="14" /> {{ number_format($currentCurrency->convertFrom($subscription->amount_paid, 'AED'), 2) }}</strong>
                             </td>
                             <td>{{ $subscription->start_date->format('Y-m-d') }}</td>
                             <td>{{ $subscription->end_date->format('Y-m-d') }}</td>

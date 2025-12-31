@@ -59,7 +59,7 @@
                                         {{ __('messages.active_now') }}
                                     </div>
                                 @endif
-                                <h2 class="mb-0">{!! format_currency($subscription->price, 'AED', 2, true) !!}</h2>
+                                <h2 class="mb-0 d-inline-flex align-items-center gap-1" style="direction: ltr;"><x-session-currency-icon width="24" height="24" /> {{ number_format($currentCurrency->convertFrom($subscription->price, 'AED'), 2) }}</h2>
                                 <small class="text-muted">{{ __('messages.per_month') }}</small>
                             </div>
 

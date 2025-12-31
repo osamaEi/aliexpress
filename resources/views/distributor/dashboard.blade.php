@@ -98,7 +98,7 @@
                             <i class="ri-wallet-3-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">${{ number_format($stats['wallet_balance'], 2) }}</h5>
+                            <h5 class="mb-0 d-inline-flex align-items-center gap-1" style="direction: ltr;"><x-session-currency-icon width="18" height="18" /> {{ number_format($currentCurrency->convertFrom($stats['wallet_balance'], 'AED'), 2) }}</h5>
                             <small>{{ __('messages.wallet_balance') }}</small>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
                             <i class="ri-money-dollar-circle-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">${{ number_format($stats['total_revenue'], 2) }}</h5>
+                            <h5 class="mb-0 d-inline-flex align-items-center gap-1" style="direction: ltr;"><x-session-currency-icon width="18" height="18" /> {{ number_format($currentCurrency->convertFrom($stats['total_revenue'], 'AED'), 2) }}</h5>
                             <small>{{ __('messages.total_revenue') }}</small>
                         </div>
                     </div>
@@ -432,7 +432,7 @@
                                 @forelse($recentProducts as $product)
                                 <tr>
                                     <td>{{ $product->name }}</td>
-                                    <td>${{ number_format($product->price, 2) }}</td>
+                                    <td style="direction: ltr;"><span class="d-inline-flex align-items-center gap-1"><x-session-currency-icon width="14" height="14" /> {{ number_format($currentCurrency->convertFrom($product->price, $product->currency ?? 'AED'), 2) }}</span></td>
                                     <td>
                                         @if($product->track_inventory)
                                             <span class="badge bg-{{ $product->stock_quantity > 10 ? 'success' : ($product->stock_quantity > 0 ? 'warning' : 'danger') }}">

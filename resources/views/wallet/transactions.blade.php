@@ -28,7 +28,7 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <h6 class="text-muted mb-2">{{ __('messages.total_commissions') }}</h6>
-                            <h3 class="mb-0" style="color: #561C04;">{!! format_currency($commissionStats['total'] ?? 0) !!}</h3>
+                            <h3 class="mb-0 d-inline-flex align-items-center gap-1" style="color: #561C04; direction: ltr;"><x-session-currency-icon width="20" height="20" /> {{ number_format($currentCurrency->convertFrom($commissionStats['total'] ?? 0, 'AED'), 2) }}</h3>
                         </div>
                         <div class="avatar flex-shrink-0">
                             <span class="avatar-initial rounded" style="background-color: rgba(86, 28, 4, 0.1); color: #561C04;">
@@ -46,7 +46,7 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <h6 class="text-muted mb-2">{{ __('messages.paid_commissions') }}</h6>
-                            <h3 class="mb-0 text-success">{!! format_currency($commissionStats['paid'] ?? 0) !!}</h3>
+                            <h3 class="mb-0 text-success d-inline-flex align-items-center gap-1" style="direction: ltr;"><x-session-currency-icon width="20" height="20" /> {{ number_format($currentCurrency->convertFrom($commissionStats['paid'] ?? 0, 'AED'), 2) }}</h3>
                         </div>
                         <div class="avatar flex-shrink-0">
                             <span class="avatar-initial rounded bg-label-success">
@@ -64,7 +64,7 @@
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <h6 class="text-muted mb-2">{{ __('messages.unpaid_commissions') }}</h6>
-                            <h3 class="mb-0 text-warning">{!! format_currency($commissionStats['unpaid'] ?? 0) !!}</h3>
+                            <h3 class="mb-0 text-warning d-inline-flex align-items-center gap-1" style="direction: ltr;"><x-session-currency-icon width="20" height="20" /> {{ number_format($currentCurrency->convertFrom($commissionStats['unpaid'] ?? 0, 'AED'), 2) }}</h3>
                         </div>
                         <div class="avatar flex-shrink-0">
                             <span class="avatar-initial rounded bg-label-warning">
@@ -195,13 +195,13 @@
                                 </small>
                                 @endif
                             </td>
-                            <td class="text-end">
-                                <strong class="{{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
-                                    {!! ($transaction->type === 'credit' ? '+' : '-') . ' ' . format_currency(abs($transaction->amount)) !!}
+                            <td class="text-end" style="direction: ltr;">
+                                <strong class="{{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }} d-inline-flex align-items-center gap-1">
+                                    {{ $transaction->type === 'credit' ? '+' : '-' }} <x-session-currency-icon width="14" height="14" /> {{ number_format($currentCurrency->convertFrom(abs($transaction->amount), 'AED'), 2) }}
                                 </strong>
                             </td>
-                            <td class="text-end">
-                                {!! format_currency($transaction->balance_after) !!}
+                            <td class="text-end" style="direction: ltr;">
+                                <span class="d-inline-flex align-items-center gap-1"><x-session-currency-icon width="14" height="14" /> {{ number_format($currentCurrency->convertFrom($transaction->balance_after, 'AED'), 2) }}</span>
                             </td>
                             <td>
                                 @if($transaction->status === 'completed')
