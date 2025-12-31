@@ -1996,14 +1996,19 @@
     }
 
     .subcategory-item span {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         text-align: center;
         color: #333;
         font-weight: 500;
-        max-width: 90px;
+        max-width: 100px;
+        line-height: 1.3;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        min-height: 2.6em;
     }
 
     /* Search Box */
