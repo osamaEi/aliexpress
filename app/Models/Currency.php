@@ -80,13 +80,17 @@ class Currency extends Model
         $formattedAmount = number_format($amount, 2);
 
         // Determine symbol/html for this currency
-        if ($this->code === 'AED' && $useIcon) {
-            // Prefer rendering the Blade component for the AED icon (safely)
+        if (in_array($this->code, ['AED', 'SAR', 'USD']) && $useIcon) {
+            // Prefer rendering the Blade component for currency icons (safely)
             try {
-                $iconHtml = view('components.currency-icon', ['width' => 20, 'height' => 20])->render();
+                $iconHtml = view('components.currency-icon', [
+                    'width' => 20,
+                    'height' => 20,
+                    'currency' => $this->code
+                ])->render();
             } catch (\Throwable $e) {
-                // Fallback inline SVG
-                $iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+                // Fallback to symbol
+                $iconHtml = $this->symbol;
             }
 
             // Place icon before or after amount depending on locale
@@ -97,7 +101,7 @@ class Currency extends Model
             return new HtmlString($iconHtml . ' ' . $formattedAmount);
         }
 
-        // Non-AED currencies: place symbol based on locale
+        // Other currencies: place symbol based on locale
         if (app()->getLocale() == 'ar') {
             return $formattedAmount . ' ' . $this->symbol;
         }

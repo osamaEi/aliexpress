@@ -31,9 +31,15 @@
 
     <!-- Subscription Plans -->
     <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">{{ __('messages.subscription_plans') }}</h5>
-            <p class="text-muted mb-0">{{ __('messages.choose_best_plan') }}</p>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">{{ __('messages.subscription_plans') }}</h5>
+                <p class="text-muted mb-0">{{ __('messages.choose_best_plan') }}</p>
+            </div>
+            <a href="{{ route('subscriptions.history') }}" class="btn btn-outline-primary">
+                <i class="ri-history-line me-1"></i>
+                {{ app()->getLocale() == 'ar' ? 'عرض الاشتراكات' : 'View Subscriptions' }}
+            </a>
         </div>
 
         <div class="card-body">
