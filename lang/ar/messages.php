@@ -40,6 +40,9 @@ return [
     'profile_updated' => 'تم تحديث الملف الشخصي بنجاح!',
     'password_updated' => 'تم تحديث كلمة المرور بنجاح!',
     'avatar_updated' => 'تم تحديث الصورة الشخصية بنجاح!',
+    'logo_updated' => 'تم تحديث الشعار بنجاح!',
+    'upload_logo' => 'رفع الشعار',
+    'no_logo' => 'لا يوجد شعار',
     'email_not_verified' => 'البريد الإلكتروني غير موثق',
     'minimum_8_characters' => 'الحد الأدنى 8 أحرف',
 
