@@ -18,8 +18,12 @@ class SellerSubcategoryProfitController extends Controller
     {
         $seller = Auth::user();
 
-        // Get all subcategories (categories with parent_id)
+        // Get seller's assigned subcategories from sub_activity field
+        $assignedSubcategoryIds = json_decode($seller->sub_activity, true) ?? [];
+
+        // Get only assigned subcategories (categories with parent_id that are assigned to this seller)
         $subcategories = Category::whereNotNull('parent_id')
+            ->whereIn('id', $assignedSubcategoryIds)
             ->with('parent')
             ->active()
             ->orderBy('parent_id')
