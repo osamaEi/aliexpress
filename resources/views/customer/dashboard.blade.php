@@ -98,7 +98,7 @@
                             <i class="ri-money-dollar-circle-line ri-24px"></i>
                         </div>
                         <div class="card-info">
-                            <h5 class="mb-0">{{ format_currency(auth()->user()->orders()->sum('total'), 'AED', 2, true) }}</h5>
+                            <h5 class="mb-0">{{ format_currency(auth()->user()->orders()->sum('total_amount'), 'AED', 2, true) }}</h5>
                             <small>{{ __('messages.total_spent') }}</small>
                         </div>
                     </div>

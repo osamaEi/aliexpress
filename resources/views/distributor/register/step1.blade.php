@@ -682,6 +682,49 @@
                             </small>
                         </div>
                     </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="password" class="form-label">
+                                <i class="ri-lock-line"></i>
+                                {{ app()->getLocale() == 'ar' ? 'كلمة المرور' : 'Password' }}
+                                <span class="required">*</span>
+                            </label>
+                            <input type="password"
+                                   class="form-control @error('password') is-invalid @enderror"
+                                   id="password"
+                                   name="password"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل كلمة المرور' : 'Enter password' }}"
+                                   minlength="8"
+                                   required>
+                            @error('password')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted d-block mt-1">
+                                {{ app()->getLocale() == 'ar' ? '8 أحرف على الأقل' : 'At least 8 characters' }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="password_confirmation" class="form-label">
+                                <i class="ri-lock-line"></i>
+                                {{ app()->getLocale() == 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password' }}
+                                <span class="required">*</span>
+                            </label>
+                            <input type="password"
+                                   class="form-control @error('password_confirmation') is-invalid @enderror"
+                                   id="password_confirmation"
+                                   name="password_confirmation"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'أعد إدخال كلمة المرور' : 'Re-enter password' }}"
+                                   minlength="8"
+                                   required>
+                            @error('password_confirmation')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
                 </div>
 
                 @if(config('services.recaptcha.enabled'))
