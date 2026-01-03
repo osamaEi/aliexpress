@@ -2,13 +2,13 @@
 
 return [
     // Navigation
-    'dashboard' => 'لوحة التحكم',
+    'dashboard' => 'قُمرة القيادة',
     'products' => 'المنتجات',
     'categories' => 'الفئات',
     'orders' => 'الطلبات',
     'users' => 'المستخدمين',
     'settings' => 'الإعدادات',
-    'profile' => 'الملف الشخصي',
+    'profile' =>'الاعدادات',
     'logout' => 'تسجيل الخروج',
     'my_profile' => 'ملفي الشخصي',
     'my_orders' => 'الطلبات',
