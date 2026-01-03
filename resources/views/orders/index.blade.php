@@ -227,9 +227,9 @@
                             {{ app()->getLocale() == 'ar' ? 'ابدأ بإنشاء طلبك الأول' : 'Start by creating your first order' }}
                         @endif
                     </p>
-                    <a href="{{ route('orders.create') }}" class="btn btn-primary">
+                    <!-- <a href="{{ route('orders.create') }}" class="btn btn-primary">
                         <i class="ri-add-line me-1"></i> {{ __('messages.create_order') }}
-                    </a>
+                    </a> -->
                 </div>
             @endif
         </div>
