@@ -25,36 +25,37 @@
                 </div>
             @endif
 
-            @if(session('status') === 'avatar-updated')
+            @if(session('status') === 'logo-updated')
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="ri-checkbox-circle-line me-2"></i>
-                    {{ __('messages.avatar_updated') }}
+                    {{ __('messages.logo_updated') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
-            <!-- Avatar Upload Section (Separate Form) -->
-            <form id="avatarForm" method="POST" action="{{ route('profile.avatar.update') }}" enctype="multipart/form-data">
+            <!-- Logo Upload Section (Separate Form) -->
+            <form id="logoForm" method="POST" action="{{ route('profile.logo.update') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-4 mb-4">
                     <div class="col-12">
                         <div class="d-flex align-items-center mb-4">
-                            <div class="avatar avatar-xl me-3">
-                                @if(auth()->user()->avatar)
-                                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" class="rounded-circle" id="avatarPreview" />
+                            <div class="logo-container me-3" style="width: 80px; height: 80px; border: 2px dashed #d9dee3; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                @if(auth()->user()->logo)
+                                    <img src="{{ asset('storage/' . auth()->user()->logo) }}" alt="{{ auth()->user()->name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;" id="logoPreview" />
                                 @else
-                                    <span class="avatar-initial rounded-circle bg-label-primary" style="font-size: 2rem;" id="avatarInitials">
-                                        {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                                    <span class="text-muted" style="font-size: 0.75rem; text-align: center;" id="logoPlaceholder">
+                                        <i class="ri-image-line d-block" style="font-size: 1.5rem;"></i>
+                                        {{ __('messages.no_logo') }}
                                     </span>
                                 @endif
                             </div>
                             <div>
-                                <label for="avatar" class="btn btn-primary btn-sm mb-2">
-                                    <i class="ri-upload-2-line me-1"></i>{{ __('messages.upload_photo') }}
+                                <label for="logo" class="btn btn-primary btn-sm mb-2">
+                                    <i class="ri-upload-2-line me-1"></i>{{ __('messages.upload_logo') }}
                                 </label>
-                                <input type="file" id="avatar" name="avatar" class="d-none" accept="image/*">
+                                <input type="file" id="logo" name="logo" class="d-none" accept="image/*">
                                 <p class="text-muted small mb-0">{{ __('messages.allowed_formats') }}</p>
-                                @error('avatar')
+                                @error('logo')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -656,27 +657,27 @@
 </style>
 
 <script>
-    // Avatar preview and auto-submit
-    document.getElementById('avatar')?.addEventListener('change', function(e) {
+    // Logo preview and auto-submit
+    document.getElementById('logo')?.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                const avatarPreview = document.getElementById('avatarPreview');
-                const avatarInitials = document.getElementById('avatarInitials');
+                const logoPreview = document.getElementById('logoPreview');
+                const logoPlaceholder = document.getElementById('logoPlaceholder');
 
-                if (avatarPreview) {
-                    avatarPreview.src = e.target.result;
-                } else if (avatarInitials) {
-                    // Replace initials with image
-                    const avatar = avatarInitials.parentElement;
-                    avatar.innerHTML = '<img src="' + e.target.result + '" alt="Avatar" class="rounded-circle" id="avatarPreview" />';
+                if (logoPreview) {
+                    logoPreview.src = e.target.result;
+                } else if (logoPlaceholder) {
+                    // Replace placeholder with image
+                    const logoContainer = logoPlaceholder.parentElement;
+                    logoContainer.innerHTML = '<img src="' + e.target.result + '" alt="Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;" id="logoPreview" />';
                 }
             };
             reader.readAsDataURL(file);
 
-            // Auto-submit the avatar form
-            document.getElementById('avatarForm').submit();
+            // Auto-submit the logo form
+            document.getElementById('logoForm').submit();
         }
     });
 
@@ -689,6 +690,20 @@
     const countrySelect = document.getElementById('country');
 
     if (customSelectWrapper && customSelectDisplay && customSelectDropdown) {
+        // Function to update display without triggering click events
+        function updateCountryDisplay(value, flag, name) {
+            const selectedFlag = customSelectDisplay.querySelector('.selected-flag');
+            const selectedText = customSelectDisplay.querySelector('.selected-text');
+
+            if (value) {
+                selectedFlag.innerHTML = `<img src="https://flagcdn.com/w20/${flag}.png" alt="${flag}" style="width:20px;height:14px;object-fit:cover;border-radius:2px;" onerror="this.style.display='none'" />`;
+                selectedText.textContent = name;
+            } else {
+                selectedFlag.innerHTML = '';
+                selectedText.textContent = '{{ __("messages.select_country") }}';
+            }
+        }
+
         // Toggle dropdown
         customSelectDisplay.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -710,16 +725,7 @@
                 countrySelect.value = value;
 
                 // Update display
-                const selectedFlag = customSelectDisplay.querySelector('.selected-flag');
-                const selectedText = customSelectDisplay.querySelector('.selected-text');
-
-                if (value) {
-                    selectedFlag.innerHTML = `<img src="https://flagcdn.com/w20/${flag}.png" alt="${flag}" style="width:20px;height:14px;object-fit:cover;border-radius:2px;" onerror="this.style.display='none'" />`;
-                    selectedText.textContent = name;
-                } else {
-                    selectedFlag.innerHTML = '';
-                    selectedText.textContent = '{{ __("messages.select_country") }}';
-                }
+                updateCountryDisplay(value, flag, name);
 
                 // Update selected state
                 options.forEach(opt => opt.classList.remove('selected'));
@@ -755,12 +761,16 @@
             e.stopPropagation();
         });
 
-        // Initialize with current value
+        // Initialize with current value from the hidden select
         const currentValue = countrySelect.value;
         if (currentValue) {
             const currentOption = customSelectOptions.querySelector(`[data-value="${currentValue}"]`);
             if (currentOption) {
-                currentOption.click();
+                // Update display without clicking (to avoid triggering events)
+                const flag = currentOption.dataset.flag;
+                const name = currentOption.dataset.name;
+                updateCountryDisplay(currentValue, flag, name);
+                currentOption.classList.add('selected');
             }
         }
     }
