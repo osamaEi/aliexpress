@@ -40,6 +40,9 @@ return [
     'profile_updated' => 'Profile updated successfully!',
     'password_updated' => 'Password updated successfully!',
     'avatar_updated' => 'Avatar updated successfully!',
+    'logo_updated' => 'Logo updated successfully!',
+    'upload_logo' => 'Upload Logo',
+    'no_logo' => 'No Logo',
     'email_not_verified' => 'Email not verified',
     'minimum_8_characters' => 'Minimum 8 characters',
 

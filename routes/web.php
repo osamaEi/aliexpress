@@ -117,7 +117,7 @@ Route::get('/aliexpress/check-enrollment', [AliExpressController::class, 'checkE
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
+    Route::post('/profile/logo', [ProfileController::class, 'updateLogo'])->name('profile.logo.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Subscription routes

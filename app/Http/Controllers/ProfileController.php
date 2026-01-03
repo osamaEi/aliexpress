@@ -64,27 +64,27 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's avatar.
+     * Update the user's logo.
      */
-    public function updateAvatar(Request $request): RedirectResponse
+    public function updateLogo(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'avatar' => ['required', 'image', 'max:2048'], // 2MB max
+            'logo' => ['required', 'image', 'max:2048'], // 2MB max
         ]);
 
         $user = $request->user();
 
-        // Delete old avatar if exists
-        if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
-            \Storage::disk('public')->delete($user->avatar);
+        // Delete old logo if exists
+        if ($user->logo && \Storage::disk('public')->exists($user->logo)) {
+            \Storage::disk('public')->delete($user->logo);
         }
 
-        // Store new avatar
-        $avatarPath = $request->file('avatar')->store('avatars', 'public');
-        $user->avatar = $avatarPath;
+        // Store new logo
+        $logoPath = $request->file('logo')->store('logos', 'public');
+        $user->logo = $logoPath;
         $user->save();
 
-        return Redirect::route('profile.edit')->with('status', 'avatar-updated');
+        return Redirect::route('profile.edit')->with('status', 'logo-updated');
     }
 
     /**
