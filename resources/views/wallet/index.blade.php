@@ -123,14 +123,14 @@
                 <div class="modal-header text-white" style="background-color: #561C04;">
                     <h5 class="modal-title" id="loadBalanceModalLabel">
                         <i class="ri-secure-payment-line me-2"></i>
-                        {{ __('messages.deposit_with_ziina') }}
+                        {{ __('messages.deposit') }}
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info">
                         <i class="ri-information-line me-2"></i>
-                        {{ __('messages.ziina_deposit_info') }}
+                        {{ __('messages.deposit_info') }}
                     </div>
 
                     <form action="{{ route('wallet.deposit.ziina') }}" method="POST" id="ziina-deposit-form">
@@ -246,7 +246,7 @@
                             <i class="ri-shield-check-line me-2"></i>
                             {{ __('messages.secure_payment') }}
                         </h6>
-                        <p class="mb-0 small">{{ __('messages.ziina_secure_notice') }}</p>
+                        <p class="mb-0 small">{{ __('messages.secure') }}</p>
                     </div>
                 </div>
             </div>
