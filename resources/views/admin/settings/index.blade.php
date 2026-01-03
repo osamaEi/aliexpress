@@ -226,6 +226,71 @@
                 </div>
             </div>
 
+            <!-- Promotional Banners (Under Subscription) -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="ri-advertisement-line me-2"></i>
+                            {{ app()->getLocale() == 'ar' ? 'بنرات ترويجية (أسفل عداد الاشتراك)' : 'Promotional Banners (Under Subscription Timer)' }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $sellerPromoBanner = $settings->get('image', collect())->firstWhere('key', 'seller_promo_banner');
+                            $distributorPromoBanner = $settings->get('image', collect())->firstWhere('key', 'distributor_promo_banner');
+                            $sellerPromoBannerLink = $settings->get('text', collect())->firstWhere('key', 'seller_promo_banner_link');
+                            $distributorPromoBannerLink = $settings->get('text', collect())->firstWhere('key', 'distributor_promo_banner_link');
+                        @endphp
+                        <div class="row">
+                            <!-- Seller Promo Banner -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'بنر ترويجي للبائع' : 'Seller Promo Banner' }}
+                                </label>
+                                @if($sellerPromoBanner?->value)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $sellerPromoBanner->value) }}" alt="Seller Promo Banner" class="img-thumbnail" style="max-width: 100%; max-height: 150px;">
+                                    <button type="button" class="btn btn-sm btn-danger mt-1 delete-image" data-key="seller_promo_banner">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                                @endif
+                                <input type="file" name="settings[seller_promo_banner]" class="form-control" accept="image/*">
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحجم الموصى به: 1200x200 بكسل' : 'Recommended size: 1200x200px' }}</small>
+
+                                <label class="form-label mt-3">
+                                    {{ app()->getLocale() == 'ar' ? 'رابط البنر (اختياري)' : 'Banner Link (Optional)' }}
+                                </label>
+                                <input type="url" name="settings[seller_promo_banner_link]" class="form-control" value="{{ $sellerPromoBannerLink?->value }}" placeholder="https://example.com">
+                            </div>
+
+                            <!-- Distributor Promo Banner -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'بنر ترويجي للتاجر' : 'Distributor Promo Banner' }}
+                                </label>
+                                @if($distributorPromoBanner?->value)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $distributorPromoBanner->value) }}" alt="Distributor Promo Banner" class="img-thumbnail" style="max-width: 100%; max-height: 150px;">
+                                    <button type="button" class="btn btn-sm btn-danger mt-1 delete-image" data-key="distributor_promo_banner">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                                @endif
+                                <input type="file" name="settings[distributor_promo_banner]" class="form-control" accept="image/*">
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحجم الموصى به: 1200x200 بكسل' : 'Recommended size: 1200x200px' }}</small>
+
+                                <label class="form-label mt-3">
+                                    {{ app()->getLocale() == 'ar' ? 'رابط البنر (اختياري)' : 'Banner Link (Optional)' }}
+                                </label>
+                                <input type="url" name="settings[distributor_promo_banner_link]" class="form-control" value="{{ $distributorPromoBannerLink?->value }}" placeholder="https://example.com">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Wallet Settings - Min Withdrawal/Deposit -->
             <div class="col-12 mb-4">
                 <div class="card">

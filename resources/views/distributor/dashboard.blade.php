@@ -36,6 +36,19 @@
         </div>
     @endif
 
+    <!-- Promotional Banner (Under Header) -->
+    @if(setting_image('distributor_promo_banner'))
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="position-relative" style="border-radius: 12px; overflow: hidden;">
+                    <a href="{{ setting('distributor_promo_banner_link') ?: '#' }}" target="{{ setting('distributor_promo_banner_link') ? '_blank' : '_self' }}">
+                        <img src="{{ setting_image('distributor_promo_banner') }}" alt="{{ app()->getLocale() == 'ar' ? 'بنر ترويجي' : 'Promotional Banner' }}" class="img-fluid w-100" style="max-height: 200px; object-fit: cover;">
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Statistics Cards -->
     <div class="row g-4 mb-4">
         <!-- Total Products -->

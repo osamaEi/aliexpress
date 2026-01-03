@@ -113,7 +113,7 @@
                                 <li>
                                     <a class="dropdown-item {{ $currentCurrencyCode == $currency->code ? 'active' : '' }}"
                                        href="{{ route('currency.switch', $currency->code) }}">
-                                        <span class="align-middle">{{ $currency->code }}</span>
+                                        <span class="align-middle">{{ $currency->localized_name }} ({{ $currency->code }})</span>
                                     </a>
                                 </li>
                                 @endforeach

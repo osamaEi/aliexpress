@@ -617,6 +617,99 @@
                         @enderror
                     </div>
 
+                    @if($user->user_type == 'distributor' && ($user->store_name || $user->store_slug || $user->commercial_register || $user->freelance_document))
+                    <!-- Distributor Registration Information (Read Only) -->
+                    <div class="col-12 mt-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="ri-store-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'معلومات المتجر' : 'Store Information' }}
+                        </h6>
+                    </div>
+
+                    @if($user->store_name)
+                    <div class="col-md-6">
+                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم المتجر' : 'Store Name' }}</label>
+                        <input type="text" class="form-control" value="{{ $user->store_name }}" readonly disabled>
+                    </div>
+                    @endif
+
+                    @if($user->store_slug)
+                    <div class="col-md-6">
+                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'رابط المتجر' : 'Store URL' }}</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="{{ $user->store_slug }}" readonly disabled>
+                            <span class="input-group-text">.selaa.com</span>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($user->default_currency)
+                    <div class="col-md-6">
+                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'العملة الافتراضية' : 'Default Currency' }}</label>
+                        <input type="text" class="form-control" value="{{ $user->default_currency }}" readonly disabled>
+                    </div>
+                    @endif
+
+                    @if($user->commercial_register)
+                    <div class="col-md-6">
+                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'السجل التجاري' : 'Commercial Register' }}</label>
+                        <div class="d-flex align-items-center">
+                            <a href="{{ asset('storage/' . $user->commercial_register) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="ri-file-text-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'عرض المستند' : 'View Document' }}
+                            </a>
+                            <span class="badge bg-success ms-2">
+                                <i class="ri-checkbox-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تم الرفع' : 'Uploaded' }}
+                            </span>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($user->freelance_document)
+                    <div class="col-md-6">
+                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'وثيقة العمل الحر' : 'Freelance Document' }}</label>
+                        <div class="d-flex align-items-center">
+                            <a href="{{ asset('storage/' . $user->freelance_document) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="ri-file-user-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'عرض المستند' : 'View Document' }}
+                            </a>
+                            <span class="badge bg-success ms-2">
+                                <i class="ri-checkbox-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تم الرفع' : 'Uploaded' }}
+                            </span>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($user->social_media_accounts && is_array($user->social_media_accounts) && count(array_filter($user->social_media_accounts)) > 0)
+                    <div class="col-12">
+                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'حسابات التواصل الاجتماعي' : 'Social Media Accounts' }}</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach($user->social_media_accounts as $platform => $url)
+                                @if($url)
+                                <a href="{{ $url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                    @if($platform == 'instagram')
+                                        <i class="ri-instagram-line me-1"></i>
+                                    @elseif($platform == 'facebook')
+                                        <i class="ri-facebook-line me-1"></i>
+                                    @elseif($platform == 'twitter' || $platform == 'x')
+                                        <i class="ri-twitter-x-line me-1"></i>
+                                    @elseif($platform == 'tiktok')
+                                        <i class="ri-tiktok-line me-1"></i>
+                                    @elseif($platform == 'youtube')
+                                        <i class="ri-youtube-line me-1"></i>
+                                    @elseif($platform == 'snapchat')
+                                        <i class="ri-snapchat-line me-1"></i>
+                                    @elseif($platform == 'whatsapp')
+                                        <i class="ri-whatsapp-line me-1"></i>
+                                    @else
+                                        <i class="ri-link me-1"></i>
+                                    @endif
+                                    {{ ucfirst($platform) }}
+                                </a>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                    @endif
+
                     <!-- Financial Information -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
