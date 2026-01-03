@@ -4,7 +4,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>@yield('title', setting('site_name', 'EcommAli') . ' - Dropshipping Platform')</title>
+    <title>@yield('title', setting('site_name', 'EcommAli') )</title>
 
     <meta name="description" content="{{ setting('site_description', '') }}" />
     <meta name="keywords" content="{{ setting('site_keywords', '') }}" />
