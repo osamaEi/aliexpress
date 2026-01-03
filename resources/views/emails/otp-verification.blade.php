@@ -179,8 +179,8 @@
     <div class="email-container">
         <!-- Header -->
         <div class="email-header">
-            <img src="{{ url('logo/logo.png') }}" alt="Selaa" class="logo">
-            <a href="{{ url('/login') }}" class="login-btn">{{ app()->getLocale() == 'ar' ? 'تسجيل الدخول' : 'Log in' }}</a>
+            <img src="https://i.selaa.ae/logo/logo.png" alt="Selaa" class="logo">
+            <a href="https://i.selaa.ae/login" class="login-btn">{{ app()->getLocale() == 'ar' ? 'تسجيل الدخول' : 'Log in' }}</a>
         </div>
 
         <!-- Body -->

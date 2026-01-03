@@ -154,8 +154,8 @@
                         <li class="nav-item navbar-dropdown dropdown-user dropdown">
                             <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                 <div class="avatar avatar-online">
-                                    @if(auth()->user()->avatar)
-                                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" class="rounded-circle" />
+                                    @if(auth()->user()->logo)
+                                        <img src="{{ asset('storage/' . auth()->user()->logo) }}" alt="{{ auth()->user()->name }}" class="rounded-circle" />
                                     @else
                                         <span class="avatar-initial rounded-circle bg-label-primary">
                                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
