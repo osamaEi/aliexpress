@@ -7,7 +7,6 @@
        
             @endif
           </span>
-            <span class="app-brand-text demo menu-text fw-semibold {{ app()->getLocale() == 'ar' ? 'me-2' : 'ms-2' }}">{{ setting('site_name', 'EcommAli') }}</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large {{ app()->getLocale() == 'ar' ? 'me-auto' : 'ms-auto' }}">
