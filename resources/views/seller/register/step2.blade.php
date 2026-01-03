@@ -538,9 +538,7 @@
                 <img src="{{ asset('logo/logo10.png') }}" alt="Logo">
 
                 <!-- Footer in Sidebar -->
-                <div class="sidebar-footer">
-                    <img src="{{ asset('foot.png') }}" alt="EVORQ">
-                </div>
+          
 
                 <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل البائع' : 'Seller Registration' }}</h3>
             </div>

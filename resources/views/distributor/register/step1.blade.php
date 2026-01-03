@@ -471,9 +471,7 @@
         <div class="sidebar">
             <div class="logo-wrapper">
                 <img src="{{ asset('logo/logo10.png') }}" alt="Logo">
-                <div class="sidebar-footer">
-                    <img src="{{ asset('foot.png') }}" alt="EVORQ">
-                </div>
+              
                 <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل متجر جديد' : 'Distributor Registration' }}</h3>
                 <div class="distributor-badge">
                     <i class="ri-truck-line"></i>

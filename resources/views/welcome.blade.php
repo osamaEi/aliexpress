@@ -577,12 +577,7 @@
                     <i class="ri-login-box-line"></i>
                 </button>
 
-                <div class="register-link">
-                    {{ app()->getLocale() == 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?" }}
-                    <a href="{{ route('seller.register.step1') }}">{{ app()->getLocale() == 'ar' ? 'سجل كبائع' : 'Register as Seller' }}</a>
-                    <span style="margin: 0 8px; color: #999;">|</span>
-                    <a href="{{ route('distributor.register.step1') }}">{{ app()->getLocale() == 'ar' ? 'سجل كمتجر' : 'Register as Distributor' }}</a>
-                </div>
+            
             </form>
         </div>
     </div>
