@@ -33,7 +33,6 @@
         </li>
 
         <!-- Products Section -->
-        @if(auth()->user()->hasActiveSubscription())
         <li class="menu-header mt-5">
             <span class="menu-header-text" >{{ __('messages.product_management') }}</span>
         </li>
@@ -45,9 +44,7 @@
                 <div>{{ __('messages.products') }}</div>
             </a>
         </li> -->
-        @endif
 
-        @if(auth()->user()->hasActiveSubscription())
         <!-- Categories -->
         <li class="menu-item {{ request()->routeIs('categories.*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -99,7 +96,6 @@
                 <div>{{ __('messages.profit_settings') }}</div>
             </a>
         </li>
-        @endif
 
         <!-- Orders Section -->
         <li class="menu-header mt-5">
