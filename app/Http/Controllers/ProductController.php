@@ -1680,7 +1680,7 @@ class ProductController extends Controller
 
         // Get all assigned products for counting
         $allAssignedProducts = $user->assignedProducts()
-            ->withPivot('aliexpress_product_id', 'status')
+            ->withPivot('aliexpress_product_id', 'status', 'seller_amount', 'admin_amount', 'price')
             ->get();
 
         // Count products by type
@@ -1701,9 +1701,30 @@ class ProductController extends Controller
         // Get current tab filter
         $tab = $request->get('tab', 'china');
 
+        // Auto-redirect to first available tab if current tab is empty
+        if ($tab === 'china' && $chinaCount === 0) {
+            if ($uaeCount > 0) {
+                return redirect()->route('products.my-assigned', ['tab' => 'uae']);
+            } elseif ($saudiCount > 0) {
+                return redirect()->route('products.my-assigned', ['tab' => 'saudi']);
+            }
+        } elseif ($tab === 'uae' && $uaeCount === 0) {
+            if ($chinaCount > 0) {
+                return redirect()->route('products.my-assigned', ['tab' => 'china']);
+            } elseif ($saudiCount > 0) {
+                return redirect()->route('products.my-assigned', ['tab' => 'saudi']);
+            }
+        } elseif ($tab === 'saudi' && $saudiCount === 0) {
+            if ($chinaCount > 0) {
+                return redirect()->route('products.my-assigned', ['tab' => 'china']);
+            } elseif ($uaeCount > 0) {
+                return redirect()->route('products.my-assigned', ['tab' => 'uae']);
+            }
+        }
+
         // Build query based on tab
         $query = $user->assignedProducts()
-            ->withPivot('aliexpress_product_id', 'status');
+            ->withPivot('aliexpress_product_id', 'status', 'seller_amount', 'admin_amount', 'price');
 
         if ($tab === 'china') {
             $query->where(function($q) {

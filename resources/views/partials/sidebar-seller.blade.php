@@ -124,12 +124,12 @@
         </li>
 
         <!-- Shipping Tracking -->
-        <li class="menu-item {{ request()->routeIs('seller.shipping.*') ? 'active' : '' }}">
+        <!-- <li class="menu-item {{ request()->routeIs('seller.shipping.*') ? 'active' : '' }}">
             <a href="{{ route('seller.shipping.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-ship-line"></i>
                 <div>{{ __('messages.shipping_tracking') }}</div>
             </a>
-        </li>
+        </li> -->
 
         <!-- Account Section -->
         <li class="menu-header mt-5">

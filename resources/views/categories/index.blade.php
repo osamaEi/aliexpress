@@ -98,7 +98,6 @@
                             <th>{{ __('messages.arabic_name') }}</th>
                             <th>{{ __('messages.products') }}</th>
                             <th>{{ __('messages.subcategories') }}</th>
-                            <th>{{ __('messages.order') }}</th>
                             <th>{{ __('messages.status') }}</th>
                             <th style="width: 150px;">{{ __('messages.actions') }}</th>
                         </tr>
@@ -143,7 +142,6 @@
                                         <span class="badge bg-light text-dark">0</span>
                                     @endif
                                 </td>
-                                <td>{{ $category->order }}</td>
                                 <td>
                                     @if(auth()->user()->user_type === 'admin')
                                         <form action="{{ route('categories.toggle-status', $category) }}" method="POST" class="d-inline">

@@ -326,12 +326,17 @@
                 </div>
             </form>
 
-            <!-- Loading Spinner -->
-            <div id="loadingSpinner" class="text-center py-5" style="display: none;">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">{{ app()->getLocale() == 'ar' ? 'جاري التحميل...' : 'Loading...' }}</span>
+            <!-- Loading Overlay -->
+            <div id="loadingSpinner" class="loading-overlay" style="display: none;">
+                <div class="loading-content">
+                    <div class="loading-spinner-container">
+                        <div class="spinner-border text-white" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">{{ app()->getLocale() == 'ar' ? 'جاري التحميل...' : 'Loading...' }}</span>
+                        </div>
+                    </div>
+                    <p class="loading-text mt-3 mb-0">{{ app()->getLocale() == 'ar' ? 'جاري البحث عن المنتجات...' : 'Searching for products...' }}</p>
+                    <small class="loading-subtext">{{ app()->getLocale() == 'ar' ? 'يرجى الانتظار' : 'Please wait' }}</small>
                 </div>
-                <p class="mt-2 text-muted">{{ app()->getLocale() == 'ar' ? 'جاري البحث عن المنتجات...' : 'Searching products...' }}</p>
             </div>
 
             <!-- Error Message -->
@@ -695,6 +700,16 @@
 
     const isArabic = '{{ app()->getLocale() }}' === 'ar';
 
+    // Show loading overlay
+    function showLoading() {
+        document.getElementById('loadingSpinner').style.display = 'flex';
+    }
+
+    // Hide loading overlay
+    function hideLoading() {
+        document.getElementById('loadingSpinner').style.display = 'none';
+    }
+
     // Scroll categories
     function scrollCategories(direction) {
         const container = document.getElementById('categoriesScroll');
@@ -721,6 +736,7 @@
             showSubcategories(categoryId, category);
         } else {
             // No subcategories, search directly - reset to AliExpress search
+            showLoading();
             document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
             document.getElementById('categoryIdInput').value = categoryId;
             document.getElementById('shipFromInput').value = '';
@@ -965,7 +981,7 @@
             url += '&keyword=' + encodeURIComponent(keyword);
         }
 
-        document.getElementById('loadingSpinner').style.display = 'block';
+        showLoading();
         window.location.href = url;
     }
 
@@ -982,7 +998,7 @@
             url += '&keyword=' + encodeURIComponent(keyword);
         }
 
-        document.getElementById('loadingSpinner').style.display = 'block';
+        showLoading();
         window.location.href = url;
     }
 
@@ -1157,12 +1173,13 @@
             url += '&keyword=' + encodeURIComponent(keyword);
         }
 
-        document.getElementById('loadingSpinner').style.display = 'block';
+        showLoading();
         window.location.href = url;
     }
 
     // Remove filter
     function removeFilter(filterName) {
+        showLoading();
         const url = new URL(window.location.href);
         url.searchParams.delete(filterName);
         window.location.href = url.toString();
@@ -1170,6 +1187,7 @@
 
     // Clear all filters
     function clearAllFilters() {
+        showLoading();
         const url = new URL(window.location.href);
         url.searchParams.delete('ship_from');
         url.searchParams.delete('category_id');
@@ -1179,6 +1197,7 @@
     // Change sort
     function changeSort(value) {
         if (value) {
+            showLoading();
             const url = new URL(window.location.href);
             url.searchParams.set('sort_by', value);
             window.location.href = url.toString();
@@ -1187,7 +1206,7 @@
 
     // Show loading on form submit
     document.getElementById('searchForm')?.addEventListener('submit', function() {
-        document.getElementById('loadingSpinner').style.display = 'block';
+        showLoading();
     });
 
     // Assign product function
@@ -1439,6 +1458,56 @@
 </script>
 
 <style>
+    /* Loading Overlay */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(86, 28, 4, 0.9);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .loading-content {
+        text-align: center;
+        color: white;
+    }
+
+    .loading-spinner-container {
+        display: inline-block;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+
+    .loading-text {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .loading-subtext {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
     /* Categories Scroll */
     .categories-scroll-container {
         position: relative;
