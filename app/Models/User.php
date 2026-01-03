@@ -92,7 +92,7 @@ class User extends Authenticatable
     public function assignedProducts(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_user')
-            ->withPivot('aliexpress_product_id', 'status')
+            ->withPivot('aliexpress_product_id', 'status', 'is_choice', 'seller_amount', 'admin_amount', 'price')
             ->withTimestamps();
     }
 

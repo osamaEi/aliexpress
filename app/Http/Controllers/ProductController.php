@@ -222,7 +222,24 @@ class ProductController extends Controller
             $walletBalance = auth()->user()->wallet->balance;
         }
 
-        return view('products.detail', compact('product', 'aliexpressData', 'walletBalance'));
+        // Get seller's profit data from pivot table if logged in as seller
+        $sellerPivotData = null;
+        if (auth()->check() && auth()->user()->user_type === 'seller') {
+            $pivotRecord = \DB::table('product_user')
+                ->where('user_id', auth()->id())
+                ->where('product_id', $product->id)
+                ->first();
+
+            if ($pivotRecord) {
+                $sellerPivotData = [
+                    'seller_amount' => $pivotRecord->seller_amount ?? 0,
+                    'admin_amount' => $pivotRecord->admin_amount ?? 0,
+                    'price' => $pivotRecord->price ?? $product->price,
+                ];
+            }
+        }
+
+        return view('products.detail', compact('product', 'aliexpressData', 'walletBalance', 'sellerPivotData'));
     }
 
     /**
@@ -1426,7 +1443,7 @@ class ProductController extends Controller
         $arabicTitle = $request->product_title_ar;
 
         if (!$product) {
-            // Create the product in products table
+            // Create the product in products table (with base price only, no seller-specific profit)
             $product = Product::create([
                 'name' => $request->product_title,
                 'name_ar' => $arabicTitle,
@@ -1435,11 +1452,9 @@ class ProductController extends Controller
                 'description_ar' => $arabicTitle,
                 'short_description' => $request->product_title,
                 'short_description_ar' => $arabicTitle,
-                'price' => $finalPrice,
+                'price' => $basePrice, // Store base price only
                 'currency' => $request->currency ?? 'AED',
                 'original_price' => $basePrice,
-                'seller_amount' => $sellerAmount,
-                'admin_amount' => $adminAmount,
                 'images' => $request->product_image ? [$request->product_image] : [],
                 'aliexpress_id' => $aliexpressProductId,
                 'aliexpress_price' => $basePrice,
@@ -1448,11 +1463,8 @@ class ProductController extends Controller
                 'is_active' => false, // Set as inactive until seller publishes
             ]);
         } else {
-            // Update existing product with seller's profit and admin profit
+            // Update existing product with Arabic title and category if needed (no seller-specific profit)
             $product->update([
-                'price' => $finalPrice,
-                'seller_amount' => $sellerAmount,
-                'admin_amount' => $adminAmount,
                 'category_id' => $request->category_id ?? $product->category_id,
                 'name_ar' => $arabicTitle ?? $product->name_ar,
             ]);
@@ -1461,11 +1473,14 @@ class ProductController extends Controller
         // Determine if this is a Choice product based on the current search filter
         $isChoice = $request->get('is_choice', false) || request()->get('choice_only', false);
 
-        // Assign product to user via pivot table
+        // Assign product to user via pivot table with seller-specific profit
         $user->assignedProducts()->attach($product->id, [
             'aliexpress_product_id' => $aliexpressProductId,
             'status' => 'assigned',
-            'is_choice' => $isChoice
+            'is_choice' => $isChoice,
+            'seller_amount' => $sellerAmount,
+            'admin_amount' => $adminAmount,
+            'price' => $finalPrice,
         ]);
 
         $message = app()->getLocale() == 'ar'
@@ -1571,7 +1586,7 @@ class ProductController extends Controller
                 }
 
                 if (!$product) {
-                    // Create new product
+                    // Create new product (with base price only, no seller-specific profit)
                     $product = Product::create([
                         'name' => $productData['product_title'],
                         'name_ar' => $productData['product_title_ar'] ?? null,
@@ -1580,11 +1595,9 @@ class ProductController extends Controller
                         'description_ar' => $productData['product_title_ar'] ?? null,
                         'short_description' => $productData['product_title'],
                         'short_description_ar' => $productData['product_title_ar'] ?? null,
-                        'price' => $finalPrice,
+                        'price' => $basePrice, // Store base price only
                         'currency' => $productData['currency'] ?? 'AED',
                         'original_price' => $basePrice,
-                        'seller_amount' => $sellerAmount,
-                        'admin_amount' => $adminAmount,
                         'images' => isset($productData['product_image']) ? [$productData['product_image']] : [],
                         'aliexpress_id' => $aliexpressProductId,
                         'aliexpress_price' => $basePrice,
@@ -1593,11 +1606,8 @@ class ProductController extends Controller
                         'is_active' => false,
                     ]);
                 } else {
-                    // Update existing product with seller's profit, admin profit and category
+                    // Update existing product with category if needed (no seller-specific profit)
                     $product->update([
-                        'price' => $finalPrice,
-                        'seller_amount' => $sellerAmount,
-                        'admin_amount' => $adminAmount,
                         'category_id' => $categoryId ?? $product->category_id,
                         'name_ar' => $productData['product_title_ar'] ?? $product->name_ar,
                     ]);
@@ -1606,11 +1616,14 @@ class ProductController extends Controller
                 // Determine if this is a Choice product
                 $isChoice = $request->get('is_choice', false) || request()->get('choice_only', false);
 
-                // Assign to user
+                // Assign to user with seller-specific profit in pivot table
                 $user->assignedProducts()->attach($product->id, [
                     'aliexpress_product_id' => $aliexpressProductId,
                     'status' => 'assigned',
-                    'is_choice' => $isChoice
+                    'is_choice' => $isChoice,
+                    'seller_amount' => $sellerAmount,
+                    'admin_amount' => $adminAmount,
+                    'price' => $finalPrice,
                 ]);
 
                 $assignedCount++;

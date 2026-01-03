@@ -561,7 +561,7 @@
                 <!-- Remember Me & Forgot Password -->
                 <div class="remember-forgot">
                     <div class="remember-me">
-                        <input id="remember_me" type="checkbox" name="remember">
+                        <input id="remember_me" type="checkbox" name="remember" checked>
                         <label for="remember_me">{{ app()->getLocale() == 'ar' ? 'تذكرني' : 'Remember me' }}</label>
                     </div>
 

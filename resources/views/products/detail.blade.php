@@ -100,9 +100,21 @@
                     <div class="card text-white mb-4 border-0" style="border-radius: 16px; background: linear-gradient(135deg, #561C04 0%, #e56300 100%);">
                         <div class="card-body p-4">
                             @php
-                                $convertedPrice = $currentCurrency->convertFrom($product->price, $product->currency ?? 'USD');
+                                // Use seller's pivot price if available, otherwise use product price
+                                $displayPrice = isset($sellerPivotData) && $sellerPivotData['price'] > 0
+                                    ? $sellerPivotData['price']
+                                    : $product->price;
+                                $convertedPrice = $currentCurrency->convertFrom($displayPrice, $product->currency ?? 'USD');
                                 $convertedComparePrice = $product->compare_price ? $currentCurrency->convertFrom($product->compare_price, $product->currency ?? 'USD') : null;
-                                $convertedOriginalPrice = $product->original_price ? $currentCurrency->convertFrom($product->original_price, $product->currency ?? 'USD') : null;
+
+                                // Calculate supplier price (original_price + admin_amount)
+                                $adminAmount = isset($sellerPivotData) ? ($sellerPivotData['admin_amount'] ?? 0) : 0;
+                                $supplierPrice = ($product->original_price ?? 0) + $adminAmount;
+                                $convertedSupplierPrice = $supplierPrice > 0 ? $currentCurrency->convertFrom($supplierPrice, $product->currency ?? 'USD') : null;
+
+                                // Seller's profit from pivot table
+                                $sellerProfit = isset($sellerPivotData) ? ($sellerPivotData['seller_amount'] ?? 0) : 0;
+                                $convertedSellerProfit = $currentCurrency->convertFrom($sellerProfit, $product->currency ?? 'USD');
                             @endphp
                             <div class="d-flex align-items-baseline mb-2">
                                 <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px; color:white;" >{{ $currentCurrency->format($convertedPrice) }}</h2>
@@ -114,17 +126,29 @@
                                 @endif
                             </div>
 
-                            @if($convertedOriginalPrice && $convertedOriginalPrice > 0)
+                            @if(isset($sellerPivotData) && $sellerProfit > 0)
+                                {{-- Show seller's profit breakdown from pivot table --}}
                                 <div class="mt-3 pt-3 border-top border-white border-opacity-25">
                                     <small class="d-block mb-2 text-white">💰 {{ __('messages.profit_breakdown') }}</small>
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <small class="text-white">{{ __('messages.supplier_price') }}</small>
-                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedOriginalPrice) }}</div>
+                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedSupplierPrice) }}</div>
                                         </div>
                                         <div class="col-6 text-end">
                                             <small class="text-white">{{ __('messages.your_profit') }}</small>
-                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedPrice - $convertedOriginalPrice) }}</div>
+                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedSellerProfit) }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($convertedSupplierPrice && $convertedSupplierPrice > 0 && !isset($sellerPivotData))
+                                {{-- Fallback for non-seller view or when no pivot data --}}
+                                <div class="mt-3 pt-3 border-top border-white border-opacity-25">
+                                    <small class="d-block mb-2 text-white">💰 {{ __('messages.profit_breakdown') }}</small>
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <small class="text-white">{{ __('messages.supplier_price') }}</small>
+                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedSupplierPrice) }}</div>
                                         </div>
                                     </div>
                                 </div>

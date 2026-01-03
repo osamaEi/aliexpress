@@ -112,4 +112,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Remember Me Token Lifetime
+    |--------------------------------------------------------------------------
+    |
+    | Here you may define the number of minutes the "remember me" cookie
+    | should be valid for. By default, the cookie will be valid for 30 days.
+    |
+    */
+
+    'remember' => env('AUTH_REMEMBER_LIFETIME', 43200), // 30 days in minutes
+
 ];
