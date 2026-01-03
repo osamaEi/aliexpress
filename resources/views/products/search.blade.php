@@ -1678,8 +1678,8 @@
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
-        flex-direction: row-reverse;
-        justify-content: flex-start;
+        flex-direction: row;
+        justify-content: flex-end;
     }
 
     [dir="ltr"] .distributors-inline-list {
