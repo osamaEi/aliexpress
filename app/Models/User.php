@@ -182,6 +182,14 @@ class User extends Authenticatable
         return $this->hasMany(Coupon::class, 'store_id');
     }
 
+    /**
+     * Get user's orders (as customer)
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
     public function hasRole(string|array $roles): bool
     {
         if (is_string($roles)) {
