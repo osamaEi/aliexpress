@@ -139,6 +139,7 @@
                                     @endif
                                     <td>
                                         <div>
+                                            <i class="ri-user-3-line me-2" style="color: #561C04;"></i>
                                             {{ $order->customer_name }}
                                             <img src="https://flagcdn.com/w20/{{ $customerCountry }}.png"
                                                  alt="{{ strtoupper($customerCountry) }}"
@@ -146,7 +147,7 @@
                                                  style="width:20px;height:14px;object-fit:cover;vertical-align:middle;border-radius:2px;"
                                                  onerror="this.style.display='none'" />
                                         </div>
-                                        <small class="text-muted">{{ $order->customer_phone }}</small>
+                                        <small class="text-muted"><i class="ri-phone-line me-1"></i>{{ $order->customer_phone }}</small>
                                     </td>
                                     <td>
                                         <a href="{{ route('products.show', $order->product) }}" class="text-decoration-none">
