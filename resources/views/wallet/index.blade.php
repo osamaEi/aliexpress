@@ -150,7 +150,7 @@
                                        min="2"
                                        max="100000"
                                        step="0.01"
-                                       value="50"
+                                       value="00.00"
                                        required
                                        placeholder="0.00">
                             </div>
@@ -159,24 +159,7 @@
                             </small>
                         </div>
 
-                        <!-- Quick Amount Buttons -->
-                        <div class="mb-4">
-                            <label class="form-label">{{ __('messages.quick_amounts') }}</label>
-                            <div class="row g-2">
-                                <div class="col-3">
-                                    <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="50">50</button>
-                                </div>
-                                <div class="col-3">
-                                    <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="100">100</button>
-                                </div>
-                                <div class="col-3">
-                                    <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="200">200</button>
-                                </div>
-                                <div class="col-3">
-                                    <button type="button" class="btn btn-outline-primary w-100 quick-amount" data-amount="500">500</button>
-                                </div>
-                            </div>
-                        </div>
+                  
 
                         <!-- Fee Breakdown -->
                         <div class="mb-4" id="fee-breakdown" style="display: none;">
