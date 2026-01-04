@@ -54,7 +54,7 @@ class Currency extends Model
     }
 
     /**
-     * Convert amount from USD to this currency
+     * Convert amount from another currency to this currency
      */
     public function convertFrom($amount, $fromCurrencyCode = 'USD')
     {
@@ -70,6 +70,25 @@ class Currency extends Model
         // Convert to USD first, then to target currency
         $usdAmount = $amount / $fromCurrency->exchange_rate;
         return $usdAmount * $this->exchange_rate;
+    }
+
+    /**
+     * Convert amount from this currency to another currency
+     */
+    public function convertTo($amount, $toCurrencyCode = 'USD')
+    {
+        if ($toCurrencyCode === $this->code) {
+            return $amount;
+        }
+
+        $toCurrency = self::where('code', $toCurrencyCode)->first();
+        if (!$toCurrency) {
+            return $amount;
+        }
+
+        // Convert to USD first, then to target currency
+        $usdAmount = $amount / $this->exchange_rate;
+        return $usdAmount * $toCurrency->exchange_rate;
     }
 
     /**

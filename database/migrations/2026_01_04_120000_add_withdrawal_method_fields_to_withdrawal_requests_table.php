@@ -20,20 +20,43 @@ return new class extends Migration
             });
         }
 
-        // Make paypal_email nullable using raw SQL (avoids doctrine/dbal dependency)
-        DB::statement('ALTER TABLE withdrawal_requests MODIFY paypal_email VARCHAR(255) NULL');
+        // Add paypal_email if it doesn't exist
+        if (!Schema::hasColumn('withdrawal_requests', 'paypal_email')) {
+            Schema::table('withdrawal_requests', function (Blueprint $table) {
+                $table->string('paypal_email')->nullable()->after('withdrawal_method');
+            });
+        } else {
+            // Make paypal_email nullable using raw SQL (avoids doctrine/dbal dependency)
+            DB::statement('ALTER TABLE withdrawal_requests MODIFY paypal_email VARCHAR(255) NULL');
+        }
 
         if (!Schema::hasColumn('withdrawal_requests', 'iban')) {
             Schema::table('withdrawal_requests', function (Blueprint $table) {
-                // Bank Transfer (IBAN) fields
                 $table->string('iban')->nullable()->after('paypal_email');
+            });
+        }
+        if (!Schema::hasColumn('withdrawal_requests', 'swift_code')) {
+            Schema::table('withdrawal_requests', function (Blueprint $table) {
                 $table->string('swift_code')->nullable()->after('iban');
-                $table->string('bank_name')->nullable()->after('swift_code');
-                $table->string('account_holder_name')->nullable()->after('bank_name');
-
-                // Mobile Wallet fields
+            });
+        }
+        if (!Schema::hasColumn('withdrawal_requests', 'account_holder_name')) {
+            Schema::table('withdrawal_requests', function (Blueprint $table) {
+                $table->string('account_holder_name')->nullable()->after('swift_code');
+            });
+        }
+        if (!Schema::hasColumn('withdrawal_requests', 'wallet_provider')) {
+            Schema::table('withdrawal_requests', function (Blueprint $table) {
                 $table->string('wallet_provider')->nullable()->after('account_holder_name');
+            });
+        }
+        if (!Schema::hasColumn('withdrawal_requests', 'wallet_mobile_number')) {
+            Schema::table('withdrawal_requests', function (Blueprint $table) {
                 $table->string('wallet_mobile_number')->nullable()->after('wallet_provider');
+            });
+        }
+        if (!Schema::hasColumn('withdrawal_requests', 'wallet_holder_name')) {
+            Schema::table('withdrawal_requests', function (Blueprint $table) {
                 $table->string('wallet_holder_name')->nullable()->after('wallet_mobile_number');
             });
         }
