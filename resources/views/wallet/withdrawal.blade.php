@@ -10,8 +10,8 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">
-                <div class="card-header text-white" style="background-color: #561C04;">
-                    <h5 class="mb-0">
+                <div class="card-header" style="background-color: #561C04;">
+                    <h5 class="mb-0 text-white">
                         <i class="ri-wallet-3-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
                         {{ __('messages.withdrawal_request') }}
                     </h5>
