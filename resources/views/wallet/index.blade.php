@@ -89,19 +89,11 @@
                     </button>
                 </div>
 
-                <!-- Withdraw to PayPal -->
+                <!-- Withdraw -->
                 <div class="col-md-3">
-                    <a href="{{ route('wallet.withdrawal.create') }}" class="btn btn-primary w-100">
+                    <a href="https://i.selaa.ae/wallet/withdrawal/create" class="btn btn-primary w-100">
                         <i class="ri-money-dollar-circle-line me-1"></i>
                         {{ __('messages.withdraw') }}
-                    </a>
-                </div>
-
-                <!-- Withdrawal History -->
-                <div class="col-md-3">
-                    <a href="{{ route('wallet.withdrawal.history') }}" class="btn btn-outline-primary w-100">
-                        <i class="ri-history-line me-1"></i>
-                        {{ __('messages.withdrawal_history') }}
                     </a>
                 </div>
 
