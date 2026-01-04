@@ -28,7 +28,7 @@
                                     {{ number_format($balanceConverted, 2) }}
                                 </h4>
                             </div>
-                            <i class="ri-money-dollar-circle-line" style="font-size: 3rem; opacity: 0.5; color: #561C04;"></i>
+                            <i class="ri-wallet-3-line" style="font-size: 3rem; opacity: 0.5; color: #561C04;"></i>
                         </div>
                     </div>
 

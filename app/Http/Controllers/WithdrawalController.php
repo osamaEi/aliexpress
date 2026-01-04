@@ -23,8 +23,8 @@ class WithdrawalController extends Controller
                 ->with('error', __('messages.wallet_not_found'));
         }
 
-        // Get current currency from session
-        $currentCurrency = app(\App\Services\CurrencyService::class)->getCurrentCurrency();
+        // Get current currency from session (shared by SetCurrency middleware)
+        $currentCurrency = \App\Models\Currency::where('code', session('currency_code', 'AED'))->first();
 
         return view('wallet.withdrawal', compact('wallet', 'currentCurrency'));
     }
