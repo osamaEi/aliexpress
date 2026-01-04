@@ -318,6 +318,9 @@
     </div>
 </div>
 
+<!-- Hidden currency symbol template for JavaScript -->
+<span id="currency-symbol-template" style="display: none;">{!! currency_symbol('AED', true) !!}</span>
+
 <style>
     .quick-amount.active {
         background-color: var(--bs-primary);
@@ -353,6 +356,7 @@
         const amountInput = document.getElementById('deposit_amount');
         const feeBreakdown = document.getElementById('fee-breakdown');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+        const currencySymbol = document.getElementById('currency-symbol-template')?.innerHTML || 'AED';
 
         // Quick amount buttons functionality
         quickAmountButtons.forEach(button => {
@@ -416,11 +420,11 @@
             .then(data => {
                 if (data.success) {
                     // Update fee breakdown with detailed information
-                    document.getElementById('net-amount').innerHTML = data.data.net_amount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-                    document.getElementById('fixed-fee').innerHTML = data.data.fixed_fee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-                    document.getElementById('percentage-fee').innerHTML = data.data.percentage_fee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-                    document.getElementById('total-fee').innerHTML = data.data.fee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-                    document.getElementById('gross-amount').innerHTML = data.data.gross_amount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+                    document.getElementById('net-amount').innerHTML = data.data.net_amount.toFixed(2) + ' ' + currencySymbol;
+                    document.getElementById('fixed-fee').innerHTML = data.data.fixed_fee.toFixed(2) + ' ' + currencySymbol;
+                    document.getElementById('percentage-fee').innerHTML = data.data.percentage_fee.toFixed(2) + ' ' + currencySymbol;
+                    document.getElementById('total-fee').innerHTML = data.data.fee.toFixed(2) + ' ' + currencySymbol;
+                    document.getElementById('gross-amount').innerHTML = data.data.gross_amount.toFixed(2) + ' ' + currencySymbol;
 
                     // Show fee breakdown
                     feeBreakdown.style.display = 'block';
@@ -444,11 +448,11 @@
             const totalFee = fixedFee + percentageFee;
             const grossAmount = amount + totalFee;
 
-            document.getElementById('net-amount').innerHTML = amount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-            document.getElementById('fixed-fee').innerHTML = fixedFee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-            document.getElementById('percentage-fee').innerHTML = percentageFee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-            document.getElementById('total-fee').innerHTML = totalFee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
-            document.getElementById('gross-amount').innerHTML = grossAmount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+            document.getElementById('net-amount').innerHTML = amount.toFixed(2) + ' ' + currencySymbol;
+            document.getElementById('fixed-fee').innerHTML = fixedFee.toFixed(2) + ' ' + currencySymbol;
+            document.getElementById('percentage-fee').innerHTML = percentageFee.toFixed(2) + ' ' + currencySymbol;
+            document.getElementById('total-fee').innerHTML = totalFee.toFixed(2) + ' ' + currencySymbol;
+            document.getElementById('gross-amount').innerHTML = grossAmount.toFixed(2) + ' ' + currencySymbol;
 
             feeBreakdown.style.display = 'block';
         }

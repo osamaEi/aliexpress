@@ -3,11 +3,14 @@
 @section('title', __('messages.withdrawal_request'))
 
 @section('content')
+@php
+    $balanceConverted = $currentCurrency->convertFrom($wallet->balance, 'AED');
+@endphp
 <div class="container py-5" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header text-white" style="background-color: #561C04;">
                     <h5 class="mb-0">
                         <i class="ri-wallet-3-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
                         {{ __('messages.withdrawal_request') }}
@@ -16,15 +19,16 @@
 
                 <div class="card-body">
                     <!-- Wallet Balance Info -->
-                    <div class="alert alert-info mb-4">
+                    <div class="alert mb-4" style="background-color: rgba(86, 28, 4, 0.1); border: 1px solid rgba(86, 28, 4, 0.2);">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="mb-1">{{ __('messages.available_balance') }}</h6>
-                                <h4 class="mb-0 text-primary" style="direction: ltr; display: inline-block;">
-                                    {{ number_format($wallet->balance, 2) }} {{ $wallet->currency }}
+                                <h6 class="mb-1" style="color: #561C04;">{{ __('messages.available_balance') }}</h6>
+                                <h4 class="mb-0 d-inline-flex align-items-center gap-1" style="color: #561C04; direction: ltr;">
+                                    <x-session-currency-icon width="24" height="24" />
+                                    {{ number_format($balanceConverted, 2) }}
                                 </h4>
                             </div>
-                            <i class="ri-money-dollar-circle-line" style="font-size: 3rem; opacity: 0.5;"></i>
+                            <i class="ri-money-dollar-circle-line" style="font-size: 3rem; opacity: 0.5; color: #561C04;"></i>
                         </div>
                     </div>
 
@@ -46,30 +50,30 @@
                                 <div class="row g-3">
                                     <!-- PayPal Option -->
                                     <div class="col-md-4">
-                                        <div class="form-check card h-100">
+                                        <div class="form-check card h-100 method-option">
                                             <input class="form-check-input d-none" type="radio" name="withdrawal_method" id="method_paypal" value="paypal" {{ old('withdrawal_method', 'paypal') == 'paypal' ? 'checked' : '' }}>
-                                            <label class="form-check-label card-body text-center cursor-pointer method-card" for="method_paypal" style="cursor: pointer;">
-                                                <i class="ri-paypal-line text-primary mb-2" style="font-size: 2.5rem;"></i>
+                                            <label class="form-check-label card-body text-center method-card" for="method_paypal">
+                                                <i class="ri-paypal-line mb-2" style="font-size: 2.5rem; color: #561C04;"></i>
                                                 <h6 class="mb-0">{{ __('messages.paypal') }}</h6>
                                             </label>
                                         </div>
                                     </div>
                                     <!-- Bank Transfer (IBAN) Option -->
                                     <div class="col-md-4">
-                                        <div class="form-check card h-100">
+                                        <div class="form-check card h-100 method-option">
                                             <input class="form-check-input d-none" type="radio" name="withdrawal_method" id="method_bank" value="bank_transfer" {{ old('withdrawal_method') == 'bank_transfer' ? 'checked' : '' }}>
-                                            <label class="form-check-label card-body text-center method-card" for="method_bank" style="cursor: pointer;">
-                                                <i class="ri-bank-line text-success mb-2" style="font-size: 2.5rem;"></i>
+                                            <label class="form-check-label card-body text-center method-card" for="method_bank">
+                                                <i class="ri-bank-line mb-2" style="font-size: 2.5rem; color: #561C04;"></i>
                                                 <h6 class="mb-0">{{ __('messages.bank_transfer') }}</h6>
                                             </label>
                                         </div>
                                     </div>
                                     <!-- Mobile Wallet Option -->
                                     <div class="col-md-4">
-                                        <div class="form-check card h-100">
+                                        <div class="form-check card h-100 method-option">
                                             <input class="form-check-input d-none" type="radio" name="withdrawal_method" id="method_wallet" value="mobile_wallet" {{ old('withdrawal_method') == 'mobile_wallet' ? 'checked' : '' }}>
-                                            <label class="form-check-label card-body text-center method-card" for="method_wallet" style="cursor: pointer;">
-                                                <i class="ri-smartphone-line text-warning mb-2" style="font-size: 2.5rem;"></i>
+                                            <label class="form-check-label card-body text-center method-card" for="method_wallet">
+                                                <i class="ri-smartphone-line mb-2" style="font-size: 2.5rem; color: #561C04;"></i>
                                                 <h6 class="mb-0">{{ __('messages.mobile_wallet') }}</h6>
                                             </label>
                                         </div>
@@ -88,15 +92,16 @@
                                         <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="ri-paypal-line"></i>
+                                        <span class="input-group-text" style="background-color: rgba(86, 28, 4, 0.1); border-color: #561C04;">
+                                            <i class="ri-paypal-line" style="color: #561C04;"></i>
                                         </span>
                                         <input type="email"
                                                class="form-control @error('paypal_email') is-invalid @enderror"
                                                id="paypal_email"
                                                name="paypal_email"
                                                value="{{ old('paypal_email') }}"
-                                               placeholder="{{ __('messages.enter_paypal_email') }}">
+                                               placeholder="{{ __('messages.enter_paypal_email') }}"
+                                               style="border-color: #ddd;">
                                     </div>
                                     @error('paypal_email')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -116,8 +121,8 @@
                                             <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
-                                            <span class="input-group-text">
-                                                <i class="ri-bank-card-line"></i>
+                                            <span class="input-group-text" style="background-color: rgba(86, 28, 4, 0.1); border-color: #561C04;">
+                                                <i class="ri-bank-card-line" style="color: #561C04;"></i>
                                             </span>
                                             <input type="text"
                                                    class="form-control @error('iban') is-invalid @enderror"
@@ -137,8 +142,8 @@
                                             {{ __('messages.swift_code') }}
                                         </label>
                                         <div class="input-group">
-                                            <span class="input-group-text">
-                                                <i class="ri-global-line"></i>
+                                            <span class="input-group-text" style="background-color: rgba(86, 28, 4, 0.1); border-color: #561C04;">
+                                                <i class="ri-global-line" style="color: #561C04;"></i>
                                             </span>
                                             <input type="text"
                                                    class="form-control @error('swift_code') is-invalid @enderror"
@@ -160,8 +165,8 @@
                                             <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
-                                            <span class="input-group-text">
-                                                <i class="ri-bank-line"></i>
+                                            <span class="input-group-text" style="background-color: rgba(86, 28, 4, 0.1); border-color: #561C04;">
+                                                <i class="ri-bank-line" style="color: #561C04;"></i>
                                             </span>
                                             <input type="text"
                                                    class="form-control @error('bank_name') is-invalid @enderror"
@@ -180,8 +185,8 @@
                                             <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
-                                            <span class="input-group-text">
-                                                <i class="ri-user-line"></i>
+                                            <span class="input-group-text" style="background-color: rgba(86, 28, 4, 0.1); border-color: #561C04;">
+                                                <i class="ri-user-line" style="color: #561C04;"></i>
                                             </span>
                                             <input type="text"
                                                    class="form-control @error('account_holder_name') is-invalid @enderror"
@@ -214,7 +219,7 @@
                                             <option value="samsung_pay" {{ old('wallet_provider') == 'samsung_pay' ? 'selected' : '' }}>Samsung Pay</option>
                                             <option value="stc_pay" {{ old('wallet_provider') == 'stc_pay' ? 'selected' : '' }}>STC Pay</option>
                                             <option value="urpay" {{ old('wallet_provider') == 'urpay' ? 'selected' : '' }}>URPay</option>
-                                            <option value="other" {{ old('wallet_provider') == 'other' ? 'selected' : '' }}>{{ __('messages.other') ?? 'Other' }}</option>
+                                            <option value="other" {{ old('wallet_provider') == 'other' ? 'selected' : '' }}>{{ __('messages.other') }}</option>
                                         </select>
                                         @error('wallet_provider')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -226,8 +231,8 @@
                                             <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
-                                            <span class="input-group-text">
-                                                <i class="ri-smartphone-line"></i>
+                                            <span class="input-group-text" style="background-color: rgba(86, 28, 4, 0.1); border-color: #561C04;">
+                                                <i class="ri-smartphone-line" style="color: #561C04;"></i>
                                             </span>
                                             <input type="tel"
                                                    class="form-control @error('wallet_mobile_number') is-invalid @enderror"
@@ -249,8 +254,8 @@
                                         <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="ri-user-line"></i>
+                                        <span class="input-group-text" style="background-color: rgba(86, 28, 4, 0.1); border-color: #561C04;">
+                                            <i class="ri-user-line" style="color: #561C04;"></i>
                                         </span>
                                         <input type="text"
                                                class="form-control @error('wallet_holder_name') is-invalid @enderror"
@@ -271,7 +276,10 @@
                                     {{ __('messages.withdrawal_amount') }}
                                     <span class="text-danger">*</span>
                                 </label>
-                                <div class="input-group">
+                                <div class="input-group" style="direction: ltr;">
+                                    <span class="input-group-text" style="background-color: rgba(86, 28, 4, 0.1); border-color: #561C04;">
+                                        <x-session-currency-icon width="18" height="18" />
+                                    </span>
                                     <input type="number"
                                            class="form-control @error('amount') is-invalid @enderror"
                                            id="amount"
@@ -282,14 +290,13 @@
                                            step="0.01"
                                            required
                                            placeholder="{{ __('messages.enter_amount') }}"
-                                           style="direction: ltr;">
-                                    <span class="input-group-text">{{ $wallet->currency }}</span>
+                                           style="direction: ltr; text-align: left;">
                                 </div>
                                 @error('amount')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                                 <small class="text-muted">
-                                    {{ __('messages.withdrawal_limits', ['min' => 10, 'max' => number_format($wallet->balance, 2)]) }}
+                                    {{ __('messages.withdrawal_limits', ['min' => 10, 'max' => number_format($balanceConverted, 2)]) }}
                                 </small>
                             </div>
 
@@ -311,12 +318,12 @@
                             </div>
 
                             <!-- Important Notes -->
-                            <div class="alert alert-warning">
-                                <h6 class="alert-heading">
+                            <div class="alert" style="background-color: #fff3cd; border-color: #ffc107;">
+                                <h6 class="alert-heading" style="color: #856404;">
                                     <i class="ri-information-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
                                     {{ __('messages.important_notes') }}
                                 </h6>
-                                <ul class="mb-0 {{ app()->getLocale() == 'ar' ? 'pe-3' : 'ps-3' }}">
+                                <ul class="mb-0 {{ app()->getLocale() == 'ar' ? 'pe-3' : 'ps-3' }}" style="color: #856404;">
                                     <li>{{ __('messages.withdrawal_note_1') }}</li>
                                     <li>{{ __('messages.withdrawal_note_2') }}</li>
                                     <li>{{ __('messages.withdrawal_note_3') }}</li>
@@ -326,7 +333,7 @@
 
                             <!-- Submit Buttons -->
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn text-white" style="background-color: #561C04;">
                                     <i class="ri-send-plane-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
                                     {{ __('messages.submit_withdrawal_request') }}
                                 </button>
@@ -342,14 +349,14 @@
 
             <!-- Recent Withdrawals -->
             <div class="card shadow-sm mt-4">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0">
+                <div class="card-header" style="background-color: rgba(86, 28, 4, 0.05);">
+                    <h6 class="mb-0" style="color: #561C04;">
                         <i class="ri-history-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
                         {{ __('messages.recent_withdrawals') }}
                     </h6>
                 </div>
                 <div class="card-body">
-                    <a href="{{ route('wallet.withdrawal.history') }}" class="btn btn-outline-primary w-100">
+                    <a href="{{ route('wallet.withdrawal.history') }}" class="btn w-100" style="background-color: #561C04; color: white;">
                         {{ __('messages.view_withdrawal_history') }}
                     </a>
                 </div>
@@ -363,17 +370,18 @@
         border: 2px solid transparent;
         border-radius: 10px;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
 
     .method-card:hover {
-        border-color: var(--bs-primary);
-        background-color: rgba(var(--bs-primary-rgb), 0.05);
+        border-color: #561C04;
+        background-color: rgba(86, 28, 4, 0.05);
     }
 
     input[type="radio"]:checked + .method-card {
-        border-color: var(--bs-primary);
-        background-color: rgba(var(--bs-primary-rgb), 0.1);
-        box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.2);
+        border-color: #561C04;
+        background-color: rgba(86, 28, 4, 0.1);
+        box-shadow: 0 0 0 3px rgba(86, 28, 4, 0.2);
     }
 
     .form-check.card {
@@ -383,6 +391,21 @@
 
     .form-check.card .card-body {
         padding: 1.5rem 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #561C04;
+        box-shadow: 0 0 0 0.2rem rgba(86, 28, 4, 0.15);
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(86, 28, 4, 0.25);
+        transition: all 0.3s ease;
+    }
+
+    .input-group-text {
+        border-color: #ddd;
     }
 </style>
 
