@@ -23,7 +23,10 @@ class WithdrawalController extends Controller
                 ->with('error', __('messages.wallet_not_found'));
         }
 
-        return view('wallet.withdrawal', compact('wallet'));
+        // Get current currency from session
+        $currentCurrency = app(\App\Services\CurrencyService::class)->getCurrentCurrency();
+
+        return view('wallet.withdrawal', compact('wallet', 'currentCurrency'));
     }
 
     /**
@@ -39,11 +42,30 @@ class WithdrawalController extends Controller
                 ->with('error', __('messages.wallet_not_found'));
         }
 
-        $validated = $request->validate([
-            'paypal_email' => 'required|email|max:255',
+        // Base validation rules
+        $rules = [
             'amount' => 'required|numeric|min:10|max:' . $wallet->balance,
+            'withdrawal_method' => 'required|in:paypal,bank_transfer,mobile_wallet',
             'seller_note' => 'nullable|string|max:1000',
-        ]);
+        ];
+
+        // Add method-specific validation rules
+        $withdrawalMethod = $request->withdrawal_method;
+
+        if ($withdrawalMethod === 'paypal') {
+            $rules['paypal_email'] = 'required|email|max:255';
+        } elseif ($withdrawalMethod === 'bank_transfer') {
+            $rules['iban'] = 'required|string|min:15|max:34';
+            $rules['swift_code'] = 'nullable|string|max:11';
+            $rules['bank_name'] = 'required|string|max:255';
+            $rules['account_holder_name'] = 'required|string|max:255';
+        } elseif ($withdrawalMethod === 'mobile_wallet') {
+            $rules['wallet_provider'] = 'required|string';
+            $rules['wallet_mobile_number'] = 'required|string';
+            $rules['wallet_holder_name'] = 'required|string|max:255';
+        }
+
+        $validated = $request->validate($rules);
 
         // Check if there's a pending withdrawal
         $pendingWithdrawal = WithdrawalRequest::where('user_id', $user->id)
@@ -55,16 +77,33 @@ class WithdrawalController extends Controller
                 ->with('error', __('messages.pending_withdrawal_exists'));
         }
 
-        DB::transaction(function () use ($user, $validated, $wallet) {
-            // Create withdrawal request
-            WithdrawalRequest::create([
+        DB::transaction(function () use ($user, $validated, $wallet, $withdrawalMethod, $request) {
+            // Build withdrawal data
+            $withdrawalData = [
                 'user_id' => $user->id,
-                'paypal_email' => $validated['paypal_email'],
+                'withdrawal_method' => $withdrawalMethod,
                 'amount' => $validated['amount'],
-                'currency' => $wallet->currency ?? 'USD',
+                'currency' => $wallet->currency ?? 'AED',
                 'status' => 'pending',
                 'seller_note' => $validated['seller_note'] ?? null,
-            ]);
+            ];
+
+            // Add method-specific data
+            if ($withdrawalMethod === 'paypal') {
+                $withdrawalData['paypal_email'] = $validated['paypal_email'];
+            } elseif ($withdrawalMethod === 'bank_transfer') {
+                $withdrawalData['iban'] = $validated['iban'];
+                $withdrawalData['swift_code'] = $validated['swift_code'] ?? null;
+                $withdrawalData['bank_name'] = $validated['bank_name'];
+                $withdrawalData['account_holder_name'] = $validated['account_holder_name'];
+            } elseif ($withdrawalMethod === 'mobile_wallet') {
+                $withdrawalData['wallet_provider'] = $validated['wallet_provider'];
+                $withdrawalData['wallet_mobile_number'] = $validated['wallet_mobile_number'];
+                $withdrawalData['wallet_holder_name'] = $validated['wallet_holder_name'];
+            }
+
+            // Create withdrawal request
+            WithdrawalRequest::create($withdrawalData);
 
             // Deduct from wallet balance (hold the amount)
             $wallet->decrement('balance', $validated['amount']);
