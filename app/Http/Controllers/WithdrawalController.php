@@ -42,9 +42,18 @@ class WithdrawalController extends Controller
                 ->with('error', __('messages.wallet_not_found'));
         }
 
-        // Base validation rules
+        // Get current currency for conversion
+        $currentCurrency = \App\Models\Currency::where('code', session('currency_code', 'AED'))->first();
+
+        // Convert wallet balance to current currency for validation display
+        $balanceInCurrentCurrency = $currentCurrency ? $currentCurrency->convertFrom($wallet->balance, 'AED') : $wallet->balance;
+
+        // Convert entered amount back to AED for storage
+        $amountInAED = $currentCurrency ? $currentCurrency->convertTo($request->amount, 'AED') : $request->amount;
+
+        // Base validation rules (using converted balance for max)
         $rules = [
-            'amount' => 'required|numeric|min:10|max:' . $wallet->balance,
+            'amount' => 'required|numeric|min:10|max:' . $balanceInCurrentCurrency,
             'withdrawal_method' => 'required|in:paypal,bank_transfer,mobile_wallet',
             'seller_note' => 'nullable|string|max:1000',
         ];
@@ -77,40 +86,52 @@ class WithdrawalController extends Controller
                 ->with('error', __('messages.pending_withdrawal_exists'));
         }
 
-        DB::transaction(function () use ($user, $validated, $wallet, $withdrawalMethod, $request) {
-            // Build withdrawal data
-            $withdrawalData = [
+        try {
+            DB::transaction(function () use ($user, $validated, $wallet, $withdrawalMethod, $request, $amountInAED) {
+                // Build withdrawal data (store amount in AED)
+                $withdrawalData = [
+                    'user_id' => $user->id,
+                    'withdrawal_method' => $withdrawalMethod,
+                    'amount' => $amountInAED,
+                    'currency' => 'AED',
+                    'status' => 'pending',
+                    'seller_note' => $validated['seller_note'] ?? null,
+                ];
+
+                // Add method-specific data
+                if ($withdrawalMethod === 'paypal') {
+                    $withdrawalData['paypal_email'] = $validated['paypal_email'];
+                } elseif ($withdrawalMethod === 'bank_transfer') {
+                    $withdrawalData['iban'] = $validated['iban'];
+                    $withdrawalData['swift_code'] = $validated['swift_code'] ?? null;
+                    $withdrawalData['bank_name'] = $validated['bank_name'];
+                    $withdrawalData['account_holder_name'] = $validated['account_holder_name'];
+                } elseif ($withdrawalMethod === 'mobile_wallet') {
+                    $withdrawalData['wallet_provider'] = $validated['wallet_provider'];
+                    $withdrawalData['wallet_mobile_number'] = $validated['wallet_mobile_number'];
+                    $withdrawalData['wallet_holder_name'] = $validated['wallet_holder_name'];
+                }
+
+                // Create withdrawal request
+                WithdrawalRequest::create($withdrawalData);
+
+                // Deduct from wallet balance (hold the amount in AED)
+                $wallet->decrement('balance', $amountInAED);
+            });
+
+            return redirect()->route('wallet.withdrawal.history')
+                ->with('success', __('messages.withdrawal_request_submitted'));
+        } catch (\Exception $e) {
+            \Log::error('Withdrawal request error: ' . $e->getMessage(), [
                 'user_id' => $user->id,
-                'withdrawal_method' => $withdrawalMethod,
-                'amount' => $validated['amount'],
-                'currency' => $wallet->currency ?? 'AED',
-                'status' => 'pending',
-                'seller_note' => $validated['seller_note'] ?? null,
-            ];
-
-            // Add method-specific data
-            if ($withdrawalMethod === 'paypal') {
-                $withdrawalData['paypal_email'] = $validated['paypal_email'];
-            } elseif ($withdrawalMethod === 'bank_transfer') {
-                $withdrawalData['iban'] = $validated['iban'];
-                $withdrawalData['swift_code'] = $validated['swift_code'] ?? null;
-                $withdrawalData['bank_name'] = $validated['bank_name'];
-                $withdrawalData['account_holder_name'] = $validated['account_holder_name'];
-            } elseif ($withdrawalMethod === 'mobile_wallet') {
-                $withdrawalData['wallet_provider'] = $validated['wallet_provider'];
-                $withdrawalData['wallet_mobile_number'] = $validated['wallet_mobile_number'];
-                $withdrawalData['wallet_holder_name'] = $validated['wallet_holder_name'];
-            }
-
-            // Create withdrawal request
-            WithdrawalRequest::create($withdrawalData);
-
-            // Deduct from wallet balance (hold the amount)
-            $wallet->decrement('balance', $validated['amount']);
-        });
-
-        return redirect()->route('wallet.withdrawal.history')
-            ->with('success', __('messages.withdrawal_request_submitted'));
+                'amount' => $request->amount,
+                'method' => $withdrawalMethod,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -18,6 +18,38 @@
                 </div>
 
                 <div class="card-body">
+                    <!-- Success Message -->
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="ri-check-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
+                    <!-- Error Message -->
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="ri-error-warning-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
+                    <!-- Validation Errors -->
+                    @if($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="ri-error-warning-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
+                            <strong>{{ __('messages.validation_errors') ?? 'Validation Errors' }}:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
                     <!-- Wallet Balance Info -->
                     <div class="alert mb-4" style="background-color: rgba(86, 28, 4, 0.1); border: 1px solid rgba(86, 28, 4, 0.2);">
                         <div class="d-flex justify-content-between align-items-center">
