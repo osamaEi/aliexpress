@@ -251,6 +251,7 @@
             justify-content: center;
             gap: 10px;
             margin: 30px 0;
+            direction: ltr;
         }
 
         .otp-input {
