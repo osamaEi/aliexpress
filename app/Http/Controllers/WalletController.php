@@ -86,12 +86,30 @@ class WalletController extends Controller
      */
     public function withdrawal(Request $request)
     {
-        $request->validate([
+        // Base validation rules
+        $rules = [
             'amount' => 'required|numeric|min:10',
-            'bank_name' => 'required|string',
-            'account_number' => 'required|string',
-            'account_name' => 'required|string',
-        ]);
+            'withdrawal_method' => 'required|in:paypal,bank_transfer,mobile_wallet',
+            'seller_note' => 'nullable|string|max:1000',
+        ];
+
+        // Add method-specific validation rules
+        $withdrawalMethod = $request->withdrawal_method;
+
+        if ($withdrawalMethod === 'paypal') {
+            $rules['paypal_email'] = 'required|email';
+        } elseif ($withdrawalMethod === 'bank_transfer') {
+            $rules['iban'] = 'required|string|min:15|max:34';
+            $rules['swift_code'] = 'nullable|string|max:11';
+            $rules['bank_name'] = 'required|string|max:255';
+            $rules['account_holder_name'] = 'required|string|max:255';
+        } elseif ($withdrawalMethod === 'mobile_wallet') {
+            $rules['wallet_provider'] = 'required|string';
+            $rules['wallet_mobile_number'] = 'required|string';
+            $rules['wallet_holder_name'] = 'required|string|max:255';
+        }
+
+        $request->validate($rules);
 
         $user = Auth::user();
         $amount = $request->amount;
@@ -107,20 +125,32 @@ class WalletController extends Controller
             // Hold the amount
             $this->walletService->hold($user, $amount);
 
-            // Create withdrawal request (pending admin approval)
-            \App\Models\WithdrawalRequest::create([
+            // Build withdrawal data based on method
+            $withdrawalData = [
                 'user_id' => $user->id,
-                'wallet_id' => $wallet->id,
+                'withdrawal_method' => $withdrawalMethod,
                 'amount' => $amount,
                 'currency' => 'AED',
                 'status' => 'pending',
-                'bank_name' => $request->bank_name,
-                'account_number' => $request->account_number,
-                'account_name' => $request->account_name,
-                'iban' => $request->iban,
-                'swift_code' => $request->swift_code,
-                'notes' => $request->notes,
-            ]);
+                'seller_note' => $request->seller_note,
+            ];
+
+            // Add method-specific data
+            if ($withdrawalMethod === 'paypal') {
+                $withdrawalData['paypal_email'] = $request->paypal_email;
+            } elseif ($withdrawalMethod === 'bank_transfer') {
+                $withdrawalData['iban'] = $request->iban;
+                $withdrawalData['swift_code'] = $request->swift_code;
+                $withdrawalData['bank_name'] = $request->bank_name;
+                $withdrawalData['account_holder_name'] = $request->account_holder_name;
+            } elseif ($withdrawalMethod === 'mobile_wallet') {
+                $withdrawalData['wallet_provider'] = $request->wallet_provider;
+                $withdrawalData['wallet_mobile_number'] = $request->wallet_mobile_number;
+                $withdrawalData['wallet_holder_name'] = $request->wallet_holder_name;
+            }
+
+            // Create withdrawal request (pending admin approval)
+            \App\Models\WithdrawalRequest::create($withdrawalData);
 
             return redirect()->route('wallet.index')
                 ->with('success', __('messages.withdrawal_request_submitted'));

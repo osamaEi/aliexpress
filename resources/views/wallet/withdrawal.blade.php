@@ -3,13 +3,13 @@
 @section('title', __('messages.withdrawal_request'))
 
 @section('content')
-<div class="container py-5">
+<div class="container py-5" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="ri-wallet-3-line me-2"></i>
+                        <i class="ri-wallet-3-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
                         {{ __('messages.withdrawal_request') }}
                     </h5>
                 </div>
@@ -20,7 +20,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-1">{{ __('messages.available_balance') }}</h6>
-                                <h4 class="mb-0 text-primary">
+                                <h4 class="mb-0 text-primary" style="direction: ltr; display: inline-block;">
                                     {{ number_format($wallet->balance, 2) }} {{ $wallet->currency }}
                                 </h4>
                             </div>
@@ -30,37 +30,239 @@
 
                     @if($wallet->balance < 10)
                         <div class="alert alert-warning">
-                            <i class="ri-error-warning-line me-2"></i>
+                            <i class="ri-error-warning-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
                             {{ __('messages.minimum_withdrawal_amount', ['amount' => 10]) }}
                         </div>
                     @else
-                        <form action="{{ route('wallet.withdrawal.store') }}" method="POST">
+                        <form action="{{ route('wallet.withdrawal.store') }}" method="POST" id="withdrawalForm">
                             @csrf
 
-                            <!-- PayPal Email -->
-                            <div class="mb-3">
-                                <label for="paypal_email" class="form-label">
-                                    {{ __('messages.paypal_email') }}
+                            <!-- Withdrawal Method Selection -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    {{ __('messages.withdrawal_method') }}
                                     <span class="text-danger">*</span>
                                 </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="ri-paypal-line"></i>
-                                    </span>
-                                    <input type="email"
-                                           class="form-control @error('paypal_email') is-invalid @enderror"
-                                           id="paypal_email"
-                                           name="paypal_email"
-                                           value="{{ old('paypal_email') }}"
-                                           required
-                                           placeholder="{{ __('messages.enter_paypal_email') }}">
+                                <div class="row g-3">
+                                    <!-- PayPal Option -->
+                                    <div class="col-md-4">
+                                        <div class="form-check card h-100">
+                                            <input class="form-check-input d-none" type="radio" name="withdrawal_method" id="method_paypal" value="paypal" {{ old('withdrawal_method', 'paypal') == 'paypal' ? 'checked' : '' }}>
+                                            <label class="form-check-label card-body text-center cursor-pointer method-card" for="method_paypal" style="cursor: pointer;">
+                                                <i class="ri-paypal-line text-primary mb-2" style="font-size: 2.5rem;"></i>
+                                                <h6 class="mb-0">{{ __('messages.paypal') }}</h6>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!-- Bank Transfer (IBAN) Option -->
+                                    <div class="col-md-4">
+                                        <div class="form-check card h-100">
+                                            <input class="form-check-input d-none" type="radio" name="withdrawal_method" id="method_bank" value="bank_transfer" {{ old('withdrawal_method') == 'bank_transfer' ? 'checked' : '' }}>
+                                            <label class="form-check-label card-body text-center method-card" for="method_bank" style="cursor: pointer;">
+                                                <i class="ri-bank-line text-success mb-2" style="font-size: 2.5rem;"></i>
+                                                <h6 class="mb-0">{{ __('messages.bank_transfer') }}</h6>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!-- Mobile Wallet Option -->
+                                    <div class="col-md-4">
+                                        <div class="form-check card h-100">
+                                            <input class="form-check-input d-none" type="radio" name="withdrawal_method" id="method_wallet" value="mobile_wallet" {{ old('withdrawal_method') == 'mobile_wallet' ? 'checked' : '' }}>
+                                            <label class="form-check-label card-body text-center method-card" for="method_wallet" style="cursor: pointer;">
+                                                <i class="ri-smartphone-line text-warning mb-2" style="font-size: 2.5rem;"></i>
+                                                <h6 class="mb-0">{{ __('messages.mobile_wallet') }}</h6>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
-                                @error('paypal_email')
+                                @error('withdrawal_method')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">
-                                    {{ __('messages.paypal_email_note') }}
-                                </small>
+                            </div>
+
+                            <!-- PayPal Fields -->
+                            <div id="paypal_fields" class="method-fields">
+                                <div class="mb-3">
+                                    <label for="paypal_email" class="form-label">
+                                        {{ __('messages.paypal_email') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="ri-paypal-line"></i>
+                                        </span>
+                                        <input type="email"
+                                               class="form-control @error('paypal_email') is-invalid @enderror"
+                                               id="paypal_email"
+                                               name="paypal_email"
+                                               value="{{ old('paypal_email') }}"
+                                               placeholder="{{ __('messages.enter_paypal_email') }}">
+                                    </div>
+                                    @error('paypal_email')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">
+                                        {{ __('messages.paypal_email_note') }}
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Bank Transfer (IBAN) Fields -->
+                            <div id="bank_fields" class="method-fields" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="iban" class="form-label">
+                                            {{ __('messages.iban') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="ri-bank-card-line"></i>
+                                            </span>
+                                            <input type="text"
+                                                   class="form-control @error('iban') is-invalid @enderror"
+                                                   id="iban"
+                                                   name="iban"
+                                                   value="{{ old('iban') }}"
+                                                   placeholder="{{ __('messages.enter_iban') }}"
+                                                   style="direction: ltr;">
+                                        </div>
+                                        @error('iban')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">{{ __('messages.iban_note') }}</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="swift_code" class="form-label">
+                                            {{ __('messages.swift_code') }}
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="ri-global-line"></i>
+                                            </span>
+                                            <input type="text"
+                                                   class="form-control @error('swift_code') is-invalid @enderror"
+                                                   id="swift_code"
+                                                   name="swift_code"
+                                                   value="{{ old('swift_code') }}"
+                                                   placeholder="{{ __('messages.enter_swift_code') }}"
+                                                   style="direction: ltr;">
+                                        </div>
+                                        @error('swift_code')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="bank_name" class="form-label">
+                                            {{ __('messages.bank_name') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="ri-bank-line"></i>
+                                            </span>
+                                            <input type="text"
+                                                   class="form-control @error('bank_name') is-invalid @enderror"
+                                                   id="bank_name"
+                                                   name="bank_name"
+                                                   value="{{ old('bank_name') }}"
+                                                   placeholder="{{ __('messages.enter_bank_name') }}">
+                                        </div>
+                                        @error('bank_name')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="account_holder_name" class="form-label">
+                                            {{ __('messages.account_holder_name') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="ri-user-line"></i>
+                                            </span>
+                                            <input type="text"
+                                                   class="form-control @error('account_holder_name') is-invalid @enderror"
+                                                   id="account_holder_name"
+                                                   name="account_holder_name"
+                                                   value="{{ old('account_holder_name') }}"
+                                                   placeholder="{{ __('messages.enter_account_holder_name') }}">
+                                        </div>
+                                        @error('account_holder_name')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mobile Wallet Fields -->
+                            <div id="wallet_fields" class="method-fields" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="wallet_provider" class="form-label">
+                                            {{ __('messages.mobile_wallet_provider') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select @error('wallet_provider') is-invalid @enderror"
+                                                id="wallet_provider"
+                                                name="wallet_provider">
+                                            <option value="">{{ __('messages.select_wallet_provider') }}</option>
+                                            <option value="apple_pay" {{ old('wallet_provider') == 'apple_pay' ? 'selected' : '' }}>Apple Pay</option>
+                                            <option value="google_pay" {{ old('wallet_provider') == 'google_pay' ? 'selected' : '' }}>Google Pay</option>
+                                            <option value="samsung_pay" {{ old('wallet_provider') == 'samsung_pay' ? 'selected' : '' }}>Samsung Pay</option>
+                                            <option value="stc_pay" {{ old('wallet_provider') == 'stc_pay' ? 'selected' : '' }}>STC Pay</option>
+                                            <option value="urpay" {{ old('wallet_provider') == 'urpay' ? 'selected' : '' }}>URPay</option>
+                                            <option value="other" {{ old('wallet_provider') == 'other' ? 'selected' : '' }}>{{ __('messages.other') ?? 'Other' }}</option>
+                                        </select>
+                                        @error('wallet_provider')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="wallet_mobile_number" class="form-label">
+                                            {{ __('messages.mobile_number') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="ri-smartphone-line"></i>
+                                            </span>
+                                            <input type="tel"
+                                                   class="form-control @error('wallet_mobile_number') is-invalid @enderror"
+                                                   id="wallet_mobile_number"
+                                                   name="wallet_mobile_number"
+                                                   value="{{ old('wallet_mobile_number') }}"
+                                                   placeholder="{{ __('messages.enter_mobile_number') }}"
+                                                   style="direction: ltr;">
+                                        </div>
+                                        @error('wallet_mobile_number')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">{{ __('messages.mobile_wallet_note') }}</small>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="wallet_holder_name" class="form-label">
+                                        {{ __('messages.wallet_holder_name') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="ri-user-line"></i>
+                                        </span>
+                                        <input type="text"
+                                               class="form-control @error('wallet_holder_name') is-invalid @enderror"
+                                               id="wallet_holder_name"
+                                               name="wallet_holder_name"
+                                               value="{{ old('wallet_holder_name') }}"
+                                               placeholder="{{ __('messages.enter_wallet_holder_name') }}">
+                                    </div>
+                                    @error('wallet_holder_name')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- Amount -->
@@ -79,7 +281,8 @@
                                            max="{{ $wallet->balance }}"
                                            step="0.01"
                                            required
-                                           placeholder="{{ __('messages.enter_amount') }}">
+                                           placeholder="{{ __('messages.enter_amount') }}"
+                                           style="direction: ltr;">
                                     <span class="input-group-text">{{ $wallet->currency }}</span>
                                 </div>
                                 @error('amount')
@@ -110,10 +313,10 @@
                             <!-- Important Notes -->
                             <div class="alert alert-warning">
                                 <h6 class="alert-heading">
-                                    <i class="ri-information-line me-2"></i>
+                                    <i class="ri-information-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
                                     {{ __('messages.important_notes') }}
                                 </h6>
-                                <ul class="mb-0 ps-3">
+                                <ul class="mb-0 {{ app()->getLocale() == 'ar' ? 'pe-3' : 'ps-3' }}">
                                     <li>{{ __('messages.withdrawal_note_1') }}</li>
                                     <li>{{ __('messages.withdrawal_note_2') }}</li>
                                     <li>{{ __('messages.withdrawal_note_3') }}</li>
@@ -124,11 +327,11 @@
                             <!-- Submit Buttons -->
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="ri-send-plane-line me-1"></i>
+                                    <i class="ri-send-plane-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
                                     {{ __('messages.submit_withdrawal_request') }}
                                 </button>
                                 <a href="{{ route('wallet.index') }}" class="btn btn-outline-secondary">
-                                    <i class="ri-arrow-left-line me-1"></i>
+                                    <i class="ri-arrow-left-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
                                     {{ __('messages.back_to_wallet') }}
                                 </a>
                             </div>
@@ -141,7 +344,7 @@
             <div class="card shadow-sm mt-4">
                 <div class="card-header bg-light">
                     <h6 class="mb-0">
-                        <i class="ri-history-line me-2"></i>
+                        <i class="ri-history-line {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
                         {{ __('messages.recent_withdrawals') }}
                     </h6>
                 </div>
@@ -154,4 +357,79 @@
         </div>
     </div>
 </div>
+
+<style>
+    .method-card {
+        border: 2px solid transparent;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .method-card:hover {
+        border-color: var(--bs-primary);
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+    }
+
+    input[type="radio"]:checked + .method-card {
+        border-color: var(--bs-primary);
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+        box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.2);
+    }
+
+    .form-check.card {
+        padding: 0;
+        margin: 0;
+    }
+
+    .form-check.card .card-body {
+        padding: 1.5rem 1rem;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const methodRadios = document.querySelectorAll('input[name="withdrawal_method"]');
+    const paypalFields = document.getElementById('paypal_fields');
+    const bankFields = document.getElementById('bank_fields');
+    const walletFields = document.getElementById('wallet_fields');
+
+    function toggleFields() {
+        const selectedMethod = document.querySelector('input[name="withdrawal_method"]:checked')?.value;
+
+        // Hide all fields first
+        paypalFields.style.display = 'none';
+        bankFields.style.display = 'none';
+        walletFields.style.display = 'none';
+
+        // Remove required from all fields
+        document.querySelectorAll('.method-fields input, .method-fields select').forEach(field => {
+            field.removeAttribute('required');
+        });
+
+        // Show and set required for selected method
+        if (selectedMethod === 'paypal') {
+            paypalFields.style.display = 'block';
+            document.getElementById('paypal_email').setAttribute('required', 'required');
+        } else if (selectedMethod === 'bank_transfer') {
+            bankFields.style.display = 'block';
+            document.getElementById('iban').setAttribute('required', 'required');
+            document.getElementById('bank_name').setAttribute('required', 'required');
+            document.getElementById('account_holder_name').setAttribute('required', 'required');
+        } else if (selectedMethod === 'mobile_wallet') {
+            walletFields.style.display = 'block';
+            document.getElementById('wallet_provider').setAttribute('required', 'required');
+            document.getElementById('wallet_mobile_number').setAttribute('required', 'required');
+            document.getElementById('wallet_holder_name').setAttribute('required', 'required');
+        }
+    }
+
+    // Add event listeners
+    methodRadios.forEach(radio => {
+        radio.addEventListener('change', toggleFields);
+    });
+
+    // Initialize on page load
+    toggleFields();
+});
+</script>
 @endsection

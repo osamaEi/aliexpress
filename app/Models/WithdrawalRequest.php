@@ -12,7 +12,15 @@ class WithdrawalRequest extends Model
 
     protected $fillable = [
         'user_id',
+        'withdrawal_method',
         'paypal_email',
+        'iban',
+        'swift_code',
+        'bank_name',
+        'account_holder_name',
+        'wallet_provider',
+        'wallet_mobile_number',
+        'wallet_holder_name',
         'amount',
         'currency',
         'status',

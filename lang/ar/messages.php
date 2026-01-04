@@ -1381,6 +1381,9 @@ return [
     'proceed_to_payment' => 'المتابعة للدفع',
     'ziina_secure_notice' => 'يتم معالجة دفعتك بشكل آمن عبر بوابة زينة للدفع. جميع المعاملات مشفرة ومحمية.',
     'quick_amounts' => 'مبالغ سريعة',
+    'deposit_info' => 'أضف أموالاً إلى محفظتك بشكل آمن باستخدام بوابة زينة للدفع',
+    'secure' => 'يتم معالجة دفعتك بشكل آمن. جميع المعاملات مشفرة ومحمية.',
+    'balance' => 'الرصيد',
 
     // Admin Dashboard
     'total_merchants' => 'عدد التجار',
@@ -1429,4 +1432,27 @@ return [
     'save' => 'حفظ',
     'update' => 'تحديث',
     'back' => 'رجوع',
+
+    // Withdrawal Methods
+    'paypal' => 'باي بال',
+    'bank_transfer' => 'تحويل بنكي (IBAN)',
+    'mobile_wallet' => 'محفظة إلكترونية',
+    'iban' => 'رقم الآيبان',
+    'enter_iban' => 'أدخل رقم الآيبان الخاص بك',
+    'iban_note' => 'تأكد من صحة رقم الآيبان لاستلام الدفعة',
+    'swift_code' => 'رمز السويفت',
+    'enter_swift_code' => 'أدخل رمز السويفت الخاص بالبنك',
+    'enter_bank_name' => 'أدخل اسم البنك',
+    'account_holder_name' => 'اسم صاحب الحساب',
+    'enter_account_holder_name' => 'أدخل اسم صاحب الحساب',
+    'mobile_wallet_provider' => 'مزود المحفظة الإلكترونية',
+    'select_wallet_provider' => 'اختر مزود المحفظة',
+    'mobile_number' => 'رقم الجوال',
+    'enter_mobile_number' => 'أدخل رقم المحفظة الإلكترونية',
+    'mobile_wallet_note' => 'أدخل رقم الجوال المرتبط بمحفظتك',
+    'wallet_holder_name' => 'اسم صاحب المحفظة',
+    'enter_wallet_holder_name' => 'أدخل اسم صاحب المحفظة',
+    'withdrawal_request' => 'طلب سحب',
+    'withdrawal_request_submitted' => 'تم تقديم طلب السحب بنجاح',
+    'other' => 'أخرى',
 ];
