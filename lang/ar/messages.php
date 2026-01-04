@@ -536,7 +536,9 @@ return [
     'processing_payment' => 'جاري معالجة الدفع',
 
     // Wallet
+    'payment_wallet' => 'الدفع والمحفظة',
     'my_wallet' => 'محفظتي',
+    'wallet_overview' => 'نظرة عامة على المحفظة',
     'manage_wallet_balance' => 'إدارة رصيد المحفظة والمعاملات',
     'total_balance' => 'الرصيد الإجمالي',
     'available_balance' => 'الرصيد المتاح',

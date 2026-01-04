@@ -131,31 +131,70 @@
             </a>
         </li> -->
 
+        <!-- Payment & Wallet Section -->
+        <li class="menu-header mt-5">
+            <span class="menu-header-text">{{ __('messages.payment_wallet') }}</span>
+        </li>
+
+        <!-- Wallet -->
+        <li class="menu-item {{ request()->routeIs('wallet.*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ri-wallet-3-line"></i>
+                <div>{{ __('messages.my_wallet') }}</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('wallet.index') ? 'active' : '' }}">
+                    <a href="{{ route('wallet.index') }}" class="menu-link">
+                        <div>{{ __('messages.wallet_overview') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('wallet.deposit') ? 'active' : '' }}">
+                    <a href="{{ route('wallet.deposit') }}" class="menu-link">
+                        <div>{{ __('messages.deposit') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('wallet.withdrawal.*') ? 'active' : '' }}">
+                    <a href="{{ route('wallet.withdrawal.create') }}" class="menu-link">
+                        <div>{{ __('messages.withdrawal') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('wallet.transactions') ? 'active' : '' }}">
+                    <a href="{{ route('wallet.transactions') }}" class="menu-link">
+                        <div>{{ __('messages.transactions') }}</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Subscriptions -->
+        <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ri-vip-crown-line"></i>
+                <div>{{ __('messages.subscriptions') }}</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('subscriptions.index') ? 'active' : '' }}">
+                    <a href="{{ route('subscriptions.index') }}" class="menu-link">
+                        <div>{{ __('messages.subscription_plans') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('subscriptions.history') ? 'active' : '' }}">
+                    <a href="{{ route('subscriptions.history') }}" class="menu-link">
+                        <div>{{ __('messages.subscription_history') }}</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Account Section -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text" >{{ __('messages.account') }}</span>
+            <span class="menu-header-text">{{ __('messages.account') }}</span>
         </li>
 
         <li class="menu-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <a href="{{ route('profile.edit') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-user-line"></i>
                 <div>{{ __('messages.profile') }}</div>
-            </a>
-        </li>
-
-        <!-- Subscriptions -->
-        <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'active' : '' }}">
-            <a href="{{ route('subscriptions.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ri-vip-crown-line"></i>
-                <div>{{ __('messages.subscriptions') }}</div>
-            </a>
-        </li>
-
-        <!-- Wallet -->
-        <li class="menu-item {{ request()->routeIs('wallet.*') ? 'active' : '' }}">
-            <a href="{{ route('wallet.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ri-wallet-3-line"></i>
-                <div>{{ __('messages.my_wallet') }}</div>
             </a>
         </li>
 

@@ -552,7 +552,9 @@ return [
     'processing_payment' => 'Processing payment',
 
     // Wallet
+    'payment_wallet' => 'Payment & Wallet',
     'my_wallet' => 'My Wallet',
+    'wallet_overview' => 'Wallet Overview',
     'manage_wallet_balance' => 'Manage your wallet balance and transactions',
     'total_balance' => 'Total Balance',
     'available_balance' => 'Available Balance',
