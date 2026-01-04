@@ -141,7 +141,7 @@
                                 {{ __('messages.amount_to_deposit') }}
                                 <span class="text-danger">*</span>
                             </label>
-                            <div class="input-group input-group-lg">
+                            <div class="input-group input-group-lg" style="direction: ltr;">
                                 <span class="input-group-text">{!! currency_symbol('AED', true) !!}</span>
                                 <input type="number"
                                        class="form-control"
@@ -150,9 +150,9 @@
                                        min="2"
                                        max="100000"
                                        step="0.01"
-                                       value="00.00"
                                        required
-                                       placeholder="0.00">
+                                       placeholder="0.00"
+                                       style="direction: ltr; text-align: left;">
                             </div>
                             <small class="text-muted">
                                 {{ __('messages.minimum_deposit_aed') }}
@@ -352,7 +352,7 @@
         const quickAmountButtons = document.querySelectorAll('.quick-amount');
         const amountInput = document.getElementById('deposit_amount');
         const feeBreakdown = document.getElementById('fee-breakdown');
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
         // Quick amount buttons functionality
         quickAmountButtons.forEach(button => {
@@ -382,8 +382,22 @@
             }
         });
 
+        // Also calculate on blur (when user leaves the field)
+        amountInput.addEventListener('change', function() {
+            const amount = parseFloat(this.value);
+            if (amount >= 2) {
+                calculateFees(amount);
+            } else {
+                feeBreakdown.style.display = 'none';
+            }
+        });
+
         // Function to calculate fees via AJAX
         function calculateFees(amount) {
+            // Show loading state
+            feeBreakdown.style.display = 'block';
+            document.getElementById('net-amount').innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
             fetch('{{ route("wallet.deposit.calculate-fees") }}', {
                 method: 'POST',
                 headers: {
@@ -391,9 +405,14 @@
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ amount: amount })
+                body: JSON.stringify({ amount: parseFloat(amount) })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Update fee breakdown with detailed information
@@ -405,11 +424,33 @@
 
                     // Show fee breakdown
                     feeBreakdown.style.display = 'block';
+                } else {
+                    console.error('Fee calculation failed:', data.message);
+                    feeBreakdown.style.display = 'none';
                 }
             })
             .catch(error => {
                 console.error('Error calculating fees:', error);
+                // Fallback: Calculate fees locally
+                calculateFeesLocally(amount);
             });
+        }
+
+        // Fallback function to calculate fees locally if AJAX fails
+        function calculateFeesLocally(amount) {
+            const fixedFee = 2.00;
+            const percentageRate = 0.079;
+            const percentageFee = amount * percentageRate;
+            const totalFee = fixedFee + percentageFee;
+            const grossAmount = amount + totalFee;
+
+            document.getElementById('net-amount').innerHTML = amount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+            document.getElementById('fixed-fee').innerHTML = fixedFee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+            document.getElementById('percentage-fee').innerHTML = percentageFee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+            document.getElementById('total-fee').innerHTML = totalFee.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+            document.getElementById('gross-amount').innerHTML = grossAmount.toFixed(2) + ' {!! currency_symbol("AED", true) !!}';
+
+            feeBreakdown.style.display = 'block';
         }
 
         // Handle form submission
@@ -417,6 +458,12 @@
             document.getElementById('ziina-loading').style.display = 'block';
             document.getElementById('ziina-pay-button').disabled = true;
         });
+
+        // Calculate fees on page load if there's already a value
+        const initialAmount = parseFloat(amountInput.value);
+        if (initialAmount >= 2) {
+            calculateFees(initialAmount);
+        }
     });
 </script>
 @endsection
