@@ -718,22 +718,10 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="withdrawal_method" class="form-label">{{ __('messages.withdrawal_method') }}</label>
-                        <select class="form-select @error('withdrawal_method') is-invalid @enderror" id="withdrawal_method" name="withdrawal_method">
-                            <option value="">{{ __('messages.select_withdrawal_method') }}</option>
-                            <option value="paypal" {{ old('withdrawal_method', $user->withdrawal_method) == 'paypal' ? 'selected' : '' }}>
-                                PayPal
-                            </option>
-                            <option value="e_wallet" {{ old('withdrawal_method', $user->withdrawal_method) == 'e_wallet' ? 'selected' : '' }}>
-                                {{ app()->getLocale() == 'ar' ? 'محفظة إلكترونية' : 'E-Wallet' }}
-                            </option>
-                            <option value="uae_bank" {{ old('withdrawal_method', $user->withdrawal_method) == 'uae_bank' ? 'selected' : '' }}>
-                                {{ app()->getLocale() == 'ar' ? 'حساب بنكي إماراتي' : 'UAE Bank Account' }}
-                            </option>
-                        </select>
-                        @error('withdrawal_method')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <a href="https://i.selaa.ae/wallet/withdrawal/create" class="btn btn-primary w-100 h-100 d-flex align-items-center justify-content-center" style="min-height: 40px;">
+                            <i class="ri-money-dollar-circle-line me-2"></i>
+                            {{ __('messages.withdraw') }}
+                        </a>
                     </div>
 
                     @if(auth()->user()->hasActiveSubscription())

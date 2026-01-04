@@ -153,8 +153,8 @@
                         <div>{{ __('messages.deposit') }}</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('wallet.withdrawal.*') ? 'active' : '' }}">
-                    <a href="{{ route('wallet.withdrawal.create') }}" class="menu-link">
+                <li class="menu-item">
+                    <a href="https://i.selaa.ae/wallet/withdrawal/create" class="menu-link">
                         <div>{{ __('messages.withdrawal') }}</div>
                     </a>
                 </li>
