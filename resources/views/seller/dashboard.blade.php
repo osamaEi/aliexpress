@@ -20,17 +20,7 @@
                     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(86, 28, 4, 0.6) 0%, rgba(122, 50, 6, 0.4) 100%);"></div>
                     
                     <!-- Content -->
-                    <div class="position-relative h-100 d-flex align-items-center p-5" style="z-index: 2;">
-                        <div>
-                            <h2 class="text-white fw-bold mb-2" style="font-size: 32px;">
-                                <i class="ri-store-2-line me-2"></i>
-                                {{ app()->getLocale() == 'ar' ? 'لوحة تحكم البائع' : 'Seller Dashboard' }}
-                            </h2>
-                            <p class="text-white-50 mb-0" style="font-size: 16px;">
-                                {{ app()->getLocale() == 'ar' ? 'أدر متجرك وراقب مبيعاتك بكل سهولة' : 'Manage your store and monitor your sales easily' }}
-                            </p>
-                        </div>
-                    </div>
+                   
                 </div>
             </div>
         </div>
