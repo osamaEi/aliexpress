@@ -1670,7 +1670,7 @@ background: rgba(255, 255, 255, 0.85);
     .search-progress-fill {
         height: 100%;
         width: 30%;
-        background: linear-gradient(90deg, #fff, #ffd700, #ffaa00, #ffd700, #fff);
+        background: linear-gradient(90deg, #fff, #561C04, #fff);
         background-size: 300% 100%;
         border-radius: 10px;
         animation: searchProgressMove 2s ease-in-out infinite, searchProgressShine 2s ease-in-out infinite;
