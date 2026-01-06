@@ -1514,12 +1514,12 @@ background: rgba(255, 255, 255, 0.85);
     .search-loading-overlay.show {
         display: flex !important;
     }
-
+/* 
     @keyframes searchGradientShift {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
-    }
+    } */
 
     .search-loading-content {
         text-align: center;
