@@ -329,13 +329,34 @@
             <!-- Loading Overlay -->
             <div id="loadingSpinner" class="loading-overlay" style="display: none;">
                 <div class="loading-content">
-                    <div class="loading-spinner-container">
-                        <div class="spinner-border text-white" role="status" style="width: 3rem; height: 3rem;">
-                            <span class="visually-hidden">{{ app()->getLocale() == 'ar' ? 'جاري التحميل...' : 'Loading...' }}</span>
+                    <!-- Animated Logo Container -->
+                    <div class="logo-loader-container">
+                        <div class="logo-pulse-ring"></div>
+                        <div class="logo-pulse-ring delay-1"></div>
+                        <div class="logo-pulse-ring delay-2"></div>
+                        <div class="logo-wrapper">
+                            <img src="{{ asset('logo/logo.png') }}" alt="Logo" class="loader-logo">
                         </div>
                     </div>
-                    <p class="loading-text mt-3 mb-0">{{ app()->getLocale() == 'ar' ? 'جاري البحث عن المنتجات...' : 'Searching for products...' }}</p>
-                    <small class="loading-subtext">{{ app()->getLocale() == 'ar' ? 'يرجى الانتظار' : 'Please wait' }}</small>
+
+                    <!-- Animated Text -->
+                    <div class="loading-text-container">
+                        <p class="loading-text">{{ app()->getLocale() == 'ar' ? 'جاري البحث عن المنتجات' : 'Searching for products' }}</p>
+                        <div class="loading-dots">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="loading-progress-container">
+                        <div class="loading-progress-bar">
+                            <div class="loading-progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <small class="loading-subtext">{{ app()->getLocale() == 'ar' ? 'يرجى الانتظار قليلاً' : 'Please wait a moment' }}</small>
                 </div>
             </div>
 
@@ -1458,54 +1479,202 @@
 </script>
 
 <style>
-    /* Loading Overlay */
+    /* Loading Overlay - Impressive Design */
     .loading-overlay {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(86, 28, 4, 0.9);
+        background: linear-gradient(135deg, rgba(86, 28, 4, 0.97) 0%, rgba(229, 99, 0, 0.95) 50%, rgba(86, 28, 4, 0.97) 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 4s ease infinite;
         z-index: 9999;
         display: flex;
         align-items: center;
         justify-content: center;
-        backdrop-filter: blur(5px);
+        backdrop-filter: blur(10px);
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
 
     .loading-content {
         text-align: center;
         color: white;
+        padding: 40px;
     }
 
-    .loading-spinner-container {
-        display: inline-block;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.1);
+    /* Logo Loader Container */
+    .logo-loader-container {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        margin: 0 auto 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo-wrapper {
+        position: relative;
+        z-index: 10;
+        width: 100px;
+        height: 100px;
+        background: white;
         border-radius: 50%;
-        animation: pulse 1.5s ease-in-out infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(255, 255, 255, 0.2);
+        animation: logoFloat 2s ease-in-out infinite;
     }
 
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
+    .loader-logo {
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+        animation: logoSpin 3s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-10px) scale(1.05); }
+    }
+
+    @keyframes logoSpin {
+        0% { transform: rotateY(0deg); }
+        25% { transform: rotateY(15deg); }
+        50% { transform: rotateY(0deg); }
+        75% { transform: rotateY(-15deg); }
+        100% { transform: rotateY(0deg); }
+    }
+
+    /* Pulse Rings */
+    .logo-pulse-ring {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 3px solid rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        animation: pulseRing 2s ease-out infinite;
+    }
+
+    .logo-pulse-ring.delay-1 {
+        animation-delay: 0.5s;
+    }
+
+    .logo-pulse-ring.delay-2 {
+        animation-delay: 1s;
+    }
+
+    @keyframes pulseRing {
+        0% {
+            transform: scale(0.6);
             opacity: 1;
         }
-        50% {
-            transform: scale(1.1);
-            opacity: 0.8;
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
         }
+    }
+
+    /* Loading Text with Dots */
+    .loading-text-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        margin-bottom: 20px;
     }
 
     .loading-text {
-        font-size: 1.25rem;
-        font-weight: 600;
+        font-size: 1.4rem;
+        font-weight: 700;
         color: white;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        letter-spacing: 0.5px;
+    }
+
+    .loading-dots {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        padding-top: 5px;
+    }
+
+    .loading-dots .dot {
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        animation: dotBounce 1.4s infinite ease-in-out both;
+    }
+
+    .loading-dots .dot:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots .dot:nth-child(2) { animation-delay: -0.16s; }
+    .loading-dots .dot:nth-child(3) { animation-delay: 0s; }
+
+    @keyframes dotBounce {
+        0%, 80%, 100% {
+            transform: scale(0.6);
+            opacity: 0.5;
+        }
+        40% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Progress Bar */
+    .loading-progress-container {
+        width: 280px;
+        margin: 0 auto 20px;
+    }
+
+    .loading-progress-bar {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .loading-progress-fill {
+        height: 100%;
+        width: 30%;
+        background: linear-gradient(90deg, #fff, #ffd700, #fff);
+        background-size: 200% 100%;
+        border-radius: 10px;
+        animation: progressMove 1.5s ease-in-out infinite, progressShine 1.5s ease-in-out infinite;
+    }
+
+    @keyframes progressMove {
+        0% { width: 10%; margin-left: 0; }
+        50% { width: 60%; margin-left: 20%; }
+        100% { width: 10%; margin-left: 90%; }
+    }
+
+    @keyframes progressShine {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
     }
 
     .loading-subtext {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        font-weight: 500;
+        display: block;
+        animation: fadeInOut 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
     }
 
     /* Categories Scroll */
