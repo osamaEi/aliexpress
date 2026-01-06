@@ -1616,7 +1616,7 @@ background: rgba(255, 255, 255, 0.85);
     .search-loading-title {
         font-size: 1.5rem;
         font-weight: 700;
-        color: white;
+        color: #561C04;
         margin: 0;
         text-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
         letter-spacing: 0.5px;
