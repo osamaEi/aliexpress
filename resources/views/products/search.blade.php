@@ -1499,8 +1499,9 @@
         bottom: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
-        background: linear-gradient(135deg, rgba(86, 28, 4, 0.98) 0%, rgba(229, 99, 0, 0.96) 50%, rgba(86, 28, 4, 0.98) 100%);
-        background-size: 200% 200%;
+background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);        
         animation: searchGradientShift 4s ease infinite;
         z-index: 99999 !important;
         display: none;
