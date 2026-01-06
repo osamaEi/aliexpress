@@ -8,23 +8,7 @@
         <p class="text-muted">{{ __('messages.welcome_seller_panel') }}</p>
     </div>
 
-    <!-- Dashboard Banner -->
-    @if(setting_image('seller_dashboard_banner'))
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="position-relative" style="border-radius: 12px; overflow: hidden; height: 280px; background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);">
-                    <!-- Banner Image -->
-                    <img src="{{ setting_image('seller_dashboard_banner') }}" alt="Seller Dashboard Banner" class="img-fluid w-100 h-100" style="object-fit: cover; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-                    
-                    <!-- Overlay Gradient -->
-                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(86, 28, 4, 0.6) 0%, rgba(122, 50, 6, 0.4) 100%);"></div>
-                    
-                    <!-- Content -->
-                   
-                </div>
-            </div>
-        </div>
-    @endif
+
 
     <!-- Subscription Countdown Timer -->
     @php
@@ -128,7 +112,23 @@
         @endif
     @endif
     <!-- /Subscription Countdown Timer -->
-
+    <!-- Dashboard Banner -->
+    @if(setting_image('seller_dashboard_banner'))
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="position-relative" style="border-radius: 12px; overflow: hidden; height: 280px; background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);">
+                    <!-- Banner Image -->
+                    <img src="{{ setting_image('seller_dashboard_banner') }}" alt="Seller Dashboard Banner" class="img-fluid w-100 h-100" style="object-fit: cover; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                    
+                    <!-- Overlay Gradient -->
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(86, 28, 4, 0.6) 0%, rgba(122, 50, 6, 0.4) 100%);"></div>
+                    
+                    <!-- Content -->
+                   
+                </div>
+            </div>
+        </div>
+    @endif
     <!-- Promotional Banner (Under Subscription) -->
     @if(setting_image('seller_promo_banner'))
         <div class="row mb-4">
