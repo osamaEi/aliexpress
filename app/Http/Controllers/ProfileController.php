@@ -33,7 +33,20 @@ class ProfileController extends Controller
             'phone_code' => ['nullable', 'string', 'max:10'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:2'],
-            'withdrawal_method' => ['nullable', 'string', 'in:paypal,e_wallet,uae_bank'],
+            // Withdrawal method fields
+            'withdrawal_method' => ['nullable', 'string', 'in:paypal,bank_transfer,mobile_wallet'],
+            // PayPal fields
+            'paypal_email' => ['nullable', 'required_if:withdrawal_method,paypal', 'email', 'max:255'],
+            // Bank transfer fields
+            'bank_name' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:255'],
+            'bank_account_name' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:255'],
+            'bank_account_number' => ['nullable', 'string', 'max:50'],
+            'bank_iban' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:50'],
+            'bank_swift_code' => ['nullable', 'string', 'max:20'],
+            // Mobile wallet fields
+            'wallet_provider' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:50'],
+            'wallet_phone_number' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:20'],
+            'wallet_holder_name' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:255'],
             'marketing_code' => ['nullable', 'string', 'max:100'],
         ]);
 

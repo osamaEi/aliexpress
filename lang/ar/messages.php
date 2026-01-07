@@ -80,7 +80,8 @@ return [
     // Sidebar
     'product_management' => 'إدارة المنتجات',
     'order_management' => 'إدارة الطلبات',
-    'all_categories' => 'كل الفئات',
+    'all_categories' => 'جميع الفئات',
+    'category_assignment' => 'تعيين الفئات',
     'my_assigned_products' => 'منتجاتي المخصصة',
     'all_orders' => 'كل الطلبات',
     'pending_orders' => 'الطلبات قيد الانتظار',
@@ -535,7 +536,26 @@ return [
     'cancel_and_go_back' => 'إلغاء والعودة',
     'processing_payment' => 'جاري معالجة الدفع',
 
+    // Withdrawal Method Settings
+    'withdrawal_method_settings' => 'إعدادات طريقة السحب',
+    'withdrawal_method_description' => 'حدد طريقة السحب المفضلة لديك وأدخل بياناتها. سيتم استخدام هذه البيانات عند طلب سحب الأرباح.',
+    'withdrawal_method' => 'طريقة السحب',
+    'select_withdrawal_method' => 'اختر طريقة السحب',
+    'paypal' => 'باي بال',
+    'bank_transfer' => 'تحويل بنكي',
+    'mobile_wallet' => 'محفظة إلكترونية',
+    'account_holder_name' => 'اسم صاحب الحساب',
+    'iban' => 'رقم الآيبان (IBAN)',
+    'swift_code' => 'رمز السويفت (SWIFT)',
+    'wallet_provider' => 'مزود المحفظة',
+    'select_wallet_provider' => 'اختر مزود المحفظة',
+    'wallet_phone_number' => 'رقم هاتف المحفظة',
+    'wallet_holder_name' => 'اسم صاحب المحفظة',
+    'other' => 'أخرى',
+    'no_withdrawal_method_set' => 'لم يتم تحديد طريقة سحب بعد. يرجى من البائع إعداد طريقة السحب من صفحة الملف الشخصي.',
+
     // Wallet
+    'financial_section' => 'القسم المالي',
     'payment_wallet' => 'الدفع والمحفظة',
     'my_wallet' => 'محفظتي',
     'wallet_overview' => 'نظرة عامة على المحفظة',

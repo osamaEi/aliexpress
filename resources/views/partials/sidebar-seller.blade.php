@@ -46,23 +46,22 @@
         </li> -->
 
         <!-- Categories -->
-        <li class="menu-item {{ request()->routeIs('categories.*') ? 'open' : '' }}">
+        <li class="menu-item {{ request()->routeIs('categories.*') || request()->routeIs('seller.request-category-assignment') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-price-tag-3-line"></i>
                 <div>{{ __('messages.categories') }}</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('seller.request-category-assignment') ? 'active' : '' }}">
+                    <a href="{{ route('seller.request-category-assignment') }}" class="menu-link">
+                        <div>{{ __('messages.category_assignment') }}</div>
+                    </a>
+                </li>
                 <li class="menu-item {{ request()->routeIs('categories.index') ? 'active' : '' }}">
                     <a href="{{ route('categories.index') }}" class="menu-link">
                         <div>{{ __('messages.all_categories') }}</div>
                     </a>
                 </li>
-
-                {{-- <li class="menu-item {{ request()->routeIs('categories.create') ? 'active' : '' }}">
-                    <a href="{{ route('categories.create') }}" class="menu-link">
-                        <div>{{ __('messages.add_category') }}</div>
-                    </a>
-                </li> --}}
             </ul>
         </li>
 
@@ -87,14 +86,6 @@
 
 
             </ul>
-        </li>
-
-        <!-- Profit Settings -->
-        <li class="menu-item {{ request()->routeIs('seller.profit-settings.*') ? 'active' : '' }}">
-            <a href="{{ route('seller.profit-settings.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ri-percent-line"></i>
-                <div>{{ __('messages.profit_settings') }}</div>
-            </a>
         </li>
 
         <!-- Orders Section -->
@@ -131,9 +122,17 @@
             </a>
         </li> -->
 
-        <!-- Payment & Wallet Section -->
+        <!-- Financial Section -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text">{{ __('messages.payment_wallet') }}</span>
+            <span class="menu-header-text">{{ __('messages.financial_section') }}</span>
+        </li>
+
+        <!-- Profit Settings -->
+        <li class="menu-item {{ request()->routeIs('seller.profit-settings.*') ? 'active' : '' }}">
+            <a href="{{ route('seller.profit-settings.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-percent-line"></i>
+                <div>{{ __('messages.profit_settings') }}</div>
+            </a>
         </li>
 
         <!-- Wallet -->

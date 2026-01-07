@@ -710,6 +710,122 @@
                     @endif
                     @endif
 
+                    <!-- Withdrawal Method Section -->
+                    @if($user->user_type == 'seller')
+                    <div class="col-12 mt-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="ri-bank-card-line me-1"></i>{{ __('messages.withdrawal_method_settings') }}
+                        </h6>
+                        <p class="text-muted small mb-3">{{ __('messages.withdrawal_method_description') }}</p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="withdrawal_method" class="form-label">{{ __('messages.withdrawal_method') }} <span class="text-danger">*</span></label>
+                        <select class="form-select @error('withdrawal_method') is-invalid @enderror" id="withdrawal_method" name="withdrawal_method">
+                            <option value="">{{ __('messages.select_withdrawal_method') }}</option>
+                            <option value="paypal" {{ old('withdrawal_method', $user->withdrawal_method) == 'paypal' ? 'selected' : '' }}>{{ __('messages.paypal') }}</option>
+                            <option value="bank_transfer" {{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? 'selected' : '' }}>{{ __('messages.bank_transfer') }}</option>
+                            <option value="mobile_wallet" {{ old('withdrawal_method', $user->withdrawal_method) == 'mobile_wallet' ? 'selected' : '' }}>{{ __('messages.mobile_wallet') }}</option>
+                        </select>
+                        @error('withdrawal_method')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- PayPal Fields -->
+                    <div class="col-md-6 withdrawal-fields paypal-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'paypal' ? '' : 'display: none;' }}">
+                        <label for="paypal_email" class="form-label">{{ __('messages.paypal_email') }} <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control @error('paypal_email') is-invalid @enderror"
+                               id="paypal_email" name="paypal_email" value="{{ old('paypal_email', $user->paypal_email) }}"
+                               placeholder="example@email.com">
+                        @error('paypal_email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Bank Transfer Fields -->
+                    <div class="col-md-6 withdrawal-fields bank-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? '' : 'display: none;' }}">
+                        <label for="bank_name" class="form-label">{{ __('messages.bank_name') }} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('bank_name') is-invalid @enderror"
+                               id="bank_name" name="bank_name" value="{{ old('bank_name', $user->bank_name) }}">
+                        @error('bank_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 withdrawal-fields bank-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? '' : 'display: none;' }}">
+                        <label for="bank_account_name" class="form-label">{{ __('messages.account_holder_name') }} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('bank_account_name') is-invalid @enderror"
+                               id="bank_account_name" name="bank_account_name" value="{{ old('bank_account_name', $user->bank_account_name) }}">
+                        @error('bank_account_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 withdrawal-fields bank-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? '' : 'display: none;' }}">
+                        <label for="bank_account_number" class="form-label">{{ __('messages.account_number') }}</label>
+                        <input type="text" class="form-control @error('bank_account_number') is-invalid @enderror"
+                               id="bank_account_number" name="bank_account_number" value="{{ old('bank_account_number', $user->bank_account_number) }}">
+                        @error('bank_account_number')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 withdrawal-fields bank-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? '' : 'display: none;' }}">
+                        <label for="bank_iban" class="form-label">{{ __('messages.iban') }} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('bank_iban') is-invalid @enderror"
+                               id="bank_iban" name="bank_iban" value="{{ old('bank_iban', $user->bank_iban) }}"
+                               placeholder="AE000000000000000000000">
+                        @error('bank_iban')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 withdrawal-fields bank-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? '' : 'display: none;' }}">
+                        <label for="bank_swift_code" class="form-label">{{ __('messages.swift_code') }}</label>
+                        <input type="text" class="form-control @error('bank_swift_code') is-invalid @enderror"
+                               id="bank_swift_code" name="bank_swift_code" value="{{ old('bank_swift_code', $user->bank_swift_code) }}">
+                        @error('bank_swift_code')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Mobile Wallet Fields -->
+                    <div class="col-md-6 withdrawal-fields wallet-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'mobile_wallet' ? '' : 'display: none;' }}">
+                        <label for="wallet_provider" class="form-label">{{ __('messages.wallet_provider') }} <span class="text-danger">*</span></label>
+                        <select class="form-select @error('wallet_provider') is-invalid @enderror" id="wallet_provider" name="wallet_provider">
+                            <option value="">{{ __('messages.select_wallet_provider') }}</option>
+                            <option value="vodafone_cash" {{ old('wallet_provider', $user->wallet_provider) == 'vodafone_cash' ? 'selected' : '' }}>Vodafone Cash</option>
+                            <option value="orange_money" {{ old('wallet_provider', $user->wallet_provider) == 'orange_money' ? 'selected' : '' }}>Orange Money</option>
+                            <option value="etisalat_cash" {{ old('wallet_provider', $user->wallet_provider) == 'etisalat_cash' ? 'selected' : '' }}>Etisalat Cash</option>
+                            <option value="stc_pay" {{ old('wallet_provider', $user->wallet_provider) == 'stc_pay' ? 'selected' : '' }}>STC Pay</option>
+                            <option value="apple_pay" {{ old('wallet_provider', $user->wallet_provider) == 'apple_pay' ? 'selected' : '' }}>Apple Pay</option>
+                            <option value="other" {{ old('wallet_provider', $user->wallet_provider) == 'other' ? 'selected' : '' }}>{{ __('messages.other') }}</option>
+                        </select>
+                        @error('wallet_provider')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 withdrawal-fields wallet-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'mobile_wallet' ? '' : 'display: none;' }}">
+                        <label for="wallet_phone_number" class="form-label">{{ __('messages.wallet_phone_number') }} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('wallet_phone_number') is-invalid @enderror"
+                               id="wallet_phone_number" name="wallet_phone_number" value="{{ old('wallet_phone_number', $user->wallet_phone_number) }}">
+                        @error('wallet_phone_number')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 withdrawal-fields wallet-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'mobile_wallet' ? '' : 'display: none;' }}">
+                        <label for="wallet_holder_name" class="form-label">{{ __('messages.wallet_holder_name') }} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('wallet_holder_name') is-invalid @enderror"
+                               id="wallet_holder_name" name="wallet_holder_name" value="{{ old('wallet_holder_name', $user->wallet_holder_name) }}">
+                        @error('wallet_holder_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    @endif
+
                     <!-- Financial Information -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
@@ -718,9 +834,9 @@
                     </div>
 
                     <div class="col-md-6">
-                        <a href="https://i.selaa.ae/wallet/withdrawal/create" class="btn btn-primary w-100 h-100 d-flex align-items-center justify-content-center" style="min-height: 40px;">
-                            <i class="ri-money-dollar-circle-line me-2"></i>
-                            {{ __('messages.withdraw') }}
+                        <a href="{{ route('wallet.index') }}" class="btn btn-primary w-100 h-100 d-flex align-items-center justify-content-center" style="min-height: 40px;">
+                            <i class="ri-wallet-3-line me-2"></i>
+                            {{ __('messages.my_wallet') }}
                         </a>
                     </div>
 
@@ -1063,6 +1179,39 @@
                 currentOption.classList.add('selected');
             }
         }
+    }
+
+    // Withdrawal Method Toggle
+    const withdrawalMethodSelect = document.getElementById('withdrawal_method');
+    if (withdrawalMethodSelect) {
+        function toggleWithdrawalFields() {
+            const method = withdrawalMethodSelect.value;
+
+            // Hide all withdrawal fields
+            document.querySelectorAll('.withdrawal-fields').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            // Show relevant fields based on selected method
+            if (method === 'paypal') {
+                document.querySelectorAll('.paypal-fields').forEach(el => {
+                    el.style.display = '';
+                });
+            } else if (method === 'bank_transfer') {
+                document.querySelectorAll('.bank-fields').forEach(el => {
+                    el.style.display = '';
+                });
+            } else if (method === 'mobile_wallet') {
+                document.querySelectorAll('.wallet-fields').forEach(el => {
+                    el.style.display = '';
+                });
+            }
+        }
+
+        withdrawalMethodSelect.addEventListener('change', toggleWithdrawalFields);
+
+        // Initialize on page load
+        toggleWithdrawalFields();
     }
 </script>
 @endsection

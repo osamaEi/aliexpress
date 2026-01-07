@@ -57,6 +57,75 @@
                 </div>
             </div>
 
+            <!-- Withdrawal Method Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="ri-bank-card-line me-2"></i>{{ __('messages.withdrawal_method_settings') }}</h5>
+                </div>
+                <div class="card-body">
+                    @if($seller->withdrawal_method)
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">{{ __('messages.withdrawal_method') }}:</div>
+                            <div class="col-md-8">
+                                @if($seller->withdrawal_method == 'paypal')
+                                    <span class="badge bg-info"><i class="ri-paypal-line me-1"></i>{{ __('messages.paypal') }}</span>
+                                @elseif($seller->withdrawal_method == 'bank_transfer')
+                                    <span class="badge bg-success"><i class="ri-bank-line me-1"></i>{{ __('messages.bank_transfer') }}</span>
+                                @elseif($seller->withdrawal_method == 'mobile_wallet')
+                                    <span class="badge bg-warning"><i class="ri-smartphone-line me-1"></i>{{ __('messages.mobile_wallet') }}</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        @if($seller->withdrawal_method == 'paypal')
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.paypal_email') }}:</div>
+                                <div class="col-md-8">{{ $seller->paypal_email ?: '-' }}</div>
+                            </div>
+                        @elseif($seller->withdrawal_method == 'bank_transfer')
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.bank_name') }}:</div>
+                                <div class="col-md-8">{{ $seller->bank_name ?: '-' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.account_holder_name') }}:</div>
+                                <div class="col-md-8">{{ $seller->bank_account_name ?: '-' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.account_number') }}:</div>
+                                <div class="col-md-8">{{ $seller->bank_account_number ?: '-' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.iban') }}:</div>
+                                <div class="col-md-8">{{ $seller->bank_iban ?: '-' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.swift_code') }}:</div>
+                                <div class="col-md-8">{{ $seller->bank_swift_code ?: '-' }}</div>
+                            </div>
+                        @elseif($seller->withdrawal_method == 'mobile_wallet')
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.wallet_provider') }}:</div>
+                                <div class="col-md-8">{{ $seller->wallet_provider ?: '-' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.wallet_phone_number') }}:</div>
+                                <div class="col-md-8">{{ $seller->wallet_phone_number ?: '-' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4 fw-bold">{{ __('messages.wallet_holder_name') }}:</div>
+                                <div class="col-md-8">{{ $seller->wallet_holder_name ?: '-' }}</div>
+                            </div>
+                        @endif
+                    @else
+                        <div class="alert alert-warning mb-0">
+                            <i class="ri-error-warning-line me-2"></i>
+                            {{ __('messages.no_withdrawal_method_set') }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             <!-- Wallet Info -->
             @if($seller->wallet)
             <div class="card mb-4">
