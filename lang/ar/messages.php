@@ -567,6 +567,8 @@ return [
     'withdrawal' => 'سحب',
     'transfer' => 'تحويل',
     'transaction_history' => 'سجل المعاملات',
+    'transactions' => 'المعاملات',
+    'type' => 'النوع',
     'recent_transactions' => 'المعاملات الأخيرة',
     'credit' => 'إضافة',
     'debit' => 'خصم',

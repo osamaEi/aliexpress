@@ -583,6 +583,8 @@ return [
     'withdrawal' => 'Withdrawal',
     'transfer' => 'Transfer',
     'transaction_history' => 'Transaction History',
+    'transactions' => 'Transactions',
+    'type' => 'Type',
     'recent_transactions' => 'Recent Transactions',
     'credit' => 'Credit',
     'debit' => 'Debit',

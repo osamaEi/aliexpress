@@ -711,7 +711,7 @@
                     @endif
 
                     <!-- Withdrawal Method Section -->
-                    @if($user->user_type == 'seller')
+                    @if($user->user_type == 'seller' || $user->user_type == 'distributor')
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
                             <i class="ri-bank-card-line me-1"></i>{{ __('messages.withdrawal_method_settings') }}
@@ -833,12 +833,7 @@
                         </h6>
                     </div>
 
-                    <div class="col-md-6">
-                        <a href="{{ route('wallet.index') }}" class="btn btn-primary w-100 h-100 d-flex align-items-center justify-content-center" style="min-height: 40px;">
-                            <i class="ri-wallet-3-line me-2"></i>
-                            {{ __('messages.my_wallet') }}
-                        </a>
-                    </div>
+                
 
                     @if(auth()->user()->hasActiveSubscription())
                     <div class="col-md-6">
