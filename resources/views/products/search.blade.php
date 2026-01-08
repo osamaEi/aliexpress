@@ -297,6 +297,19 @@
                         @endforeach
                     @endif
                 </div>
+
+                <!-- Distributors Section (shown under subcategories for non-China countries) -->
+                <div id="subcategoryDistributors" class="subcategory-distributors-section" style="display: none;">
+                    <div class="distributors-section-header">
+                        <h6 class="mb-0">
+                            <i class="ri-store-2-line me-2"></i>
+                            <span id="distributorsSectionTitle">{{ app()->getLocale() == 'ar' ? 'اختر المتجر' : 'Select Store' }}</span>
+                        </h6>
+                    </div>
+                    <div class="distributors-grid" id="subcategoryDistributorsList">
+                        <!-- Distributors will be loaded here dynamically -->
+                    </div>
+                </div>
             </div>
 
             <!-- Search Form -->
@@ -841,6 +854,9 @@
         }
     }
 
+    // Track selected subcategory
+    let selectedSubcategoryId = null;
+
     // Handle category/subcategory selection based on selected country source
     function handleCategorySelection(categoryId) {
         // If no country source selected, prompt user to select one
@@ -849,10 +865,15 @@
             return;
         }
 
+        // Mark subcategory as active
+        document.querySelectorAll('.subcategory-item').forEach(item => item.classList.remove('active'));
+        event.currentTarget?.classList.add('active');
+
+        selectedSubcategoryId = categoryId;
         document.getElementById('categoryIdInput').value = categoryId;
 
         if (selectedCountrySourceCode === 'CN') {
-            // China selected - fetch from AliExpress
+            // China selected - fetch from AliExpress directly
             showLoading();
             document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
             document.getElementById('shipFromInput').value = 'CN';
@@ -861,9 +882,69 @@
             document.getElementById('distributorIdInput').value = '';
             document.getElementById('searchForm').submit();
         } else {
-            // Other country selected - show distributors for this category in this country
-            showDistributorsForCategory(selectedCountrySourceCode, categoryId);
+            // Other country selected - show distributors under subcategories
+            showDistributorsUnderSubcategory(selectedCountrySourceCode, categoryId);
         }
+    }
+
+    // Show distributors under subcategory section
+    function showDistributorsUnderSubcategory(countryCode, categoryId) {
+        const distributorsSection = document.getElementById('subcategoryDistributors');
+        const distributorsList = document.getElementById('subcategoryDistributorsList');
+        const titleEl = document.getElementById('distributorsSectionTitle');
+
+        // Get country info
+        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
+        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+
+        // Update title
+        if (titleEl) {
+            titleEl.textContent = isArabic ? `متاجر ${countryName}` : `${countryName} Stores`;
+        }
+
+        // Get distributors for this country
+        const distributors = distributorsByCountry[countryCode] || [];
+
+        // Build distributors grid HTML
+        let html = '';
+        if (distributors.length === 0) {
+            html = `<div class="text-center py-3 w-100">
+                <p class="text-muted mb-0">${isArabic ? 'لا يوجد متاجر حالياً' : 'No stores available'}</p>
+            </div>`;
+        } else {
+            // Add "All" option first
+            html = `<div class="distributor-grid-item" onclick="viewDistributorProductsWithCategory(null, '${countryCode}', '${categoryId}')">
+                <div class="distributor-grid-avatar all-avatar">
+                    <i class="ri-apps-line"></i>
+                </div>
+                <span class="distributor-grid-name">${isArabic ? 'كل المتاجر' : 'All Stores'}</span>
+            </div>`;
+
+            distributors.forEach(dist => {
+                const avatar = dist.avatar ? `{{ asset('storage') }}/${dist.avatar}` : null;
+                const name = dist.store_name || dist.name;
+                html += `
+                    <div class="distributor-grid-item" onclick="viewDistributorProductsWithCategory(${dist.id}, '${countryCode}', '${categoryId}')">
+                        <div class="distributor-grid-avatar">
+                            ${avatar
+                                ? `<img src="${avatar}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                                : ''
+                            }
+                            <div class="avatar-placeholder" ${avatar ? 'style="display:none;"' : ''}>
+                                <i class="ri-store-2-line"></i>
+                            </div>
+                        </div>
+                        <span class="distributor-grid-name">${name}</span>
+                    </div>
+                `;
+            });
+        }
+
+        distributorsList.innerHTML = html;
+
+        // Show section with animation
+        distributorsSection.style.display = 'block';
+        distributorsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     // Show distributors for a specific category in a specific country
