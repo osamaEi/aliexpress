@@ -146,52 +146,10 @@
                 </div>
                 @endif
 
-                <!-- Distributors Dropdown (shown below country cards) -->
-                @php
-                    $showDistributorDropdown = isset($source_country) && !empty($source_country);
-                @endphp
-                <div id="distributorsDropdown" class="distributors-dropdown" style="display: {{ $showDistributorDropdown ? 'block' : 'none' }};">
-                    <div class="distributors-dropdown-header">
-                        <span id="dropdownCountryName">
-                            @if($showDistributorDropdown)
-                                @php
-                                    $defaultFlag = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><rect fill="#ccc" width="640" height="480"/></svg>';
-                                    $dropdownCountryInfo = $countryNames[$source_country] ?? ['ar' => $source_country, 'en' => $source_country, 'flag' => $defaultFlag];
-                                @endphp
-                                <span class="header-flag">{!! $dropdownCountryInfo['flag'] !!}</span> {{ app()->getLocale() == 'ar' ? 'متاجر ' . $dropdownCountryInfo['ar'] : $dropdownCountryInfo['en'] . ' Stores' }}
-                            @endif
-                        </span>
-                        <button type="button" class="btn btn-sm btn-link text-muted p-0" onclick="hideDistributors()">
-                            <i class="ri-close-line"></i>
-                        </button>
-                    </div>
-                    <div id="distributorsList" class="distributors-inline-list">
-                        @if($showDistributorDropdown && isset($distributorsByCountry[$source_country]))
-                            @php
-                                $currentDistributorId = request('distributor_id');
-                            @endphp
-                            <!-- All Products from this country -->
-                            <div class="distributor-card {{ empty($currentDistributorId) ? 'active' : '' }}" onclick="viewAllCountryProducts('{{ $source_country }}')">
-                                <div class="distributor-card-avatar all-avatar">
-                                    <i class="ri-apps-line"></i>
-                                </div>
-                                <span class="distributor-card-name">{{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}</span>
-                            </div>
-                            @foreach($distributorsByCountry[$source_country] as $dist)
-                                <div class="distributor-card {{ $currentDistributorId == $dist['id'] ? 'active' : '' }}" onclick="viewDistributorProducts({{ $dist['id'] }}, '{{ $source_country }}')">
-                                    <div class="distributor-card-avatar">
-                                        @if(!empty($dist['avatar']))
-                                            <img src="{{ asset('storage/' . $dist['avatar']) }}" alt="{{ $dist['store_name'] ?? $dist['name'] }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        @endif
-                                        <div class="avatar-placeholder" @if(!empty($dist['avatar'])) style="display:none;" @endif>
-                                            <i class="ri-store-2-line"></i>
-                                        </div>
-                                    </div>
-                                    <span class="distributor-card-name">{{ $dist['store_name'] ?? $dist['name'] }}</span>
-                                </div>
-                            @endforeach
-                        @endif
-                    </div>
+                <!-- Old Distributors Dropdown - Hidden, now using subcategory distributors section -->
+                <div id="distributorsDropdown" class="distributors-dropdown" style="display: none;">
+                    <div id="dropdownCountryName"></div>
+                    <div id="distributorsList"></div>
                 </div>
 
                 <!-- China Stores Dropdown (shown below country cards when China is clicked) -->
@@ -947,63 +905,6 @@
         distributorsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    // Show distributors for a specific category in a specific country
-    function showDistributorsForCategory(countryCode, categoryId) {
-        const dropdown = document.getElementById('distributorsDropdown');
-
-        // Get country info
-        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
-        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
-        const flagSvg = countrySvgFlags[countryCode] || defaultSvgFlag;
-
-        // Update dropdown header
-        document.getElementById('dropdownCountryName').innerHTML =
-            `<span class="header-flag">${flagSvg}</span> ${isArabic ? 'موزعين ' + countryName : countryName + ' Distributors'}`;
-
-        // Get distributors for this country
-        const distributors = distributorsByCountry[countryCode] || [];
-
-        // Build distributors list HTML
-        let html = '';
-        if (distributors.length === 0) {
-            html = `<div class="text-center py-3">
-                <p class="text-muted mb-0">${isArabic ? 'لا يوجد موزعين حالياً في هذا البلد' : 'No distributors available in this country'}</p>
-            </div>`;
-        } else {
-            // Add "All" option first
-            html = `<div class="distributor-card" onclick="viewDistributorProductsWithCategory(null, '${countryCode}', '${categoryId}')">
-                <div class="distributor-card-avatar all-avatar">
-                    <i class="ri-apps-line"></i>
-                </div>
-                <span class="distributor-card-name">${isArabic ? 'الكل' : 'All'}</span>
-            </div>`;
-
-            distributors.forEach(dist => {
-                const avatar = dist.avatar ? `{{ asset('storage') }}/${dist.avatar}` : null;
-                const name = dist.store_name || dist.name;
-                html += `
-                    <div class="distributor-card" onclick="viewDistributorProductsWithCategory(${dist.id}, '${countryCode}', '${categoryId}')">
-                        <div class="distributor-card-avatar">
-                            ${avatar
-                                ? `<img src="${avatar}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
-                                : ''
-                            }
-                            <div class="avatar-placeholder" ${avatar ? 'style="display:none;"' : ''}>
-                                <i class="ri-store-2-line"></i>
-                            </div>
-                        </div>
-                        <span class="distributor-card-name">${name}</span>
-                    </div>
-                `;
-            });
-        }
-
-        document.getElementById('distributorsList').innerHTML = html;
-
-        // Show dropdown
-        dropdown.style.display = 'block';
-    }
-
     // View distributor products with category filter
     function viewDistributorProductsWithCategory(distributorId, countryCode, categoryId) {
         const keywordInput = document.getElementById('keyword');
@@ -1112,6 +1013,12 @@
         const container = document.getElementById('subcategoriesContainer');
         const grid = document.getElementById('subcategoriesGrid');
         const nameSpan = document.getElementById('selectedCategoryName');
+
+        // Hide distributors section when changing main category
+        const distributorsSection = document.getElementById('subcategoryDistributors');
+        if (distributorsSection) {
+            distributorsSection.style.display = 'none';
+        }
 
         nameSpan.textContent = isArabic && category.name_ar ? category.name_ar : category.name;
 
