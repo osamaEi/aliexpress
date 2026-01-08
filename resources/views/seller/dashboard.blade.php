@@ -118,10 +118,10 @@
             <div class="col-12">
                 <div class="position-relative" style="border-radius: 12px; overflow: contain; height: 280px;">
                     <!-- Banner Image -->
-                    <img src="{{ setting_image('seller_dashboard_banner') }}" alt="Seller Dashboard Banner" class="img-fluid w-100 h-100" style="object-fit: contain; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                    <img src="{{ setting_image('seller_dashboard_banner') }}" alt="Seller Dashboard Banner" class="img-fluid w-100 h-100" style="object-fit: cover; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
                     
                     <!-- Overlay Gradient -->
-                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; "></div>
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
                     
                     <!-- Content -->
                    
