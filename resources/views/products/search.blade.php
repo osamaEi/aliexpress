@@ -1,5 +1,5 @@
 @extends('dashboard')
- 
+  
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card mb-6 shadow-sm border-0">
@@ -37,53 +37,11 @@
                 </div>
             @endif
 
-            <!-- Main Categories Horizontal Scroll -->
-            @if(isset($categories) && count($categories) > 0)
-            <div class="categories-scroll-container mb-4">
-                <div class="d-flex align-items-center mb-2">
-                    <button class="btn btn-sm btn-light rounded-circle me-2 scroll-btn scroll-left" onclick="scrollCategories('left')">
-                        <i class="ri-arrow-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }}-s-line"></i>
-                    </button>
-                    <div class="categories-scroll flex-grow-1" id="categoriesScroll">
-                        @foreach($categories as $category)
-                            @php
-                                // Check if this main category is active (either directly selected or has active child)
-                                $isMainCatActive = request('category_id') == $category->aliexpress_category_id;
-                                if (!$isMainCatActive && $category->children) {
-                                    foreach ($category->children as $child) {
-                                        if ($child->aliexpress_category_id == request('category_id') || $child->id == request('category_id')) {
-                                            $isMainCatActive = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            @endphp
-                            <div class="category-item {{ $isMainCatActive ? 'active' : '' }}"
-                                 onclick="selectMainCategory('{{ $category->aliexpress_category_id }}')"
-                                 data-category-id="{{ $category->aliexpress_category_id }}">
-                                <div class="category-icon">
-                                    @if($category->photo)
-                                        <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name }}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        <i class="ri-folder-line" style="display: none;"></i>
-                                    @else
-                                        <i class="ri-folder-line"></i>
-                                    @endif
-                                </div>
-                                <span class="category-name">{{ app()->getLocale() == 'ar' && $category->name_ar ? $category->name_ar : $category->name }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                    <button class="btn btn-sm btn-light rounded-circle ms-2 scroll-btn scroll-right" onclick="scrollCategories('right')">
-                        <i class="ri-arrow-{{ app()->getLocale() == 'ar' ? 'left' : 'right' }}-s-line"></i>
-                    </button>
-                </div>
-            </div>
-            @endif
-
-            <!-- Product Source Cards (Dynamic from Distributors + China) -->
+            <!-- Product Source Cards (Dynamic from Distributors + China) - FIRST STEP -->
             @php
                 $isChinaActive = request('ship_from') == 'CN';
                 $activeCountryCode = request('country_code') ?? (isset($source_country) ? $source_country : null);
+                $hasSelectedSource = $isChinaActive || !empty($activeCountryCode);
 
                 // Country names mapping with SVG flags
                 $countryFlags = [
@@ -123,7 +81,7 @@
                                 $countryInfo = $countryNames[$countryCode] ?? ['ar' => $countryCode, 'en' => $countryCode, 'flag' => $defaultFlag];
                             @endphp
                             <div class="source-card-mini {{ $isActive ? 'active' : '' }}"
-                                 onclick="toggleDistributors('{{ $countryCode }}')"
+                                 onclick="selectCountrySource('{{ $countryCode }}')"
                                  data-source="{{ $countryCode }}">
                                 <span class="country-flag">{!! $countryInfo['flag'] !!}</span>
                                 <span class="country-name">{{ app()->getLocale() == 'ar' ? $countryInfo['ar'] : $countryInfo['en'] }}</span>
@@ -133,7 +91,7 @@
 
                     <!-- China Card - Always Show -->
                     <div class="source-card-mini china {{ $isChinaActive ? 'active' : '' }}"
-                         onclick="selectSource('china')"
+                         onclick="selectCountrySource('CN')"
                          data-source="china">
                         <span class="country-flag">{!! $countryFlags['CN'] !!}</span>
                         <span class="country-name">{{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
@@ -721,6 +679,54 @@
 
     const isArabic = '{{ app()->getLocale() }}' === 'ar';
 
+    // Track currently selected country source (CN for China, other country codes for distributors)
+    let selectedCountrySourceCode = null;
+
+    // Select country source - shows categories first, then user navigates to subcategories
+    function selectCountrySource(countryCode) {
+        // Remove active from all country cards
+        document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
+
+        // Add active to clicked card
+        if (countryCode === 'CN') {
+            document.querySelector('[data-source="china"]')?.classList.add('active');
+        } else {
+            document.querySelector(`[data-source="${countryCode}"]`)?.classList.add('active');
+        }
+
+        // Store the selected country
+        selectedCountrySourceCode = countryCode;
+
+        // Hide all dropdowns
+        hideDistributors();
+        hideChinaStores();
+
+        // Clear previous subcategory selection
+        document.getElementById('subcategoriesContainer').style.display = 'none';
+
+        // Clear previous category selection
+        document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
+
+        // Show message to select a category
+        const categoriesContainer = document.getElementById('categoriesScroll');
+        if (categoriesContainer) {
+            // Scroll to categories section
+            categoriesContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Update form action based on source
+        if (countryCode === 'CN') {
+            document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
+            document.getElementById('shipFromInput').value = 'CN';
+            document.getElementById('countryCodeInput').value = '';
+            document.getElementById('distributorIdInput').value = '';
+        } else {
+            document.getElementById('searchForm').action = '{{ route("products.search-distributor") }}';
+            document.getElementById('shipFromInput').value = '';
+            document.getElementById('countryCodeInput').value = countryCode;
+        }
+    }
+
     // Show loading overlay
     function showLoading() {
         const loader = document.getElementById('loadingSpinner');
@@ -756,24 +762,116 @@
         document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
         document.querySelector(`[data-category-id="${categoryId}"]`)?.classList.add('active');
 
-        // Clear source cards selection
-        document.querySelectorAll('.source-card').forEach(card => card.classList.remove('active'));
-
         const category = categoryData[categoryId];
         if (category && category.children && category.children.length > 0) {
-            // Show subcategories
+            // Show subcategories - this will allow user to click on subcategory
             showSubcategories(categoryId, category);
         } else {
-            // No subcategories, search directly - reset to AliExpress search
+            // No subcategories, proceed based on selected country source
+            handleCategorySelection(categoryId);
+        }
+    }
+
+    // Handle category/subcategory selection based on selected country source
+    function handleCategorySelection(categoryId) {
+        // If no country source selected, prompt user to select one
+        if (!selectedCountrySourceCode) {
+            showToast('info', isArabic ? 'يرجى اختيار بلد المصدر أولاً (الصين أو دولة أخرى)' : 'Please select a source country first (China or another country)');
+            return;
+        }
+
+        document.getElementById('categoryIdInput').value = categoryId;
+
+        if (selectedCountrySourceCode === 'CN') {
+            // China selected - fetch from AliExpress
             showLoading();
             document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
-            document.getElementById('categoryIdInput').value = categoryId;
-            document.getElementById('shipFromInput').value = '';
+            document.getElementById('shipFromInput').value = 'CN';
             document.getElementById('choiceOnlyInput').value = '';
             document.getElementById('countryCodeInput').value = '';
             document.getElementById('distributorIdInput').value = '';
             document.getElementById('searchForm').submit();
+        } else {
+            // Other country selected - show distributors for this category in this country
+            showDistributorsForCategory(selectedCountrySourceCode, categoryId);
         }
+    }
+
+    // Show distributors for a specific category in a specific country
+    function showDistributorsForCategory(countryCode, categoryId) {
+        const dropdown = document.getElementById('distributorsDropdown');
+
+        // Get country info
+        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
+        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+        const flagSvg = countrySvgFlags[countryCode] || defaultSvgFlag;
+
+        // Update dropdown header
+        document.getElementById('dropdownCountryName').innerHTML =
+            `<span class="header-flag">${flagSvg}</span> ${isArabic ? 'موزعين ' + countryName : countryName + ' Distributors'}`;
+
+        // Get distributors for this country
+        const distributors = distributorsByCountry[countryCode] || [];
+
+        // Build distributors list HTML
+        let html = '';
+        if (distributors.length === 0) {
+            html = `<div class="text-center py-3">
+                <p class="text-muted mb-0">${isArabic ? 'لا يوجد موزعين حالياً في هذا البلد' : 'No distributors available in this country'}</p>
+            </div>`;
+        } else {
+            // Add "All" option first
+            html = `<div class="distributor-card" onclick="viewDistributorProductsWithCategory(null, '${countryCode}', '${categoryId}')">
+                <div class="distributor-card-avatar all-avatar">
+                    <i class="ri-apps-line"></i>
+                </div>
+                <span class="distributor-card-name">${isArabic ? 'الكل' : 'All'}</span>
+            </div>`;
+
+            distributors.forEach(dist => {
+                const avatar = dist.avatar ? `{{ asset('storage') }}/${dist.avatar}` : null;
+                const name = dist.store_name || dist.name;
+                html += `
+                    <div class="distributor-card" onclick="viewDistributorProductsWithCategory(${dist.id}, '${countryCode}', '${categoryId}')">
+                        <div class="distributor-card-avatar">
+                            ${avatar
+                                ? `<img src="${avatar}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                                : ''
+                            }
+                            <div class="avatar-placeholder" ${avatar ? 'style="display:none;"' : ''}>
+                                <i class="ri-store-2-line"></i>
+                            </div>
+                        </div>
+                        <span class="distributor-card-name">${name}</span>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('distributorsList').innerHTML = html;
+
+        // Show dropdown
+        dropdown.style.display = 'block';
+    }
+
+    // View distributor products with category filter
+    function viewDistributorProductsWithCategory(distributorId, countryCode, categoryId) {
+        const keywordInput = document.getElementById('keyword');
+        const keyword = keywordInput ? keywordInput.value.trim() : '';
+
+        let url = '{{ route("products.search-distributor") }}?country_code=' + countryCode;
+        if (distributorId) {
+            url += '&distributor_id=' + distributorId;
+        }
+        if (categoryId) {
+            url += '&category_id=' + categoryId;
+        }
+        if (keyword) {
+            url += '&keyword=' + encodeURIComponent(keyword);
+        }
+
+        showLoading();
+        window.location.href = url;
     }
 
     // Subcategory icons mapping based on keywords
@@ -891,24 +989,10 @@
         container.style.display = 'block';
     }
 
-    // Search by category
+    // Search by category (called when clicking on a subcategory)
     function searchByCategory(categoryId) {
-        showLoading();
-        document.getElementById('categoryIdInput').value = categoryId;
-
-        // Keep distributor/country settings if currently viewing distributor products
-        if (currentSourceCountry) {
-            // Stay on distributor search with category filter
-            document.getElementById('searchForm').action = '{{ route("products.search-distributor") }}';
-        } else {
-            // Reset to AliExpress search when selecting category
-            document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
-            document.getElementById('shipFromInput').value = '';
-            document.getElementById('choiceOnlyInput').value = '';
-            document.getElementById('countryCodeInput').value = '';
-            document.getElementById('distributorIdInput').value = '';
-        }
-        document.getElementById('searchForm').submit();
+        // Use the handleCategorySelection function which respects the selected country source
+        handleCategorySelection(categoryId);
     }
 
     // Clear category selection
@@ -921,9 +1005,17 @@
     // Check if we're currently viewing distributor products
     const currentSourceCountry = '{{ isset($source_country) ? $source_country : "" }}';
     const currentDistributorId = '{{ request("distributor_id", "") }}';
+    const currentShipFrom = '{{ request("ship_from", "") }}';
 
     // Current selected country for dropdown - initialize with current source country if viewing distributor products
     let selectedCountryCode = currentSourceCountry || null;
+
+    // Initialize selectedCountrySourceCode based on current page state
+    if (currentShipFrom === 'CN') {
+        selectedCountrySourceCode = 'CN';
+    } else if (currentSourceCountry) {
+        selectedCountrySourceCode = currentSourceCountry;
+    }
 
     // Toggle distributors dropdown
     function toggleDistributors(countryCode) {
@@ -1305,8 +1397,16 @@
         }
 
         const toast = document.createElement('div');
-        const bgColor = type === 'success' ? '#28a745' : '#dc3545';
-        const icon = type === 'success' ? 'checkbox-circle' : 'error-warning';
+        let bgColor = '#dc3545'; // default error
+        let icon = 'error-warning';
+
+        if (type === 'success') {
+            bgColor = '#28a745';
+            icon = 'checkbox-circle';
+        } else if (type === 'info') {
+            bgColor = '#17a2b8';
+            icon = 'information';
+        }
 
         toast.style.cssText = `
             min-width: 320px;
