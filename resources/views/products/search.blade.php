@@ -707,12 +707,25 @@
         // Clear previous category selection
         document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
 
-        // Show message to select a category
-        const categoriesContainer = document.getElementById('categoriesScroll');
+        // Highlight categories section to indicate user should select a category
+        const categoriesContainer = document.querySelector('.categories-scroll-container');
         if (categoriesContainer) {
+            // Add highlight effect
+            categoriesContainer.classList.add('highlight-categories');
+
             // Scroll to categories section
             categoriesContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Remove highlight after animation
+            setTimeout(() => {
+                categoriesContainer.classList.remove('highlight-categories');
+            }, 2000);
         }
+
+        // Show info toast to guide user
+        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
+        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+        showToast('info', isArabic ? `اختر فئة للبحث في ${countryName}` : `Select a category to search in ${countryName}`);
 
         // Update form action based on source
         if (countryCode === 'CN') {
@@ -1804,6 +1817,20 @@ background: rgba(255, 255, 255, 0.85);
     /* Categories Scroll */
     .categories-scroll-container {
         position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .categories-scroll-container.highlight-categories {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        border-radius: 16px;
+        padding: 15px;
+        box-shadow: 0 0 20px rgba(229, 99, 0, 0.3);
+        animation: pulseHighlight 0.5s ease-in-out 3;
+    }
+
+    @keyframes pulseHighlight {
+        0%, 100% { box-shadow: 0 0 20px rgba(229, 99, 0, 0.3); }
+        50% { box-shadow: 0 0 30px rgba(229, 99, 0, 0.5); }
     }
 
     .categories-scroll {
