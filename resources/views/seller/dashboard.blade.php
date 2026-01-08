@@ -116,7 +116,7 @@
     @if(setting_image('seller_dashboard_banner'))
         <div class="row mb-4">
             <div class="col-12">
-                <div class="position-relative" style="border-radius: 12px; overflow: hidden; height: 280px; background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);">
+                <div class="position-relative" style="border-radius: 12px; overflow: contain; height: 280px;">
                     <!-- Banner Image -->
                     <img src="{{ setting_image('seller_dashboard_banner') }}" alt="Seller Dashboard Banner" class="img-fluid w-100 h-100" style="object-fit: cover; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
                     

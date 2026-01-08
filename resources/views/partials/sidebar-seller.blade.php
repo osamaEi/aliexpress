@@ -147,16 +147,7 @@
                         <div>{{ __('messages.wallet_overview') }}</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('wallet.deposit') ? 'active' : '' }}">
-                    <a href="{{ route('wallet.deposit') }}" class="menu-link">
-                        <div>{{ __('messages.deposit') }}</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="https://i.selaa.ae/wallet/withdrawal/create" class="menu-link">
-                        <div>{{ __('messages.withdrawal') }}</div>
-                    </a>
-                </li>
+                
                 <li class="menu-item {{ request()->routeIs('wallet.transactions') ? 'active' : '' }}">
                     <a href="{{ route('wallet.transactions') }}" class="menu-link">
                         <div>{{ __('messages.transactions') }}</div>
