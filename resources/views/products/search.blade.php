@@ -98,6 +98,54 @@
                     </div>
                 </div>
 
+                <!-- Main Categories Section (shown when country is selected) -->
+                @if(isset($categories) && count($categories) > 0)
+                <div id="mainCategoriesSection" class="categories-scroll-container mb-4" style="display: none;">
+                    <div class="categories-section-header mb-2">
+                        <h6 class="mb-0 d-flex align-items-center">
+                            <i class="ri-folder-3-line me-2" style="color: #e56300;"></i>
+                            <span id="categoriesSectionTitle">{{ app()->getLocale() == 'ar' ? 'اختر الفئة الرئيسية' : 'Select Main Category' }}</span>
+                        </h6>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <button class="btn btn-sm btn-light rounded-circle me-2 scroll-btn scroll-left" onclick="scrollCategories('left')">
+                            <i class="ri-arrow-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }}-s-line"></i>
+                        </button>
+                        <div class="categories-scroll flex-grow-1" id="categoriesScroll">
+                            @foreach($categories as $category)
+                                @php
+                                    $isMainCatActive = request('category_id') == $category->aliexpress_category_id;
+                                    if (!$isMainCatActive && $category->children) {
+                                        foreach ($category->children as $child) {
+                                            if ($child->aliexpress_category_id == request('category_id') || $child->id == request('category_id')) {
+                                                $isMainCatActive = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <div class="category-item {{ $isMainCatActive ? 'active' : '' }}"
+                                     onclick="selectMainCategory('{{ $category->aliexpress_category_id }}')"
+                                     data-category-id="{{ $category->aliexpress_category_id }}">
+                                    <div class="category-icon">
+                                        @if($category->photo)
+                                            <img src="{{ asset('storage/' . $category->photo) }}" alt="{{ $category->name }}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <i class="ri-folder-line" style="display: none;"></i>
+                                        @else
+                                            <i class="ri-folder-line"></i>
+                                        @endif
+                                    </div>
+                                    <span class="category-name">{{ app()->getLocale() == 'ar' && $category->name_ar ? $category->name_ar : $category->name }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <button class="btn btn-sm btn-light rounded-circle ms-2 scroll-btn scroll-right" onclick="scrollCategories('right')">
+                            <i class="ri-arrow-{{ app()->getLocale() == 'ar' ? 'left' : 'right' }}-s-line"></i>
+                        </button>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Distributors Dropdown (shown below country cards) -->
                 @php
                     $showDistributorDropdown = isset($source_country) && !empty($source_country);
@@ -702,30 +750,38 @@
         hideChinaStores();
 
         // Clear previous subcategory selection
-        document.getElementById('subcategoriesContainer').style.display = 'none';
+        const subcatContainer = document.getElementById('subcategoriesContainer');
+        if (subcatContainer) {
+            subcatContainer.style.display = 'none';
+        }
 
         // Clear previous category selection
         document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
 
-        // Highlight categories section to indicate user should select a category
-        const categoriesContainer = document.querySelector('.categories-scroll-container');
-        if (categoriesContainer) {
+        // Show main categories section
+        const mainCategoriesSection = document.getElementById('mainCategoriesSection');
+        if (mainCategoriesSection) {
+            mainCategoriesSection.style.display = 'block';
+
+            // Update title based on country
+            const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
+            const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+            const titleEl = document.getElementById('categoriesSectionTitle');
+            if (titleEl) {
+                titleEl.textContent = isArabic ? `اختر فئة للبحث في ${countryName}` : `Select category for ${countryName}`;
+            }
+
             // Add highlight effect
-            categoriesContainer.classList.add('highlight-categories');
+            mainCategoriesSection.classList.add('highlight-categories');
 
             // Scroll to categories section
-            categoriesContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            mainCategoriesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             // Remove highlight after animation
             setTimeout(() => {
-                categoriesContainer.classList.remove('highlight-categories');
+                mainCategoriesSection.classList.remove('highlight-categories');
             }, 2000);
         }
-
-        // Show info toast to guide user
-        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
-        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
-        showToast('info', isArabic ? `اختر فئة للبحث في ${countryName}` : `Select a category to search in ${countryName}`);
 
         // Update form action based on source
         if (countryCode === 'CN') {
@@ -1818,6 +1874,20 @@ background: rgba(255, 255, 255, 0.85);
     .categories-scroll-container {
         position: relative;
         transition: all 0.3s ease;
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 15px;
+        border: 1px solid #e9ecef;
+    }
+
+    .categories-section-header {
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .categories-section-header h6 {
+        color: #561C04;
+        font-weight: 600;
     }
 
     .categories-scroll-container.highlight-categories {
@@ -1826,6 +1896,7 @@ background: rgba(255, 255, 255, 0.85);
         padding: 15px;
         box-shadow: 0 0 20px rgba(229, 99, 0, 0.3);
         animation: pulseHighlight 0.5s ease-in-out 3;
+        border-color: #e56300;
     }
 
     @keyframes pulseHighlight {
