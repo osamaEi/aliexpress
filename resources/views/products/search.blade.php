@@ -98,9 +98,12 @@
                     </div>
                 </div>
 
-                <!-- Main Categories Section (always visible) -->
+                <!-- Main Categories Section (hidden until country is selected, then stays visible) -->
                 @if(isset($categories) && count($categories) > 0)
-                <div id="mainCategoriesSection" class="categories-scroll-container mb-4">
+                @php
+                    $showMainCategories = request('ship_from') || request('country_code') || isset($source_country);
+                @endphp
+                <div id="mainCategoriesSection" class="categories-scroll-container mb-4" style="display: {{ $showMainCategories ? 'block' : 'none' }}">
                     <div class="categories-section-header mb-2">
                         <h6 class="mb-0 d-flex align-items-center">
                             <i class="ri-folder-3-line me-2" style="color: #e56300;"></i>
@@ -734,6 +737,12 @@
 
         // Clear previous category selection
         document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
+
+        // Show main categories section (stays visible after first country selection)
+        const mainCategoriesSection = document.getElementById('mainCategoriesSection');
+        if (mainCategoriesSection) {
+            mainCategoriesSection.style.display = 'block';
+        }
 
         // Show info toast
         const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
