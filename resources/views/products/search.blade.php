@@ -2552,6 +2552,101 @@ background: rgba(255, 255, 255, 0.85);
         min-height: 2.6em;
     }
 
+    /* Distributors Section under Subcategories */
+    .subcategory-distributors-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px dashed #e9ecef;
+    }
+
+    .distributors-section-header {
+        margin-bottom: 15px;
+    }
+
+    .distributors-section-header h6 {
+        color: #561C04;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .distributors-section-header i {
+        color: #e56300;
+    }
+
+    .distributors-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .distributor-grid-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 90px;
+        max-width: 100px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 12px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #e9ecef;
+    }
+
+    .distributor-grid-item:hover {
+        background: #f8f9fa;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #e56300;
+    }
+
+    .distributor-grid-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+        overflow: hidden;
+    }
+
+    .distributor-grid-avatar.all-avatar {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .distributor-grid-avatar i {
+        font-size: 22px;
+        color: white;
+    }
+
+    .distributor-grid-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .distributor-grid-avatar .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .distributor-grid-name {
+        font-size: 0.75rem;
+        text-align: center;
+        color: #333;
+        font-weight: 500;
+        max-width: 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     /* Search Box */
     .search-box-container {
         background: #f8f9fa;
