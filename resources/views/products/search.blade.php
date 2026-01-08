@@ -98,13 +98,13 @@
                     </div>
                 </div>
 
-                <!-- Main Categories Section (shown when country is selected) -->
+                <!-- Main Categories Section (always visible) -->
                 @if(isset($categories) && count($categories) > 0)
-                <div id="mainCategoriesSection" class="categories-scroll-container mb-4" style="display: none;">
+                <div id="mainCategoriesSection" class="categories-scroll-container mb-4">
                     <div class="categories-section-header mb-2">
                         <h6 class="mb-0 d-flex align-items-center">
                             <i class="ri-folder-3-line me-2" style="color: #e56300;"></i>
-                            <span id="categoriesSectionTitle">{{ app()->getLocale() == 'ar' ? 'اختر الفئة الرئيسية' : 'Select Main Category' }}</span>
+                            <span id="categoriesSectionTitle">{{ app()->getLocale() == 'ar' ? 'الفئات الرئيسية' : 'Main Categories' }}</span>
                         </h6>
                     </div>
                     <div class="d-flex align-items-center mb-2">
@@ -701,7 +701,7 @@
     // Track currently selected country source (CN for China, other country codes for distributors)
     let selectedCountrySourceCode = null;
 
-    // Select country source - shows categories first, then user navigates to subcategories
+    // Select country source
     function selectCountrySource(countryCode) {
         // Remove active from all country cards
         document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
@@ -716,9 +716,15 @@
         // Store the selected country
         selectedCountrySourceCode = countryCode;
 
-        // Hide all dropdowns
+        // Hide all dropdowns and distributors section
         hideDistributors();
         hideChinaStores();
+
+        // Hide distributors under subcategories
+        const distributorsSection = document.getElementById('subcategoryDistributors');
+        if (distributorsSection) {
+            distributorsSection.style.display = 'none';
+        }
 
         // Clear previous subcategory selection
         const subcatContainer = document.getElementById('subcategoriesContainer');
@@ -729,30 +735,10 @@
         // Clear previous category selection
         document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
 
-        // Show main categories section
-        const mainCategoriesSection = document.getElementById('mainCategoriesSection');
-        if (mainCategoriesSection) {
-            mainCategoriesSection.style.display = 'block';
-
-            // Update title based on country
-            const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
-            const countryName = isArabic ? countryInfo.ar : countryInfo.en;
-            const titleEl = document.getElementById('categoriesSectionTitle');
-            if (titleEl) {
-                titleEl.textContent = isArabic ? `اختر فئة للبحث في ${countryName}` : `Select category for ${countryName}`;
-            }
-
-            // Add highlight effect
-            mainCategoriesSection.classList.add('highlight-categories');
-
-            // Scroll to categories section
-            mainCategoriesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            // Remove highlight after animation
-            setTimeout(() => {
-                mainCategoriesSection.classList.remove('highlight-categories');
-            }, 2000);
-        }
+        // Show info toast
+        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
+        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+        showToast('info', isArabic ? `اختر فئة للبحث في ${countryName}` : `Select a category for ${countryName}`);
 
         // Update form action based on source
         if (countryCode === 'CN') {
