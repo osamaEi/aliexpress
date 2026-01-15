@@ -689,6 +689,12 @@
                         // Show subcategories for this main category
                         if (subCategoryGroup) {
                             subCategoryGroup.style.display = 'block';
+
+                            // Auto-select all subcategories when main category is selected
+                            const subCheckboxes = subCategoryGroup.querySelectorAll('.sub-category-checkbox');
+                            subCheckboxes.forEach(sub => {
+                                sub.checked = true;
+                            });
                         }
                     } else {
                         // Hide subcategories and uncheck them
@@ -706,6 +712,11 @@
                     const subCategoryGroup = document.getElementById('sub-cat-' + categoryId);
                     if (subCategoryGroup) {
                         subCategoryGroup.style.display = 'block';
+                        // Also select all subcategories on initial load if main is checked
+                        const subCheckboxes = subCategoryGroup.querySelectorAll('.sub-category-checkbox');
+                        subCheckboxes.forEach(sub => {
+                            sub.checked = true;
+                        });
                     }
                 }
             });
