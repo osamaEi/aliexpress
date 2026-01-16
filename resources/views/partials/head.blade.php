@@ -587,6 +587,15 @@
                 margin-right: 0 !important;
             }
         }
+
+        h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #f6f5f5;
+  
+}
     </style>
 
     <!-- Helpers -->
