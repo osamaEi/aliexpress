@@ -119,11 +119,10 @@
                                         <strong class="text-primary">{{ $totalDays ?? $subscription->duration_days }} {{ __('messages.days') }}</strong>
                                     </div>
                                     @endif
-                                    <hr>
 
                                     <hr class="my-3">
                                     <div class="d-flex justify-content-between">
-                                        <h5 class="mb-0">{{ __('messages.final_amount_to_pay') }}:</h5>
+                                        <h5 class="mb-0">{{ __('messages.total_with_gateway_fees') }}:</h5>
                                         <h5 class="mb-0 text-primary">{!! format_currency($feeBreakdown['gross_amount']) !!}</h5>
                                     </div>
                                 </div>
