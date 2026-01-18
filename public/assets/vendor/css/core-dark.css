@@ -83,7 +83,7 @@
   --bs-tertiary-color-rgb: 178, 179, 202;
   --bs-tertiary-bg: rgba(234, 234, 255, 0.06);
   --bs-tertiary-bg-rgb: 234, 234, 255;
-  --bs-heading-color: #d7d8ed;
+  --bs-heading-color: #09090a;
   --bs-link-color: #666cff;
   --bs-link-color-rgb: 102, 108, 255;
   --bs-link-decoration: none;
@@ -157,7 +157,7 @@ h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1 {
   margin-bottom: 1rem;
   font-weight: 500;
   line-height: 1.1;
-  color: white;
+  color: var(--bs-heading-color);
 }
 
 h1, .h1 {
