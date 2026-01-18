@@ -1010,10 +1010,19 @@ class ProductController extends Controller
                     $apiOptions['ship_from'] = $request->get('ship_from');
                 }
 
-                $result = $this->aliexpressTextService->searchProductsByText(
-                    $categoryKeyword,
-                    $apiOptions
-                );
+                // Create cache key based on search parameters
+                $cacheKey = 'aliexpress_search_' . md5(json_encode([
+                    'keyword' => $categoryKeyword,
+                    'options' => $apiOptions
+                ]));
+
+                // Cache for 30 minutes to speed up repeated searches
+                $result = \Cache::remember($cacheKey, 1800, function() use ($categoryKeyword, $apiOptions) {
+                    return $this->aliexpressTextService->searchProductsByText(
+                        $categoryKeyword,
+                        $apiOptions
+                    );
+                });
 
                 Log::info('Category search result', [
                     'requested_category_id' => $requestedCategoryId,
@@ -1073,10 +1082,19 @@ class ProductController extends Controller
                     $apiOptions['ship_from'] = $request->get('ship_from');
                 }
 
-                $result = $this->aliexpressTextService->searchProductsByText(
-                    $keyword,
-                    $apiOptions
-                );
+                // Create cache key based on search parameters
+                $cacheKey = 'aliexpress_search_' . md5(json_encode([
+                    'keyword' => $keyword,
+                    'options' => $apiOptions
+                ]));
+
+                // Cache for 30 minutes to speed up repeated searches
+                $result = \Cache::remember($cacheKey, 1800, function() use ($keyword, $apiOptions) {
+                    return $this->aliexpressTextService->searchProductsByText(
+                        $keyword,
+                        $apiOptions
+                    );
+                });
             } else {
                 // No category and no keyword selected
                 $result = [
@@ -1141,8 +1159,9 @@ class ProductController extends Controller
                     ->toArray();
             }
 
-            // Always fetch Arabic titles for products (since we always search in English first)
-            if (!empty($result['products'])) {
+            // Only fetch Arabic titles if app locale is Arabic (performance optimization)
+            $appLocaleIsar = app()->getLocale() === 'ar';
+            if (!empty($result['products']) && $appLocaleIsar) {
                 try {
                         // Current results are in English, fetch Arabic versions
                         $arabicApiOptions = [
@@ -1167,10 +1186,18 @@ class ProductController extends Controller
                         // Determine search keyword
                         $searchKeyword = $keyword ?? $categoryKeyword ?? 'product';
 
-                        $arabicResult = $this->aliexpressTextService->searchProductsByText(
-                            $searchKeyword,
-                            $arabicApiOptions
-                        );
+                        // Cache Arabic search results
+                        $arabicCacheKey = 'aliexpress_search_ar_' . md5(json_encode([
+                            'keyword' => $searchKeyword,
+                            'options' => $arabicApiOptions
+                        ]));
+
+                        $arabicResult = \Cache::remember($arabicCacheKey, 1800, function() use ($searchKeyword, $arabicApiOptions) {
+                            return $this->aliexpressTextService->searchProductsByText(
+                                $searchKeyword,
+                                $arabicApiOptions
+                            );
+                        });
 
                         // Create a map of product IDs to Arabic titles
                         $arabicTitles = [];
@@ -1190,7 +1217,11 @@ class ProductController extends Controller
                                 $product['title_ar'] = $arabicFromApi;
                             } else {
                                 // Use Google Translate
-                                $product['title_ar'] = $this->translationService->translate($product['title'], 'ar', 'en');
+                                // Cache translation for 7 days
+                                $translationKey = 'translation_' . md5($product['title']);
+                                $product['title_ar'] = \Cache::remember($translationKey, 604800, function() use ($product) {
+                                    return $this->translationService->translate($product['title'], 'ar', 'en');
+                                });
                             }
                         }
                         unset($product);
@@ -1209,7 +1240,11 @@ class ProductController extends Controller
                             $product['title_en'] = $product['title'];
                         }
                         if (!isset($product['title_ar'])) {
-                            $product['title_ar'] = $this->translationService->translate($product['title'], 'ar', 'en');
+                            // Cache translation for 7 days
+                            $translationKey = 'translation_' . md5($product['title']);
+                            $product['title_ar'] = \Cache::remember($translationKey, 604800, function() use ($product) {
+                                return $this->translationService->translate($product['title'], 'ar', 'en');
+                            });
                         }
                     }
                     unset($product);

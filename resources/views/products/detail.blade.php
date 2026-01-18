@@ -1328,7 +1328,6 @@ function displayShippingSuccess(data) {
             <div class="col-md-4">
                 <div class="card border-0 bg-light text-center h-100">
                     <div class="card-body">
-                        <i class="ri-money-dollar-circle-line text-primary mb-2" style="font-size: 32px;"></i>
                         <h3 class="text-primary mb-1">${formatCurrency(freightAmountConverted)}</h3>
                         <small class="text-muted">{{ __('messages.shipping_cost') }}</small>
                     </div>

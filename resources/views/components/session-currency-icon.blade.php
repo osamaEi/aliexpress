@@ -1,4 +1,4 @@
-@props(['width' => '18', 'height' => '18', 'class' => ''])
+@props(['width' => '24', 'height' => '24', 'class' => ''])
 
 @php
     $sessionCurrency = session('currency_code', 'USD');
