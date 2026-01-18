@@ -49,10 +49,8 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="typeFilter">
-                        <option value="">{{ __('messages.all_types') }}</option>
-                        <option value="percentage">{{ __('messages.percentage') }}</option>
-                        <option value="fixed">{{ __('messages.fixed_amount') }}</option>
+                    <select class="form-select" id="typeFilter" disabled>
+                        <option value="fixed" selected>{{ __('messages.fixed_amount') }}</option>
                     </select>
                 </div>
             </div>
@@ -80,7 +78,7 @@
                             @foreach($subcategories as $index => $subcategory)
                                 @php
                                     $existingProfit = $profitSettings->get($subcategory->id);
-                                    $profitType = $existingProfit ? $existingProfit->profit_type : 'percentage';
+                                    $profitType = 'fixed';
                                     $profitValue = $existingProfit ? $existingProfit->profit_value : 0;
                                     $isActive = $existingProfit ? $existingProfit->is_active : true;
                                     $hasConfig = $existingProfit ? 'configured' : 'not-configured';
@@ -109,14 +107,8 @@
 
                                     <!-- Profit Type -->
                                     <td>
-                                        <select name="profits[{{ $index }}][profit_type]" class="form-select form-select-sm profit-type" data-index="{{ $index }}" style="width: 150px;">
-                                            <option value="percentage" {{ $profitType == 'percentage' ? 'selected' : '' }}>
-                                                {{ __('messages.percentage') }}
-                                            </option>
-                                            <option value="fixed" {{ $profitType == 'fixed' ? 'selected' : '' }}>
-                                                {{ __('messages.fixed_amount') }}
-                                            </option>
-                                        </select>
+                                        <input type="hidden" name="profits[{{ $index }}][profit_type]" value="fixed">
+                                        <span class="badge bg-label-primary">{{ __('messages.fixed_amount') }}</span>
                                     </td>
 
                                     <!-- Profit Value -->
@@ -130,11 +122,7 @@
                                                    step="0.01"
                                                    required>
                                             <span class="input-group-text profit-unit" data-index="{{ $index }}">
-                                                @if($profitType == 'percentage')
-                                                    %
-                                                @else
-                                                    <x-session-currency-icon width="16" height="16" />
-                                                @endif
+                                                <x-session-currency-icon width="16" height="16" />
                                             </span>
                                         </div>
                                     </td>
@@ -296,22 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sessionCurrency = '{{ session("currency_code", "USD") }}';
     const currencyIcon = currencyIcons[sessionCurrency] || sessionCurrency;
 
-    // Handle profit type change
-    document.querySelectorAll('.profit-type').forEach(function(select) {
-        select.addEventListener('change', function() {
-            const index = this.dataset.index;
-            const unit = document.querySelector(`.profit-unit[data-index="${index}"]`);
-            const row = this.closest('tr');
-
-            if (this.value === 'percentage') {
-                unit.textContent = '%';
-            } else {
-                unit.innerHTML = currencyIcon;
-            }
-
-            row.dataset.type = this.value;
-        });
-    });
+    // Profit type is now fixed only - no dynamic switching needed
 
     // Handle save all button
     document.getElementById('saveAllBtn').addEventListener('click', function() {
@@ -364,18 +337,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updatePreview() {
         const basePrice = parseFloat(document.getElementById('previewBasePrice').value) || 0;
-        const profitTypeSelect = document.querySelector(`select[name="profits[${currentPreviewIndex}][profit_type]"]`);
         const profitValueInput = document.querySelector(`input[name="profits[${currentPreviewIndex}][profit_value]"]`);
 
-        const profitType = profitTypeSelect.value;
         const profitValue = parseFloat(profitValueInput.value) || 0;
-
-        let profitAmount = 0;
-        if (profitType === 'percentage') {
-            profitAmount = basePrice * (profitValue / 100);
-        } else {
-            profitAmount = profitValue;
-        }
+        const profitAmount = profitValue; // Always fixed amount now
 
         const finalPrice = basePrice + profitAmount;
 

@@ -121,34 +121,6 @@
                                     @endif
                                     <hr>
 
-                                    <!-- Price Breakdown -->
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>{{ __('messages.subscription_price') }}:</span>
-                                        <strong>{!! format_currency($subscription->price) !!}</strong>
-                                    </div>
-
-                                    <!-- Gateway Fees Breakdown -->
-                                    <div class="mb-3 p-3" style="background-color: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
-                                        <h6 class="mb-2 text-warning">
-                                            <i class="ri-information-line me-1"></i>{{ __('messages.total_gateway_fees') }}
-                                        </h6>
-                                        <div class="d-flex justify-content-between mb-1 small">
-                                            <span class="text-muted">{{ __('messages.fixed_gateway_fee') }}:</span>
-                                            <span>{!! format_currency($feeBreakdown['fixed_fee']) !!}</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between mb-1 small">
-                                            <span class="text-muted">{{ __('messages.percentage_gateway_fee') }} (7.9%):</span>
-                                            <span>{!! format_currency($feeBreakdown['percentage_fee']) !!}</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between pt-2 border-top">
-                                            <strong>{{ __('messages.total_gateway_fees') }}:</strong>
-                                            <strong class="text-warning">{!! format_currency($feeBreakdown['fee']) !!}</strong>
-                                        </div>
-                                        <p class="mb-0 mt-2 small text-muted">
-                                            <i class="ri-shield-check-line me-1"></i>{{ __('messages.gateway_fee_note') }}
-                                        </p>
-                                    </div>
-
                                     <hr class="my-3">
                                     <div class="d-flex justify-content-between">
                                         <h5 class="mb-0">{{ __('messages.final_amount_to_pay') }}:</h5>

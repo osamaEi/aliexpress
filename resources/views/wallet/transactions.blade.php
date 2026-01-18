@@ -32,7 +32,7 @@
                         </div>
                         <div class="avatar flex-shrink-0">
                             <span class="avatar-initial rounded" style="background-color: rgba(86, 28, 4, 0.1); color: #561C04;">
-                                <i class="ri-money-dollar-circle-line ri-24px"></i>
+                                <x-session-currency-icon width="24" height="24" />
                             </span>
                         </div>
                     </div>
