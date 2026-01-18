@@ -175,7 +175,14 @@
                         <div class="mt-3 text-center">
                             <a href="{{ $product->aliexpress_url }}" target="_blank" class="text-muted text-decoration-none">
                                 <i class="ri-external-link-line me-1"></i>
-                                <img src="https://flagcdn.com/w20/cn.png" alt="CN" style="width:16px;height:12px;object-fit:cover;vertical-align:middle;border-radius:2px;" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 900 600" style="vertical-align:middle;border-radius:2px;">
+                                    <rect fill="#de2910" width="900" height="600"/>
+                                    <polygon fill="#ffde00" points="149.75,123.5 172.5,197.82 249.25,197.82 188.5,242.18 211.25,316.5 149.75,272.82 88.25,316.5 111,242.18 50.25,197.82 127,197.82"/>
+                                    <polygon fill="#ffde00" points="299.75,54 311.18,89.09 348.25,89.09 318.75,110.91 330.18,146 299.75,124.82 269.32,146 280.75,110.91 251.25,89.09 288.32,89.09"/>
+                                    <polygon fill="#ffde00" points="371.25,123.5 382.68,158.59 419.75,158.59 390.25,180.41 401.68,215.5 371.25,194.32 340.82,215.5 352.25,180.41 322.75,158.59 359.82,158.59"/>
+                                    <polygon fill="#ffde00" points="371.25,243.5 382.68,278.59 419.75,278.59 390.25,300.41 401.68,335.5 371.25,314.32 340.82,335.5 352.25,300.41 322.75,278.59 359.82,278.59"/>
+                                    <polygon fill="#ffde00" points="299.75,313 311.18,348.09 348.25,348.09 318.75,369.91 330.18,405 299.75,383.82 269.32,405 280.75,369.91 251.25,348.09 288.32,348.09"/>
+                                </svg>
                                 {{ app()->getLocale() == 'ar' ? 'عرض على موقع الصين' : 'View on China Store' }}
                             </a>
                         </div>
@@ -287,10 +294,12 @@
                             <table class="table table-hover">
                                 <tbody>
                                     @foreach($aliexpressData['ae_item_properties']['ae_item_property'] as $property)
-                                        <tr>
-                                            <th style="width: 35%;" class="border-end">{{ $property['attr_name'] }}</th>
-                                            <td>{{ $property['attr_value'] }}</td>
-                                        </tr>
+                                        @if(strtoupper($property['attr_name']) !== 'CHOICE')
+                                            <tr>
+                                                <th style="width: 35%;" class="border-end">{{ $property['attr_name'] }}</th>
+                                                <td>{{ $property['attr_value'] }}</td>
+                                            </tr>
+                                        @endif
                                     @endforeach
                                 </tbody>
                             </table>
@@ -967,9 +976,9 @@ const productCurrency = '{{ $currentCurrency->code }}';
 
 // Currency icon SVGs
 const currencyIcons = {
-    'AED': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
-    'SAR': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><text x="4" y="17" font-size="14" fill="currentColor">﷼</text></svg>',
-    'USD': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    'AED': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+    'SAR': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="inline-block" style="vertical-align: middle;"><text x="4" y="17" font-size="16" fill="currentColor">﷼</text></svg>',
+    'USD': ''
 };
 
 // Convert amount from USD to current currency

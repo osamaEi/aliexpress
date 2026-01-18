@@ -31,6 +31,7 @@ class SellerRegistrationController extends Controller
             'company_name' => 'required|string|max:255',
             'country' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
             'logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'g-recaptcha-response' => config('services.recaptcha.enabled') ? 'required' : 'nullable',
         ], [
@@ -77,9 +78,10 @@ class SellerRegistrationController extends Controller
             $logoPath = $logo->storeAs('logos/sellers', $logoName, 'public');
         }
 
-        // Remove reCAPTCHA and logo file from validated data (can't be serialized in session)
+        // Remove reCAPTCHA, logo file, and password_confirmation from validated data
         unset($validated['g-recaptcha-response']);
         unset($validated['logo']);
+        unset($validated['password_confirmation']);
 
         // Add logo path to validated data
         if ($logoPath) {
@@ -193,7 +195,7 @@ class SellerRegistrationController extends Controller
             'company_name' => $data['company_name'],
             'country' => $data['country'],
             'email' => $data['email'],
-            'password' => Hash::make(Str::random(16)), // Random password, will use OTP for login
+            'password' => Hash::make($data['password']),
             'user_type' => 'seller',
             'main_activity' => json_encode($data['main_categories']),
             'sub_activity' => json_encode($data['sub_categories']),

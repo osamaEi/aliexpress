@@ -212,6 +212,7 @@ return [
     'phone_country' => 'Phone Country',
     'phone_code' => 'Phone Code',
     'phone_number' => 'Phone Number',
+    'street_address' => 'Street Address',
     'apartment_optional' => 'Apartment, Suite, etc. (Optional)',
     'postal_zip_code' => 'Postal/ZIP Code',
     'order_notes_optional' => 'Order Notes (Optional)',
