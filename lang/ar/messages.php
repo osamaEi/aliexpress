@@ -1327,6 +1327,7 @@ return [
     'percentage_gateway_fee' => 'رسوم نسبية',
     'total_gateway_fees' => 'إجمالي رسوم البوابة',
     'final_amount_to_pay' => 'المبلغ النهائي المطلوب دفعه',
+    'total_with_gateway_fees' => 'الإجمالي شامل رسوم البوابة',
     'gateway_fee_note' => 'رسوم بوابة الدفع: رسوم ثابتة 2 درهم + 7.9% من قيمة الاشتراك',
 
     // Invoice
