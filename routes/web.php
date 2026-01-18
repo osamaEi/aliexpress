@@ -246,10 +246,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     Route::get('/subscriptions-history', [SubscriptionController::class, 'history'])->name('subscriptions.history');
 
-    // Seller Dashboard Route
-    Route::get('/seller/dashboard', [SellerController::class, 'dashboard'])->name('seller.dashboard');
+    // Seller Dashboard Route (with access control)
+    Route::middleware('seller.access')->group(function () {
+        Route::get('/seller/dashboard', [SellerController::class, 'dashboard'])->name('seller.dashboard');
 
-    // Seller Profit Management Routes
+        // Seller Shipping Tracking Routes
+        Route::prefix('seller/shipping')->name('seller.shipping.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Seller\ShippingController::class, 'index'])->name('index');
+            Route::get('/{shipping}', [App\Http\Controllers\Seller\ShippingController::class, 'show'])->name('show');
+            Route::post('/{order}/sync', [App\Http\Controllers\Seller\ShippingController::class, 'sync'])->name('sync');
+            Route::post('/sync-all', [App\Http\Controllers\Seller\ShippingController::class, 'syncAll'])->name('sync-all');
+        });
+    });
+
+    // Seller Profit Management Routes (accessible during setup)
     Route::prefix('seller/profit-settings')->name('seller.profit-settings.')->group(function () {
         Route::get('/', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'index'])->name('index');
         Route::post('/', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'store'])->name('store');
@@ -259,15 +269,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/api/subcategory/{categoryId}', [App\Http\Controllers\SellerSubcategoryProfitController::class, 'getProfitForSubcategory'])->name('api.get');
     });
 
-    // Seller Shipping Tracking Routes
-    Route::prefix('seller/shipping')->name('seller.shipping.')->group(function () {
-        Route::get('/', [App\Http\Controllers\Seller\ShippingController::class, 'index'])->name('index');
-        Route::get('/{shipping}', [App\Http\Controllers\Seller\ShippingController::class, 'show'])->name('show');
-        Route::post('/{order}/sync', [App\Http\Controllers\Seller\ShippingController::class, 'sync'])->name('sync');
-        Route::post('/sync-all', [App\Http\Controllers\Seller\ShippingController::class, 'syncAll'])->name('sync-all');
-    });
-
-    // Seller Ticket Routes
+    // Seller Ticket Routes (always accessible)
     Route::prefix('seller/tickets')->name('seller.tickets.')->group(function () {
         Route::get('/', [App\Http\Controllers\Seller\TicketController::class, 'index'])->name('index');
         Route::get('/create', [App\Http\Controllers\Seller\TicketController::class, 'create'])->name('create');

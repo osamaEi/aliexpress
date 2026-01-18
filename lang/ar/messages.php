@@ -1479,4 +1479,12 @@ return [
     'withdrawal_request' => 'طلب سحب',
     'withdrawal_request_submitted' => 'تم تقديم طلب السحب بنجاح',
     'other' => 'أخرى',
+
+    // Seller Setup Flow
+    'please_complete_profile_settings' => 'يرجى إكمال إعدادات الملف الشخصي أولاً',
+    'please_complete_profit_settings' => 'يرجى إكمال إعدادات الأرباح للمتابعة',
+    'trial_expired_please_subscribe' => 'انتهت فترة التجربة. يرجى الاشتراك لمتابعة استخدام النظام',
+    'trial_period_active' => 'أنت في فترة التجربة. اشترك الآن لضمان استمرار الوصول.',
+    'setup_step_profile' => 'الخطوة 1: إعدادات الملف الشخصي',
+    'setup_step_profits' => 'الخطوة 2: إعدادات الأرباح',
 ];

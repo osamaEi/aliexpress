@@ -646,31 +646,31 @@
                                     required>
                                 <option value="">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</option>
                                 <!-- دول الخليج العربي -->
-                                <option value="الإمارات العربية المتحدة" {{ old('country') == 'الإمارات العربية المتحدة' ? 'selected' : '' }}>الإمارات العربية المتحدة</option>
-                                <option value="المملكة العربية السعودية" {{ old('country') == 'المملكة العربية السعودية' ? 'selected' : '' }}>المملكة العربية السعودية</option>
-                                <option value="الكويت" {{ old('country') == 'الكويت' ? 'selected' : '' }}>الكويت</option>
-                                <option value="قطر" {{ old('country') == 'قطر' ? 'selected' : '' }}>قطر</option>
-                                <option value="البحرين" {{ old('country') == 'البحرين' ? 'selected' : '' }}>البحرين</option>
-                                <option value="سلطنة عُمان" {{ old('country') == 'سلطنة عُمان' ? 'selected' : '' }}>سلطنة عُمان</option>
+                                <option value="AE" {{ old('country') == 'AE' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الإمارات العربية المتحدة' : 'United Arab Emirates' }}</option>
+                                <option value="SA" {{ old('country') == 'SA' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المملكة العربية السعودية' : 'Saudi Arabia' }}</option>
+                                <option value="KW" {{ old('country') == 'KW' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الكويت' : 'Kuwait' }}</option>
+                                <option value="QA" {{ old('country') == 'QA' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'قطر' : 'Qatar' }}</option>
+                                <option value="BH" {{ old('country') == 'BH' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'البحرين' : 'Bahrain' }}</option>
+                                <option value="OM" {{ old('country') == 'OM' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'سلطنة عُمان' : 'Oman' }}</option>
                                 <!-- دول الشام -->
-                                <option value="الأردن" {{ old('country') == 'الأردن' ? 'selected' : '' }}>الأردن</option>
-                                <option value="لبنان" {{ old('country') == 'لبنان' ? 'selected' : '' }}>لبنان</option>
-                                <option value="سوريا" {{ old('country') == 'سوريا' ? 'selected' : '' }}>سوريا</option>
-                                <option value="فلسطين" {{ old('country') == 'فلسطين' ? 'selected' : '' }}>فلسطين</option>
-                                <option value="العراق" {{ old('country') == 'العراق' ? 'selected' : '' }}>العراق</option>
+                                <option value="JO" {{ old('country') == 'JO' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الأردن' : 'Jordan' }}</option>
+                                <option value="LB" {{ old('country') == 'LB' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'لبنان' : 'Lebanon' }}</option>
+                                <option value="SY" {{ old('country') == 'SY' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'سوريا' : 'Syria' }}</option>
+                                <option value="PS" {{ old('country') == 'PS' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'فلسطين' : 'Palestine' }}</option>
+                                <option value="IQ" {{ old('country') == 'IQ' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'العراق' : 'Iraq' }}</option>
                                 <!-- دول شمال أفريقيا -->
-                                <option value="مصر" {{ old('country') == 'مصر' ? 'selected' : '' }}>مصر</option>
-                                <option value="ليبيا" {{ old('country') == 'ليبيا' ? 'selected' : '' }}>ليبيا</option>
-                                <option value="تونس" {{ old('country') == 'تونس' ? 'selected' : '' }}>تونس</option>
-                                <option value="الجزائر" {{ old('country') == 'الجزائر' ? 'selected' : '' }}>الجزائر</option>
-                                <option value="المغرب" {{ old('country') == 'المغرب' ? 'selected' : '' }}>المغرب</option>
-                                <option value="موريتانيا" {{ old('country') == 'موريتانيا' ? 'selected' : '' }}>موريتانيا</option>
+                                <option value="EG" {{ old('country') == 'EG' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'مصر' : 'Egypt' }}</option>
+                                <option value="LY" {{ old('country') == 'LY' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'ليبيا' : 'Libya' }}</option>
+                                <option value="TN" {{ old('country') == 'TN' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'تونس' : 'Tunisia' }}</option>
+                                <option value="DZ" {{ old('country') == 'DZ' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الجزائر' : 'Algeria' }}</option>
+                                <option value="MA" {{ old('country') == 'MA' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المغرب' : 'Morocco' }}</option>
+                                <option value="MR" {{ old('country') == 'MR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'موريتانيا' : 'Mauritania' }}</option>
                                 <!-- دول أخرى -->
-                                <option value="السودان" {{ old('country') == 'السودان' ? 'selected' : '' }}>السودان</option>
-                                <option value="اليمن" {{ old('country') == 'اليمن' ? 'selected' : '' }}>اليمن</option>
-                                <option value="الصومال" {{ old('country') == 'الصومال' ? 'selected' : '' }}>الصومال</option>
-                                <option value="جيبوتي" {{ old('country') == 'جيبوتي' ? 'selected' : '' }}>جيبوتي</option>
-                                <option value="جزر القمر" {{ old('country') == 'جزر القمر' ? 'selected' : '' }}>جزر القمر</option>
+                                <option value="SD" {{ old('country') == 'SD' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'السودان' : 'Sudan' }}</option>
+                                <option value="YE" {{ old('country') == 'YE' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'اليمن' : 'Yemen' }}</option>
+                                <option value="SO" {{ old('country') == 'SO' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الصومال' : 'Somalia' }}</option>
+                                <option value="DJ" {{ old('country') == 'DJ' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'جيبوتي' : 'Djibouti' }}</option>
+                                <option value="KM" {{ old('country') == 'KM' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'جزر القمر' : 'Comoros' }}</option>
                             </select>
                             @error('country')
                                 <div class="text-danger">{{ $message }}</div>

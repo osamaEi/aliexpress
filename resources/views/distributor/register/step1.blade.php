@@ -569,6 +569,8 @@
                                    name="phone"
                                    value="{{ old('phone') }}"
                                    placeholder="{{ app()->getLocale() == 'ar' ? 'مثال: +971501234567' : 'e.g. +971501234567' }}"
+                                   dir="ltr"
+                                   style="text-align: left;"
                                    required>
                             @error('phone')
                                 <div class="text-danger">{{ $message }}</div>

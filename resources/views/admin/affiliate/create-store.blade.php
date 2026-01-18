@@ -93,6 +93,8 @@
                             id="phone"
                             name="phone"
                             value="{{ old('phone') }}"
+                            dir="ltr"
+                            style="text-align: left;"
                         >
                         @error('phone')
                             <div class="invalid-feedback">{{ $message }}</div>

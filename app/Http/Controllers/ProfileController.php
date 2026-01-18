@@ -71,7 +71,19 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
+        // Mark setup_completed_at for sellers who haven't completed it yet
+        if ($user->user_type === 'seller' && !$user->setup_completed_at) {
+            $user->setup_completed_at = now();
+        }
+
         $user->save();
+
+        // Redirect sellers to profit settings if they haven't completed that step
+        if ($user->user_type === 'seller' && !$user->profit_settings_completed) {
+            return Redirect::route('seller.profit-settings.index')
+                ->with('status', 'profile-updated')
+                ->with('info', __('messages.please_complete_profit_settings'));
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

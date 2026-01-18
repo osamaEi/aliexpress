@@ -1170,4 +1170,12 @@ return [
     'withdrawal_request' => 'Withdrawal Request',
     'withdrawal_request_submitted' => 'Withdrawal request submitted successfully',
     'other' => 'Other',
+
+    // Seller Setup Flow
+    'please_complete_profile_settings' => 'Please complete your profile settings first',
+    'please_complete_profit_settings' => 'Please complete your profit settings to continue',
+    'trial_expired_please_subscribe' => 'Your trial period has expired. Please subscribe to continue using the system',
+    'trial_period_active' => 'You are in your trial period. Subscribe now to ensure uninterrupted access.',
+    'setup_step_profile' => 'Step 1: Profile Settings',
+    'setup_step_profits' => 'Step 2: Profit Settings',
 ];

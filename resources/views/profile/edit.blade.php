@@ -128,7 +128,8 @@
                             </select>
                             <input type="text" class="form-control @error('phone') is-invalid @enderror"
                                    id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone number' }}">
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone number' }}"
+                                   dir="ltr" style="text-align: left;">
                         </div>
                         @error('phone_code')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -141,7 +142,8 @@
                     <div class="col-md-6">
                         <label for="email" class="form-label">{{ __('messages.email') }} <span class="text-danger">*</span></label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror"
-                               id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                               id="email" name="email" value="{{ old('email', $user->email) }}" required
+                               dir="ltr" style="text-align: left;">
                         @error('email')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -737,7 +739,8 @@
                         <label for="paypal_email" class="form-label">{{ __('messages.paypal_email') }} <span class="text-danger">*</span></label>
                         <input type="email" class="form-control @error('paypal_email') is-invalid @enderror"
                                id="paypal_email" name="paypal_email" value="{{ old('paypal_email', $user->paypal_email) }}"
-                               placeholder="example@email.com">
+                               placeholder="example@email.com"
+                               dir="ltr" style="text-align: left;">
                         @error('paypal_email')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -765,7 +768,8 @@
                     <div class="col-md-6 withdrawal-fields bank-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? '' : 'display: none;' }}">
                         <label for="bank_account_number" class="form-label">{{ __('messages.account_number') }}</label>
                         <input type="text" class="form-control @error('bank_account_number') is-invalid @enderror"
-                               id="bank_account_number" name="bank_account_number" value="{{ old('bank_account_number', $user->bank_account_number) }}">
+                               id="bank_account_number" name="bank_account_number" value="{{ old('bank_account_number', $user->bank_account_number) }}"
+                               dir="ltr" style="text-align: left;">
                         @error('bank_account_number')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -775,6 +779,7 @@
                         <label for="bank_iban" class="form-label">{{ __('messages.iban') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('bank_iban') is-invalid @enderror"
                                id="bank_iban" name="bank_iban" value="{{ old('bank_iban', $user->bank_iban) }}"
+                               dir="ltr" style="text-align: left;"
                                placeholder="AE000000000000000000000">
                         @error('bank_iban')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -810,7 +815,8 @@
                     <div class="col-md-6 withdrawal-fields wallet-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'mobile_wallet' ? '' : 'display: none;' }}">
                         <label for="wallet_phone_number" class="form-label">{{ __('messages.wallet_phone_number') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('wallet_phone_number') is-invalid @enderror"
-                               id="wallet_phone_number" name="wallet_phone_number" value="{{ old('wallet_phone_number', $user->wallet_phone_number) }}">
+                               id="wallet_phone_number" name="wallet_phone_number" value="{{ old('wallet_phone_number', $user->wallet_phone_number) }}"
+                               dir="ltr" style="text-align: left;">
                         @error('wallet_phone_number')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

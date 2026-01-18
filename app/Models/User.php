@@ -60,6 +60,9 @@ class User extends Authenticatable
         'commercial_register',
         'freelance_document',
         'social_media_accounts',
+        // Seller setup fields
+        'setup_completed_at',
+        'profit_settings_completed',
     ];
 
     /**
@@ -85,6 +88,8 @@ class User extends Authenticatable
             'otp_expires_at' => 'datetime',
             'is_verified' => 'boolean',
             'verified_at' => 'datetime',
+            'setup_completed_at' => 'datetime',
+            'profit_settings_completed' => 'boolean',
             'is_blocked' => 'boolean',
             'social_media_accounts' => 'array',
         ];
@@ -181,6 +186,69 @@ class User extends Authenticatable
             ->where('category_id', $categoryId)
             ->where('is_active', true)
             ->first();
+    }
+
+    /**
+     * Check if seller is in trial period (24 hours from creation)
+     */
+    public function isInTrialPeriod(): bool
+    {
+        if ($this->user_type !== 'seller') {
+            return false;
+        }
+
+        // Trial period is 24 hours from account creation
+        return $this->created_at->addHours(24)->isFuture();
+    }
+
+    /**
+     * Check if seller trial has expired
+     */
+    public function hasTrialExpired(): bool
+    {
+        if ($this->user_type !== 'seller') {
+            return false;
+        }
+
+        return !$this->isInTrialPeriod() && !$this->hasActiveSubscription();
+    }
+
+    /**
+     * Check if seller has completed initial setup (settings + profit)
+     */
+    public function hasCompletedSetup(): bool
+    {
+        return $this->setup_completed_at !== null && $this->profit_settings_completed;
+    }
+
+    /**
+     * Check if seller can access full system
+     */
+    public function canAccessFullSystem(): bool
+    {
+        if ($this->user_type !== 'seller') {
+            return true;
+        }
+
+        // Must have completed setup first
+        if (!$this->hasCompletedSetup()) {
+            return false;
+        }
+
+        // Either in trial period or has active subscription
+        return $this->isInTrialPeriod() || $this->hasActiveSubscription();
+    }
+
+    /**
+     * Get trial remaining time in hours
+     */
+    public function getTrialRemainingHours(): int
+    {
+        if (!$this->isInTrialPeriod()) {
+            return 0;
+        }
+
+        return (int) now()->diffInHours($this->created_at->addHours(24), false);
     }
 
     /**

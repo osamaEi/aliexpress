@@ -75,6 +75,12 @@ class SellerSubcategoryProfitController extends Controller
                 ]
             );
 
+            // Mark profit settings as completed for seller setup flow
+            if (!$seller->profit_settings_completed) {
+                $seller->profit_settings_completed = true;
+                $seller->save();
+            }
+
             return back()->with('success', __('messages.profit_setting_saved'));
 
         } catch (\Exception $e) {
@@ -134,6 +140,12 @@ class SellerSubcategoryProfitController extends Controller
                             'is_active' => $isActive,
                         ]
                     );
+                }
+
+                // Mark profit settings as completed for seller setup flow
+                if (!$seller->profit_settings_completed) {
+                    $seller->profit_settings_completed = true;
+                    $seller->save();
                 }
             });
 
