@@ -744,21 +744,25 @@
             mainCategoriesSection.style.display = 'block';
         }
 
-        // Show info toast
-        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
-        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
-        showToast('info', isArabic ? `اختر فئة للبحث في ${countryName}` : `Select a category for ${countryName}`);
-
         // Update form action based on source
         if (countryCode === 'CN') {
+            // China: Show categories to select
             document.getElementById('searchForm').action = '{{ route("products.search-text") }}';
             document.getElementById('shipFromInput').value = 'CN';
             document.getElementById('countryCodeInput').value = '';
             document.getElementById('distributorIdInput').value = '';
+
+            const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
+            const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+            showToast('info', isArabic ? `اختر فئة للبحث في ${countryName}` : `Select a category for ${countryName}`);
         } else {
+            // Other countries: Show distributors immediately
             document.getElementById('searchForm').action = '{{ route("products.search-distributor") }}';
             document.getElementById('shipFromInput').value = '';
             document.getElementById('countryCodeInput').value = countryCode;
+
+            // Show distributors for the selected country immediately
+            showDistributorsForCountry(countryCode);
         }
     }
 
@@ -840,6 +844,66 @@
         }
     }
 
+    // Show distributors for a country (without requiring category selection)
+    function showDistributorsForCountry(countryCode) {
+        const distributorsSection = document.getElementById('subcategoryDistributors');
+        const distributorsList = document.getElementById('subcategoryDistributorsList');
+        const titleEl = document.getElementById('distributorsSectionTitle');
+
+        // Get country info
+        const countryInfo = countryNames[countryCode] || { ar: countryCode, en: countryCode };
+        const countryName = isArabic ? countryInfo.ar : countryInfo.en;
+
+        // Update title
+        if (titleEl) {
+            titleEl.textContent = isArabic ? `متاجر ${countryName}` : `${countryName} Stores`;
+        }
+
+        // Get distributors for this country
+        const distributors = distributorsByCountry[countryCode] || [];
+
+        // Build distributors grid HTML
+        let html = '';
+        if (distributors.length === 0) {
+            html = `<div class="text-center py-3 w-100">
+                <p class="text-muted mb-0">${isArabic ? 'لا يوجد متاجر حالياً في ${countryName}' : 'No stores available in ${countryName}'}</p>
+            </div>`;
+        } else {
+            // Add "All" option first (without category filter)
+            html = `<div class="distributor-grid-item" onclick="viewDistributorProducts(null, '${countryCode}')">
+                <div class="distributor-grid-avatar all-avatar">
+                    <i class="ri-apps-line"></i>
+                </div>
+                <span class="distributor-grid-name">${isArabic ? 'كل المتاجر' : 'All Stores'}</span>
+            </div>`;
+
+            distributors.forEach(dist => {
+                const avatar = dist.avatar ? `{{ asset('storage') }}/${dist.avatar}` : null;
+                const name = dist.store_name || dist.name;
+                html += `
+                    <div class="distributor-grid-item" onclick="viewDistributorProducts(${dist.id}, '${countryCode}')">
+                        <div class="distributor-grid-avatar">
+                            ${avatar
+                                ? `<img src="${avatar}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                                : ''
+                            }
+                            <div class="avatar-placeholder" ${avatar ? 'style="display:none;"' : ''}>
+                                <i class="ri-store-2-line"></i>
+                            </div>
+                        </div>
+                        <span class="distributor-grid-name">${name}</span>
+                    </div>
+                `;
+            });
+        }
+
+        distributorsList.innerHTML = html;
+
+        // Show section with animation
+        distributorsSection.style.display = 'block';
+        distributorsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
     // Show distributors under subcategory section
     function showDistributorsUnderSubcategory(countryCode, categoryId) {
         const distributorsSection = document.getElementById('subcategoryDistributors');
@@ -898,6 +962,23 @@
         // Show section with animation
         distributorsSection.style.display = 'block';
         distributorsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // View distributor products (without category filter)
+    function viewDistributorProducts(distributorId, countryCode) {
+        const keywordInput = document.getElementById('keyword');
+        const keyword = keywordInput ? keywordInput.value.trim() : '';
+
+        let url = '{{ route("products.search-distributor") }}?country_code=' + countryCode;
+        if (distributorId) {
+            url += '&distributor_id=' + distributorId;
+        }
+        if (keyword) {
+            url += '&keyword=' + encodeURIComponent(keyword);
+        }
+
+        showLoading();
+        window.location.href = url;
     }
 
     // View distributor products with category filter

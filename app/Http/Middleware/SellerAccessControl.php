@@ -10,24 +10,59 @@ class SellerAccessControl
 {
     /**
      * Routes that are always accessible for sellers (even after trial expires)
+     * These are: Subscriptions, Settings/Profile, Support tickets
      */
     protected array $alwaysAccessibleRoutes = [
+        // Subscription routes
         'subscriptions.index',
+        'subscriptions.show',
+        'subscriptions.create',
+        'subscriptions.store',
+        'subscriptions.edit',
+        'subscriptions.update',
+        'subscriptions.destroy',
         'subscriptions.subscribe',
         'subscriptions.history',
+        'subscriptions.cancel',
+        // Profile/Settings routes
         'profile.edit',
         'profile.update',
         'profile.logo.update',
+        'profile.destroy',
+        // Profit settings (part of setup and settings)
+        'seller.profit-settings.index',
+        'seller.profit-settings.store',
+        'seller.profit-settings.bulk-update',
+        'seller.profit-settings.toggle',
+        'seller.profit-settings.destroy',
+        'seller.profit-settings.api.get',
+        // Support tickets
         'seller.tickets.index',
         'seller.tickets.create',
         'seller.tickets.store',
         'seller.tickets.show',
         'seller.tickets.reply',
+        // Payment for subscription
+        'payment.subscription',
+        'payment.success',
+        'payment.error',
+        // Auth routes
         'logout',
+        'password.request',
+        'password.email',
+        'password.reset',
+        'password.update',
+        'password.confirm',
+        'verification.notice',
+        'verification.verify',
+        'verification.send',
+        // Language and locale switching
+        'locale.switch',
+        'currency.switch',
     ];
 
     /**
-     * Routes for initial setup
+     * Routes for initial setup (profile + profit settings)
      */
     protected array $setupRoutes = [
         'seller.profit-settings.index',
@@ -35,6 +70,7 @@ class SellerAccessControl
         'seller.profit-settings.bulk-update',
         'profile.edit',
         'profile.update',
+        'profile.logo.update',
     ];
 
     /**
@@ -49,9 +85,9 @@ class SellerAccessControl
             return $next($request);
         }
 
-        $currentRoute = $request->route()->getName();
+        $currentRoute = $request->route()?->getName();
 
-        // Always allow certain routes
+        // Always allow certain routes (subscriptions, settings, support)
         if ($this->isAlwaysAccessible($currentRoute)) {
             return $next($request);
         }
