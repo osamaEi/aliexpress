@@ -67,8 +67,8 @@
 
         /* Dynamic Colors from Settings */
         @php
-            $primaryColor = setting('primary_color', '#666cff');
-            $primaryLightColor = setting('primary_light_color', '#e7e7ff');
+            $primaryColor = setting('primary_color', '#561C04');
+            $primaryLightColor = setting('primary_light_color', '#f5e6e0');
             $primaryHoverColor = setting('btn_primary_hover_color', '#4a1603');
             $primaryActiveColor = setting('btn_primary_active_color', '#3d1202');
 

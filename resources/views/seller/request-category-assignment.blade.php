@@ -18,7 +18,7 @@
 
         .category-card.selected {
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-color: #3b82f6;
+            border-color: #561C04;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
         }
 
@@ -51,7 +51,7 @@
 
         .subcategory-item.selected {
             background: #eff6ff;
-            border: 1px solid #3b82f6;
+            border: 1px solid #561C04;
         }
 
         .assigned-badge {
@@ -114,9 +114,7 @@
     <div class="card shadow-sm">
         <div class="card-header bg-white border-0 pt-4">
             <div class="d-flex align-items-center mb-3">
-                <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                    <i class="ri-add-circle-line text-primary" style="font-size: 1.5rem;"></i>
-                </div>
+
                 <div>
                     <h4 class="mb-0">
                         {{ app()->getLocale() == 'ar' ? 'طلب تعيين فئات جديدة' : 'Request New Category Assignment' }}

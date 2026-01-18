@@ -1,15 +1,15 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
-    <div class="app-brand demo">
+    <div class="app-brand demo" style="justify-content: space-between;">
         <a href="{{ route('seller.dashboard') }}" class="app-brand-link">
           <span class="app-brand-logo demo">
             @if(setting('site_logo'))
                 <img src="{{ asset('storage/' . setting('site_logo')) }}" alt="{{ setting('site_name', 'EcommAli') }}" style="max-height: 50px; max-width: 50px;">
-       
+
             @endif
           </span>
         </a>
 
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large {{ app()->getLocale() == 'ar' ? 'me-auto' : 'ms-auto' }}">
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M8.47365 11.7183C8.11707 12.0749 8.11707 12.6531 8.47365 13.0097L12.071 16.607C12.4615 16.9975 12.4615 17.6305 12.071 18.021C11.6805 18.4115 11.0475 18.4115 10.657 18.021L5.83009 13.1941C5.37164 12.7356 5.37164 11.9924 5.83009 11.5339L10.657 6.707C11.0475 6.31653 11.6805 6.31653 12.071 6.707C12.4615 7.09747 12.4615 7.73053 12.071 8.121L8.47365 11.7183Z"
