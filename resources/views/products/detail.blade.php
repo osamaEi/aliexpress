@@ -260,11 +260,13 @@
                                             @endif
 
                                             <div class="mb-3">
-                                                @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
-                                                    <span class="badge bg-secondary mb-1 me-1">
-                                                        {{ $property['sku_property_name'] }}: <strong>{{ $property['sku_property_value'] }}</strong>
-                                                    </span>
-                                                @endforeach
+                                                @if(isset($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o']))
+                                                    @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
+                                                        <span class="badge bg-secondary mb-1 me-1">
+                                                            {{ $property['sku_property_name'] }}: <strong>{{ $property['sku_property_value'] }}</strong>
+                                                        </span>
+                                                    @endforeach
+                                                @endif
                                             </div>
 
                                             <div class="d-flex justify-content-between align-items-center">
