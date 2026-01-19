@@ -417,11 +417,13 @@
                                                         @endif
                                                         <div class="flex-grow-1">
                                                             <div class="mb-2">
-                                                                @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
-                                                                    <span class="badge bg-secondary me-1">
-                                                                        {{ $property['sku_property_name'] }}: {{ $property['sku_property_value'] }}
-                                                                    </span>
-                                                                @endforeach
+                                                                @if(isset($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o']))
+                                                                    @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
+                                                                        <span class="badge bg-secondary me-1">
+                                                                            {{ $property['sku_property_name'] }}: {{ $property['sku_property_value'] }}
+                                                                        </span>
+                                                                    @endforeach
+                                                                @endif
                                                             </div>
                                                             <div class="d-flex justify-content-between align-items-center">
                                                                 <div class="text-primary fw-bold">
@@ -691,9 +693,11 @@
                                     <option value="{{ $index }}"
                                             data-price="{{ $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 0 }}"
                                             data-stock="{{ $sku['sku_available_stock'] ?? 0 }}">
-                                        @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
-                                            {{ $property['sku_property_name'] }}: {{ $property['sku_property_value'] }}
-                                        @endforeach
+                                        @if(isset($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o']))
+                                            @foreach($sku['ae_sku_property_dtos']['ae_sku_property_d_t_o'] as $property)
+                                                {{ $property['sku_property_name'] }}: {{ $property['sku_property_value'] }}
+                                            @endforeach
+                                        @endif
                                         - ${{ $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 'N/A' }}
                                     </option>
                                 @endforeach
