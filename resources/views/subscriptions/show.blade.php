@@ -27,7 +27,6 @@
                         </span>
                         <h2 class="mb-0 d-flex align-items-center justify-content-center gap-2">
                                             {{ number_format($subscription->price, 2) }}
-                                                                                        <x-dirham-icon width="28" height="28" />
                                             <x-dirham-icon width="28" height="28" />
 
                                         </h2>
