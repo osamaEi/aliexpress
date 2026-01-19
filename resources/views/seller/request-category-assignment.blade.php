@@ -145,7 +145,7 @@
 
                 <div class="mb-5">
                     <div class="section-header">
-                        <h5 class="mb-0">
+                        <h5 class="mb-0 text-white">
                             <i class="ri-checkbox-multiple-line me-2"></i>
                             {{ app()->getLocale() == 'ar' ? 'الفئات الرئيسية' : 'Main Categories' }}
                             <span class="text-warning ms-2">*</span>
