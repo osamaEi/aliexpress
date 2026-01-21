@@ -1105,36 +1105,149 @@ class ProductController extends Controller
                 ];
             }
 
-            // Only add Arabic titles if app locale is Arabic (performance optimization)
-            // OPTIMIZED: Use cached translations, dispatch job for uncached titles in background
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'products' => $result['products'],
+                    'total_count' => $result['total_count'] ?? 0,
+                    'current_page' => $result['current_page'] ?? 1,
+                    'page_size' => $result['page_size'] ?? 50,
+                    'debug' => $request->get('debug') ? $result['debug'] : null,
+                ]);
+            }
+
+            // Get only active categories with AliExpress IDs
+            $categoryQuery = Category::where('aliexpress_category_id', '!=', null)
+                ->where('is_active', true);
+
+            // Filter categories for sellers based on their selected categories
+            $user = auth()->user();
+            if ($user && $user->user_type === 'seller') {
+                // Decode the seller's selected categories
+                $mainActivities = json_decode($user->main_activity, true) ?? [];
+                $subActivities = json_decode($user->sub_activity, true) ?? [];
+
+                // Combine both main and sub category IDs
+                $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+                // Filter query to only show allowed categories
+                if (!empty($allowedCategoryIds)) {
+                    $categoryQuery->whereIn('id', $allowedCategoryIds);
+                } else {
+                    // If no categories selected, show nothing
+                    $categoryQuery->whereRaw('1 = 0');
+                }
+            }
+
+            $allCategories = $categoryQuery->orderBy('order')->get();
+
+            // Separate main categories (no parent) and subcategories
+            $mainCategories = $allCategories->whereNull('parent_id');
+
+            // Organize subcategories by parent
+            $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
+                $parent->children = $allCategories->where('parent_id', $parent->id)->values();
+                return $parent;
+            });
+
+            // Get assigned products for current user (if seller)
+            $assignedProductIds = [];
+            if (auth()->check() && auth()->user()->user_type === 'seller') {
+                $assignedProductIds = \DB::table('product_user')
+                    ->where('user_id', auth()->id())
+                    ->pluck('aliexpress_product_id')
+                    ->toArray();
+            }
+
+            // Only fetch Arabic titles if app locale is Arabic (performance optimization)
             $appLocaleIsar = app()->getLocale() === 'ar';
             if (!empty($result['products']) && $appLocaleIsar) {
-                $titlesToTranslate = [];
+                try {
+                        // Current results are in English, fetch Arabic versions
+                        $arabicApiOptions = [
+                            'locale' => 'ar_MA',
+                            'page' => 1,
+                            'limit' => min(count($result['products']), 50),
+                            'country' => $request->get('country', 'AE'),
+                            'currency' => $request->get('currency', 'AED'),
+                        ];
 
-                foreach ($result['products'] as $index => $product) {
-                    $result['products'][$index]['title_en'] = $product['title'];
+                        // Add all filters to ensure we get the same products
+                        if (!empty($aliexpressCategoryId)) {
+                            $arabicApiOptions['category_id'] = $aliexpressCategoryId;
+                        }
+                        if ($request->get('choice_only')) {
+                            $arabicApiOptions['item_tag'] = 'choice';
+                        }
+                        if ($request->filled('ship_from')) {
+                            $arabicApiOptions['ship_from'] = $request->get('ship_from');
+                        }
 
-                    // Check if translation is already cached
-                    $translationKey = 'translation_' . md5($product['title']);
-                    $cachedTranslation = \Cache::get($translationKey);
+                        // Determine search keyword
+                        $searchKeyword = $keyword ?? $categoryKeyword ?? 'product';
 
-                    if ($cachedTranslation) {
-                        $result['products'][$index]['title_ar'] = $cachedTranslation;
-                    } else {
-                        // Use English title for now, queue translation for background
-                        $result['products'][$index]['title_ar'] = $product['title'];
-                        $titlesToTranslate[$index] = $product['title'];
-                    }
-                }
+                        // Cache Arabic search results
+                        $arabicCacheKey = 'aliexpress_search_ar_' . md5(json_encode([
+                            'keyword' => $searchKeyword,
+                            'options' => $arabicApiOptions
+                        ]));
 
-                // Dispatch background job for uncached translations
-                if (!empty($titlesToTranslate)) {
-                    \App\Jobs\TranslateProductTitlesJob::dispatch($titlesToTranslate)->onQueue('translations');
+                        $arabicResult = \Cache::remember($arabicCacheKey, 1800, function() use ($searchKeyword, $arabicApiOptions) {
+                            return $this->aliexpressTextService->searchProductsByText(
+                                $searchKeyword,
+                                $arabicApiOptions
+                            );
+                        });
 
-                    Log::info('Translation job dispatched', [
-                        'cached_titles' => count($result['products']) - count($titlesToTranslate),
-                        'queued_for_translation' => count($titlesToTranslate)
+                        // Create a map of product IDs to Arabic titles
+                        $arabicTitles = [];
+                        if (!empty($arabicResult['products'])) {
+                            foreach ($arabicResult['products'] as $arabicProduct) {
+                                $arabicTitles[$arabicProduct['item_id']] = $arabicProduct['title'] ?? null;
+                            }
+                        }
+
+                        // Add Arabic titles to original products (English is already there)
+                        foreach ($result['products'] as &$product) {
+                            $product['title_en'] = $product['title']; // Original English title
+                            $arabicFromApi = $arabicTitles[$product['item_id']] ?? null;
+
+                            // Check if Arabic title is actually different from English
+                            if ($arabicFromApi && $arabicFromApi !== $product['title']) {
+                                $product['title_ar'] = $arabicFromApi;
+                            } else {
+                                // Use Google Translate
+                                // Cache translation for 7 days
+                                $translationKey = 'translation_' . md5($product['title']);
+                                $product['title_ar'] = \Cache::remember($translationKey, 604800, function() use ($product) {
+                                    return $this->translationService->translate($product['title'], 'ar', 'en');
+                                });
+                            }
+                        }
+                        unset($product);
+
+                    Log::info('Arabic titles fetched', [
+                        'arabic_titles_found' => count($arabicTitles),
+                        'total_products' => count($result['products'])
                     ]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to fetch bilingual titles', [
+                        'error' => $e->getMessage()
+                    ]);
+                    // Fallback: use Google Translate
+                    foreach ($result['products'] as &$product) {
+                        if (!isset($product['title_en'])) {
+                            $product['title_en'] = $product['title'];
+                        }
+                        if (!isset($product['title_ar'])) {
+                            // Cache translation for 7 days
+                            $translationKey = 'translation_' . md5($product['title']);
+                            $product['title_ar'] = \Cache::remember($translationKey, 604800, function() use ($product) {
+                                return $this->translationService->translate($product['title'], 'ar', 'en');
+                            });
+                        }
+                    }
+                    unset($product);
                 }
             }
 
@@ -1193,52 +1306,6 @@ class ProductController extends Controller
                     'admin_profit_amount' => $adminProfit ?? 0,
                     'products_count' => count($result['products'])
                 ]);
-            }
-
-            // Return JSON for AJAX requests (after all processing is done)
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'products' => $result['products'],
-                    'total_count' => $result['total_count'] ?? 0,
-                    'current_page' => $result['current_page'] ?? 1,
-                    'page_size' => $result['page_size'] ?? 50,
-                    'debug' => $request->get('debug') ? $result['debug'] : null,
-                ]);
-            }
-
-            // Get only active categories with AliExpress IDs (for non-AJAX requests)
-            $categoryQuery = Category::where('aliexpress_category_id', '!=', null)
-                ->where('is_active', true);
-
-            // Filter categories for sellers based on their selected categories
-            $user = auth()->user();
-            if ($user && $user->user_type === 'seller') {
-                $mainActivities = json_decode($user->main_activity, true) ?? [];
-                $subActivities = json_decode($user->sub_activity, true) ?? [];
-                $allowedCategoryIds = array_merge($mainActivities, $subActivities);
-
-                if (!empty($allowedCategoryIds)) {
-                    $categoryQuery->whereIn('id', $allowedCategoryIds);
-                } else {
-                    $categoryQuery->whereRaw('1 = 0');
-                }
-            }
-
-            $allCategories = $categoryQuery->orderBy('order')->get();
-            $mainCategories = $allCategories->whereNull('parent_id');
-            $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
-                $parent->children = $allCategories->where('parent_id', $parent->id)->values();
-                return $parent;
-            });
-
-            // Get assigned products for current user (if seller)
-            $assignedProductIds = [];
-            if (auth()->check() && auth()->user()->user_type === 'seller') {
-                $assignedProductIds = \DB::table('product_user')
-                    ->where('user_id', auth()->id())
-                    ->pluck('aliexpress_product_id')
-                    ->toArray();
             }
 
             // Get distributor countries for the country filter buttons

@@ -142,8 +142,8 @@ class AliexpressTextService
         ]);
 
         try {
-            // Make GET request with query parameters (reduced timeout for faster response)
-            $response = Http::timeout(15)
+            // Make GET request with query parameters
+            $response = Http::timeout(30)
                 ->get($this->apiUrl, $params);
 
             $statusCode = $response->status();
