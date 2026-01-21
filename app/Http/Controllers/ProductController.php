@@ -1105,60 +1105,6 @@ class ProductController extends Controller
                 ];
             }
 
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'products' => $result['products'],
-                    'total_count' => $result['total_count'] ?? 0,
-                    'current_page' => $result['current_page'] ?? 1,
-                    'page_size' => $result['page_size'] ?? 50,
-                    'debug' => $request->get('debug') ? $result['debug'] : null,
-                ]);
-            }
-
-            // Get only active categories with AliExpress IDs
-            $categoryQuery = Category::where('aliexpress_category_id', '!=', null)
-                ->where('is_active', true);
-
-            // Filter categories for sellers based on their selected categories
-            $user = auth()->user();
-            if ($user && $user->user_type === 'seller') {
-                // Decode the seller's selected categories
-                $mainActivities = json_decode($user->main_activity, true) ?? [];
-                $subActivities = json_decode($user->sub_activity, true) ?? [];
-
-                // Combine both main and sub category IDs
-                $allowedCategoryIds = array_merge($mainActivities, $subActivities);
-
-                // Filter query to only show allowed categories
-                if (!empty($allowedCategoryIds)) {
-                    $categoryQuery->whereIn('id', $allowedCategoryIds);
-                } else {
-                    // If no categories selected, show nothing
-                    $categoryQuery->whereRaw('1 = 0');
-                }
-            }
-
-            $allCategories = $categoryQuery->orderBy('order')->get();
-
-            // Separate main categories (no parent) and subcategories
-            $mainCategories = $allCategories->whereNull('parent_id');
-
-            // Organize subcategories by parent
-            $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
-                $parent->children = $allCategories->where('parent_id', $parent->id)->values();
-                return $parent;
-            });
-
-            // Get assigned products for current user (if seller)
-            $assignedProductIds = [];
-            if (auth()->check() && auth()->user()->user_type === 'seller') {
-                $assignedProductIds = \DB::table('product_user')
-                    ->where('user_id', auth()->id())
-                    ->pluck('aliexpress_product_id')
-                    ->toArray();
-            }
-
             // Only add Arabic titles if app locale is Arabic (performance optimization)
             // OPTIMIZED: Use cached translations, dispatch job for uncached titles in background
             $appLocaleIsar = app()->getLocale() === 'ar';
@@ -1247,6 +1193,52 @@ class ProductController extends Controller
                     'admin_profit_amount' => $adminProfit ?? 0,
                     'products_count' => count($result['products'])
                 ]);
+            }
+
+            // Return JSON for AJAX requests (after all processing is done)
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'products' => $result['products'],
+                    'total_count' => $result['total_count'] ?? 0,
+                    'current_page' => $result['current_page'] ?? 1,
+                    'page_size' => $result['page_size'] ?? 50,
+                    'debug' => $request->get('debug') ? $result['debug'] : null,
+                ]);
+            }
+
+            // Get only active categories with AliExpress IDs (for non-AJAX requests)
+            $categoryQuery = Category::where('aliexpress_category_id', '!=', null)
+                ->where('is_active', true);
+
+            // Filter categories for sellers based on their selected categories
+            $user = auth()->user();
+            if ($user && $user->user_type === 'seller') {
+                $mainActivities = json_decode($user->main_activity, true) ?? [];
+                $subActivities = json_decode($user->sub_activity, true) ?? [];
+                $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+                if (!empty($allowedCategoryIds)) {
+                    $categoryQuery->whereIn('id', $allowedCategoryIds);
+                } else {
+                    $categoryQuery->whereRaw('1 = 0');
+                }
+            }
+
+            $allCategories = $categoryQuery->orderBy('order')->get();
+            $mainCategories = $allCategories->whereNull('parent_id');
+            $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
+                $parent->children = $allCategories->where('parent_id', $parent->id)->values();
+                return $parent;
+            });
+
+            // Get assigned products for current user (if seller)
+            $assignedProductIds = [];
+            if (auth()->check() && auth()->user()->user_type === 'seller') {
+                $assignedProductIds = \DB::table('product_user')
+                    ->where('user_id', auth()->id())
+                    ->pluck('aliexpress_product_id')
+                    ->toArray();
             }
 
             // Get distributor countries for the country filter buttons
