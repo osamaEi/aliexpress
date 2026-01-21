@@ -1159,95 +1159,36 @@ class ProductController extends Controller
                     ->toArray();
             }
 
-            // Only fetch Arabic titles if app locale is Arabic (performance optimization)
+            // Only add Arabic titles if app locale is Arabic (performance optimization)
+            // OPTIMIZED: Use cached translations, dispatch job for uncached titles in background
             $appLocaleIsar = app()->getLocale() === 'ar';
             if (!empty($result['products']) && $appLocaleIsar) {
-                try {
-                        // Current results are in English, fetch Arabic versions
-                        $arabicApiOptions = [
-                            'locale' => 'ar_MA',
-                            'page' => 1,
-                            'limit' => min(count($result['products']), 50),
-                            'country' => $request->get('country', 'AE'),
-                            'currency' => $request->get('currency', 'AED'),
-                        ];
+                $titlesToTranslate = [];
 
-                        // Add all filters to ensure we get the same products
-                        if (!empty($aliexpressCategoryId)) {
-                            $arabicApiOptions['category_id'] = $aliexpressCategoryId;
-                        }
-                        if ($request->get('choice_only')) {
-                            $arabicApiOptions['item_tag'] = 'choice';
-                        }
-                        if ($request->filled('ship_from')) {
-                            $arabicApiOptions['ship_from'] = $request->get('ship_from');
-                        }
+                foreach ($result['products'] as $index => $product) {
+                    $result['products'][$index]['title_en'] = $product['title'];
 
-                        // Determine search keyword
-                        $searchKeyword = $keyword ?? $categoryKeyword ?? 'product';
+                    // Check if translation is already cached
+                    $translationKey = 'translation_' . md5($product['title']);
+                    $cachedTranslation = \Cache::get($translationKey);
 
-                        // Cache Arabic search results
-                        $arabicCacheKey = 'aliexpress_search_ar_' . md5(json_encode([
-                            'keyword' => $searchKeyword,
-                            'options' => $arabicApiOptions
-                        ]));
-
-                        $arabicResult = \Cache::remember($arabicCacheKey, 1800, function() use ($searchKeyword, $arabicApiOptions) {
-                            return $this->aliexpressTextService->searchProductsByText(
-                                $searchKeyword,
-                                $arabicApiOptions
-                            );
-                        });
-
-                        // Create a map of product IDs to Arabic titles
-                        $arabicTitles = [];
-                        if (!empty($arabicResult['products'])) {
-                            foreach ($arabicResult['products'] as $arabicProduct) {
-                                $arabicTitles[$arabicProduct['item_id']] = $arabicProduct['title'] ?? null;
-                            }
-                        }
-
-                        // Add Arabic titles to original products (English is already there)
-                        foreach ($result['products'] as &$product) {
-                            $product['title_en'] = $product['title']; // Original English title
-                            $arabicFromApi = $arabicTitles[$product['item_id']] ?? null;
-
-                            // Check if Arabic title is actually different from English
-                            if ($arabicFromApi && $arabicFromApi !== $product['title']) {
-                                $product['title_ar'] = $arabicFromApi;
-                            } else {
-                                // Use Google Translate
-                                // Cache translation for 7 days
-                                $translationKey = 'translation_' . md5($product['title']);
-                                $product['title_ar'] = \Cache::remember($translationKey, 604800, function() use ($product) {
-                                    return $this->translationService->translate($product['title'], 'ar', 'en');
-                                });
-                            }
-                        }
-                        unset($product);
-
-                    Log::info('Arabic titles fetched', [
-                        'arabic_titles_found' => count($arabicTitles),
-                        'total_products' => count($result['products'])
-                    ]);
-                } catch (\Exception $e) {
-                    Log::warning('Failed to fetch bilingual titles', [
-                        'error' => $e->getMessage()
-                    ]);
-                    // Fallback: use Google Translate
-                    foreach ($result['products'] as &$product) {
-                        if (!isset($product['title_en'])) {
-                            $product['title_en'] = $product['title'];
-                        }
-                        if (!isset($product['title_ar'])) {
-                            // Cache translation for 7 days
-                            $translationKey = 'translation_' . md5($product['title']);
-                            $product['title_ar'] = \Cache::remember($translationKey, 604800, function() use ($product) {
-                                return $this->translationService->translate($product['title'], 'ar', 'en');
-                            });
-                        }
+                    if ($cachedTranslation) {
+                        $result['products'][$index]['title_ar'] = $cachedTranslation;
+                    } else {
+                        // Use English title for now, queue translation for background
+                        $result['products'][$index]['title_ar'] = $product['title'];
+                        $titlesToTranslate[$index] = $product['title'];
                     }
-                    unset($product);
+                }
+
+                // Dispatch background job for uncached translations
+                if (!empty($titlesToTranslate)) {
+                    \App\Jobs\TranslateProductTitlesJob::dispatch($titlesToTranslate)->onQueue('translations');
+
+                    Log::info('Translation job dispatched', [
+                        'cached_titles' => count($result['products']) - count($titlesToTranslate),
+                        'queued_for_translation' => count($titlesToTranslate)
+                    ]);
                 }
             }
 
