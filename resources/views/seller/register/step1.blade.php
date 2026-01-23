@@ -692,22 +692,22 @@
                                 <i class="ri-phone-line"></i> {{ app()->getLocale() == 'ar' ? 'رقم الهاتف (واتساب)' : 'Phone Number (WhatsApp)' }}
                             </label>
                             <div style="position: relative;">
-                                <div class="phone-input-wrapper" style="display: flex; align-items: center; border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden; transition: all 0.3s;" id="phoneInputWrapper">
-                                    <div class="phone-code-trigger" id="phoneCodeSelected" style="display: flex; align-items: center; gap: 6px; padding: 13px 12px; cursor: pointer; background: #f9fafb; border-{{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 2px solid #e5e7eb; flex-shrink: 0;">
-                                        <img id="selectedFlag" src="https://flagcdn.com/w20/ae.png" style="width: 20px; height: 15px; border-radius: 2px;">
-                                        <span id="selectedCode" style="font-size: 14px; font-weight: 500; color: #333;">+971</span>
-                                        <i class="ri-arrow-down-s-line" style="font-size: 14px; color: #999;"></i>
-                                    </div>
+                                <div class="phone-input-wrapper" style="display: flex; align-items: center; border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden; transition: all 0.3s; direction: ltr;" id="phoneInputWrapper">
                                     <input type="text"
                                            class="@error('phone') is-invalid @enderror"
                                            id="phone"
                                            name="phone"
                                            value="{{ old('phone') }}"
                                            placeholder="{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone number' }}"
-                                           style="border: none; outline: none; padding: 13px 15px; flex: 1; font-size: 15px; direction: ltr; width: 100%;"
+                                           style="border: none; outline: none; padding: 13px 15px; flex: 1; font-size: 15px; direction: ltr; text-align: left; width: 100%;"
                                            required>
+                                    <div class="phone-code-trigger" id="phoneCodeSelected" style="display: flex; align-items: center; gap: 6px; padding: 13px 12px; cursor: pointer; background: #f9fafb; border-left: 2px solid #e5e7eb; flex-shrink: 0;">
+                                        <img id="selectedFlag" src="https://flagcdn.com/w20/ae.png" style="width: 20px; height: 15px; border-radius: 2px;">
+                                        <span id="selectedCode" style="font-size: 14px; font-weight: 500; color: #333;">+971</span>
+                                        <i class="ri-arrow-down-s-line" style="font-size: 14px; color: #999;"></i>
+                                    </div>
                                 </div>
-                                <div class="phone-code-dropdown" id="phoneCodeDropdown" style="display: none; position: absolute; top: 100%; {{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 0; width: 200px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+                                <div class="phone-code-dropdown" id="phoneCodeDropdown" style="display: none; position: absolute; top: 100%; right: 0; width: 200px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
                                     @php
                                         $phoneCodes = [
                                             ['code' => '971', 'flag' => 'ae', 'name' => 'UAE'],
