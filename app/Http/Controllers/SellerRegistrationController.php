@@ -31,6 +31,7 @@ class SellerRegistrationController extends Controller
             'full_name' => 'required|string|max:255',
             'company_name' => 'required|string|max:255',
             'country' => 'required|string|max:100',
+            'phone_code' => 'required|string|max:5',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
@@ -79,6 +80,10 @@ class SellerRegistrationController extends Controller
             $logoName = time() . '_' . Str::slug($validated['company_name']) . '.' . $logo->getClientOriginalExtension();
             $logoPath = $logo->storeAs('logos/sellers', $logoName, 'public');
         }
+
+        // Combine phone_code + phone for DB storage (e.g. 971501234567)
+        $validated['phone'] = $validated['phone_code'] . $validated['phone'];
+        $validated['phone_code'] = '+' . $validated['phone_code'];
 
         // Remove reCAPTCHA, logo file, and password_confirmation from validated data
         unset($validated['g-recaptcha-response']);
@@ -261,6 +266,7 @@ class SellerRegistrationController extends Controller
             'company_name' => $data['company_name'],
             'country' => $data['country'],
             'phone' => $data['phone'] ?? null,
+            'phone_code' => $data['phone_code'] ?? '+971',
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'user_type' => 'seller',
@@ -354,6 +360,7 @@ class SellerRegistrationController extends Controller
         Session::put('whatsapp_otp_' . $phone, $otp);
         Session::put('whatsapp_otp_expiry_' . $phone, now()->addMinutes(10));
 
+        // Phone is already the full number (code + local), send directly
         $isEnglish = app()->getLocale() !== 'ar';
         $whatsappService = new WhatsAppOTPService();
         $whatsappService->sendOTP($phone, $otp, $isEnglish);

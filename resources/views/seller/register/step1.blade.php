@@ -691,13 +691,54 @@
                             <label for="phone" class="form-label">
                                 <i class="ri-phone-line"></i> {{ app()->getLocale() == 'ar' ? 'رقم الهاتف (واتساب)' : 'Phone Number (WhatsApp)' }}
                             </label>
-                            <input type="text"
-                                   class="form-control @error('phone') is-invalid @enderror"
-                                   id="phone"
-                                   name="phone"
-                                   value="{{ old('phone') }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'مثال: 971501234567' : 'Example: 971501234567' }}"
-                                   required>
+                            <div style="display: flex; gap: 8px;">
+                                <div class="phone-code-wrapper" style="position: relative; width: 140px; flex-shrink: 0;">
+                                    <div class="phone-code-selected" id="phoneCodeSelected" style="display: flex; align-items: center; gap: 6px; padding: 13px 12px; border: 2px solid #e5e7eb; border-radius: 10px; cursor: pointer; background: white; font-size: 14px; height: 100%;">
+                                        <img id="selectedFlag" src="https://flagcdn.com/w20/ae.png" style="width: 20px; height: 15px; border-radius: 2px;">
+                                        <span id="selectedCode">+971</span>
+                                        <i class="ri-arrow-down-s-line" style="margin-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: auto; font-size: 16px; color: #999;"></i>
+                                    </div>
+                                    <div class="phone-code-dropdown" id="phoneCodeDropdown" style="display: none; position: absolute; top: 100%; {{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 0; width: 180px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+                                        @php
+                                            $phoneCodes = [
+                                                ['code' => '971', 'flag' => 'ae', 'name' => 'UAE'],
+                                                ['code' => '966', 'flag' => 'sa', 'name' => 'KSA'],
+                                                ['code' => '20', 'flag' => 'eg', 'name' => 'Egypt'],
+                                                ['code' => '965', 'flag' => 'kw', 'name' => 'Kuwait'],
+                                                ['code' => '974', 'flag' => 'qa', 'name' => 'Qatar'],
+                                                ['code' => '973', 'flag' => 'bh', 'name' => 'Bahrain'],
+                                                ['code' => '968', 'flag' => 'om', 'name' => 'Oman'],
+                                                ['code' => '962', 'flag' => 'jo', 'name' => 'Jordan'],
+                                                ['code' => '961', 'flag' => 'lb', 'name' => 'Lebanon'],
+                                                ['code' => '963', 'flag' => 'sy', 'name' => 'Syria'],
+                                                ['code' => '970', 'flag' => 'ps', 'name' => 'Palestine'],
+                                                ['code' => '964', 'flag' => 'iq', 'name' => 'Iraq'],
+                                                ['code' => '218', 'flag' => 'ly', 'name' => 'Libya'],
+                                                ['code' => '216', 'flag' => 'tn', 'name' => 'Tunisia'],
+                                                ['code' => '213', 'flag' => 'dz', 'name' => 'Algeria'],
+                                                ['code' => '212', 'flag' => 'ma', 'name' => 'Morocco'],
+                                                ['code' => '249', 'flag' => 'sd', 'name' => 'Sudan'],
+                                                ['code' => '967', 'flag' => 'ye', 'name' => 'Yemen'],
+                                            ];
+                                        @endphp
+                                        @foreach($phoneCodes as $country)
+                                            <div class="phone-code-option" data-code="{{ $country['code'] }}" data-flag="{{ $country['flag'] }}" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; transition: background 0.2s;">
+                                                <img src="https://flagcdn.com/w20/{{ $country['flag'] }}.png" style="width: 20px; height: 15px; border-radius: 2px;">
+                                                <span>+{{ $country['code'] }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <input type="hidden" name="phone_code" id="phone_code" value="{{ old('phone_code', '971') }}">
+                                </div>
+                                <input type="text"
+                                       class="form-control @error('phone') is-invalid @enderror"
+                                       id="phone"
+                                       name="phone"
+                                       value="{{ old('phone') }}"
+                                       placeholder="{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone number' }}"
+                                       style="direction: ltr;"
+                                       required>
+                            </div>
                             @error('phone')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
@@ -859,6 +900,53 @@
             };
             reader.readAsDataURL(file);
         }
+    </script>
+
+    <!-- Phone Code Dropdown Script -->
+    <script>
+        const phoneCodeSelected = document.getElementById('phoneCodeSelected');
+        const phoneCodeDropdown = document.getElementById('phoneCodeDropdown');
+        const phoneCodeInput = document.getElementById('phone_code');
+        const selectedFlag = document.getElementById('selectedFlag');
+        const selectedCode = document.getElementById('selectedCode');
+        const phoneCodeOptions = document.querySelectorAll('.phone-code-option');
+
+        // Set initial value from old input
+        const initialCode = '{{ old("phone_code", "971") }}';
+        const initialOption = document.querySelector(`.phone-code-option[data-code="${initialCode}"]`);
+        if (initialOption) {
+            selectedFlag.src = `https://flagcdn.com/w20/${initialOption.dataset.flag}.png`;
+            selectedCode.textContent = `+${initialOption.dataset.code}`;
+        }
+
+        // Toggle dropdown
+        phoneCodeSelected.addEventListener('click', (e) => {
+            e.stopPropagation();
+            phoneCodeDropdown.style.display = phoneCodeDropdown.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Select option
+        phoneCodeOptions.forEach(option => {
+            option.addEventListener('mouseover', () => {
+                option.style.background = '#f3f4f6';
+            });
+            option.addEventListener('mouseout', () => {
+                option.style.background = 'transparent';
+            });
+            option.addEventListener('click', () => {
+                const code = option.dataset.code;
+                const flag = option.dataset.flag;
+                selectedFlag.src = `https://flagcdn.com/w20/${flag}.png`;
+                selectedCode.textContent = `+${code}`;
+                phoneCodeInput.value = code;
+                phoneCodeDropdown.style.display = 'none';
+            });
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', () => {
+            phoneCodeDropdown.style.display = 'none';
+        });
     </script>
 
     <!-- reCAPTCHA v3 Script -->
