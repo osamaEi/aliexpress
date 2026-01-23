@@ -683,7 +683,7 @@
                                     @endphp
                                     @foreach($countries as $c)
                                         <div class="country-option" data-value="{{ $c['value'] }}" data-flag="{{ $c['flag'] }}" data-name="{{ app()->getLocale() == 'ar' ? $c['name_ar'] : $c['name_en'] }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.2s; font-size: 14px;">
-                                            <img src="https://flagcdn.com/w40/{{ $c['flag'] }}.svg" style="width: 22px; height: 16px; border-radius: 2px; object-fit: cover;">
+                                            <img src="https://flagcdn.com/w20/{{ $c['flag'] }}.png" style="width: 20px; height: 15px; border-radius: 2px;">
                                             <span>{{ app()->getLocale() == 'ar' ? $c['name_ar'] : $c['name_en'] }}</span>
                                         </div>
                                     @endforeach
@@ -993,7 +993,7 @@
         if (initialCountry) {
             const initialCountryOption = document.querySelector(`.country-option[data-value="${initialCountry}"]`);
             if (initialCountryOption) {
-                countryFlag.src = `https://flagcdn.com/w40/${initialCountryOption.dataset.flag}.svg`;
+                countryFlag.src = `https://flagcdn.com/w20/${initialCountryOption.dataset.flag}.png`;
                 countryFlag.style.display = 'block';
                 countryName.textContent = initialCountryOption.dataset.name;
                 countryName.style.color = '#333';
@@ -1025,7 +1025,7 @@
                 const value = option.dataset.value;
                 const flag = option.dataset.flag;
                 const name = option.dataset.name;
-                countryFlag.src = `https://flagcdn.com/w40/${flag}.svg`;
+                countryFlag.src = `https://flagcdn.com/w20/${flag}.png`;
                 countryFlag.style.display = 'block';
                 countryName.textContent = name;
                 countryName.style.color = '#333';

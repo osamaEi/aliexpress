@@ -403,78 +403,97 @@
             opacity: 0.9;
         }
 
-        /* Category Checkboxes */
-        .category-section {
-            margin-bottom: 25px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid #e5e7eb;
+        /* Category Cards */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .category-section:last-child {
-            border-bottom: none;
-        }
-
-        .category-checkbox {
+        .category-card {
             position: relative;
             cursor: pointer;
-            user-select: none;
-            display: inline-block;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            background: white;
         }
 
-        .category-checkbox.main-category {
-            display: block;
-            margin-bottom: 15px;
+        .category-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(86, 28, 4, 0.12);
         }
 
-        .category-checkbox input[type="checkbox"] {
+        .category-card.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(86, 28, 4, 0.2);
+        }
+
+        .category-card.selected::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(86, 28, 4, 0.08);
+            pointer-events: none;
+        }
+
+        .category-card.selected .category-card-check {
+            display: flex;
+        }
+
+        .category-card-check {
+            display: none;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+        .category-card input[type="checkbox"] {
             position: absolute;
             opacity: 0;
-            cursor: pointer;
+            pointer-events: none;
         }
 
-        .category-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 20px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            background: white;
-            transition: all 0.3s;
-            font-size: 15px;
+        .category-card-img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+
+        .category-card-name {
+            padding: 10px 12px;
+            font-size: 13px;
             font-weight: 600;
+            color: #333;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .sub-category .category-label {
-            font-size: 14px;
-            font-weight: 500;
-            padding: 12px 16px;
+        .category-card.selected .category-card-name {
+            color: var(--primary-color);
         }
 
-        .category-label i {
-            font-size: 18px;
-            color: white;
-            opacity: 0;
-            transition: all 0.3s;
-        }
-
-        .category-checkbox:hover .category-label {
-            border-color: var(--primary-color);
-            background: rgba(86, 28, 4, 0.05);
-        }
-
-        .category-checkbox input[type="checkbox"]:checked + .category-label {
-            border-color: var(--primary-color);
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-        }
-
-        .category-checkbox input[type="checkbox"]:checked + .category-label i {
-            opacity: 1;
-        }
-
+        /* Subcategories */
         .sub-categories-wrapper {
-            margin-top: 15px;
+            margin-top: 20px;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 12px;
@@ -498,22 +517,65 @@
             font-weight: 600;
             color: var(--primary-color);
             margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 12px;
         }
 
         .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 10px;
+        }
+
+        .sub-category-item {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .sub-category-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sub-category-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .sub-category-label i {
+            font-size: 16px;
+            color: white;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .sub-category-item:hover .sub-category-label {
+            border-color: var(--primary-color);
+        }
+
+        .sub-category-item input[type="checkbox"]:checked + .sub-category-label {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .sub-category-item input[type="checkbox"]:checked + .sub-category-label i {
+            opacity: 1;
         }
 
         @media (max-width: 768px) {
             .categories-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            }
+            .sub-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -609,47 +671,61 @@
                         {{ app()->getLocale() == 'ar' ? 'اختر الفئات الرئيسية وسيتم إظهار الفئات الفرعية أسفلها' : 'Select main categories and subcategories will appear below them' }}
                     </p>
 
-                    @foreach($mainCategories as $category)
-                        <div class="category-section" data-category-id="{{ $category->id }}">
-                            <!-- Main Category -->
-                            <label class="category-checkbox main-category">
+                    <!-- Main Categories Grid with Photos -->
+                    <div class="categories-grid">
+                        @foreach($mainCategories as $category)
+                            <div class="category-card {{ in_array($category->id, old('main_categories', [])) ? 'selected' : '' }}"
+                                 data-category-id="{{ $category->id }}"
+                                 onclick="toggleMainCategory(this, {{ $category->id }})">
+                                <div class="category-card-check">
+                                    <i class="ri-check-line"></i>
+                                </div>
                                 <input type="checkbox"
                                        name="main_categories[]"
                                        value="{{ $category->id }}"
                                        class="main-category-checkbox"
                                        data-category-id="{{ $category->id }}"
                                        {{ in_array($category->id, old('main_categories', [])) ? 'checked' : '' }}>
-                                <span class="category-label">
-                                    <i class="ri-check-line"></i>
-                                    {{ app()->getLocale() == 'ar' ? $category->name_ar : $category->name }}
-                                </span>
-                            </label>
-
-                            <!-- Sub Categories for this main category -->
-                            @if(isset($subCategories[$category->id]) && count($subCategories[$category->id]) > 0)
-                                <div class="sub-categories-wrapper" id="sub-cat-{{ $category->id }}" style="display: none;">
-                                    <div class="sub-categories-label">
-                                        {{ app()->getLocale() == 'ar' ? 'الفئات الفرعية:' : 'Subcategories:' }}
+                                @if($category->photo || $category->image)
+                                    <img src="{{ asset($category->photo ?? $category->image) }}" alt="{{ $category->name }}" class="category-card-img">
+                                @else
+                                    <div class="category-card-img" style="display: flex; align-items: center; justify-content: center; background: #f3f4f6;">
+                                        <i class="ri-folder-line" style="font-size: 32px; color: #ccc;"></i>
                                     </div>
-                                    <div class="categories-grid sub-grid">
-                                        @foreach($subCategories[$category->id] as $subCat)
-                                            <label class="category-checkbox sub-category">
-                                                <input type="checkbox"
-                                                       name="sub_categories[]"
-                                                       value="{{ $subCat->id }}"
-                                                       class="sub-category-checkbox"
-                                                       data-parent-id="{{ $category->id }}"
-                                                       {{ in_array($subCat->id, old('sub_categories', [])) ? 'checked' : '' }}>
-                                                <span class="category-label">
-                                                    <i class="ri-check-line"></i>
-                                                    {{ app()->getLocale() == 'ar' ? $subCat->name_ar : $subCat->name }}
-                                                </span>
-                                            </label>
-                                        @endforeach
-                                    </div>
+                                @endif
+                                <div class="category-card-name">
+                                    {{ app()->getLocale() == 'ar' ? ($category->name_ar ?: $category->name) : $category->name }}
                                 </div>
-                            @endif
-                        </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Subcategories Section (shown when main category selected) -->
+                    @foreach($mainCategories as $category)
+                        @if(isset($subCategories[$category->id]) && count($subCategories[$category->id]) > 0)
+                            <div class="sub-categories-wrapper" id="sub-cat-{{ $category->id }}" style="display: none;">
+                                <div class="sub-categories-label">
+                                    {{ app()->getLocale() == 'ar' ? 'الفئات الفرعية لـ' : 'Subcategories of' }}
+                                    "{{ app()->getLocale() == 'ar' ? ($category->name_ar ?: $category->name) : $category->name }}":
+                                </div>
+                                <div class="sub-grid">
+                                    @foreach($subCategories[$category->id] as $subCat)
+                                        <label class="sub-category-item">
+                                            <input type="checkbox"
+                                                   name="sub_categories[]"
+                                                   value="{{ $subCat->id }}"
+                                                   class="sub-category-checkbox"
+                                                   data-parent-id="{{ $category->id }}"
+                                                   {{ in_array($subCat->id, old('sub_categories', [])) ? 'checked' : '' }}>
+                                            <span class="sub-category-label">
+                                                <i class="ri-check-line"></i>
+                                                {{ app()->getLocale() == 'ar' ? ($subCat->name_ar ?: $subCat->name) : $subCat->name }}
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     @endforeach
 
                     @error('main_categories')
@@ -683,49 +759,41 @@
     </div>
 
     <script>
+        function toggleMainCategory(card, categoryId) {
+            const checkbox = card.querySelector('.main-category-checkbox');
+            const isChecked = !checkbox.checked;
+            checkbox.checked = isChecked;
+
+            const subCategoryGroup = document.getElementById('sub-cat-' + categoryId);
+
+            if (isChecked) {
+                card.classList.add('selected');
+                if (subCategoryGroup) {
+                    subCategoryGroup.style.display = 'block';
+                    // Auto-select all subcategories
+                    const subCheckboxes = subCategoryGroup.querySelectorAll('.sub-category-checkbox');
+                    subCheckboxes.forEach(sub => { sub.checked = true; });
+                }
+            } else {
+                card.classList.remove('selected');
+                if (subCategoryGroup) {
+                    subCategoryGroup.style.display = 'none';
+                    const subCheckboxes = subCategoryGroup.querySelectorAll('.sub-category-checkbox');
+                    subCheckboxes.forEach(sub => { sub.checked = false; });
+                }
+            }
+        }
+
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            const mainCategoryCheckboxes = document.querySelectorAll('.main-category-checkbox');
-            const subCategoriesContainer = document.getElementById('subCategoriesContainer');
-
-            // Handle main category checkbox changes
-            mainCategoryCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const categoryId = this.dataset.categoryId;
-                    const subCategoryGroup = document.getElementById('sub-cat-' + categoryId);
-
-                    if (this.checked) {
-                        // Show subcategories for this main category
-                        if (subCategoryGroup) {
-                            subCategoryGroup.style.display = 'block';
-
-                            // Auto-select all subcategories when main category is selected
-                            const subCheckboxes = subCategoryGroup.querySelectorAll('.sub-category-checkbox');
-                            subCheckboxes.forEach(sub => {
-                                sub.checked = true;
-                            });
-                        }
-                    } else {
-                        // Hide subcategories and uncheck them
-                        if (subCategoryGroup) {
-                            subCategoryGroup.style.display = 'none';
-                            const subCheckboxes = subCategoryGroup.querySelectorAll('.sub-category-checkbox');
-                            subCheckboxes.forEach(sub => sub.checked = false);
-                        }
-                    }
-                });
-
-                // Initialize display on page load
-                if (checkbox.checked) {
-                    const categoryId = checkbox.dataset.categoryId;
-                    const subCategoryGroup = document.getElementById('sub-cat-' + categoryId);
-                    if (subCategoryGroup) {
-                        subCategoryGroup.style.display = 'block';
-                        // Also select all subcategories on initial load if main is checked
-                        const subCheckboxes = subCategoryGroup.querySelectorAll('.sub-category-checkbox');
-                        subCheckboxes.forEach(sub => {
-                            sub.checked = true;
-                        });
-                    }
+            const checkedCards = document.querySelectorAll('.category-card.selected');
+            checkedCards.forEach(card => {
+                const categoryId = card.dataset.categoryId;
+                const subCategoryGroup = document.getElementById('sub-cat-' + categoryId);
+                if (subCategoryGroup) {
+                    subCategoryGroup.style.display = 'block';
+                    const subCheckboxes = subCategoryGroup.querySelectorAll('.sub-category-checkbox');
+                    subCheckboxes.forEach(sub => { sub.checked = true; });
                 }
             });
         });
