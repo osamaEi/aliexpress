@@ -648,38 +648,48 @@
                             <label for="country" class="form-label">
                                 <i class="ri-map-pin-line"></i> {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }}
                             </label>
-                            <select class="form-select @error('country') is-invalid @enderror"
-                                    id="country"
-                                    name="country"
-                                    required>
-                                <option value="">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</option>
-                                <!-- دول الخليج العربي -->
-                                <option value="AE" {{ old('country') == 'AE' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الإمارات العربية المتحدة' : 'United Arab Emirates' }}</option>
-                                <option value="SA" {{ old('country') == 'SA' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المملكة العربية السعودية' : 'Saudi Arabia' }}</option>
-                                <option value="KW" {{ old('country') == 'KW' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الكويت' : 'Kuwait' }}</option>
-                                <option value="QA" {{ old('country') == 'QA' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'قطر' : 'Qatar' }}</option>
-                                <option value="BH" {{ old('country') == 'BH' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'البحرين' : 'Bahrain' }}</option>
-                                <option value="OM" {{ old('country') == 'OM' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'سلطنة عُمان' : 'Oman' }}</option>
-                                <!-- دول الشام -->
-                                <option value="JO" {{ old('country') == 'JO' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الأردن' : 'Jordan' }}</option>
-                                <option value="LB" {{ old('country') == 'LB' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'لبنان' : 'Lebanon' }}</option>
-                                <option value="SY" {{ old('country') == 'SY' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'سوريا' : 'Syria' }}</option>
-                                <option value="PS" {{ old('country') == 'PS' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'فلسطين' : 'Palestine' }}</option>
-                                <option value="IQ" {{ old('country') == 'IQ' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'العراق' : 'Iraq' }}</option>
-                                <!-- دول شمال أفريقيا -->
-                                <option value="EG" {{ old('country') == 'EG' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'مصر' : 'Egypt' }}</option>
-                                <option value="LY" {{ old('country') == 'LY' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'ليبيا' : 'Libya' }}</option>
-                                <option value="TN" {{ old('country') == 'TN' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'تونس' : 'Tunisia' }}</option>
-                                <option value="DZ" {{ old('country') == 'DZ' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الجزائر' : 'Algeria' }}</option>
-                                <option value="MA" {{ old('country') == 'MA' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المغرب' : 'Morocco' }}</option>
-                                <option value="MR" {{ old('country') == 'MR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'موريتانيا' : 'Mauritania' }}</option>
-                                <!-- دول أخرى -->
-                                <option value="SD" {{ old('country') == 'SD' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'السودان' : 'Sudan' }}</option>
-                                <option value="YE" {{ old('country') == 'YE' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'اليمن' : 'Yemen' }}</option>
-                                <option value="SO" {{ old('country') == 'SO' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الصومال' : 'Somalia' }}</option>
-                                <option value="DJ" {{ old('country') == 'DJ' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'جيبوتي' : 'Djibouti' }}</option>
-                                <option value="KM" {{ old('country') == 'KM' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'جزر القمر' : 'Comoros' }}</option>
-                            </select>
+                            <div style="position: relative;">
+                                <div class="country-select-trigger" id="countrySelectTrigger" style="display: flex; align-items: center; gap: 10px; padding: 13px 18px; border: 2px solid #e5e7eb; border-radius: 10px; cursor: pointer; background: white; transition: all 0.3s; font-family: 'Cairo', sans-serif; font-size: 15px;">
+                                    <img id="countryFlag" src="" style="width: 22px; height: 16px; border-radius: 2px; object-fit: cover; display: none;">
+                                    <span id="countryName" style="flex: 1; color: #999;">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</span>
+                                    <i class="ri-arrow-down-s-line" style="font-size: 16px; color: #999;"></i>
+                                </div>
+                                <div class="country-dropdown" id="countryDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-family: 'Cairo', sans-serif;">
+                                    @php
+                                        $countries = [
+                                            ['value' => 'AE', 'flag' => 'ae', 'name_ar' => 'الإمارات العربية المتحدة', 'name_en' => 'United Arab Emirates'],
+                                            ['value' => 'SA', 'flag' => 'sa', 'name_ar' => 'المملكة العربية السعودية', 'name_en' => 'Saudi Arabia'],
+                                            ['value' => 'KW', 'flag' => 'kw', 'name_ar' => 'الكويت', 'name_en' => 'Kuwait'],
+                                            ['value' => 'QA', 'flag' => 'qa', 'name_ar' => 'قطر', 'name_en' => 'Qatar'],
+                                            ['value' => 'BH', 'flag' => 'bh', 'name_ar' => 'البحرين', 'name_en' => 'Bahrain'],
+                                            ['value' => 'OM', 'flag' => 'om', 'name_ar' => 'سلطنة عُمان', 'name_en' => 'Oman'],
+                                            ['value' => 'JO', 'flag' => 'jo', 'name_ar' => 'الأردن', 'name_en' => 'Jordan'],
+                                            ['value' => 'LB', 'flag' => 'lb', 'name_ar' => 'لبنان', 'name_en' => 'Lebanon'],
+                                            ['value' => 'SY', 'flag' => 'sy', 'name_ar' => 'سوريا', 'name_en' => 'Syria'],
+                                            ['value' => 'PS', 'flag' => 'ps', 'name_ar' => 'فلسطين', 'name_en' => 'Palestine'],
+                                            ['value' => 'IQ', 'flag' => 'iq', 'name_ar' => 'العراق', 'name_en' => 'Iraq'],
+                                            ['value' => 'EG', 'flag' => 'eg', 'name_ar' => 'مصر', 'name_en' => 'Egypt'],
+                                            ['value' => 'LY', 'flag' => 'ly', 'name_ar' => 'ليبيا', 'name_en' => 'Libya'],
+                                            ['value' => 'TN', 'flag' => 'tn', 'name_ar' => 'تونس', 'name_en' => 'Tunisia'],
+                                            ['value' => 'DZ', 'flag' => 'dz', 'name_ar' => 'الجزائر', 'name_en' => 'Algeria'],
+                                            ['value' => 'MA', 'flag' => 'ma', 'name_ar' => 'المغرب', 'name_en' => 'Morocco'],
+                                            ['value' => 'MR', 'flag' => 'mr', 'name_ar' => 'موريتانيا', 'name_en' => 'Mauritania'],
+                                            ['value' => 'SD', 'flag' => 'sd', 'name_ar' => 'السودان', 'name_en' => 'Sudan'],
+                                            ['value' => 'YE', 'flag' => 'ye', 'name_ar' => 'اليمن', 'name_en' => 'Yemen'],
+                                            ['value' => 'SO', 'flag' => 'so', 'name_ar' => 'الصومال', 'name_en' => 'Somalia'],
+                                            ['value' => 'DJ', 'flag' => 'dj', 'name_ar' => 'جيبوتي', 'name_en' => 'Djibouti'],
+                                            ['value' => 'KM', 'flag' => 'km', 'name_ar' => 'جزر القمر', 'name_en' => 'Comoros'],
+                                        ];
+                                    @endphp
+                                    @foreach($countries as $c)
+                                        <div class="country-option" data-value="{{ $c['value'] }}" data-flag="{{ $c['flag'] }}" data-name="{{ app()->getLocale() == 'ar' ? $c['name_ar'] : $c['name_en'] }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.2s; font-size: 14px;">
+                                            <img src="https://flagcdn.com/w40/{{ $c['flag'] }}.svg" style="width: 22px; height: 16px; border-radius: 2px; object-fit: cover;">
+                                            <span>{{ app()->getLocale() == 'ar' ? $c['name_ar'] : $c['name_en'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <input type="hidden" name="country" id="country" value="{{ old('country') }}" required>
+                            </div>
                             @error('country')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
@@ -693,8 +703,8 @@
                             </label>
                             <div style="position: relative;">
                                 <div class="phone-input-wrapper" style="display: flex; align-items: center; border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden; transition: all 0.3s; direction: ltr;" id="phoneInputWrapper">
-                                    <div class="phone-code-trigger" id="phoneCodeSelected" style="display: flex; align-items: center; gap: 6px; padding: 13px 12px; cursor: pointer; background: #f9fafb; border-right: 2px solid #e5e7eb; flex-shrink: 0; font-family: 'Cairo', sans-serif;">
-                                        <img id="selectedFlag" src="https://flagcdn.com/w40/ae.svg" style="width: 22px; height: 16px; border-radius: 2px; object-fit: cover;">
+                                    <div class="phone-code-trigger" id="phoneCodeSelected" style="display: flex; align-items: center; gap: 6px; padding: 13px 12px; cursor: pointer; background: #f9fafb; border-right: 2px solid #e5e7eb; flex-shrink: 0;">
+                                        <img id="selectedFlag" src="https://flagcdn.com/w20/ae.png" style="width: 20px; height: 15px; border-radius: 2px;">
                                         <span id="selectedCode" style="font-size: 14px; font-weight: 500; color: #333;">+971</span>
                                         <i class="ri-arrow-down-s-line" style="font-size: 14px; color: #999;"></i>
                                     </div>
@@ -707,34 +717,33 @@
                                            style="border: none; outline: none; padding: 13px 15px; flex: 1; font-size: 15px; direction: ltr; text-align: left; width: 100%;"
                                            required>
                                 </div>
-                                <div class="phone-code-dropdown" id="phoneCodeDropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 220px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-family: 'Cairo', sans-serif;">
+                                <div class="phone-code-dropdown" id="phoneCodeDropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 200px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
                                     @php
                                         $phoneCodes = [
-                                            ['code' => '971', 'flag' => 'ae', 'name_ar' => 'الإمارات', 'name_en' => 'UAE'],
-                                            ['code' => '966', 'flag' => 'sa', 'name_ar' => 'السعودية', 'name_en' => 'KSA'],
-                                            ['code' => '20', 'flag' => 'eg', 'name_ar' => 'مصر', 'name_en' => 'Egypt'],
-                                            ['code' => '965', 'flag' => 'kw', 'name_ar' => 'الكويت', 'name_en' => 'Kuwait'],
-                                            ['code' => '974', 'flag' => 'qa', 'name_ar' => 'قطر', 'name_en' => 'Qatar'],
-                                            ['code' => '973', 'flag' => 'bh', 'name_ar' => 'البحرين', 'name_en' => 'Bahrain'],
-                                            ['code' => '968', 'flag' => 'om', 'name_ar' => 'عُمان', 'name_en' => 'Oman'],
-                                            ['code' => '962', 'flag' => 'jo', 'name_ar' => 'الأردن', 'name_en' => 'Jordan'],
-                                            ['code' => '961', 'flag' => 'lb', 'name_ar' => 'لبنان', 'name_en' => 'Lebanon'],
-                                            ['code' => '963', 'flag' => 'sy', 'name_ar' => 'سوريا', 'name_en' => 'Syria'],
-                                            ['code' => '970', 'flag' => 'ps', 'name_ar' => 'فلسطين', 'name_en' => 'Palestine'],
-                                            ['code' => '964', 'flag' => 'iq', 'name_ar' => 'العراق', 'name_en' => 'Iraq'],
-                                            ['code' => '218', 'flag' => 'ly', 'name_ar' => 'ليبيا', 'name_en' => 'Libya'],
-                                            ['code' => '216', 'flag' => 'tn', 'name_ar' => 'تونس', 'name_en' => 'Tunisia'],
-                                            ['code' => '213', 'flag' => 'dz', 'name_ar' => 'الجزائر', 'name_en' => 'Algeria'],
-                                            ['code' => '212', 'flag' => 'ma', 'name_ar' => 'المغرب', 'name_en' => 'Morocco'],
-                                            ['code' => '249', 'flag' => 'sd', 'name_ar' => 'السودان', 'name_en' => 'Sudan'],
-                                            ['code' => '967', 'flag' => 'ye', 'name_ar' => 'اليمن', 'name_en' => 'Yemen'],
+                                            ['code' => '971', 'flag' => 'ae', 'name' => 'UAE'],
+                                            ['code' => '966', 'flag' => 'sa', 'name' => 'KSA'],
+                                            ['code' => '20', 'flag' => 'eg', 'name' => 'Egypt'],
+                                            ['code' => '965', 'flag' => 'kw', 'name' => 'Kuwait'],
+                                            ['code' => '974', 'flag' => 'qa', 'name' => 'Qatar'],
+                                            ['code' => '973', 'flag' => 'bh', 'name' => 'Bahrain'],
+                                            ['code' => '968', 'flag' => 'om', 'name' => 'Oman'],
+                                            ['code' => '962', 'flag' => 'jo', 'name' => 'Jordan'],
+                                            ['code' => '961', 'flag' => 'lb', 'name' => 'Lebanon'],
+                                            ['code' => '963', 'flag' => 'sy', 'name' => 'Syria'],
+                                            ['code' => '970', 'flag' => 'ps', 'name' => 'Palestine'],
+                                            ['code' => '964', 'flag' => 'iq', 'name' => 'Iraq'],
+                                            ['code' => '218', 'flag' => 'ly', 'name' => 'Libya'],
+                                            ['code' => '216', 'flag' => 'tn', 'name' => 'Tunisia'],
+                                            ['code' => '213', 'flag' => 'dz', 'name' => 'Algeria'],
+                                            ['code' => '212', 'flag' => 'ma', 'name' => 'Morocco'],
+                                            ['code' => '249', 'flag' => 'sd', 'name' => 'Sudan'],
+                                            ['code' => '967', 'flag' => 'ye', 'name' => 'Yemen'],
                                         ];
                                     @endphp
                                     @foreach($phoneCodes as $country)
                                         <div class="phone-code-option" data-code="{{ $country['code'] }}" data-flag="{{ $country['flag'] }}" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; transition: background 0.2s;">
-                                            <img src="https://flagcdn.com/w40/{{ $country['flag'] }}.svg" style="width: 22px; height: 16px; border-radius: 2px; object-fit: cover;">
-                                            <span style="font-size: 13px; color: #555;">{{ app()->getLocale() == 'ar' ? $country['name_ar'] : $country['name_en'] }}</span>
-                                            <span style="font-size: 13px; color: #333; font-weight: 500; margin-inline-start: auto;">+{{ $country['code'] }}</span>
+                                            <img src="https://flagcdn.com/w20/{{ $country['flag'] }}.png" style="width: 20px; height: 15px; border-radius: 2px;">
+                                            <span>+{{ $country['code'] }}</span>
                                         </div>
                                     @endforeach
                                 </div>
@@ -918,7 +927,7 @@
         const initialCode = '{{ old("phone_code", "971") }}';
         const initialOption = document.querySelector(`.phone-code-option[data-code="${initialCode}"]`);
         if (initialOption) {
-            selectedFlag.src = `https://flagcdn.com/w40/${initialOption.dataset.flag}.svg`;
+            selectedFlag.src = `https://flagcdn.com/w20/${initialOption.dataset.flag}.png`;
             selectedCode.textContent = `+${initialOption.dataset.code}`;
         }
 
@@ -954,7 +963,7 @@
             option.addEventListener('click', () => {
                 const code = option.dataset.code;
                 const flag = option.dataset.flag;
-                selectedFlag.src = `https://flagcdn.com/w40/${flag}.svg`;
+                selectedFlag.src = `https://flagcdn.com/w20/${flag}.png`;
                 selectedCode.textContent = `+${code}`;
                 phoneCodeInput.value = code;
                 phoneCodeDropdown.style.display = 'none';
@@ -966,6 +975,81 @@
         document.addEventListener('click', (e) => {
             if (!phoneCodeSelected.contains(e.target) && !phoneCodeDropdown.contains(e.target)) {
                 phoneCodeDropdown.style.display = 'none';
+            }
+        });
+    </script>
+
+    <!-- Country Dropdown Script -->
+    <script>
+        const countryTrigger = document.getElementById('countrySelectTrigger');
+        const countryDropdown = document.getElementById('countryDropdown');
+        const countryInput = document.getElementById('country');
+        const countryFlag = document.getElementById('countryFlag');
+        const countryName = document.getElementById('countryName');
+        const countryOptions = document.querySelectorAll('.country-option');
+
+        // Set initial value from old input
+        const initialCountry = '{{ old("country", "") }}';
+        if (initialCountry) {
+            const initialCountryOption = document.querySelector(`.country-option[data-value="${initialCountry}"]`);
+            if (initialCountryOption) {
+                countryFlag.src = `https://flagcdn.com/w40/${initialCountryOption.dataset.flag}.svg`;
+                countryFlag.style.display = 'block';
+                countryName.textContent = initialCountryOption.dataset.name;
+                countryName.style.color = '#333';
+            }
+        }
+
+        // Toggle dropdown
+        countryTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            countryDropdown.style.display = countryDropdown.style.display === 'none' ? 'block' : 'none';
+            // Close phone dropdown if open
+            phoneCodeDropdown.style.display = 'none';
+        });
+
+        // Prevent dropdown clicks from bubbling
+        countryDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Select option
+        countryOptions.forEach(option => {
+            option.addEventListener('mouseover', () => {
+                option.style.background = '#f3f4f6';
+            });
+            option.addEventListener('mouseout', () => {
+                option.style.background = 'transparent';
+            });
+            option.addEventListener('click', () => {
+                const value = option.dataset.value;
+                const flag = option.dataset.flag;
+                const name = option.dataset.name;
+                countryFlag.src = `https://flagcdn.com/w40/${flag}.svg`;
+                countryFlag.style.display = 'block';
+                countryName.textContent = name;
+                countryName.style.color = '#333';
+                countryInput.value = value;
+                countryDropdown.style.display = 'none';
+            });
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            if (!countryTrigger.contains(e.target) && !countryDropdown.contains(e.target)) {
+                countryDropdown.style.display = 'none';
+            }
+        });
+
+        // Focus styling
+        countryTrigger.addEventListener('click', () => {
+            countryTrigger.style.borderColor = '#561C04';
+            countryTrigger.style.boxShadow = '0 0 0 4px rgba(86, 28, 4, 0.08)';
+        });
+        document.addEventListener('click', (e) => {
+            if (!countryTrigger.contains(e.target)) {
+                countryTrigger.style.borderColor = '#e5e7eb';
+                countryTrigger.style.boxShadow = 'none';
             }
         });
     </script>
