@@ -563,8 +563,16 @@
                 <div class="progress-step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h4>{{ app()->getLocale() == 'ar' ? 'التحقق' : 'Verification' }}</h4>
+                        <h4>{{ app()->getLocale() == 'ar' ? 'تحقق البريد' : 'Email Verification' }}</h4>
                         <p>{{ app()->getLocale() == 'ar' ? 'تأكيد البريد الإلكتروني' : 'Email confirmation' }}</p>
+                    </div>
+                </div>
+
+                <div class="progress-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>{{ app()->getLocale() == 'ar' ? 'تحقق واتساب' : 'WhatsApp Verification' }}</h4>
+                        <p>{{ app()->getLocale() == 'ar' ? 'تأكيد رقم الهاتف' : 'Phone confirmation' }}</p>
                     </div>
                 </div>
             </div>

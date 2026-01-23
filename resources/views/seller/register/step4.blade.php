@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ app()->getLocale() == 'ar' ? 'تسجيل بائع جديد - الخطوة 3' : 'Seller Registration - Step 3' }}</title>
-        <link rel="icon" type="image/x-icon" href="{{ asset('logo/logo.png') }}">
-
+    <title>{{ app()->getLocale() == 'ar' ? 'تسجيل بائع جديد - الخطوة 4' : 'Seller Registration - Step 4' }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('logo/logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,6 +15,7 @@
             --primary-color: #561C04;
             --secondary-color: #7a2805;
             --success-color: #10b981;
+            --whatsapp-color: #25D366;
         }
 
         * {
@@ -58,7 +57,6 @@
             }
         }
 
-        /* Left Sidebar */
         .sidebar {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             padding: 50px 40px;
@@ -156,7 +154,7 @@
         }
 
         .progress-step.completed .step-number {
-            background: #b9a010;
+            background: #10b981;
             color: white;
         }
 
@@ -180,7 +178,6 @@
             opacity: 0.6;
         }
 
-        /* Right Content */
         .content-area {
             padding: 50px 60px;
         }
@@ -205,7 +202,7 @@
         .icon-box {
             width: 100px;
             height: 100px;
-            background: rgba(86, 28, 4, 0.1);
+            background: rgba(37, 211, 102, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -215,7 +212,7 @@
 
         .icon-box i {
             font-size: 50px;
-            color: var(--primary-color);
+            color: var(--whatsapp-color);
         }
 
         @keyframes pulse {
@@ -228,11 +225,12 @@
         }
 
         .otp-info {
-            background: #f8f9fa;
+            background: #f0fdf4;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 30px;
             text-align: center;
+            border: 1px solid #bbf7d0;
         }
 
         .otp-info p {
@@ -242,8 +240,10 @@
         }
 
         .otp-info strong {
-            color: var(--primary-color);
+            color: var(--whatsapp-color);
             font-size: 18px;
+            direction: ltr;
+            display: inline-block;
         }
 
         .otp-inputs {
@@ -266,8 +266,8 @@
         }
 
         .otp-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(86, 28, 4, 0.08);
+            border-color: var(--whatsapp-color);
+            box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.1);
             outline: none;
         }
 
@@ -296,7 +296,7 @@
 
         .btn-resend {
             background: transparent;
-            color: var(--primary-color);
+            color: var(--whatsapp-color);
             border: none;
             font-weight: 600;
             text-decoration: underline;
@@ -306,7 +306,7 @@
         }
 
         .btn-resend:hover {
-            color: var(--secondary-color);
+            color: #1da851;
         }
 
         .btn-resend:disabled {
@@ -381,7 +381,6 @@
             }
         }
 
-        /* Language Switcher */
         .language-switcher {
             position: absolute;
             top: 20px;
@@ -426,20 +425,6 @@
             width: 20px;
             height: 20px;
         }
-
-        .sidebar-footer {
-            margin-top: 30px;
-            margin-bottom: 30px;
-            text-align: center;
-            position: relative;
-            z-index: 2;
-        }
-
-        .sidebar-footer img {
-            max-width: 200px;
-            height: auto;
-            opacity: 0.9;
-        }
     </style>
 </head>
 <body>
@@ -454,13 +439,12 @@
             <span>العربية</span>
         </a>
     </div>
+
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo-wrapper">
                 <img src="{{ asset('logo/logo10.png') }}" alt="Logo">
-
-           
                 <h3>{{ app()->getLocale() == 'ar' ? 'تسجيل البائع' : 'Seller Registration' }}</h3>
             </div>
 
@@ -481,15 +465,15 @@
                     </div>
                 </div>
 
-                <div class="progress-step active">
-                    <div class="step-number">3</div>
+                <div class="progress-step completed">
+                    <div class="step-number"><i class="ri-check-line"></i></div>
                     <div class="step-content">
                         <h4>{{ app()->getLocale() == 'ar' ? 'تحقق البريد' : 'Email Verification' }}</h4>
                         <p>{{ app()->getLocale() == 'ar' ? 'تأكيد البريد الإلكتروني' : 'Email confirmation' }}</p>
                     </div>
                 </div>
 
-                <div class="progress-step">
+                <div class="progress-step active">
                     <div class="step-number">4</div>
                     <div class="step-content">
                         <h4>{{ app()->getLocale() == 'ar' ? 'تحقق واتساب' : 'WhatsApp Verification' }}</h4>
@@ -503,10 +487,10 @@
         <div class="content-area">
             <div class="content-header">
                 <div class="icon-box pulse">
-                    <i class="ri-mail-check-line"></i>
+                    <i class="ri-whatsapp-line"></i>
                 </div>
-                <h2>{{ app()->getLocale() == 'ar' ? 'تحقق من بريدك الإلكتروني' : 'Verify Your Email' }}</h2>
-                <p>{{ app()->getLocale() == 'ar' ? 'أدخل الرمز المرسل إليك لإتمام التسجيل' : 'Enter the code sent to you to complete registration' }}</p>
+                <h2>{{ app()->getLocale() == 'ar' ? 'تحقق من واتساب' : 'Verify WhatsApp' }}</h2>
+                <p>{{ app()->getLocale() == 'ar' ? 'أدخل الرمز المرسل إلى واتساب لإتمام التسجيل' : 'Enter the code sent to your WhatsApp to complete registration' }}</p>
             </div>
 
             @if ($errors->any())
@@ -524,12 +508,12 @@
             @endif
 
             <div class="otp-info">
-                <p>{{ app()->getLocale() == 'ar' ? 'تم إرسال رمز التحقق المكون من 6 أرقام إلى:' : 'A 6-digit verification code has been sent to:' }}</p>
-                <strong>{{ $email }}</strong>
-                <p style="margin-top: 15px; margin-bottom: 0; font-size: 13px; color: #999;">{{ app()->getLocale() == 'ar' ? 'يرجى التحقق من صندوق الوارد أو البريد المزعج' : 'Please check your inbox or spam folder' }}</p>
+                <p>{{ app()->getLocale() == 'ar' ? 'تم إرسال رمز التحقق المكون من 6 أرقام عبر واتساب إلى:' : 'A 6-digit verification code has been sent via WhatsApp to:' }}</p>
+                <strong>{{ $phone }}</strong>
+                <p style="margin-top: 15px; margin-bottom: 0; font-size: 13px; color: #999;">{{ app()->getLocale() == 'ar' ? 'يرجى التحقق من رسائل واتساب' : 'Please check your WhatsApp messages' }}</p>
             </div>
 
-            <form action="{{ route('seller.register.verify-otp') }}" method="POST" id="otpForm">
+            <form action="{{ route('seller.register.verify-whatsapp-otp') }}" method="POST" id="otpForm">
                 @csrf
 
                 <div style="text-align: center;">
@@ -547,16 +531,17 @@
 
                 <button type="submit" class="btn-verify">
                     <i class="ri-check-double-line"></i>
-                    {{ app()->getLocale() == 'ar' ? 'تحقق والتالي' : 'Verify and Continue' }}
+                    {{ app()->getLocale() == 'ar' ? 'تحقق وأكمل التسجيل' : 'Verify and Complete Registration' }}
                 </button>
             </form>
 
             <div style="text-align: center; margin-top: 30px;">
                 <p style="color: #999; margin-bottom: 10px; font-size: 14px;">{{ app()->getLocale() == 'ar' ? 'لم تستلم الرمز؟' : "Didn't receive the code?" }}</p>
-                <form action="{{ route('seller.register.resend-otp') }}" method="POST" id="resendForm">
+                <form action="{{ route('seller.register.resend-whatsapp-otp') }}" method="POST" id="resendForm">
                     @csrf
                     <button type="submit" class="btn-resend" id="resendBtn">
-                        {{ app()->getLocale() == 'ar' ? 'إعادة إرسال الرمز' : 'Resend Code' }}
+                        <i class="ri-whatsapp-line"></i>
+                        {{ app()->getLocale() == 'ar' ? 'إعادة إرسال عبر واتساب' : 'Resend via WhatsApp' }}
                     </button>
                 </form>
                 <div class="timer" id="timer"></div>
@@ -564,13 +549,10 @@
         </div>
     </div>
 
-    <!-- Footer with EVORQ Logo -->
-   <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
+    <!-- Footer -->
+    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px;">
         <span style="color: #808080; font-size: 14px; font-weight: 400;">{{ app()->getLocale() == 'ar' ? 'بواسطة' : 'BY' }}</span>
-        <img src="{{ asset('footer.png') }}"
-             alt="EVORQ Logo"
-             style="height: 45px;"
-           >
+        <img src="{{ asset('footer.png') }}" alt="EVORQ Logo" style="height: 45px;">
         <span style="color: #808080; font-size: 14px; font-weight: 400; letter-spacing: 2px;">{{ app()->getLocale() == 'ar' ? 'إيفورك للتقنية' : 'EVORQ TECHNOLOGIES' }}</span>
     </div>
 
@@ -578,35 +560,29 @@
         // OTP Input Handling
         const otpInputs = document.querySelectorAll('.otp-input');
         const otpHidden = document.getElementById('otpHidden');
-        const otpForm = document.getElementById('otpForm');
 
         otpInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
                 const value = e.target.value;
 
-                // Only allow numbers
                 if (!/^\d$/.test(value)) {
                     e.target.value = '';
                     return;
                 }
 
-                // Move to next input
                 if (value && index < otpInputs.length - 1) {
                     otpInputs[index + 1].focus();
                 }
 
-                // Update hidden input
                 updateOTPValue();
             });
 
             input.addEventListener('keydown', (e) => {
-                // Handle backspace
                 if (e.key === 'Backspace' && !e.target.value && index > 0) {
                     otpInputs[index - 1].focus();
                 }
             });
 
-            // Handle paste
             input.addEventListener('paste', (e) => {
                 e.preventDefault();
                 const pastedData = e.clipboardData.getData('text').slice(0, 6);
@@ -648,15 +624,12 @@
             }, 1000);
         }
 
-        // Start timer on page load
         startTimer();
 
-        // Handle resend form submission
         document.getElementById('resendForm').addEventListener('submit', () => {
             startTimer();
         });
 
-        // Auto-focus first input
         otpInputs[0].focus();
     </script>
 

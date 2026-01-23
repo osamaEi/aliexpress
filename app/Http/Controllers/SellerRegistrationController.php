@@ -156,14 +156,14 @@ class SellerRegistrationController extends Controller
 
         $email = Session::get('seller_registration.email');
 
-        // Generate and send OTP
-        $this->sendOTP($email);
+        // Generate and send email OTP
+        $this->sendEmailOTP($email);
 
         return view('seller.register.step3', compact('email'));
     }
 
     /**
-     * Verify OTP and complete registration
+     * Verify Email OTP and go to Step 4
      */
     public function verifyOTP(Request $request)
     {
@@ -179,15 +179,79 @@ class SellerRegistrationController extends Controller
         $otpExpiry = Session::get('otp_expiry_' . $email);
 
         if (!$storedOTP || !$otpExpiry) {
-            return back()->withErrors(['otp' => 'OTP expired or not found. Please request a new one.']);
+            return back()->withErrors(['otp' => app()->getLocale() == 'ar'
+                ? 'انتهت صلاحية الرمز. يرجى طلب رمز جديد.'
+                : 'OTP expired or not found. Please request a new one.']);
         }
 
         if (now()->gt($otpExpiry)) {
-            return back()->withErrors(['otp' => 'OTP has expired. Please request a new one.']);
+            return back()->withErrors(['otp' => app()->getLocale() == 'ar'
+                ? 'انتهت صلاحية الرمز. يرجى طلب رمز جديد.'
+                : 'OTP has expired. Please request a new one.']);
         }
 
         if ($request->otp !== $storedOTP) {
-            return back()->withErrors(['otp' => 'Invalid OTP code.']);
+            return back()->withErrors(['otp' => app()->getLocale() == 'ar'
+                ? 'رمز التحقق غير صحيح.'
+                : 'Invalid OTP code.']);
+        }
+
+        // Mark email as verified in session
+        Session::put('seller_email_verified', true);
+        Session::forget('otp_' . $email);
+        Session::forget('otp_expiry_' . $email);
+
+        return redirect()->route('seller.register.step4');
+    }
+
+    /**
+     * Show Step 4: WhatsApp Verification
+     */
+    public function showStep4()
+    {
+        if (!Session::has('seller_registration') || !Session::get('seller_email_verified')) {
+            return redirect()->route('seller.register.step1');
+        }
+
+        $phone = Session::get('seller_registration.phone');
+
+        // Generate and send WhatsApp OTP
+        $this->sendWhatsAppOTP($phone);
+
+        return view('seller.register.step4', compact('phone'));
+    }
+
+    /**
+     * Verify WhatsApp OTP and complete registration
+     */
+    public function verifyWhatsAppOTP(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $data = Session::get('seller_registration');
+        $phone = $data['phone'];
+
+        $storedOTP = Session::get('whatsapp_otp_' . $phone);
+        $otpExpiry = Session::get('whatsapp_otp_expiry_' . $phone);
+
+        if (!$storedOTP || !$otpExpiry) {
+            return back()->withErrors(['otp' => app()->getLocale() == 'ar'
+                ? 'انتهت صلاحية الرمز. يرجى طلب رمز جديد.'
+                : 'OTP expired or not found. Please request a new one.']);
+        }
+
+        if (now()->gt($otpExpiry)) {
+            return back()->withErrors(['otp' => app()->getLocale() == 'ar'
+                ? 'انتهت صلاحية الرمز. يرجى طلب رمز جديد.'
+                : 'OTP has expired. Please request a new one.']);
+        }
+
+        if ($request->otp !== $storedOTP) {
+            return back()->withErrors(['otp' => app()->getLocale() == 'ar'
+                ? 'رمز التحقق غير صحيح.'
+                : 'Invalid OTP code.']);
         }
 
         // Create user
@@ -210,58 +274,89 @@ class SellerRegistrationController extends Controller
 
         // Clear session data
         Session::forget('seller_registration');
-        Session::forget('otp_' . $email);
-        Session::forget('otp_expiry_' . $email);
+        Session::forget('seller_email_verified');
+        Session::forget('whatsapp_otp_' . $phone);
+        Session::forget('whatsapp_otp_expiry_' . $phone);
 
         // Log the user in
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', 'Registration completed successfully!');
+        return redirect()->route('dashboard')->with('success', app()->getLocale() == 'ar'
+            ? 'تم التسجيل بنجاح!'
+            : 'Registration completed successfully!');
     }
 
     /**
-     * Resend OTP
+     * Resend Email OTP
      */
     public function resendOTP()
     {
         $email = Session::get('seller_registration.email');
 
         if (!$email) {
-            return back()->withErrors(['email' => 'Session expired. Please start registration again.']);
+            return back()->withErrors(['email' => app()->getLocale() == 'ar'
+                ? 'انتهت صلاحية الجلسة. يرجى بدء التسجيل من جديد.'
+                : 'Session expired. Please start registration again.']);
         }
 
-        $this->sendOTP($email);
+        $this->sendEmailOTP($email);
 
-        return back()->with('success', 'OTP has been resent to your email.');
+        return back()->with('success', app()->getLocale() == 'ar'
+            ? 'تم إعادة إرسال رمز التحقق إلى بريدك الإلكتروني.'
+            : 'OTP has been resent to your email.');
     }
 
     /**
-     * Send OTP to email and WhatsApp
+     * Resend WhatsApp OTP
      */
-    private function sendOTP($email)
+    public function resendWhatsAppOTP()
     {
-        // Generate 6-digit OTP
+        $phone = Session::get('seller_registration.phone');
+
+        if (!$phone) {
+            return back()->withErrors(['phone' => app()->getLocale() == 'ar'
+                ? 'انتهت صلاحية الجلسة. يرجى بدء التسجيل من جديد.'
+                : 'Session expired. Please start registration again.']);
+        }
+
+        $this->sendWhatsAppOTP($phone);
+
+        return back()->with('success', app()->getLocale() == 'ar'
+            ? 'تم إعادة إرسال رمز التحقق عبر واتساب.'
+            : 'OTP has been resent via WhatsApp.');
+    }
+
+    /**
+     * Send OTP to email
+     */
+    private function sendEmailOTP($email)
+    {
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Store in session (expires in 10 minutes)
         Session::put('otp_' . $email, $otp);
         Session::put('otp_expiry_' . $email, now()->addMinutes(10));
 
-        // Send email with beautiful template
         Mail::send('emails.otp-verification', ['otp' => $otp], function($message) use ($email) {
             $message->to($email)
                     ->subject(app()->getLocale() == 'ar'
                         ? 'رمز التحقق - تسجيل البائع'
                         : 'Email Verification Code - Seller Registration');
         });
+    }
 
-        // Send OTP via WhatsApp
-        $phone = Session::get('seller_registration.phone');
-        if ($phone) {
-            $isEnglish = app()->getLocale() !== 'ar';
-            $whatsappService = new WhatsAppOTPService();
-            $whatsappService->sendOTP($phone, $otp, $isEnglish);
-        }
+    /**
+     * Send OTP via WhatsApp
+     */
+    private function sendWhatsAppOTP($phone)
+    {
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        Session::put('whatsapp_otp_' . $phone, $otp);
+        Session::put('whatsapp_otp_expiry_' . $phone, now()->addMinutes(10));
+
+        $isEnglish = app()->getLocale() !== 'ar';
+        $whatsappService = new WhatsAppOTPService();
+        $whatsappService->sendOTP($phone, $otp, $isEnglish);
     }
 
     /**

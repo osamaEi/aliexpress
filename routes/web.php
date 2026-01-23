@@ -55,6 +55,9 @@ Route::prefix('seller/register')->name('seller.register.')->group(function () {
     Route::get('step-3', [SellerRegistrationController::class, 'showStep3'])->name('step3');
     Route::post('verify-otp', [SellerRegistrationController::class, 'verifyOTP'])->name('verify-otp');
     Route::post('resend-otp', [SellerRegistrationController::class, 'resendOTP'])->name('resend-otp');
+    Route::get('step-4', [SellerRegistrationController::class, 'showStep4'])->name('step4');
+    Route::post('verify-whatsapp-otp', [SellerRegistrationController::class, 'verifyWhatsAppOTP'])->name('verify-whatsapp-otp');
+    Route::post('resend-whatsapp-otp', [SellerRegistrationController::class, 'resendWhatsAppOTP'])->name('resend-whatsapp-otp');
 });
 
 // Distributor Registration Routes (Public - No Auth Required)
