@@ -693,8 +693,8 @@
                             </label>
                             <div style="position: relative;">
                                 <div class="phone-input-wrapper" style="display: flex; align-items: center; border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden; transition: all 0.3s; direction: ltr;" id="phoneInputWrapper">
-                                    <div class="phone-code-trigger" id="phoneCodeSelected" style="display: flex; align-items: center; gap: 6px; padding: 13px 12px; cursor: pointer; background: #f9fafb; border-right: 2px solid #e5e7eb; flex-shrink: 0;">
-                                        <img id="selectedFlag" src="https://flagcdn.com/w20/ae.png" style="width: 20px; height: 15px; border-radius: 2px;">
+                                    <div class="phone-code-trigger" id="phoneCodeSelected" style="display: flex; align-items: center; gap: 6px; padding: 13px 12px; cursor: pointer; background: #f9fafb; border-right: 2px solid #e5e7eb; flex-shrink: 0; font-family: 'Cairo', sans-serif;">
+                                        <img id="selectedFlag" src="https://flagcdn.com/w40/ae.svg" style="width: 22px; height: 16px; border-radius: 2px; object-fit: cover;">
                                         <span id="selectedCode" style="font-size: 14px; font-weight: 500; color: #333;">+971</span>
                                         <i class="ri-arrow-down-s-line" style="font-size: 14px; color: #999;"></i>
                                     </div>
@@ -707,33 +707,34 @@
                                            style="border: none; outline: none; padding: 13px 15px; flex: 1; font-size: 15px; direction: ltr; text-align: left; width: 100%;"
                                            required>
                                 </div>
-                                <div class="phone-code-dropdown" id="phoneCodeDropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 200px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+                                <div class="phone-code-dropdown" id="phoneCodeDropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 220px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-family: 'Cairo', sans-serif;">
                                     @php
                                         $phoneCodes = [
-                                            ['code' => '971', 'flag' => 'ae', 'name' => 'UAE'],
-                                            ['code' => '966', 'flag' => 'sa', 'name' => 'KSA'],
-                                            ['code' => '20', 'flag' => 'eg', 'name' => 'Egypt'],
-                                            ['code' => '965', 'flag' => 'kw', 'name' => 'Kuwait'],
-                                            ['code' => '974', 'flag' => 'qa', 'name' => 'Qatar'],
-                                            ['code' => '973', 'flag' => 'bh', 'name' => 'Bahrain'],
-                                            ['code' => '968', 'flag' => 'om', 'name' => 'Oman'],
-                                            ['code' => '962', 'flag' => 'jo', 'name' => 'Jordan'],
-                                            ['code' => '961', 'flag' => 'lb', 'name' => 'Lebanon'],
-                                            ['code' => '963', 'flag' => 'sy', 'name' => 'Syria'],
-                                            ['code' => '970', 'flag' => 'ps', 'name' => 'Palestine'],
-                                            ['code' => '964', 'flag' => 'iq', 'name' => 'Iraq'],
-                                            ['code' => '218', 'flag' => 'ly', 'name' => 'Libya'],
-                                            ['code' => '216', 'flag' => 'tn', 'name' => 'Tunisia'],
-                                            ['code' => '213', 'flag' => 'dz', 'name' => 'Algeria'],
-                                            ['code' => '212', 'flag' => 'ma', 'name' => 'Morocco'],
-                                            ['code' => '249', 'flag' => 'sd', 'name' => 'Sudan'],
-                                            ['code' => '967', 'flag' => 'ye', 'name' => 'Yemen'],
+                                            ['code' => '971', 'flag' => 'ae', 'name_ar' => 'الإمارات', 'name_en' => 'UAE'],
+                                            ['code' => '966', 'flag' => 'sa', 'name_ar' => 'السعودية', 'name_en' => 'KSA'],
+                                            ['code' => '20', 'flag' => 'eg', 'name_ar' => 'مصر', 'name_en' => 'Egypt'],
+                                            ['code' => '965', 'flag' => 'kw', 'name_ar' => 'الكويت', 'name_en' => 'Kuwait'],
+                                            ['code' => '974', 'flag' => 'qa', 'name_ar' => 'قطر', 'name_en' => 'Qatar'],
+                                            ['code' => '973', 'flag' => 'bh', 'name_ar' => 'البحرين', 'name_en' => 'Bahrain'],
+                                            ['code' => '968', 'flag' => 'om', 'name_ar' => 'عُمان', 'name_en' => 'Oman'],
+                                            ['code' => '962', 'flag' => 'jo', 'name_ar' => 'الأردن', 'name_en' => 'Jordan'],
+                                            ['code' => '961', 'flag' => 'lb', 'name_ar' => 'لبنان', 'name_en' => 'Lebanon'],
+                                            ['code' => '963', 'flag' => 'sy', 'name_ar' => 'سوريا', 'name_en' => 'Syria'],
+                                            ['code' => '970', 'flag' => 'ps', 'name_ar' => 'فلسطين', 'name_en' => 'Palestine'],
+                                            ['code' => '964', 'flag' => 'iq', 'name_ar' => 'العراق', 'name_en' => 'Iraq'],
+                                            ['code' => '218', 'flag' => 'ly', 'name_ar' => 'ليبيا', 'name_en' => 'Libya'],
+                                            ['code' => '216', 'flag' => 'tn', 'name_ar' => 'تونس', 'name_en' => 'Tunisia'],
+                                            ['code' => '213', 'flag' => 'dz', 'name_ar' => 'الجزائر', 'name_en' => 'Algeria'],
+                                            ['code' => '212', 'flag' => 'ma', 'name_ar' => 'المغرب', 'name_en' => 'Morocco'],
+                                            ['code' => '249', 'flag' => 'sd', 'name_ar' => 'السودان', 'name_en' => 'Sudan'],
+                                            ['code' => '967', 'flag' => 'ye', 'name_ar' => 'اليمن', 'name_en' => 'Yemen'],
                                         ];
                                     @endphp
                                     @foreach($phoneCodes as $country)
                                         <div class="phone-code-option" data-code="{{ $country['code'] }}" data-flag="{{ $country['flag'] }}" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; transition: background 0.2s;">
-                                            <img src="https://flagcdn.com/w20/{{ $country['flag'] }}.png" style="width: 20px; height: 15px; border-radius: 2px;">
-                                            <span>+{{ $country['code'] }}</span>
+                                            <img src="https://flagcdn.com/w40/{{ $country['flag'] }}.svg" style="width: 22px; height: 16px; border-radius: 2px; object-fit: cover;">
+                                            <span style="font-size: 13px; color: #555;">{{ app()->getLocale() == 'ar' ? $country['name_ar'] : $country['name_en'] }}</span>
+                                            <span style="font-size: 13px; color: #333; font-weight: 500; margin-inline-start: auto;">+{{ $country['code'] }}</span>
                                         </div>
                                     @endforeach
                                 </div>
@@ -917,7 +918,7 @@
         const initialCode = '{{ old("phone_code", "971") }}';
         const initialOption = document.querySelector(`.phone-code-option[data-code="${initialCode}"]`);
         if (initialOption) {
-            selectedFlag.src = `https://flagcdn.com/w20/${initialOption.dataset.flag}.png`;
+            selectedFlag.src = `https://flagcdn.com/w40/${initialOption.dataset.flag}.svg`;
             selectedCode.textContent = `+${initialOption.dataset.code}`;
         }
 
@@ -937,6 +938,11 @@
             phoneCodeDropdown.style.display = phoneCodeDropdown.style.display === 'none' ? 'block' : 'none';
         });
 
+        // Prevent dropdown clicks from bubbling to document
+        phoneCodeDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
         // Select option
         phoneCodeOptions.forEach(option => {
             option.addEventListener('mouseover', () => {
@@ -948,7 +954,7 @@
             option.addEventListener('click', () => {
                 const code = option.dataset.code;
                 const flag = option.dataset.flag;
-                selectedFlag.src = `https://flagcdn.com/w20/${flag}.png`;
+                selectedFlag.src = `https://flagcdn.com/w40/${flag}.svg`;
                 selectedCode.textContent = `+${code}`;
                 phoneCodeInput.value = code;
                 phoneCodeDropdown.style.display = 'none';
@@ -958,7 +964,7 @@
 
         // Close dropdown on outside click
         document.addEventListener('click', (e) => {
-            if (!phoneCodeSelected.contains(e.target)) {
+            if (!phoneCodeSelected.contains(e.target) && !phoneCodeDropdown.contains(e.target)) {
                 phoneCodeDropdown.style.display = 'none';
             }
         });
