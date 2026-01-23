@@ -27,6 +27,8 @@ class SellerRegistrationController extends Controller
      */
     public function processStep1(Request $request)
     {
+        $isAr = app()->getLocale() == 'ar';
+
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'company_name' => 'required|string|max:255',
@@ -38,18 +40,24 @@ class SellerRegistrationController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'g-recaptcha-response' => config('services.recaptcha.enabled') ? 'required' : 'nullable',
         ], [
-            'g-recaptcha-response.required' => app()->getLocale() == 'ar'
-                ? 'يرجى التحقق من أنك لست روبوت'
-                : 'Please verify that you are not a robot',
-            'logo.image' => app()->getLocale() == 'ar'
-                ? 'يجب أن يكون الملف صورة'
-                : 'The file must be an image',
-            'logo.mimes' => app()->getLocale() == 'ar'
-                ? 'يجب أن تكون الصورة بصيغة: jpeg, jpg, png'
-                : 'The image must be a file of type: jpeg, jpg, png',
-            'logo.max' => app()->getLocale() == 'ar'
-                ? 'يجب أن يكون حجم الصورة أقل من 2 ميجابايت'
-                : 'The image size must be less than 2MB',
+            'full_name.required' => $isAr ? 'الاسم الكامل مطلوب' : 'Full name is required',
+            'full_name.max' => $isAr ? 'الاسم الكامل يجب ألا يزيد عن 255 حرف' : 'Full name must not exceed 255 characters',
+            'company_name.required' => $isAr ? 'اسم الشركة مطلوب' : 'Company name is required',
+            'company_name.max' => $isAr ? 'اسم الشركة يجب ألا يزيد عن 255 حرف' : 'Company name must not exceed 255 characters',
+            'country.required' => $isAr ? 'يرجى اختيار الدولة' : 'Please select a country',
+            'phone_code.required' => $isAr ? 'رمز الدولة مطلوب' : 'Country code is required',
+            'phone.required' => $isAr ? 'رقم الهاتف مطلوب' : 'Phone number is required',
+            'phone.max' => $isAr ? 'رقم الهاتف يجب ألا يزيد عن 20 رقم' : 'Phone number must not exceed 20 digits',
+            'email.required' => $isAr ? 'البريد الإلكتروني مطلوب' : 'Email address is required',
+            'email.email' => $isAr ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address',
+            'email.unique' => $isAr ? 'البريد الإلكتروني مسجل بالفعل' : 'This email is already registered',
+            'password.required' => $isAr ? 'كلمة المرور مطلوبة' : 'Password is required',
+            'password.min' => $isAr ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters',
+            'password.confirmed' => $isAr ? 'تأكيد كلمة المرور غير متطابق' : 'Password confirmation does not match',
+            'logo.image' => $isAr ? 'يجب أن يكون الملف صورة' : 'The file must be an image',
+            'logo.mimes' => $isAr ? 'يجب أن تكون الصورة بصيغة: jpeg, jpg, png' : 'The image must be a file of type: jpeg, jpg, png',
+            'logo.max' => $isAr ? 'يجب أن يكون حجم الصورة أقل من 2 ميجابايت' : 'The image size must be less than 2MB',
+            'g-recaptcha-response.required' => $isAr ? 'يرجى التحقق من أنك لست روبوت' : 'Please verify that you are not a robot',
         ]);
 
         // Verify reCAPTCHA v3
@@ -135,11 +143,20 @@ class SellerRegistrationController extends Controller
      */
     public function processStep2(Request $request)
     {
+        $isAr = app()->getLocale() == 'ar';
+
         $validated = $request->validate([
             'main_categories' => 'required|array|min:1',
             'main_categories.*' => 'exists:categories,id',
             'sub_categories' => 'required|array|min:1',
             'sub_categories.*' => 'exists:categories,id',
+        ], [
+            'main_categories.required' => $isAr ? 'يرجى اختيار فئة رئيسية واحدة على الأقل' : 'Please select at least one main category',
+            'main_categories.min' => $isAr ? 'يرجى اختيار فئة رئيسية واحدة على الأقل' : 'Please select at least one main category',
+            'main_categories.*.exists' => $isAr ? 'الفئة المختارة غير صالحة' : 'The selected category is invalid',
+            'sub_categories.required' => $isAr ? 'يرجى اختيار فئة فرعية واحدة على الأقل' : 'Please select at least one subcategory',
+            'sub_categories.min' => $isAr ? 'يرجى اختيار فئة فرعية واحدة على الأقل' : 'Please select at least one subcategory',
+            'sub_categories.*.exists' => $isAr ? 'الفئة الفرعية المختارة غير صالحة' : 'The selected subcategory is invalid',
         ]);
 
         // Merge with existing session data
@@ -172,8 +189,13 @@ class SellerRegistrationController extends Controller
      */
     public function verifyOTP(Request $request)
     {
+        $isAr = app()->getLocale() == 'ar';
+
         $request->validate([
             'otp' => 'required|string|size:6',
+        ], [
+            'otp.required' => $isAr ? 'رمز التحقق مطلوب' : 'Verification code is required',
+            'otp.size' => $isAr ? 'رمز التحقق يجب أن يكون 6 أرقام' : 'Verification code must be 6 digits',
         ]);
 
         $data = Session::get('seller_registration');
@@ -231,8 +253,13 @@ class SellerRegistrationController extends Controller
      */
     public function verifyWhatsAppOTP(Request $request)
     {
+        $isAr = app()->getLocale() == 'ar';
+
         $request->validate([
             'otp' => 'required|string|size:6',
+        ], [
+            'otp.required' => $isAr ? 'رمز التحقق مطلوب' : 'Verification code is required',
+            'otp.size' => $isAr ? 'رمز التحقق يجب أن يكون 6 أرقام' : 'Verification code must be 6 digits',
         ]);
 
         $data = Session::get('seller_registration');
