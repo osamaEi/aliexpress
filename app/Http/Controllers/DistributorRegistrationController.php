@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Currency;
+use App\Services\WhatsAppOTPService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -338,6 +339,14 @@ class DistributorRegistrationController extends Controller
                         ? 'رمز التحقق - تسجيل المتجر'
                         : 'Email Verification Code - Distributor Registration');
         });
+
+        // Send OTP via WhatsApp
+        $phone = Session::get('distributor_registration.phone');
+        if ($phone) {
+            $isEnglish = app()->getLocale() !== 'ar';
+            $whatsappService = new WhatsAppOTPService();
+            $whatsappService->sendOTP($phone, $otp, $isEnglish);
+        }
     }
 
     /**

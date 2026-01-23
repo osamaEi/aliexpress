@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Category;
+use App\Services\WhatsAppOTPService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,7 @@ class SellerRegistrationController extends Controller
             'full_name' => 'required|string|max:255',
             'company_name' => 'required|string|max:255',
             'country' => 'required|string|max:100',
+            'phone' => 'required|string|max:20',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
@@ -194,6 +196,7 @@ class SellerRegistrationController extends Controller
             'full_name' => $data['full_name'],
             'company_name' => $data['company_name'],
             'country' => $data['country'],
+            'phone' => $data['phone'] ?? null,
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'user_type' => 'seller',
@@ -233,7 +236,7 @@ class SellerRegistrationController extends Controller
     }
 
     /**
-     * Send OTP to email
+     * Send OTP to email and WhatsApp
      */
     private function sendOTP($email)
     {
@@ -251,6 +254,14 @@ class SellerRegistrationController extends Controller
                         ? 'رمز التحقق - تسجيل البائع'
                         : 'Email Verification Code - Seller Registration');
         });
+
+        // Send OTP via WhatsApp
+        $phone = Session::get('seller_registration.phone');
+        if ($phone) {
+            $isEnglish = app()->getLocale() !== 'ar';
+            $whatsappService = new WhatsAppOTPService();
+            $whatsappService->sendOTP($phone, $otp, $isEnglish);
+        }
     }
 
     /**

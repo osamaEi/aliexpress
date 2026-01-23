@@ -680,6 +680,25 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
+                            <label for="phone" class="form-label">
+                                <i class="ri-phone-line"></i> {{ app()->getLocale() == 'ar' ? 'رقم الهاتف (واتساب)' : 'Phone Number (WhatsApp)' }}
+                            </label>
+                            <input type="text"
+                                   class="form-control @error('phone') is-invalid @enderror"
+                                   id="phone"
+                                   name="phone"
+                                   value="{{ old('phone') }}"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'مثال: 971501234567' : 'Example: 971501234567' }}"
+                                   required>
+                            @error('phone')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted d-block mt-1">{{ app()->getLocale() == 'ar' ? 'سنرسل رمز التحقق عبر واتساب' : 'We will send verification code via WhatsApp' }}</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
                             <label for="email" class="form-label">
                                 <i class="ri-mail-line"></i> {{ app()->getLocale() == 'ar' ? 'البريد الإلكتروني' : 'Email Address' }}
                             </label>
