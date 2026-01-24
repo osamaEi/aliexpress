@@ -662,7 +662,7 @@
                             <option value="">{{ app()->getLocale() == 'ar' ? 'اختر العملة' : 'Select Currency' }}</option>
                             @foreach($currencies as $currency)
                                 <option value="{{ $currency->code }}" {{ $currentCurrency == $currency->code ? 'selected' : '' }}>
-                                    {{ $currency->symbol }} {{ $currency->localizedName }} ({{ $currency->code }})
+                                    {{ $currency->symbol }}  ({{ $currency->code }})
                                 </option>
                             @endforeach
                         </select>
