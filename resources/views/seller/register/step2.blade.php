@@ -701,7 +701,7 @@
                     </div>
 
                     <!-- Subcategories Section (shown when main category selected) -->
-                    @foreach($mainCategories as $category)
+                    <!-- @foreach($mainCategories as $category)
                         @if(isset($subCategories[$category->id]) && count($subCategories[$category->id]) > 0)
                             <div class="sub-categories-wrapper" id="sub-cat-{{ $category->id }}" style="display: none;">
                                 <div class="sub-categories-label">
@@ -726,7 +726,7 @@
                                 </div>
                             </div>
                         @endif
-                    @endforeach
+                    @endforeach -->
 
                     @error('main_categories')
                         <div class="text-danger mt-2">{{ $message }}</div>
