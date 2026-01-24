@@ -59,7 +59,6 @@ class ProfileController extends Controller
         // Add seller-specific required fields
         if ($isSeller) {
             $rules['store_name'] = ['required', 'string', 'max:255'];
-            $rules['store_slug'] = ['required', 'string', 'max:255', 'alpha_dash', 'unique:users,store_slug,' . $user->id];
             $rules['default_currency'] = ['required', 'string', 'max:10'];
             // Commercial register is required if not already uploaded
             $commercialRegisterRules = ['file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'];
@@ -77,9 +76,6 @@ class ProfileController extends Controller
             'phone.required' => $isAr ? 'رقم الهاتف مطلوب' : 'Phone number is required',
             'store_name.required' => $isAr ? 'اسم الشركة مطلوب' : 'Company name is required',
             'website_url.url' => $isAr ? 'يجب أن يكون رابط الموقع صالحاً' : 'Website URL must be a valid URL',
-            'store_slug.required' => $isAr ? 'رابط المتجر مطلوب' : 'Store link is required',
-            'store_slug.alpha_dash' => $isAr ? 'رابط المتجر يجب أن يحتوي على حروف وأرقام وشرطات فقط' : 'Store link may only contain letters, numbers, dashes and underscores',
-            'store_slug.unique' => $isAr ? 'رابط المتجر مستخدم بالفعل' : 'This store link is already taken',
             'default_currency.required' => $isAr ? 'العملة الافتراضية مطلوبة' : 'Default currency is required',
             'withdrawal_method.required' => $isAr ? 'طريقة السحب مطلوبة' : 'Withdrawal method is required',
             'commercial_register.required' => $isAr ? 'السجل التجاري مطلوب' : 'Commercial register is required',

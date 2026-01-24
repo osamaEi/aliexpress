@@ -229,7 +229,7 @@ class User extends Authenticatable
 
     /**
      * Check if seller has completed all required profile fields
-     * Required: phone, commercial_register, logo, store_name, store_slug, default_currency, withdrawal_method
+     * Required: phone, commercial_register, logo, store_name, default_currency, withdrawal_method
      */
     public function hasCompletedSellerProfile(): bool
     {
@@ -241,7 +241,6 @@ class User extends Authenticatable
             && !empty($this->commercial_register)
             && !empty($this->logo)
             && !empty($this->store_name)
-            && !empty($this->store_slug)
             && !empty($this->default_currency)
             && !empty($this->withdrawal_method);
     }
