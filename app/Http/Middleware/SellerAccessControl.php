@@ -116,9 +116,18 @@ class SellerAccessControl
                 return $next($request);
             }
 
-            // Redirect to profit setup (profile data is already collected during registration)
+            $isAr = app()->getLocale() == 'ar';
+
+            // Step 1: Check if payment method is set up
+            if (!$user->hasPaymentMethodSetup()) {
+                return redirect()->route('profile.edit')
+                    ->with('warning', $isAr
+                        ? 'يرجى إكمال بيانات الملف الشخصي وطريقة السحب أولاً'
+                        : 'Please complete your profile and withdrawal method first');
+            }
+
+            // Step 2: Check if profit settings are completed
             if (!$user->profit_settings_completed) {
-                $isAr = app()->getLocale() == 'ar';
                 return redirect()->route('seller.profit.setup')
                     ->with('warning', $isAr
                         ? 'يرجى إكمال إعدادات نسب الربح للمتابعة'

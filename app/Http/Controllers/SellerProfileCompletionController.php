@@ -17,6 +17,16 @@ class SellerProfileCompletionController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        $isAr = app()->getLocale() == 'ar';
+
+        // Check if payment method is set up first
+        if (!$user->hasPaymentMethodSetup()) {
+            return redirect()->route('profile.edit')
+                ->with('warning', $isAr
+                    ? 'يرجى إكمال بيانات الملف الشخصي وطريقة السحب أولاً'
+                    : 'Please complete your profile and withdrawal method first');
+        }
+
         // If already completed profit settings, redirect to dashboard
         if ($user->profit_settings_completed) {
             return redirect()->route('dashboard');

@@ -214,11 +214,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if seller has completed initial setup (settings + profit)
+     * Check if seller has completed payment method setup
+     */
+    public function hasPaymentMethodSetup(): bool
+    {
+        return !empty($this->withdrawal_method);
+    }
+
+    /**
+     * Check if seller has completed initial setup (payment method + profit settings)
      */
     public function hasCompletedSetup(): bool
     {
-        return $this->setup_completed_at !== null && $this->profit_settings_completed;
+        return $this->hasPaymentMethodSetup() && $this->profit_settings_completed;
     }
 
     /**

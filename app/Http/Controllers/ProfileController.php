@@ -71,18 +71,16 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
-        // Mark setup_completed_at for sellers who haven't completed it yet
-        if ($user->user_type === 'seller' && !$user->setup_completed_at) {
-            $user->setup_completed_at = now();
-        }
-
         $user->save();
 
-        // Redirect sellers to profit settings if they haven't completed that step
-        if ($user->user_type === 'seller' && !$user->profit_settings_completed) {
-            return Redirect::route('seller.profit-settings.index')
+        // Redirect sellers to profit settings if they have payment method but haven't completed profit settings
+        if ($user->user_type === 'seller' && $user->hasPaymentMethodSetup() && !$user->profit_settings_completed) {
+            $isAr = app()->getLocale() == 'ar';
+            return Redirect::route('seller.profit.setup')
                 ->with('status', 'profile-updated')
-                ->with('info', __('messages.please_complete_profit_settings'));
+                ->with('success', $isAr
+                    ? 'تم تحديث الملف الشخصي بنجاح. يرجى الآن إكمال إعدادات نسب الربح.'
+                    : 'Profile updated successfully. Please now complete profit settings.');
         }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

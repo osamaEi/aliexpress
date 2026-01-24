@@ -9,6 +9,22 @@
             </h5>
         </div>
         <div class="card-body">
+            @if(session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="ri-alert-line me-2"></i>
+                    {{ session('warning') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="ri-checkbox-circle-line me-2"></i>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
             @if(session('status') === 'profile-updated')
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="ri-checkbox-circle-line me-2"></i>
@@ -29,6 +45,17 @@
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="ri-checkbox-circle-line me-2"></i>
                     {{ __('messages.logo_updated') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if(auth()->user()->user_type === 'seller' && !auth()->user()->hasPaymentMethodSetup())
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="ri-information-line me-2"></i>
+                    <strong>{{ app()->getLocale() == 'ar' ? 'مطلوب:' : 'Required:' }}</strong>
+                    {{ app()->getLocale() == 'ar'
+                        ? 'يرجى اختيار طريقة السحب لإكمال إعداد حسابك. لن تتمكن من الوصول إلى النظام حتى تكمل هذه الخطوة.'
+                        : 'Please select a withdrawal method to complete your account setup. You will not be able to access the system until you complete this step.' }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
