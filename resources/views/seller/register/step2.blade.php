@@ -687,7 +687,7 @@
                                        data-category-id="{{ $category->id }}"
                                        {{ in_array($category->id, old('main_categories', [])) ? 'checked' : '' }}>
                                 @if($category->photo || $category->image)
-                                    <img src="{{ asset($category->photo ?? $category->image) }}" alt="{{ $category->name }}" class="category-card-img">
+                                    <img src="{{ asset('storage/' . ($category->photo ?? $category->image)) }}" alt="{{ $category->name }}" class="category-card-img">
                                 @else
                                     <div class="category-card-img" style="display: flex; align-items: center; justify-content: center; background: #f3f4f6;">
                                         <i class="ri-folder-line" style="font-size: 32px; color: #ccc;"></i>
