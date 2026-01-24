@@ -133,17 +133,17 @@ if (!function_exists('convert_price')) {
     /**
      * Convert price to current currency using exchange rate
      *
-     * @param float $amount The amount in base currency (AED)
+     * @param float $amount The amount in base currency (USD)
      * @param string|null $targetCurrency Target currency code (defaults to session currency)
      * @return float
      */
     function convert_price(float $amount, ?string $targetCurrency = null): float
     {
         // Get current currency from session or use provided target currency
-        $currencyCode = $targetCurrency ?? session('currency_code', 'AED');
+        $currencyCode = $targetCurrency ?? session('currency_code', 'USD');
 
-        // If currency is AED (base currency), no conversion needed
-        if ($currencyCode === 'AED') {
+        // If currency is USD (base currency), no conversion needed
+        if ($currencyCode === 'USD') {
             return $amount;
         }
 
