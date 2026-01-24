@@ -18,12 +18,34 @@ class SetCurrency
     {
         // Check if currency is set in session
         if (!session()->has('currency_code')) {
-            // Set default currency
-            $defaultCurrency = Currency::default();
-            if ($defaultCurrency) {
-                session(['currency_code' => $defaultCurrency->code]);
-            } else {
-                session(['currency_code' => 'USD']);
+            // Set default currency from user profile if logged in and is seller
+            if (auth()->check() && auth()->user()->user_type === 'seller' && auth()->user()->default_currency) {
+                $currency = Currency::where('code', auth()->user()->default_currency)->first();
+                if ($currency) {
+                    session([
+                        'currency_code' => $currency->code,
+                        'currency_symbol' => $currency->symbol,
+                        'currency_rate' => $currency->exchange_rate,
+                    ]);
+                }
+            }
+
+            // If still not set, use system default currency
+            if (!session()->has('currency_code')) {
+                $defaultCurrency = Currency::default();
+                if ($defaultCurrency) {
+                    session([
+                        'currency_code' => $defaultCurrency->code,
+                        'currency_symbol' => $defaultCurrency->symbol,
+                        'currency_rate' => $defaultCurrency->exchange_rate,
+                    ]);
+                } else {
+                    session([
+                        'currency_code' => 'USD',
+                        'currency_symbol' => '$',
+                        'currency_rate' => 1.00,
+                    ]);
+                }
             }
         }
 
@@ -52,8 +74,12 @@ class SetCurrency
                 }
             }
 
-            // Update session with the fallback currency
-            session(['currency_code' => $currency->code]);
+            // Update session with the fallback currency (all details)
+            session([
+                'currency_code' => $currency->code,
+                'currency_symbol' => $currency->symbol,
+                'currency_rate' => $currency->exchange_rate,
+            ]);
         }
 
         view()->share('currentCurrency', $currency);

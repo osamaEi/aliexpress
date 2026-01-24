@@ -141,13 +141,10 @@
 
                     <div class="col-md-6">
                         <label for="phone" class="form-label">{{ __('messages.phone') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text">+</span>
-                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                                   id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? '971501234567' : '971501234567' }}"
-                                   dir="ltr" style="text-align: left;">
-                        </div>
+                        <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                               id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
+                               placeholder="{{ app()->getLocale() == 'ar' ? '971501234567' : '971501234567' }}"
+                               dir="ltr" style="text-align: left;" readonly>
                         @error('phone')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror

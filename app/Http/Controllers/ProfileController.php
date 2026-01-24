@@ -130,9 +130,19 @@ class ProfileController extends Controller
 
         $user->save();
 
-        // Update session currency if default_currency was changed
+        // Update session currency if default_currency was changed or if user is seller
         if (isset($validated['default_currency'])) {
             $currency = Currency::where('code', $validated['default_currency'])->first();
+            if ($currency) {
+                session([
+                    'currency_code' => $currency->code,
+                    'currency_symbol' => $currency->symbol,
+                    'currency_rate' => $currency->exchange_rate,
+                ]);
+            }
+        } elseif ($isSeller && $user->default_currency) {
+            // Ensure session currency matches user's default currency for sellers
+            $currency = Currency::where('code', $user->default_currency)->first();
             if ($currency) {
                 session([
                     'currency_code' => $currency->code,
