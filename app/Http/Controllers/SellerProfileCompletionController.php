@@ -64,19 +64,16 @@ class SellerProfileCompletionController extends Controller
         $messages = [];
 
         foreach ($subActivityIds as $subcategoryId) {
-            $rules["profit_{$subcategoryId}"] = 'required|numeric|min:0|max:100';
+            $rules["profit_{$subcategoryId}"] = 'required|numeric|min:0';
             $messages["profit_{$subcategoryId}.required"] = $isAr
-                ? 'نسبة الربح مطلوبة لجميع الفئات'
-                : 'Profit percentage is required for all categories';
+                ? 'مبلغ الربح مطلوب لجميع الفئات'
+                : 'Profit amount is required for all categories';
             $messages["profit_{$subcategoryId}.numeric"] = $isAr
-                ? 'نسبة الربح يجب أن تكون رقم'
-                : 'Profit percentage must be a number';
+                ? 'مبلغ الربح يجب أن يكون رقم'
+                : 'Profit amount must be a number';
             $messages["profit_{$subcategoryId}.min"] = $isAr
-                ? 'نسبة الربح يجب أن تكون 0 على الأقل'
-                : 'Profit percentage must be at least 0';
-            $messages["profit_{$subcategoryId}.max"] = $isAr
-                ? 'نسبة الربح يجب ألا تزيد عن 100'
-                : 'Profit percentage must not exceed 100';
+                ? 'مبلغ الربح يجب أن يكون 0 على الأقل'
+                : 'Profit amount must be at least 0';
         }
 
         $validated = $request->validate($rules, $messages);
@@ -84,14 +81,14 @@ class SellerProfileCompletionController extends Controller
         // Delete existing profit settings for this seller
         SellerSubcategoryProfit::where('user_id', $user->id)->delete();
 
-        // Create new profit settings
+        // Create new profit settings (fixed amount stored in profit_percentage field)
         foreach ($subActivityIds as $subcategoryId) {
-            $profitPercentage = $validated["profit_{$subcategoryId}"];
+            $profitAmount = $validated["profit_{$subcategoryId}"];
 
             SellerSubcategoryProfit::create([
                 'user_id' => $user->id,
                 'category_id' => $subcategoryId,
-                'profit_percentage' => $profitPercentage,
+                'profit_percentage' => $profitAmount, // This is now a fixed amount, not percentage
                 'is_active' => true,
             ]);
         }

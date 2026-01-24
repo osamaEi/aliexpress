@@ -4,8 +4,8 @@
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <!-- Page Header -->
     <div class="mb-4">
-        <h4 class="mb-1">{{ app()->getLocale() == 'ar' ? 'إعداد نسب الربح' : 'Profit Settings Setup' }}</h4>
-        <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'يرجى تحديد نسب الربح لكل فئة فرعية قمت باختيارها' : 'Please set profit percentages for each subcategory you selected' }}</p>
+        <h4 class="mb-1">{{ app()->getLocale() == 'ar' ? 'إعداد مبالغ الربح' : 'Profit Amount Setup' }}</h4>
+        <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'يرجى تحديد مبلغ الربح الثابت لكل فئة فرعية قمت باختيارها' : 'Please set fixed profit amount for each subcategory you selected' }}</p>
     </div>
 
     <!-- Alert Notice -->
@@ -53,13 +53,12 @@
                                                     id="profit_{{ $subcategory->id }}"
                                                     name="profit_{{ $subcategory->id }}"
                                                     min="0"
-                                                    max="100"
                                                     step="0.01"
-                                                    placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل النسبة' : 'Enter percentage' }}"
+                                                    placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل المبلغ' : 'Enter amount' }}"
                                                     value="{{ old('profit_' . $subcategory->id, '0') }}"
                                                     required
                                                 >
-                                                <span class="input-group-text">%</span>
+                                                <span class="input-group-text">{{ session('currency_code', 'AED') }}</span>
                                             </div>
                                             @error('profit_' . $subcategory->id)
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -92,8 +91,8 @@
             </h6>
             <p class="mb-0 small" style="color: #856404;">
                 {{ app()->getLocale() == 'ar'
-                    ? 'نسبة الربح هي النسبة المئوية التي ستضاف على سعر المنتج الأساسي. على سبيل المثال، إذا كان سعر المنتج 100 درهم ونسبة الربح 10%، سيكون السعر النهائي 110 درهم.'
-                    : 'The profit percentage is the markup added to the base product price. For example, if a product costs 100 AED and the profit is 10%, the final price will be 110 AED.' }}
+                    ? 'مبلغ الربح هو المبلغ الثابت الذي سيضاف على سعر المنتج الأساسي. على سبيل المثال، إذا كان سعر المنتج 100 درهم ومبلغ الربح 10 درهم، سيكون السعر النهائي 110 درهم.'
+                    : 'The profit amount is the fixed amount added to the base product price. For example, if a product costs 100 AED and the profit is 10 AED, the final price will be 110 AED.' }}
             </p>
         </div>
     </div>
