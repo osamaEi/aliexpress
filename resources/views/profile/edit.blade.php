@@ -710,18 +710,17 @@
 
                     <div class="col-md-6">
                         <label for="default_currency" class="form-label">{{ app()->getLocale() == 'ar' ? 'العملة الافتراضية' : 'Default Currency' }} <span class="text-danger">*</span></label>
+                        @php
+                            $currencies = \App\Models\Currency::active();
+                            $currentCurrency = old('default_currency', $user->default_currency) ?? session('currency_code', 'AED');
+                        @endphp
                         <select class="form-select @error('default_currency') is-invalid @enderror" id="default_currency" name="default_currency">
                             <option value="">{{ app()->getLocale() == 'ar' ? 'اختر العملة' : 'Select Currency' }}</option>
-                            <option value="AED" {{ old('default_currency', $user->default_currency) == 'AED' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'درهم إماراتي (AED)' : 'UAE Dirham (AED)' }}</option>
-                            <option value="SAR" {{ old('default_currency', $user->default_currency) == 'SAR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'ريال سعودي (SAR)' : 'Saudi Riyal (SAR)' }}</option>
-                            <option value="USD" {{ old('default_currency', $user->default_currency) == 'USD' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'دولار أمريكي (USD)' : 'US Dollar (USD)' }}</option>
-                            <option value="EUR" {{ old('default_currency', $user->default_currency) == 'EUR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'يورو (EUR)' : 'Euro (EUR)' }}</option>
-                            <option value="GBP" {{ old('default_currency', $user->default_currency) == 'GBP' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'جنيه إسترليني (GBP)' : 'British Pound (GBP)' }}</option>
-                            <option value="KWD" {{ old('default_currency', $user->default_currency) == 'KWD' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'دينار كويتي (KWD)' : 'Kuwaiti Dinar (KWD)' }}</option>
-                            <option value="BHD" {{ old('default_currency', $user->default_currency) == 'BHD' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'دينار بحريني (BHD)' : 'Bahraini Dinar (BHD)' }}</option>
-                            <option value="OMR" {{ old('default_currency', $user->default_currency) == 'OMR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'ريال عماني (OMR)' : 'Omani Rial (OMR)' }}</option>
-                            <option value="QAR" {{ old('default_currency', $user->default_currency) == 'QAR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'ريال قطري (QAR)' : 'Qatari Riyal (QAR)' }}</option>
-                            <option value="EGP" {{ old('default_currency', $user->default_currency) == 'EGP' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'جنيه مصري (EGP)' : 'Egyptian Pound (EGP)' }}</option>
+                            @foreach($currencies as $currency)
+                                <option value="{{ $currency->code }}" {{ $currentCurrency == $currency->code ? 'selected' : '' }}>
+                                    {{ $currency->symbol }} {{ $currency->localizedName }} ({{ $currency->code }})
+                                </option>
+                            @endforeach
                         </select>
                         @error('default_currency')
                             <div class="invalid-feedback">{{ $message }}</div>

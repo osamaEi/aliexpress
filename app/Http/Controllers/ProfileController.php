@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Currency;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -131,6 +132,18 @@ class ProfileController extends Controller
         }
 
         $user->save();
+
+        // Update session currency if default_currency was changed
+        if (isset($validated['default_currency'])) {
+            $currency = Currency::where('code', $validated['default_currency'])->first();
+            if ($currency) {
+                session([
+                    'currency_code' => $currency->code,
+                    'currency_symbol' => $currency->symbol,
+                    'currency_rate' => $currency->exchange_rate,
+                ]);
+            }
+        }
 
         // Redirect sellers to profit settings if they have completed profile but haven't completed profit settings
         if ($isSeller && $user->hasCompletedSellerProfile() && !$user->profit_settings_completed) {
