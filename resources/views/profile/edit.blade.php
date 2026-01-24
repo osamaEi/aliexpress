@@ -170,7 +170,6 @@
                         @endif
                     </div>
 
-                  
 
                     <div class="col-md-6">
                         <label for="country" class="form-label">{{ __('messages.country') }}</label>
@@ -638,11 +637,12 @@
                         <p class="text-muted small mb-3">{{ app()->getLocale() == 'ar' ? 'يرجى إكمال جميع الحقول المطلوبة' : 'Please complete all required fields' }}</p>
                     </div>
 
-                <div class="col-md-6">
-                        <label for="company_name" class="form-label">{{ __('messages.company_name') }}</label>
-                        <input type="text" class="form-control @error('company_name') is-invalid @enderror"
-                               id="company_name" name="company_name" value="{{ old('company_name', $user->company_name) }}">
-                        @error('company_name')
+                    <div class="col-md-6">
+                        <label for="store_name" class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم الشركة' : 'Company Name' }} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('store_name') is-invalid @enderror"
+                               id="store_name" name="store_name" value="{{ old('store_name', $user->store_name) }}"
+                               placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسم شركتك' : 'Enter your company name' }}">
+                        @error('store_name')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -760,7 +760,7 @@
                     </div>
                     @endif
 
-                    <!-- @if($user->store_slug)
+                    @if($user->store_slug)
                     <div class="col-md-6">
                         <label class="form-label">{{ app()->getLocale() == 'ar' ? 'رابط المتجر' : 'Store URL' }}</label>
                         <div class="input-group">
@@ -768,7 +768,7 @@
                             <span class="input-group-text">.selaa.com</span>
                         </div>
                     </div>
-                    @endif -->
+                    @endif
 
                     @if($user->default_currency)
                     <div class="col-md-6">
