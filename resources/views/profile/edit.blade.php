@@ -57,7 +57,6 @@
                         'commercial_register' => 'السجل التجاري',
                         'logo' => 'شعار المتجر',
                         'store_name' => 'اسم الشركة',
-                        'store_slug' => 'رابط المتجر',
                         'default_currency' => 'العملة الافتراضية',
                         'withdrawal_method' => 'طريقة السحب',
                     ] : [
@@ -65,7 +64,6 @@
                         'commercial_register' => 'Commercial Register',
                         'logo' => 'Store Logo',
                         'store_name' => 'Company Name',
-                        'store_slug' => 'Store Link',
                         'default_currency' => 'Default Currency',
                         'withdrawal_method' => 'Withdrawal Method',
                     ];
@@ -658,21 +656,6 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="store_slug" class="form-label">{{ app()->getLocale() == 'ar' ? 'رابط المتجر' : 'Store Link' }} <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="text" class="form-control @error('store_slug') is-invalid @enderror"
-                                   id="store_slug" name="store_slug" value="{{ old('store_slug', $user->store_slug) }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'my-store' : 'my-store' }}"
-                                   dir="ltr" style="text-align: left;">
-                            <span class="input-group-text">.selaa.ae</span>
-                        </div>
-                        <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'حروف وأرقام وشرطات فقط' : 'Letters, numbers and dashes only' }}</small>
-                        @error('store_slug')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
                         <label for="default_currency" class="form-label">{{ app()->getLocale() == 'ar' ? 'العملة الافتراضية' : 'Default Currency' }} <span class="text-danger">*</span></label>
                         @php
                             $currencies = \App\Models\Currency::active();
@@ -760,15 +743,6 @@
                     </div>
                     @endif
 
-                    @if($user->store_slug)
-                    <div class="col-md-6">
-                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'رابط المتجر' : 'Store URL' }}</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" value="{{ $user->store_slug }}" readonly disabled>
-                            <span class="input-group-text">.selaa.com</span>
-                        </div>
-                    </div>
-                    @endif
 
                     @if($user->default_currency)
                     <div class="col-md-6">
