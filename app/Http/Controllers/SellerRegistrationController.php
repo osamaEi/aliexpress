@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Subscription;
+use App\Models\UserSubscription;
 use App\Services\WhatsAppOTPService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -305,6 +307,9 @@ class SellerRegistrationController extends Controller
             'email_verified_at' => now(),
         ]);
 
+        // Create 24-hour free trial subscription
+        $this->createTrialSubscription($user);
+
         // Clear session data
         Session::forget('seller_registration');
         Session::forget('seller_email_verified');
@@ -316,8 +321,8 @@ class SellerRegistrationController extends Controller
 
         // Redirect to profile to set up payment method first
         return redirect()->route('profile.edit')->with('success', app()->getLocale() == 'ar'
-            ? 'تم التسجيل بنجاح! يرجى إكمال بيانات الملف الشخصي وطريقة الدفع.'
-            : 'Registration completed successfully! Please complete your profile and payment method.');
+            ? 'تم التسجيل بنجاح! لديك فترة تجريبية مجانية لمدة 24 ساعة. يرجى إكمال بيانات الملف الشخصي وطريقة الدفع.'
+            : 'Registration completed successfully! You have a 24-hour free trial. Please complete your profile and payment method.');
     }
 
     /**
@@ -448,5 +453,25 @@ class SellerRegistrationController extends Controller
                 'منتجات متنوعة',
             ],
         ];
+    }
+
+    /**
+     * Create a 24-hour free trial subscription for new seller
+     */
+    private function createTrialSubscription(User $user): void
+    {
+        // Get the first active subscription plan (or create a trial record without plan)
+        $subscription = Subscription::where('is_active', true)->orderBy('sort_order')->first();
+
+        UserSubscription::create([
+            'user_id' => $user->id,
+            'subscription_id' => $subscription?->id,
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addDay()->toDateString(), // 24-hour trial (1 full day)
+            'status' => 'active',
+            'amount_paid' => 0.00,
+            'payment_method' => 'trial',
+            'transaction_id' => 'TRIAL-' . strtoupper(Str::random(10)),
+        ]);
     }
 }

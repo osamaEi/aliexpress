@@ -49,13 +49,40 @@
                 </div>
             @endif
 
-            @if(auth()->user()->user_type === 'seller' && !auth()->user()->hasPaymentMethodSetup())
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="ri-information-line me-2"></i>
-                    <strong>{{ app()->getLocale() == 'ar' ? 'مطلوب:' : 'Required:' }}</strong>
-                    {{ app()->getLocale() == 'ar'
-                        ? 'يرجى اختيار طريقة السحب لإكمال إعداد حسابك. لن تتمكن من الوصول إلى النظام حتى تكمل هذه الخطوة.'
-                        : 'Please select a withdrawal method to complete your account setup. You will not be able to access the system until you complete this step.' }}
+            @if(auth()->user()->user_type === 'seller' && !auth()->user()->hasCompletedSellerProfile())
+                @php
+                    $missingFields = auth()->user()->getMissingProfileFields();
+                    $fieldLabels = app()->getLocale() == 'ar' ? [
+                        'phone' => 'رقم الهاتف',
+                        'commercial_register' => 'السجل التجاري',
+                        'logo' => 'شعار المتجر',
+                        'store_name' => 'اسم المتجر',
+                        'store_slug' => 'رابط المتجر',
+                        'default_currency' => 'العملة الافتراضية',
+                        'withdrawal_method' => 'طريقة السحب',
+                    ] : [
+                        'phone' => 'Phone Number',
+                        'commercial_register' => 'Commercial Register',
+                        'logo' => 'Store Logo',
+                        'store_name' => 'Store Name',
+                        'store_slug' => 'Store Link',
+                        'default_currency' => 'Default Currency',
+                        'withdrawal_method' => 'Withdrawal Method',
+                    ];
+                @endphp
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="ri-alert-line me-2"></i>
+                    <strong>{{ app()->getLocale() == 'ar' ? 'مطلوب إكمال البيانات التالية:' : 'Please complete the following required fields:' }}</strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach($missingFields as $field)
+                            <li>{{ $fieldLabels[$field] ?? $field }}</li>
+                        @endforeach
+                    </ul>
+                    <small class="d-block mt-2">
+                        {{ app()->getLocale() == 'ar'
+                            ? 'لن تتمكن من الوصول إلى النظام حتى تكمل جميع الحقول المطلوبة.'
+                            : 'You will not be able to access the system until you complete all required fields.' }}
+                    </small>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
@@ -92,7 +119,7 @@
             </form>
 
             <!-- Profile Information Form (Separate) -->
-            <form method="POST" action="{{ route('profile.update') }}">
+            <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
 
@@ -645,6 +672,115 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    @if($user->user_type == 'seller')
+                    <!-- Seller Store Information (Required) -->
+                    <div class="col-12 mt-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="ri-store-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'معلومات المتجر' : 'Store Information' }}
+                            <span class="text-danger">*</span>
+                        </h6>
+                        <p class="text-muted small mb-3">{{ app()->getLocale() == 'ar' ? 'يرجى إكمال جميع الحقول المطلوبة' : 'Please complete all required fields' }}</p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="store_name" class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم المتجر' : 'Store Name' }} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('store_name') is-invalid @enderror"
+                               id="store_name" name="store_name" value="{{ old('store_name', $user->store_name) }}"
+                               placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسم متجرك' : 'Enter your store name' }}">
+                        @error('store_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="store_slug" class="form-label">{{ app()->getLocale() == 'ar' ? 'رابط المتجر' : 'Store Link' }} <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control @error('store_slug') is-invalid @enderror"
+                                   id="store_slug" name="store_slug" value="{{ old('store_slug', $user->store_slug) }}"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'my-store' : 'my-store' }}"
+                                   dir="ltr" style="text-align: left;">
+                            <span class="input-group-text">.selaa.ae</span>
+                        </div>
+                        <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'حروف وأرقام وشرطات فقط' : 'Letters, numbers and dashes only' }}</small>
+                        @error('store_slug')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="default_currency" class="form-label">{{ app()->getLocale() == 'ar' ? 'العملة الافتراضية' : 'Default Currency' }} <span class="text-danger">*</span></label>
+                        <select class="form-select @error('default_currency') is-invalid @enderror" id="default_currency" name="default_currency">
+                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر العملة' : 'Select Currency' }}</option>
+                            <option value="AED" {{ old('default_currency', $user->default_currency) == 'AED' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'درهم إماراتي (AED)' : 'UAE Dirham (AED)' }}</option>
+                            <option value="SAR" {{ old('default_currency', $user->default_currency) == 'SAR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'ريال سعودي (SAR)' : 'Saudi Riyal (SAR)' }}</option>
+                            <option value="USD" {{ old('default_currency', $user->default_currency) == 'USD' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'دولار أمريكي (USD)' : 'US Dollar (USD)' }}</option>
+                            <option value="EUR" {{ old('default_currency', $user->default_currency) == 'EUR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'يورو (EUR)' : 'Euro (EUR)' }}</option>
+                            <option value="GBP" {{ old('default_currency', $user->default_currency) == 'GBP' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'جنيه إسترليني (GBP)' : 'British Pound (GBP)' }}</option>
+                            <option value="KWD" {{ old('default_currency', $user->default_currency) == 'KWD' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'دينار كويتي (KWD)' : 'Kuwaiti Dinar (KWD)' }}</option>
+                            <option value="BHD" {{ old('default_currency', $user->default_currency) == 'BHD' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'دينار بحريني (BHD)' : 'Bahraini Dinar (BHD)' }}</option>
+                            <option value="OMR" {{ old('default_currency', $user->default_currency) == 'OMR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'ريال عماني (OMR)' : 'Omani Rial (OMR)' }}</option>
+                            <option value="QAR" {{ old('default_currency', $user->default_currency) == 'QAR' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'ريال قطري (QAR)' : 'Qatari Riyal (QAR)' }}</option>
+                            <option value="EGP" {{ old('default_currency', $user->default_currency) == 'EGP' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'جنيه مصري (EGP)' : 'Egyptian Pound (EGP)' }}</option>
+                        </select>
+                        @error('default_currency')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Business Documents Section -->
+                    <div class="col-12 mt-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="ri-file-text-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'مستندات النشاط التجاري' : 'Business Documents' }}
+                        </h6>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="commercial_register" class="form-label">
+                            {{ app()->getLocale() == 'ar' ? 'السجل التجاري' : 'Commercial Register' }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        @if($user->commercial_register)
+                            <div class="mb-2">
+                                <a href="{{ asset('storage/' . $user->commercial_register) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="ri-file-text-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'عرض المستند الحالي' : 'View Current Document' }}
+                                </a>
+                                <span class="badge bg-success ms-2">
+                                    <i class="ri-checkbox-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تم الرفع' : 'Uploaded' }}
+                                </span>
+                            </div>
+                        @endif
+                        <input type="file" class="form-control @error('commercial_register') is-invalid @enderror"
+                               id="commercial_register" name="commercial_register" accept=".pdf,.jpg,.jpeg,.png">
+                        <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'PDF أو صورة (حد أقصى 5 ميجابايت)' : 'PDF or image (max 5MB)' }}</small>
+                        @error('commercial_register')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="freelance_document" class="form-label">
+                            {{ app()->getLocale() == 'ar' ? 'وثيقة العمل الحر' : 'Freelance Document' }}
+                            <span class="text-muted small">({{ app()->getLocale() == 'ar' ? 'اختياري' : 'Optional' }})</span>
+                        </label>
+                        @if($user->freelance_document)
+                            <div class="mb-2">
+                                <a href="{{ asset('storage/' . $user->freelance_document) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="ri-file-text-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'عرض المستند الحالي' : 'View Current Document' }}
+                                </a>
+                                <span class="badge bg-success ms-2">
+                                    <i class="ri-checkbox-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تم الرفع' : 'Uploaded' }}
+                                </span>
+                            </div>
+                        @endif
+                        <input type="file" class="form-control @error('freelance_document') is-invalid @enderror"
+                               id="freelance_document" name="freelance_document" accept=".pdf,.jpg,.jpeg,.png">
+                        <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'PDF أو صورة (حد أقصى 5 ميجابايت)' : 'PDF or image (max 5MB)' }}</small>
+                        @error('freelance_document')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    @endif
 
                     @if($user->user_type == 'distributor' && ($user->store_name || $user->store_slug || $user->commercial_register || $user->freelance_document))
                     <!-- Distributor Registration Information (Read Only) -->

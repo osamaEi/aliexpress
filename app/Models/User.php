@@ -189,7 +189,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if seller is in trial period (24 hours from creation)
+     * Check if seller is in trial period (has active trial subscription)
      */
     public function isInTrialPeriod(): bool
     {
@@ -197,8 +197,12 @@ class User extends Authenticatable
             return false;
         }
 
-        // Trial period is 24 hours from account creation
-        return $this->created_at->addHours(24)->isFuture();
+        // Check for active trial subscription
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where('payment_method', 'trial')
+            ->where('end_date', '>=', now()->toDateString())
+            ->exists();
     }
 
     /**
@@ -210,23 +214,87 @@ class User extends Authenticatable
             return false;
         }
 
+        // Check if there was a trial and it has expired
+        $hadTrial = $this->subscriptions()
+            ->where('payment_method', 'trial')
+            ->exists();
+
+        if (!$hadTrial) {
+            return false;
+        }
+
         return !$this->isInTrialPeriod() && !$this->hasActiveSubscription();
     }
 
     /**
-     * Check if seller has completed payment method setup
+     * Check if seller has completed all required profile fields
+     * Required: phone, commercial_register, logo, store_name, store_slug, default_currency, withdrawal_method
      */
-    public function hasPaymentMethodSetup(): bool
+    public function hasCompletedSellerProfile(): bool
     {
-        return !empty($this->withdrawal_method);
+        if ($this->user_type !== 'seller') {
+            return true;
+        }
+
+        return !empty($this->phone)
+            && !empty($this->commercial_register)
+            && !empty($this->logo)
+            && !empty($this->store_name)
+            && !empty($this->store_slug)
+            && !empty($this->default_currency)
+            && !empty($this->withdrawal_method);
     }
 
     /**
-     * Check if seller has completed initial setup (payment method + profit settings)
+     * Check if seller has completed payment method setup (backward compatibility)
+     */
+    public function hasPaymentMethodSetup(): bool
+    {
+        return $this->hasCompletedSellerProfile();
+    }
+
+    /**
+     * Check if seller has completed initial setup (profile + profit settings)
      */
     public function hasCompletedSetup(): bool
     {
-        return $this->hasPaymentMethodSetup() && $this->profit_settings_completed;
+        return $this->hasCompletedSellerProfile() && $this->profit_settings_completed;
+    }
+
+    /**
+     * Get missing required profile fields for seller
+     */
+    public function getMissingProfileFields(): array
+    {
+        if ($this->user_type !== 'seller') {
+            return [];
+        }
+
+        $missing = [];
+
+        if (empty($this->phone)) {
+            $missing[] = 'phone';
+        }
+        if (empty($this->commercial_register)) {
+            $missing[] = 'commercial_register';
+        }
+        if (empty($this->logo)) {
+            $missing[] = 'logo';
+        }
+        if (empty($this->store_name)) {
+            $missing[] = 'store_name';
+        }
+        if (empty($this->store_slug)) {
+            $missing[] = 'store_slug';
+        }
+        if (empty($this->default_currency)) {
+            $missing[] = 'default_currency';
+        }
+        if (empty($this->withdrawal_method)) {
+            $missing[] = 'withdrawal_method';
+        }
+
+        return $missing;
     }
 
     /**
@@ -256,7 +324,17 @@ class User extends Authenticatable
             return 0;
         }
 
-        return (int) now()->diffInHours($this->created_at->addHours(24), false);
+        $trialSubscription = $this->subscriptions()
+            ->where('status', 'active')
+            ->where('payment_method', 'trial')
+            ->where('end_date', '>=', now()->toDateString())
+            ->first();
+
+        if (!$trialSubscription) {
+            return 0;
+        }
+
+        return (int) now()->diffInHours($trialSubscription->end_date->endOfDay(), false);
     }
 
     /**

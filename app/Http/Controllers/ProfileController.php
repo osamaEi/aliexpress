@@ -26,15 +26,20 @@ class ProfileController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $user = $request->user();
+        $isSeller = $user->user_type === 'seller';
+        $isAr = app()->getLocale() == 'ar';
+
+        // Base validation rules
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'phone_code' => ['nullable', 'string', 'max:10'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'phone' => [$isSeller ? 'required' : 'nullable', 'string', 'max:20'],
+            'phone_code' => [$isSeller ? 'required' : 'nullable', 'string', 'max:10'],
             'company_name' => ['nullable', 'string', 'max:255'],
-            'country' => ['nullable', 'string', 'max:2'],
+            'country' => ['nullable', 'string', 'max:100'],
             // Withdrawal method fields
-            'withdrawal_method' => ['nullable', 'string', 'in:paypal,bank_transfer,mobile_wallet'],
+            'withdrawal_method' => [$isSeller ? 'required' : 'nullable', 'string', 'in:paypal,bank_transfer,mobile_wallet'],
             // PayPal fields
             'paypal_email' => ['nullable', 'required_if:withdrawal_method,paypal', 'email', 'max:255'],
             // Bank transfer fields
@@ -48,9 +53,41 @@ class ProfileController extends Controller
             'wallet_phone_number' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:20'],
             'wallet_holder_name' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:255'],
             'marketing_code' => ['nullable', 'string', 'max:100'],
-        ]);
+        ];
 
-        $user = $request->user();
+        // Add seller-specific required fields
+        if ($isSeller) {
+            $rules['store_name'] = ['required', 'string', 'max:255'];
+            $rules['store_slug'] = ['required', 'string', 'max:255', 'alpha_dash', 'unique:users,store_slug,' . $user->id];
+            $rules['default_currency'] = ['required', 'string', 'max:10'];
+            // Commercial register is required if not already uploaded
+            $commercialRegisterRules = ['file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'];
+            if (empty($user->commercial_register)) {
+                array_unshift($commercialRegisterRules, 'required');
+            } else {
+                array_unshift($commercialRegisterRules, 'nullable');
+            }
+            $rules['commercial_register'] = $commercialRegisterRules;
+            $rules['freelance_document'] = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120']; // Optional
+        }
+
+        // Custom validation messages
+        $messages = [
+            'phone.required' => $isAr ? 'رقم الهاتف مطلوب' : 'Phone number is required',
+            'store_name.required' => $isAr ? 'اسم المتجر مطلوب' : 'Store name is required',
+            'store_slug.required' => $isAr ? 'رابط المتجر مطلوب' : 'Store link is required',
+            'store_slug.alpha_dash' => $isAr ? 'رابط المتجر يجب أن يحتوي على حروف وأرقام وشرطات فقط' : 'Store link may only contain letters, numbers, dashes and underscores',
+            'store_slug.unique' => $isAr ? 'رابط المتجر مستخدم بالفعل' : 'This store link is already taken',
+            'default_currency.required' => $isAr ? 'العملة الافتراضية مطلوبة' : 'Default currency is required',
+            'withdrawal_method.required' => $isAr ? 'طريقة السحب مطلوبة' : 'Withdrawal method is required',
+            'commercial_register.required' => $isAr ? 'السجل التجاري مطلوب' : 'Commercial register is required',
+            'commercial_register.mimes' => $isAr ? 'السجل التجاري يجب أن يكون ملف PDF أو صورة' : 'Commercial register must be a PDF or image file',
+            'commercial_register.max' => $isAr ? 'حجم الملف يجب أن يكون أقل من 5 ميجابايت' : 'File size must be less than 5MB',
+            'freelance_document.mimes' => $isAr ? 'وثيقة العمل الحر يجب أن تكون ملف PDF أو صورة' : 'Freelance document must be a PDF or image file',
+            'freelance_document.max' => $isAr ? 'حجم الملف يجب أن يكون أقل من 5 ميجابايت' : 'File size must be less than 5MB',
+        ];
+
+        $validated = $request->validate($rules, $messages);
 
         // Handle marketing code - can only be entered once and requires approval
         if (isset($validated['marketing_code'])) {
@@ -63,6 +100,28 @@ class ProfileController extends Controller
             }
         }
 
+        // Handle commercial register file upload
+        if ($request->hasFile('commercial_register')) {
+            // Delete old file if exists
+            if ($user->commercial_register && \Storage::disk('public')->exists($user->commercial_register)) {
+                \Storage::disk('public')->delete($user->commercial_register);
+            }
+            $validated['commercial_register'] = $request->file('commercial_register')->store('documents/commercial_registers', 'public');
+        } else {
+            unset($validated['commercial_register']);
+        }
+
+        // Handle freelance document file upload
+        if ($request->hasFile('freelance_document')) {
+            // Delete old file if exists
+            if ($user->freelance_document && \Storage::disk('public')->exists($user->freelance_document)) {
+                \Storage::disk('public')->delete($user->freelance_document);
+            }
+            $validated['freelance_document'] = $request->file('freelance_document')->store('documents/freelance_documents', 'public');
+        } else {
+            unset($validated['freelance_document']);
+        }
+
         // Fill user data
         $user->fill($validated);
 
@@ -73,9 +132,8 @@ class ProfileController extends Controller
 
         $user->save();
 
-        // Redirect sellers to profit settings if they have payment method but haven't completed profit settings
-        if ($user->user_type === 'seller' && $user->hasPaymentMethodSetup() && !$user->profit_settings_completed) {
-            $isAr = app()->getLocale() == 'ar';
+        // Redirect sellers to profit settings if they have completed profile but haven't completed profit settings
+        if ($isSeller && $user->hasCompletedSellerProfile() && !$user->profit_settings_completed) {
             return Redirect::route('seller.profit.setup')
                 ->with('status', 'profile-updated')
                 ->with('success', $isAr

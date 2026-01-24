@@ -118,12 +118,12 @@ class SellerAccessControl
 
             $isAr = app()->getLocale() == 'ar';
 
-            // Step 1: Check if payment method is set up
-            if (!$user->hasPaymentMethodSetup()) {
+            // Step 1: Check if seller profile is complete (all required fields)
+            if (!$user->hasCompletedSellerProfile()) {
                 return redirect()->route('profile.edit')
                     ->with('warning', $isAr
-                        ? 'يرجى إكمال بيانات الملف الشخصي وطريقة السحب أولاً'
-                        : 'Please complete your profile and withdrawal method first');
+                        ? 'يرجى إكمال جميع بيانات الملف الشخصي المطلوبة (رقم الهاتف، اسم المتجر، رابط المتجر، السجل التجاري، العملة، طريقة السحب)'
+                        : 'Please complete all required profile fields (phone, store name, store link, commercial register, currency, withdrawal method)');
             }
 
             // Step 2: Check if profit settings are completed
