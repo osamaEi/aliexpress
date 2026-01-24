@@ -22,14 +22,25 @@ class SellerAccessControl
         'subscriptions.update',
         'subscriptions.destroy',
         'subscriptions.subscribe',
+        'subscriptions.subscribe.show',
+        'subscriptions.pay-with-wallet',
+        'subscriptions.pay-with-ziina',
+        'subscriptions.pay-with-paymob',
+        'subscriptions.initialize-paymob',
+        'subscriptions.payment.success',
+        'subscriptions.payment.cancel',
         'subscriptions.history',
         'subscriptions.cancel',
+        'subscriptions.invoice',
         // Profile/Settings routes
         'profile.edit',
         'profile.update',
         'profile.logo.update',
         'profile.destroy',
-        // Profit settings (part of setup and settings)
+        // Initial Profit Setup routes (must complete after registration)
+        'seller.profit.setup',
+        'seller.profit.store',
+        // Profit settings management (part of setup and settings)
         'seller.profit-settings.index',
         'seller.profit-settings.store',
         'seller.profit-settings.bulk-update',
@@ -44,8 +55,12 @@ class SellerAccessControl
         'seller.tickets.reply',
         // Payment for subscription
         'payment.subscription',
+        'payment.order',
         'payment.success',
         'payment.error',
+        'payment.callback',
+        'paymob.callback',
+        'paymob.initiate-subscription',
         // Auth routes
         'logout',
         'password.request',
@@ -57,14 +72,16 @@ class SellerAccessControl
         'verification.verify',
         'verification.send',
         // Language and locale switching
-        'locale.switch',
+        'lang.switch',
         'currency.switch',
     ];
 
     /**
-     * Routes for initial setup (profile + profit settings)
+     * Routes for initial setup (profit settings)
      */
     protected array $setupRoutes = [
+        'seller.profit.setup',
+        'seller.profit.store',
         'seller.profit-settings.index',
         'seller.profit-settings.store',
         'seller.profit-settings.bulk-update',
@@ -99,15 +116,13 @@ class SellerAccessControl
                 return $next($request);
             }
 
-            // Redirect to appropriate setup page
-            if (!$user->setup_completed_at) {
-                return redirect()->route('profile.edit')
-                    ->with('warning', __('messages.please_complete_profile_settings'));
-            }
-
+            // Redirect to profit setup (profile data is already collected during registration)
             if (!$user->profit_settings_completed) {
-                return redirect()->route('seller.profit-settings.index')
-                    ->with('warning', __('messages.please_complete_profit_settings'));
+                $isAr = app()->getLocale() == 'ar';
+                return redirect()->route('seller.profit.setup')
+                    ->with('warning', $isAr
+                        ? 'يرجى إكمال إعدادات نسب الربح للمتابعة'
+                        : 'Please complete profit settings to continue');
             }
         }
 

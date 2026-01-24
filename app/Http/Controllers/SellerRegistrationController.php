@@ -303,6 +303,7 @@ class SellerRegistrationController extends Controller
             'is_verified' => true,
             'verified_at' => now(),
             'email_verified_at' => now(),
+            'setup_completed_at' => now(), // Profile data collected during registration
         ]);
 
         // Clear session data
@@ -314,9 +315,10 @@ class SellerRegistrationController extends Controller
         // Log the user in
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', app()->getLocale() == 'ar'
-            ? 'تم التسجيل بنجاح!'
-            : 'Registration completed successfully!');
+        // Redirect to profit settings setup
+        return redirect()->route('seller.profit.setup')->with('success', app()->getLocale() == 'ar'
+            ? 'تم التسجيل بنجاح! يرجى إعداد نسب الربح للفئات الخاصة بك.'
+            : 'Registration completed successfully! Please set up your profit percentages.');
     }
 
     /**

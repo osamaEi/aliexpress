@@ -14,6 +14,7 @@ use App\Http\Controllers\Seller\SellerController;
 use App\Http\Controllers\AliExpressTestController;
 use App\Http\Controllers\AliExpressWebhookController;
 use App\Http\Controllers\SellerRegistrationController;
+use App\Http\Controllers\SellerProfileCompletionController;
 use App\Http\Controllers\DistributorRegistrationController;
 use App\Http\Controllers\Admin\OrderManagementController;
 use App\Http\Controllers\Admin\AdminCategoryProfitController;
@@ -118,6 +119,10 @@ Route::get('/aliexpress/product/{productId}', [AliExpressController::class, 'det
 Route::get('/aliexpress/check-enrollment', [AliExpressController::class, 'checkEnrollment'])->name('aliexpress.enrollment');
 
 Route::middleware('auth')->group(function () {
+    // Seller Profit Setup Routes (must complete before accessing system)
+    Route::get('/seller/profit-setup', [SellerProfileCompletionController::class, 'showProfitForm'])->name('seller.profit.setup');
+    Route::post('/seller/profit-setup', [SellerProfileCompletionController::class, 'storeProfitSettings'])->name('seller.profit.store');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/logo', [ProfileController::class, 'updateLogo'])->name('profile.logo.update');
