@@ -96,7 +96,7 @@
                         </li>
                         <!--/ Language Switcher -->
 
-                        <!-- Currency Switcher -->
+                        <!-- Currency Switcher
                         <li class="nav-item dropdown me-2 me-xl-0">
                             <a
                                 class="nav-link btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow"
@@ -118,7 +118,7 @@
                                 </li>
                                 @endforeach
                             </ul>
-                        </li>
+                        </li> -->
                         <!--/ Currency Switcher -->
 
                         <!-- Style Switcher -->
