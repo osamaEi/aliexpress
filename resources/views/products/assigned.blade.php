@@ -215,13 +215,13 @@
                                             @if($displayPrice > 0)
                                                 <span class="fw-bold d-inline-flex align-items-center gap-1" style="color: #561C04;">
                                                     <x-session-currency-icon width="16" height="16" />
-                                                    {{ number_format($displayPrice, 2) }}
+                                                    {{ number_format(convert_price($displayPrice), 2) }}
                                                 </span>
                                                 @if($sellerAmount > 0)
                                                     <br>
                                                     <small class="text-success">
                                                         {{ app()->getLocale() == 'ar' ? 'ربحك:' : 'Profit:' }}
-                                                        {{ number_format($sellerAmount, 2) }}
+                                                        {{ number_format(convert_price($sellerAmount), 2) }}
                                                     </small>
                                                 @endif
                                             @endif

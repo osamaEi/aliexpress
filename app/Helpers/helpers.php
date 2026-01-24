@@ -77,27 +77,46 @@ if (!function_exists('currency_symbol')) {
     /**
      * Get currency symbol based on locale
      *
-     * @param string $currency
+     * @param string|null $currency Currency code (defaults to session currency)
      * @param bool $asHtml Return as HTML (with SVG icon for AED)
      * @return string
      */
-    function currency_symbol(string $currency = 'AED', bool $asHtml = false, int $iconWidth = 20, int $iconHeight = 20, string $iconClass = ''): string
+    function currency_symbol(?string $currency = null, bool $asHtml = false, int $iconWidth = 20, int $iconHeight = 20, string $iconClass = ''): string
     {
-        // For AED, use SVG icon
-        if ($currency === 'AED' && $asHtml) {
-            try {
-                // Render the Blade component for the AED icon and return its HTML
-                return view('components.currency-icon', [
-                    'width' => $iconWidth,
-                    'height' => $iconHeight,
-                    'class' => $iconClass,
-                ])->render();
-            } catch (\Throwable $e) {
-                // Fallback to inline SVG if rendering fails for any reason
-                return '<svg xmlns="http://www.w3.org/2000/svg" width="' . e($iconWidth) . '" height="' . e($iconHeight) . '" viewBox="0 0 24 24" fill="none" class="inline-block ' . e($iconClass) . '" style="vertical-align: middle;"><path d="M8 7V17H12C14.8 17 17 14.8 17 12C17 9.2 14.8 7 12 7H8Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 11H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 13H12.5H18.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+        // Get currency from session if not provided
+        $currency = $currency ?? session('currency_code', 'AED');
+
+        // Try to get symbol from session first (faster)
+        if ($currency === session('currency_code')) {
+            $symbol = session('currency_symbol');
+            if ($symbol) {
+                // For AED, use SVG icon if requested
+                if ($currency === 'AED' && $asHtml) {
+                    try {
+                        return view('components.currency-icon', [
+                            'width' => $iconWidth,
+                            'height' => $iconHeight,
+                            'class' => $iconClass,
+                        ])->render();
+                    } catch (\Throwable $e) {
+                        return $symbol;
+                    }
+                }
+                return $symbol;
             }
         }
 
+        // Fallback: get from database
+        try {
+            $currencyModel = \App\Models\Currency::where('code', $currency)->first();
+            if ($currencyModel && $currencyModel->symbol) {
+                return $currencyModel->symbol;
+            }
+        } catch (\Throwable $e) {
+            // Continue to static fallback
+        }
+
+        // Last resort: static symbols
         $symbols = [
             'AED' => app()->getLocale() == 'ar' ? 'د.إ' : 'AED',
             'USD' => '$',
