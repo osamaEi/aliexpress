@@ -56,7 +56,7 @@
                                                     max="100"
                                                     step="0.01"
                                                     placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل النسبة' : 'Enter percentage' }}"
-                                                    value="{{ old('profit_' . $subcategory->id) }}"
+                                                    value="{{ old('profit_' . $subcategory->id, '0') }}"
                                                     required
                                                 >
                                                 <span class="input-group-text">%</span>
