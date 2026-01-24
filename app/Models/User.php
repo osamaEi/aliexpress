@@ -284,9 +284,6 @@ class User extends Authenticatable
         if (empty($this->store_name)) {
             $missing[] = 'store_name';
         }
-        if (empty($this->store_slug)) {
-            $missing[] = 'store_slug';
-        }
         if (empty($this->default_currency)) {
             $missing[] = 'default_currency';
         }

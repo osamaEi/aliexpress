@@ -15,7 +15,11 @@ class CurrencyController extends Controller
         $currency = Currency::where('code', $code)->where('is_active', true)->first();
 
         if ($currency) {
-            session(['currency_code' => $currency->code]);
+            session([
+                'currency_code' => $currency->code,
+                'currency_symbol' => $currency->symbol,
+                'currency_rate' => $currency->exchange_rate,
+            ]);
         }
 
         // Get the previous URL and update currency parameter if exists
