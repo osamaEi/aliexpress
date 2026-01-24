@@ -110,18 +110,53 @@ if (!function_exists('currency_symbol')) {
     }
 }
 
+if (!function_exists('convert_price')) {
+    /**
+     * Convert price to current currency using exchange rate
+     *
+     * @param float $amount The amount in base currency (AED)
+     * @param string|null $targetCurrency Target currency code (defaults to session currency)
+     * @return float
+     */
+    function convert_price(float $amount, ?string $targetCurrency = null): float
+    {
+        // Get current currency from session or use provided target currency
+        $currencyCode = $targetCurrency ?? session('currency_code', 'AED');
+
+        // If currency is AED (base currency), no conversion needed
+        if ($currencyCode === 'AED') {
+            return $amount;
+        }
+
+        // Get exchange rate from session
+        $exchangeRate = session('currency_rate', 1.0);
+
+        // Convert: base amount * exchange rate
+        return $amount * $exchangeRate;
+    }
+}
+
 if (!function_exists('format_currency')) {
     /**
-     * Format amount with currency symbol
+     * Format amount with currency symbol (with automatic conversion)
      *
-     * @param float $amount
-     * @param string $currency
-     * @param int $decimals
+     * @param float $amount The amount in base currency (AED)
+     * @param string|null $currency Currency code (defaults to session currency)
+     * @param int $decimals Number of decimal places
      * @param bool $useIcon Use SVG icon for AED currency
+     * @param bool $convert Whether to convert the price (default: true)
      * @return string
      */
-    function format_currency(float $amount, string $currency = 'AED', int $decimals = 2, bool $useIcon = true): string
+    function format_currency(float $amount, ?string $currency = null, int $decimals = 2, bool $useIcon = true, bool $convert = true): string
     {
+        // Get currency from session if not provided
+        $currency = $currency ?? session('currency_code', 'AED');
+
+        // Convert price if needed
+        if ($convert) {
+            $amount = convert_price($amount, $currency);
+        }
+
         $formattedAmount = number_format($amount, $decimals);
         $symbol = currency_symbol($currency, $useIcon);
         // If symbol contains HTML (SVG), return an HtmlString so Blade won't double-escape
