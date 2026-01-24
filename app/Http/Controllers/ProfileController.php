@@ -36,7 +36,6 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'phone' => [$isSeller ? 'required' : 'nullable', 'string', 'max:20'],
-            'phone_code' => [$isSeller ? 'required' : 'nullable', 'string', 'max:10'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:100'],
             // Withdrawal method fields
@@ -54,6 +53,7 @@ class ProfileController extends Controller
             'wallet_phone_number' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:20'],
             'wallet_holder_name' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:255'],
             'marketing_code' => ['nullable', 'string', 'max:100'],
+            'website_url' => ['nullable', 'url', 'max:255'],
         ];
 
         // Add seller-specific required fields
@@ -75,7 +75,8 @@ class ProfileController extends Controller
         // Custom validation messages
         $messages = [
             'phone.required' => $isAr ? 'رقم الهاتف مطلوب' : 'Phone number is required',
-            'store_name.required' => $isAr ? 'اسم المتجر مطلوب' : 'Store name is required',
+            'store_name.required' => $isAr ? 'اسم الشركة مطلوب' : 'Company name is required',
+            'website_url.url' => $isAr ? 'يجب أن يكون رابط الموقع صالحاً' : 'Website URL must be a valid URL',
             'store_slug.required' => $isAr ? 'رابط المتجر مطلوب' : 'Store link is required',
             'store_slug.alpha_dash' => $isAr ? 'رابط المتجر يجب أن يحتوي على حروف وأرقام وشرطات فقط' : 'Store link may only contain letters, numbers, dashes and underscores',
             'store_slug.unique' => $isAr ? 'رابط المتجر مستخدم بالفعل' : 'This store link is already taken',

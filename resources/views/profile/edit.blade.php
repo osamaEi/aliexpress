@@ -56,7 +56,7 @@
                         'phone' => 'رقم الهاتف',
                         'commercial_register' => 'السجل التجاري',
                         'logo' => 'شعار المتجر',
-                        'store_name' => 'اسم المتجر',
+                        'store_name' => 'اسم الشركة',
                         'store_slug' => 'رابط المتجر',
                         'default_currency' => 'العملة الافتراضية',
                         'withdrawal_method' => 'طريقة السحب',
@@ -64,7 +64,7 @@
                         'phone' => 'Phone Number',
                         'commercial_register' => 'Commercial Register',
                         'logo' => 'Store Logo',
-                        'store_name' => 'Store Name',
+                        'store_name' => 'Company Name',
                         'store_slug' => 'Store Link',
                         'default_currency' => 'Default Currency',
                         'withdrawal_method' => 'Withdrawal Method',
@@ -144,50 +144,12 @@
                     <div class="col-md-6">
                         <label for="phone" class="form-label">{{ __('messages.phone') }}</label>
                         <div class="input-group">
-                            <select class="form-select @error('phone_code') is-invalid @enderror"
-                                    id="phone_code"
-                                    name="phone_code"
-                                    style="max-width: 140px;">
-                                @php
-                                    $arabCountryCodes = [
-                                        ['code' => '+971', 'flag' => '🇦🇪', 'name' => 'الإمارات'],
-                                        ['code' => '+966', 'flag' => '🇸🇦', 'name' => 'السعودية'],
-                                        ['code' => '+965', 'flag' => '🇰🇼', 'name' => 'الكويت'],
-                                        ['code' => '+974', 'flag' => '🇶🇦', 'name' => 'قطر'],
-                                        ['code' => '+973', 'flag' => '🇧🇭', 'name' => 'البحرين'],
-                                        ['code' => '+968', 'flag' => '🇴🇲', 'name' => 'عُمان'],
-                                        ['code' => '+962', 'flag' => '🇯🇴', 'name' => 'الأردن'],
-                                        ['code' => '+961', 'flag' => '🇱🇧', 'name' => 'لبنان'],
-                                        ['code' => '+963', 'flag' => '🇸🇾', 'name' => 'سوريا'],
-                                        ['code' => '+970', 'flag' => '🇵🇸', 'name' => 'فلسطين'],
-                                        ['code' => '+964', 'flag' => '🇮🇶', 'name' => 'العراق'],
-                                        ['code' => '+20', 'flag' => '🇪🇬', 'name' => 'مصر'],
-                                        ['code' => '+218', 'flag' => '🇱🇾', 'name' => 'ليبيا'],
-                                        ['code' => '+216', 'flag' => '🇹🇳', 'name' => 'تونس'],
-                                        ['code' => '+213', 'flag' => '🇩🇿', 'name' => 'الجزائر'],
-                                        ['code' => '+212', 'flag' => '🇲🇦', 'name' => 'المغرب'],
-                                        ['code' => '+222', 'flag' => '🇲🇷', 'name' => 'موريتانيا'],
-                                        ['code' => '+249', 'flag' => '🇸🇩', 'name' => 'السودان'],
-                                        ['code' => '+967', 'flag' => '🇾🇪', 'name' => 'اليمن'],
-                                        ['code' => '+252', 'flag' => '🇸🇴', 'name' => 'الصومال'],
-                                        ['code' => '+253', 'flag' => '🇩🇯', 'name' => 'جيبوتي'],
-                                        ['code' => '+269', 'flag' => '🇰🇲', 'name' => 'جزر القمر'],
-                                    ];
-                                @endphp
-                                @foreach($arabCountryCodes as $country)
-                                    <option value="{{ $country['code'] }}" {{ old('phone_code', $user->phone_code ?? '+971') == $country['code'] ? 'selected' : '' }}>
-                                        {{ $country['flag'] }} {{ $country['code'] }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <span class="input-group-text">+</span>
                             <input type="text" class="form-control @error('phone') is-invalid @enderror"
                                    id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone number' }}"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? '971501234567' : '971501234567' }}"
                                    dir="ltr" style="text-align: left;">
                         </div>
-                        @error('phone_code')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
                         @error('phone')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -684,11 +646,21 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="store_name" class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم المتجر' : 'Store Name' }} <span class="text-danger">*</span></label>
+                        <label for="store_name" class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم الشركة' : 'Company Name' }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('store_name') is-invalid @enderror"
                                id="store_name" name="store_name" value="{{ old('store_name', $user->store_name) }}"
-                               placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسم متجرك' : 'Enter your store name' }}">
+                               placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسم شركتك' : 'Enter your company name' }}">
                         @error('store_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="website_url" class="form-label">{{ app()->getLocale() == 'ar' ? 'رابط الموقع' : 'Website URL' }}</label>
+                        <input type="url" class="form-control @error('website_url') is-invalid @enderror"
+                               id="website_url" name="website_url" value="{{ old('website_url', $user->website_url) }}"
+                               placeholder="https://example.com" dir="ltr" style="text-align: left;">
+                        @error('website_url')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

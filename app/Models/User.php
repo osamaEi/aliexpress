@@ -60,6 +60,7 @@ class User extends Authenticatable
         'commercial_register',
         'freelance_document',
         'social_media_accounts',
+        'website_url',
         // Seller setup fields
         'setup_completed_at',
         'profit_settings_completed',
