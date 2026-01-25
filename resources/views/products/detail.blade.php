@@ -122,7 +122,7 @@
                                     {{ number_format($convertedPrice, 2) }}
                                 </h2>
                                 @if($convertedComparePrice && $convertedComparePrice > $convertedPrice)
-                                    <span class="text-white-50 text-decoration-line-through me-2 d-inline-flex align-items-center gap-1" style="font-size: 20px;">
+                                    <span class="text-white-50 text-decoration-line-through me-2 d-inline-flex align-items-center gap-1" style="font-size: 20px; direction: ltr;">
                                         <x-session-currency-icon width="18" height="18" />
                                         {{ number_format($convertedComparePrice, 2) }}
                                     </span>
@@ -139,14 +139,14 @@
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <small class="text-white">{{ __('messages.supplier_price') }}</small>
-                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1">
+                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1" style="direction: ltr;">
                                                 <x-session-currency-icon width="16" height="16" />
                                                 {{ number_format($convertedSupplierPrice, 2) }}
                                             </div>
                                         </div>
                                         <div class="col-6 text-end">
                                             <small class="text-white">{{ __('messages.your_profit') }}</small>
-                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1 justify-content-end">
+                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1 justify-content-end" style="direction: ltr;">
                                                 <x-session-currency-icon width="16" height="16" />
                                                 {{ number_format($convertedSellerProfit, 2) }}
                                             </div>
@@ -160,7 +160,7 @@
                                     <div class="row g-2">
                                         <div class="col-12">
                                             <small class="text-white">{{ __('messages.supplier_price') }}</small>
-                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1">
+                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1" style="direction: ltr;">
                                                 <x-session-currency-icon width="16" height="16" />
                                                 {{ number_format($convertedSupplierPrice, 2) }}
                                             </div>
