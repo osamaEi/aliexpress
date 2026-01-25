@@ -526,14 +526,9 @@
                                                 {{ number_format((float)$product['sale_price'], 2) }}
                                             @endif
                                         </h5>
-                                        @if(isset($product['admin_profit']) && $product['admin_profit'] > 0)
-                                            <small class="text-success d-block d-flex align-items-center">
-                                                <x-session-currency-icon width="12" height="12" class="me-1" />
-                                                {{ app()->getLocale() == 'ar' ? 'تشمل' : 'Includes' }} {{ number_format($product['admin_profit'], 2) }} {{ app()->getLocale() == 'ar' ? 'عمولة' : 'profit' }}
-                                            </small>
-                                        @endif
+                                        {{-- Admin profit included in price - not shown separately --}}
                                         @if($product['original_price'] > $product['sale_price'])
-                                            <small class="text-muted text-decoration-line-through d-flex align-items-center">
+                                            <small class="text-muted text-decoration-line-through d-flex align-items-center" style="direction: ltr;">
                                                 <x-session-currency-icon width="12" height="12" class="me-1" />
                                                 @if($product['original_price_format'])
                                                     {{ preg_replace('/[A-Z]{3}\s*/', '', $product['original_price_format']) }}

@@ -132,42 +132,7 @@
                                 @endif
                             </div>
 
-                            @if(isset($sellerPivotData) && $sellerProfit > 0)
-                                {{-- Show seller's profit breakdown from pivot table --}}
-                                <div class="mt-3 pt-3 border-top border-white border-opacity-25">
-                                    <small class="d-block mb-2 text-white">💰 {{ __('messages.profit_breakdown') }}</small>
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <small class="text-white">{{ __('messages.supplier_price') }}</small>
-                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1" style="direction: ltr;">
-                                                <x-session-currency-icon width="16" height="16" />
-                                                {{ number_format($convertedSupplierPrice, 2) }}
-                                            </div>
-                                        </div>
-                                        <div class="col-6 text-end">
-                                            <small class="text-white">{{ __('messages.your_profit') }}</small>
-                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1 justify-content-end" style="direction: ltr;">
-                                                <x-session-currency-icon width="16" height="16" />
-                                                {{ number_format($convertedSellerProfit, 2) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @elseif($convertedSupplierPrice && $convertedSupplierPrice > 0 && !isset($sellerPivotData))
-                                {{-- Fallback for non-seller view or when no pivot data --}}
-                                <div class="mt-3 pt-3 border-top border-white border-opacity-25">
-                                    <small class="d-block mb-2 text-white">💰 {{ __('messages.profit_breakdown') }}</small>
-                                    <div class="row g-2">
-                                        <div class="col-12">
-                                            <small class="text-white">{{ __('messages.supplier_price') }}</small>
-                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1" style="direction: ltr;">
-                                                <x-session-currency-icon width="16" height="16" />
-                                                {{ number_format($convertedSupplierPrice, 2) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
+                            {{-- Price breakdown hidden - show only final price to customers --}}
                         </div>
                     </div>
 
