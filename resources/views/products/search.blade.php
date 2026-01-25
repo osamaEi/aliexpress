@@ -70,6 +70,10 @@
                 ];
             @endphp
             <div class="source-cards-container mb-4">
+                <h6 class="mb-3 text-muted">
+                    <i class="ri-global-line me-2"></i>
+                    {{ app()->getLocale() == 'ar' ? 'اختر المصدر' : 'Select Source' }}
+                </h6>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <!-- Dynamic Country Cards from Distributors -->
                     @if(isset($distributorCountries) && count($distributorCountries) > 0)
