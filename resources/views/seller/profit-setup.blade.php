@@ -16,6 +16,14 @@
             : 'You must complete profit settings before accessing the system' }}
     </div>
 
+    <!-- Save Notice -->
+    <div class="alert alert-warning mb-4" role="alert">
+        <i class="ri-save-line me-2"></i>
+        {{ app()->getLocale() == 'ar'
+            ? 'سوف يتم حفظ جميع القيم حتى لو كانت صفر'
+            : 'All values will be saved even if they are zero' }}
+    </div>
+
     <!-- Profit Settings Form -->
     <div class="card">
         <div class="card-body">
@@ -46,19 +54,30 @@
                                             <label for="profit_{{ $subcategory->id }}" class="form-label fw-semibold">
                                                 {{ app()->getLocale() == 'ar' ? $subcategory->name_ar : $subcategory->name_en }}
                                             </label>
-                                            <div class="input-group">
-                                                <input
-                                                    type="number"
-                                                    class="form-control @error('profit_' . $subcategory->id) is-invalid @enderror"
-                                                    id="profit_{{ $subcategory->id }}"
-                                                    name="profit_{{ $subcategory->id }}"
-                                                    min="0"
-                                                    step="0.01"
-                                                    placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل المبلغ' : 'Enter amount' }}"
-                                                    value="{{ old('profit_' . $subcategory->id, '0') }}"
-                                                    required
-                                                >
-                                                <span class="input-group-text">{{ session('currency_code', 'AED') }}</span>
+                                            <div class="row g-2">
+                                                <div class="col-5">
+                                                    <select class="form-select profit-type-select" name="profit_type_{{ $subcategory->id }}" data-id="{{ $subcategory->id }}">
+                                                        <option value="fixed">{{ app()->getLocale() == 'ar' ? 'مبلغ ثابت' : 'Fixed' }}</option>
+                                                        <option value="percentage">{{ app()->getLocale() == 'ar' ? 'نسبة %' : 'Percentage' }}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-7">
+                                                    <div class="input-group">
+                                                        <input
+                                                            type="number"
+                                                            class="form-control profit-value-input @error('profit_' . $subcategory->id) is-invalid @enderror"
+                                                            id="profit_{{ $subcategory->id }}"
+                                                            name="profit_{{ $subcategory->id }}"
+                                                            data-id="{{ $subcategory->id }}"
+                                                            min="0"
+                                                            step="0.01"
+                                                            placeholder="{{ app()->getLocale() == 'ar' ? 'القيمة' : 'Value' }}"
+                                                            value="{{ old('profit_' . $subcategory->id, '0') }}"
+                                                            required
+                                                        >
+                                                        <span class="input-group-text profit-unit" data-id="{{ $subcategory->id }}">{{ session('currency_code', 'AED') }}</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                             @error('profit_' . $subcategory->id)
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -119,4 +138,30 @@
         border-color: #333;
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const currencyCode = '{{ session("currency_code", "AED") }}';
+
+    document.querySelectorAll('.profit-type-select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            const id = this.dataset.id;
+            const type = this.value;
+            const unitSpan = document.querySelector(`.profit-unit[data-id="${id}"]`);
+            const valueInput = document.querySelector(`.profit-value-input[data-id="${id}"]`);
+
+            if (type === 'percentage') {
+                unitSpan.textContent = '%';
+                valueInput.setAttribute('max', '100');
+                if (parseFloat(valueInput.value) > 100) {
+                    valueInput.value = 100;
+                }
+            } else {
+                unitSpan.textContent = currencyCode;
+                valueInput.removeAttribute('max');
+            }
+        });
+    });
+});
+</script>
 @endsection

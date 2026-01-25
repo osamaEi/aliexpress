@@ -59,12 +59,13 @@ class SellerProfileCompletionController extends Controller
         // Get all subcategory IDs
         $subActivityIds = json_decode($user->sub_activity, true) ?? [];
 
-        // Validate that all subcategories have profit values
+        // Validate that all subcategories have profit values and types
         $rules = [];
         $messages = [];
 
         foreach ($subActivityIds as $subcategoryId) {
             $rules["profit_{$subcategoryId}"] = 'required|numeric|min:0';
+            $rules["profit_type_{$subcategoryId}"] = 'required|in:fixed,percentage';
             $messages["profit_{$subcategoryId}.required"] = $isAr
                 ? 'مبلغ الربح مطلوب لجميع الفئات'
                 : 'Profit amount is required for all categories';
@@ -81,14 +82,17 @@ class SellerProfileCompletionController extends Controller
         // Delete existing profit settings for this seller
         SellerSubcategoryProfit::where('user_id', $user->id)->delete();
 
-        // Create new profit settings (fixed amount stored in profit_percentage field)
+        // Create new profit settings
         foreach ($subActivityIds as $subcategoryId) {
-            $profitAmount = $validated["profit_{$subcategoryId}"];
+            $profitValue = $validated["profit_{$subcategoryId}"];
+            $profitType = $request->input("profit_type_{$subcategoryId}", 'fixed');
 
             SellerSubcategoryProfit::create([
                 'user_id' => $user->id,
                 'category_id' => $subcategoryId,
-                'profit_percentage' => $profitAmount, // This is now a fixed amount, not percentage
+                'profit_type' => $profitType,
+                'profit_value' => $profitValue,
+                'currency' => session('currency_code', 'AED'),
                 'is_active' => true,
             ]);
         }
