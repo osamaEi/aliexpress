@@ -795,40 +795,62 @@ class ProductController extends Controller
     public function searchPage()
     {
         // Get only active categories with AliExpress IDs
-        $query = Category::where('aliexpress_category_id', '!=', null)
-            ->where('is_active', true);
+        $user = auth()->user();
 
         // Filter categories for sellers based on their selected categories
         // Admins can see all categories
-        $user = auth()->user();
         if ($user && $user->user_type === 'seller') {
             // Decode the seller's selected categories
             $mainActivities = json_decode($user->main_activity, true) ?? [];
             $subActivities = json_decode($user->sub_activity, true) ?? [];
 
-            // Combine both main and sub category IDs
-            $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+            // Get subcategories assigned to seller
+            $allowedSubcategoryIds = $subActivities;
 
-            // Filter query to only show allowed categories
-            if (!empty($allowedCategoryIds)) {
-                $query->whereIn('id', $allowedCategoryIds);
+            if (empty($allowedSubcategoryIds)) {
+                // If no subcategories selected, show nothing
+                $allCategories = collect();
+                $categoriesWithChildren = collect();
             } else {
-                // If no categories selected, show nothing
-                $query->whereRaw('1 = 0');
+                // Get the allowed subcategories
+                $allowedSubcategories = Category::whereIn('id', $allowedSubcategoryIds)
+                    ->where('is_active', true)
+                    ->where('aliexpress_category_id', '!=', null)
+                    ->get();
+
+                // Get parent IDs of allowed subcategories
+                $parentIds = $allowedSubcategories->pluck('parent_id')->unique()->filter()->toArray();
+
+                // Get parent categories
+                $mainCategories = Category::whereIn('id', $parentIds)
+                    ->where('is_active', true)
+                    ->orderBy('order')
+                    ->get();
+
+                // Organize subcategories by parent
+                $categoriesWithChildren = $mainCategories->map(function($parent) use ($allowedSubcategories) {
+                    $parent->children = $allowedSubcategories->where('parent_id', $parent->id)->values();
+                    return $parent;
+                });
+
+                $allCategories = $mainCategories->merge($allowedSubcategories);
             }
+        } else {
+            // Admin can see all categories
+            $allCategories = Category::where('aliexpress_category_id', '!=', null)
+                ->where('is_active', true)
+                ->orderBy('order')
+                ->get();
+
+            // Separate main categories (no parent) and subcategories
+            $mainCategories = $allCategories->whereNull('parent_id');
+
+            // Organize subcategories by parent
+            $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
+                $parent->children = $allCategories->where('parent_id', $parent->id)->values();
+                return $parent;
+            });
         }
-        // Admin can see all categories - no filtering needed
-
-        $allCategories = $query->orderBy('order')->get();
-
-        // Separate main categories (no parent) and subcategories
-        $mainCategories = $allCategories->whereNull('parent_id');
-
-        // Organize subcategories by parent
-        $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
-            $parent->children = $allCategories->where('parent_id', $parent->id)->values();
-            return $parent;
-        });
 
         // Get assigned products for current user (if seller)
         $assignedProductIds = [];
