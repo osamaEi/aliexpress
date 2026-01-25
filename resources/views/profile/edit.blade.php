@@ -56,14 +56,14 @@
                         'phone' => 'رقم الهاتف',
                         'commercial_register' => 'السجل التجاري',
                         'logo' => 'شعار المتجر',
-                        'store_name' => 'اسم الشركة',
+                        'company_name' => 'اسم الشركة',
                         'default_currency' => 'العملة الافتراضية',
                         'withdrawal_method' => 'طريقة السحب',
                     ] : [
                         'phone' => 'Phone Number',
                         'commercial_register' => 'Commercial Register',
                         'logo' => 'Store Logo',
-                        'store_name' => 'Company Name',
+                        'company_name' => 'Company Name',
                         'default_currency' => 'Default Currency',
                         'withdrawal_method' => 'Withdrawal Method',
                     ];
@@ -821,7 +821,7 @@
                     </div>
                     @endif
 
-                    @if($user->user_type == 'distributor' && ($user->store_name || $user->store_slug || $user->commercial_register || $user->freelance_document))
+                    @if($user->user_type == 'distributor' && ($user->company_name || $user->store_slug || $user->commercial_register || $user->freelance_document))
                     <!-- Distributor Registration Information (Read Only) -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
@@ -829,10 +829,10 @@
                         </h6>
                     </div>
 
-                    @if($user->store_name)
+                    @if($user->company_name)
                     <div class="col-md-6">
-                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم المتجر' : 'Store Name' }}</label>
-                        <input type="text" class="form-control" value="{{ $user->store_name }}" readonly disabled>
+                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم الشركة' : 'Company Name' }}</label>
+                        <input type="text" class="form-control" value="{{ $user->company_name }}" readonly disabled>
                     </div>
                     @endif
 

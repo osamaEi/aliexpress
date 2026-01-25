@@ -49,8 +49,10 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="typeFilter" disabled>
-                        <option value="fixed" selected>{{ __('messages.fixed_amount') }}</option>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">{{ __('messages.all_types') }}</option>
+                        <option value="fixed">{{ __('messages.fixed_amount') }}</option>
+                        <option value="percentage">{{ __('messages.percentage') }}</option>
                     </select>
                 </div>
             </div>
@@ -78,7 +80,7 @@
                             @foreach($subcategories as $index => $subcategory)
                                 @php
                                     $existingProfit = $profitSettings->get($subcategory->id);
-                                    $profitType = 'fixed';
+                                    $profitType = $existingProfit ? $existingProfit->profit_type : 'fixed';
                                     $profitValue = $existingProfit ? $existingProfit->profit_value : 0;
                                     $isActive = $existingProfit ? $existingProfit->is_active : true;
                                     $hasConfig = $existingProfit ? 'configured' : 'not-configured';
@@ -107,8 +109,10 @@
 
                                     <!-- Profit Type -->
                                     <td>
-                                        <input type="hidden" name="profits[{{ $index }}][profit_type]" value="fixed">
-                                        <span class="badge bg-label-primary">{{ __('messages.fixed_amount') }}</span>
+                                        <select name="profits[{{ $index }}][profit_type]" class="form-select form-select-sm profit-type-select" data-index="{{ $index }}" style="width: 130px;">
+                                            <option value="fixed" {{ $profitType == 'fixed' ? 'selected' : '' }}>{{ __('messages.fixed_amount') }}</option>
+                                            <option value="percentage" {{ $profitType == 'percentage' ? 'selected' : '' }}>{{ __('messages.percentage') }}</option>
+                                        </select>
                                     </td>
 
                                     <!-- Profit Value -->
@@ -116,13 +120,19 @@
                                         <div class="input-group input-group-sm" style="width: 200px;">
                                             <input type="number"
                                                    name="profits[{{ $index }}][profit_value]"
-                                                   class="form-control"
+                                                   class="form-control profit-value-input"
+                                                   data-index="{{ $index }}"
                                                    value="{{ $profitValue }}"
                                                    min="0"
+                                                   max="{{ $profitType == 'percentage' ? '100' : '' }}"
                                                    step="0.01"
                                                    required>
                                             <span class="input-group-text profit-unit" data-index="{{ $index }}">
-                                                <x-session-currency-icon width="16" height="16" />
+                                                @if($profitType == 'percentage')
+                                                    %
+                                                @else
+                                                    <x-session-currency-icon width="16" height="16" />
+                                                @endif
                                             </span>
                                         </div>
                                     </td>
@@ -284,7 +294,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const sessionCurrency = '{{ session("currency_code", "USD") }}';
     const currencyIcon = currencyIcons[sessionCurrency] || sessionCurrency;
 
-    // Profit type is now fixed only - no dynamic switching needed
+    // Handle profit type change
+    document.querySelectorAll('.profit-type-select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            const index = this.dataset.index;
+            const type = this.value;
+            const row = this.closest('tr');
+            const unitSpan = row.querySelector(`.profit-unit[data-index="${index}"]`);
+            const valueInput = row.querySelector(`.profit-value-input[data-index="${index}"]`);
+
+            // Update row data attribute
+            row.dataset.type = type;
+
+            // Update unit display
+            if (type === 'percentage') {
+                unitSpan.innerHTML = '%';
+                valueInput.setAttribute('max', '100');
+                // Validate current value
+                if (parseFloat(valueInput.value) > 100) {
+                    valueInput.value = 100;
+                }
+            } else {
+                unitSpan.innerHTML = currencyIcon || sessionCurrency;
+                valueInput.removeAttribute('max');
+            }
+        });
+    });
 
     // Handle save all button
     document.getElementById('saveAllBtn').addEventListener('click', function() {
@@ -338,9 +373,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function updatePreview() {
         const basePrice = parseFloat(document.getElementById('previewBasePrice').value) || 0;
         const profitValueInput = document.querySelector(`input[name="profits[${currentPreviewIndex}][profit_value]"]`);
+        const profitTypeSelect = document.querySelector(`select[name="profits[${currentPreviewIndex}][profit_type]"]`);
 
         const profitValue = parseFloat(profitValueInput.value) || 0;
-        const profitAmount = profitValue; // Always fixed amount now
+        const profitType = profitTypeSelect.value;
+
+        let profitAmount;
+        if (profitType === 'percentage') {
+            profitAmount = basePrice * (profitValue / 100);
+        } else {
+            profitAmount = profitValue;
+        }
 
         const finalPrice = basePrice + profitAmount;
 

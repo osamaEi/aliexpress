@@ -70,7 +70,7 @@ class ProfileController extends Controller
 
         // Add seller-specific required fields
         if ($isSeller) {
-            $rules['store_name'] = ['required', 'string', 'max:255'];
+            $rules['company_name'] = ['required', 'string', 'max:255'];
             $rules['default_currency'] = ['required', 'string', 'max:10'];
             // Commercial register is required if not already uploaded
             $commercialRegisterRules = ['file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'];
@@ -86,7 +86,7 @@ class ProfileController extends Controller
         // Custom validation messages
         $messages = [
             'phone.required' => $isAr ? 'رقم الهاتف مطلوب' : 'Phone number is required',
-            'store_name.required' => $isAr ? 'اسم الشركة مطلوب' : 'Company name is required',
+            'company_name.required' => $isAr ? 'اسم الشركة مطلوب' : 'Company name is required',
             'website_url.url' => $isAr ? 'يجب أن يكون رابط الموقع صالحاً' : 'Website URL must be a valid URL',
             'default_currency.required' => $isAr ? 'العملة الافتراضية مطلوبة' : 'Default currency is required',
             'withdrawal_method.required' => $isAr ? 'طريقة السحب مطلوبة' : 'Withdrawal method is required',

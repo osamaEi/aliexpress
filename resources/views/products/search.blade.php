@@ -70,6 +70,11 @@
                 ];
             @endphp
             <div class="source-cards-container mb-4">
+                <!-- Step 1: Select Source -->
+                <div class="step-header mb-3">
+                    <span class="step-number">1</span>
+                    <span class="step-title">{{ app()->getLocale() == 'ar' ? 'اختر المصدر' : 'Select Source' }}</span>
+                </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <!-- Dynamic Country Cards from Distributors -->
                     @if(isset($distributorCountries) && count($distributorCountries) > 0)
@@ -104,11 +109,10 @@
                     $showMainCategories = request('ship_from') || request('country_code') || isset($source_country);
                 @endphp
                 <div id="mainCategoriesSection" class="categories-scroll-container mb-4" style="display: {{ $showMainCategories ? 'block' : 'none' }}">
-                    <div class="categories-section-header mb-2">
-                        <h6 class="mb-0 d-flex align-items-center">
-                            <i class="ri-folder-3-line me-2" style="color: #e56300;"></i>
-                            <span id="categoriesSectionTitle">{{ app()->getLocale() == 'ar' ? 'الفئات الرئيسية' : 'Main Categories' }}</span>
-                        </h6>
+                    <!-- Step 2: Select Main Category -->
+                    <div class="step-header mb-3">
+                        <span class="step-number">2</span>
+                        <span class="step-title">{{ app()->getLocale() == 'ar' ? 'اختر الفئة الرئيسية' : 'Select Main Category' }}</span>
                     </div>
                     <div class="d-flex align-items-center mb-2">
                         <button class="btn btn-sm btn-light rounded-circle me-2 scroll-btn scroll-left" onclick="scrollCategories('left')">
@@ -226,17 +230,10 @@
                 }
             @endphp
             <div id="subcategoriesContainer" class="mb-4" style="display: {{ $showSubcategories ? 'block' : 'none' }};">
-                <div class="subcategories-header">
-                    <h6 class="mb-0">
-                        <i class="ri-folder-open-line me-2"></i>
-                        <span id="selectedCategoryName">
-                            @if($parentCategory)
-                                {{ app()->getLocale() == 'ar' && $parentCategory->name_ar ? $parentCategory->name_ar : $parentCategory->name }}
-                            @else
-                                {{ app()->getLocale() == 'ar' ? 'الفئات الفرعية' : 'Subcategories' }}
-                            @endif
-                        </span>
-                    </h6>
+                <!-- Step 3: Select Subcategory -->
+                <div class="step-header mb-3">
+                    <span class="step-number">3</span>
+                    <span class="step-title">{{ app()->getLocale() == 'ar' ? 'اختر الفئة الفرعية' : 'Select Subcategory' }}</span>
                 </div>
                 <div class="subcategories-grid" id="subcategoriesGrid">
                     @if($showSubcategories && $parentCategory && $parentCategory->children)
@@ -1723,6 +1720,38 @@
 </script>
 
 <style>
+    /* Step Headers Styling */
+    .step-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #561C04 0%, #e56300 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        box-shadow: 0 2px 8px rgba(86, 28, 4, 0.3);
+    }
+
+    .step-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #561C04;
+    }
+
+    /* RTL Support for Step Headers */
+    [dir="rtl"] .step-header {
+        flex-direction: row;
+    }
+
     /* Search Loading Overlay - Impressive Design */
     .search-loading-overlay {
         position: fixed !important;
