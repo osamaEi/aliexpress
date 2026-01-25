@@ -652,6 +652,95 @@
                         @enderror
                     </div>
 
+                    <!-- Social Media Accounts -->
+                    <div class="col-12 mt-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="ri-share-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'حسابات التواصل الاجتماعي' : 'Social Media Accounts' }}
+                        </h6>
+                    </div>
+
+                    @php
+                        $socialAccounts = $user->social_media_accounts ?? [];
+                    @endphp
+
+                    <div class="col-md-6">
+                        <label for="instagram" class="form-label">
+                            <i class="ri-instagram-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'إنستجرام' : 'Instagram' }}
+                        </label>
+                        <input type="url" class="form-control @error('social_media_accounts.instagram') is-invalid @enderror"
+                               id="instagram" name="social_media_accounts[instagram]"
+                               value="{{ old('social_media_accounts.instagram', $socialAccounts['instagram'] ?? '') }}"
+                               placeholder="https://instagram.com/username" dir="ltr" style="text-align: left;">
+                        @error('social_media_accounts.instagram')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="facebook" class="form-label">
+                            <i class="ri-facebook-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'فيسبوك' : 'Facebook' }}
+                        </label>
+                        <input type="url" class="form-control @error('social_media_accounts.facebook') is-invalid @enderror"
+                               id="facebook" name="social_media_accounts[facebook]"
+                               value="{{ old('social_media_accounts.facebook', $socialAccounts['facebook'] ?? '') }}"
+                               placeholder="https://facebook.com/username" dir="ltr" style="text-align: left;">
+                        @error('social_media_accounts.facebook')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="twitter" class="form-label">
+                            <i class="ri-twitter-x-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تويتر / إكس' : 'Twitter / X' }}
+                        </label>
+                        <input type="url" class="form-control @error('social_media_accounts.twitter') is-invalid @enderror"
+                               id="twitter" name="social_media_accounts[twitter]"
+                               value="{{ old('social_media_accounts.twitter', $socialAccounts['twitter'] ?? $socialAccounts['x'] ?? '') }}"
+                               placeholder="https://x.com/username" dir="ltr" style="text-align: left;">
+                        @error('social_media_accounts.twitter')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="tiktok" class="form-label">
+                            <i class="ri-tiktok-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تيك توك' : 'TikTok' }}
+                        </label>
+                        <input type="url" class="form-control @error('social_media_accounts.tiktok') is-invalid @enderror"
+                               id="tiktok" name="social_media_accounts[tiktok]"
+                               value="{{ old('social_media_accounts.tiktok', $socialAccounts['tiktok'] ?? '') }}"
+                               placeholder="https://tiktok.com/@username" dir="ltr" style="text-align: left;">
+                        @error('social_media_accounts.tiktok')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="snapchat" class="form-label">
+                            <i class="ri-snapchat-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'سناب شات' : 'Snapchat' }}
+                        </label>
+                        <input type="url" class="form-control @error('social_media_accounts.snapchat') is-invalid @enderror"
+                               id="snapchat" name="social_media_accounts[snapchat]"
+                               value="{{ old('social_media_accounts.snapchat', $socialAccounts['snapchat'] ?? '') }}"
+                               placeholder="https://snapchat.com/add/username" dir="ltr" style="text-align: left;">
+                        @error('social_media_accounts.snapchat')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="whatsapp" class="form-label">
+                            <i class="ri-whatsapp-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'واتساب' : 'WhatsApp' }}
+                        </label>
+                        <input type="text" class="form-control @error('social_media_accounts.whatsapp') is-invalid @enderror"
+                               id="whatsapp" name="social_media_accounts[whatsapp]"
+                               value="{{ old('social_media_accounts.whatsapp', $socialAccounts['whatsapp'] ?? '') }}"
+                               placeholder="+971501234567" dir="ltr" style="text-align: left;">
+                        @error('social_media_accounts.whatsapp')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="col-md-6">
                         <label for="default_currency" class="form-label">{{ app()->getLocale() == 'ar' ? 'العملة الافتراضية' : 'Default Currency' }} <span class="text-danger">*</span></label>
                         @php
@@ -936,9 +1025,9 @@
                         </h6>
                     </div>
 
-                
 
-                    @if(auth()->user()->hasActiveSubscription())
+
+                    @if(auth()->user()->user_type === 'marketer')
                     <div class="col-md-6">
                         <label for="marketing_code" class="form-label">{{ __('messages.marketing_code') }}</label>
                         <input type="text" class="form-control @error('marketing_code') is-invalid @enderror"

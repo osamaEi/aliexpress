@@ -52,9 +52,21 @@ class ProfileController extends Controller
             'wallet_provider' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:50'],
             'wallet_phone_number' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:20'],
             'wallet_holder_name' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:255'],
-            'marketing_code' => ['nullable', 'string', 'max:100'],
             'website_url' => ['nullable', 'url', 'max:255'],
+            // Social media accounts
+            'social_media_accounts' => ['nullable', 'array'],
+            'social_media_accounts.instagram' => ['nullable', 'url', 'max:255'],
+            'social_media_accounts.facebook' => ['nullable', 'url', 'max:255'],
+            'social_media_accounts.twitter' => ['nullable', 'url', 'max:255'],
+            'social_media_accounts.tiktok' => ['nullable', 'url', 'max:255'],
+            'social_media_accounts.snapchat' => ['nullable', 'url', 'max:255'],
+            'social_media_accounts.whatsapp' => ['nullable', 'string', 'max:20'],
         ];
+
+        // Add marketing code only for marketers
+        if ($user->user_type === 'marketer') {
+            $rules['marketing_code'] = ['nullable', 'string', 'max:100'];
+        }
 
         // Add seller-specific required fields
         if ($isSeller) {
