@@ -117,7 +117,7 @@
                                 $convertedSellerProfit = convert_price($sellerProfit);
                             @endphp
                             <div class="d-flex align-items-baseline mb-2">
-                                <h2 class="mb-0 me-3 fw-bold d-inline-flex align-items-center gap-2" style="font-size: 36px; color:white;">
+                                <h2 class="mb-0 me-3 fw-bold d-inline-flex align-items-center gap-2" style="font-size: 36px; color:white; direction: ltr;">
                                     <x-session-currency-icon width="32" height="32" />
                                     {{ number_format($convertedPrice, 2) }}
                                 </h2>
@@ -139,11 +139,17 @@
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <small class="text-white">{{ __('messages.supplier_price') }}</small>
-                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedSupplierPrice) }}</div>
+                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1">
+                                                <x-session-currency-icon width="16" height="16" />
+                                                {{ number_format($convertedSupplierPrice, 2) }}
+                                            </div>
                                         </div>
                                         <div class="col-6 text-end">
                                             <small class="text-white">{{ __('messages.your_profit') }}</small>
-                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedSellerProfit) }}</div>
+                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1 justify-content-end">
+                                                <x-session-currency-icon width="16" height="16" />
+                                                {{ number_format($convertedSellerProfit, 2) }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -154,7 +160,10 @@
                                     <div class="row g-2">
                                         <div class="col-12">
                                             <small class="text-white">{{ __('messages.supplier_price') }}</small>
-                                            <div class="fw-bold text-white">{{ $currentCurrency->format($convertedSupplierPrice) }}</div>
+                                            <div class="fw-bold text-white d-inline-flex align-items-center gap-1">
+                                                <x-session-currency-icon width="16" height="16" />
+                                                {{ number_format($convertedSupplierPrice, 2) }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
