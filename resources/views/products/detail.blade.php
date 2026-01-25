@@ -104,22 +104,28 @@
                                 $displayPrice = isset($sellerPivotData) && $sellerPivotData['price'] > 0
                                     ? $sellerPivotData['price']
                                     : $product->price;
-                                $convertedPrice = $currentCurrency->convertFrom($displayPrice, $product->currency ?? 'USD');
-                                $convertedComparePrice = $product->compare_price ? $currentCurrency->convertFrom($product->compare_price, $product->currency ?? 'USD') : null;
+                                $convertedPrice = convert_price($displayPrice);
+                                $convertedComparePrice = $product->compare_price ? convert_price($product->compare_price) : null;
 
                                 // Calculate supplier price (original_price + admin_amount)
                                 $adminAmount = isset($sellerPivotData) ? ($sellerPivotData['admin_amount'] ?? 0) : 0;
                                 $supplierPrice = ($product->original_price ?? 0) + $adminAmount;
-                                $convertedSupplierPrice = $supplierPrice > 0 ? $currentCurrency->convertFrom($supplierPrice, $product->currency ?? 'USD') : null;
+                                $convertedSupplierPrice = $supplierPrice > 0 ? convert_price($supplierPrice) : null;
 
                                 // Seller's profit from pivot table
                                 $sellerProfit = isset($sellerPivotData) ? ($sellerPivotData['seller_amount'] ?? 0) : 0;
-                                $convertedSellerProfit = $currentCurrency->convertFrom($sellerProfit, $product->currency ?? 'USD');
+                                $convertedSellerProfit = convert_price($sellerProfit);
                             @endphp
                             <div class="d-flex align-items-baseline mb-2">
-                                <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px; color:white;" >{{ $currentCurrency->format($convertedPrice) }}</h2>
+                                <h2 class="mb-0 me-3 fw-bold d-inline-flex align-items-center gap-2" style="font-size: 36px; color:white;">
+                                    <x-session-currency-icon width="32" height="32" />
+                                    {{ number_format($convertedPrice, 2) }}
+                                </h2>
                                 @if($convertedComparePrice && $convertedComparePrice > $convertedPrice)
-                                    <span class="text-white-50 text-decoration-line-through me-2" style="font-size: 20px;">{{ $currentCurrency->format($convertedComparePrice) }}</span>
+                                    <span class="text-white-50 text-decoration-line-through me-2 d-inline-flex align-items-center gap-1" style="font-size: 20px;">
+                                        <x-session-currency-icon width="18" height="18" />
+                                        {{ number_format($convertedComparePrice, 2) }}
+                                    </span>
                                     <span class="badge bg-danger" style="font-size: 14px;">
                                         {{ round((($convertedComparePrice - $convertedPrice) / $convertedComparePrice) * 100) }}% OFF
                                     </span>
