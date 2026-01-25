@@ -99,8 +99,8 @@ class ProfileController extends Controller
 
         $validated = $request->validate($rules, $messages);
 
-        // Handle marketing code - can only be entered once and requires approval
-        if (isset($validated['marketing_code'])) {
+        // Handle marketing code - only for marketers, can only be entered once and requires approval
+        if ($user->user_type === 'marketer' && isset($validated['marketing_code'])) {
             if ($user->marketing_code && $user->marketing_code_approved) {
                 // If already approved, don't allow changes
                 unset($validated['marketing_code']);
@@ -108,6 +108,9 @@ class ProfileController extends Controller
                 // New or changed code - set to pending approval
                 $validated['marketing_code_approved'] = false;
             }
+        } else {
+            // Remove marketing code for non-marketer users
+            unset($validated['marketing_code']);
         }
 
         // Handle commercial register file upload
@@ -130,6 +133,17 @@ class ProfileController extends Controller
             $validated['freelance_document'] = $request->file('freelance_document')->store('documents/freelance_documents', 'public');
         } else {
             unset($validated['freelance_document']);
+        }
+
+        // Handle social media accounts - remove empty values
+        if (isset($validated['social_media_accounts']) && is_array($validated['social_media_accounts'])) {
+            $validated['social_media_accounts'] = array_filter($validated['social_media_accounts'], function($value) {
+                return !empty($value);
+            });
+            // If all values are empty, set to null
+            if (empty($validated['social_media_accounts'])) {
+                $validated['social_media_accounts'] = null;
+            }
         }
 
         // Fill user data

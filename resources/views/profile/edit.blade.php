@@ -865,37 +865,6 @@
                     </div>
                     @endif
 
-                    @if($user->social_media_accounts && is_array($user->social_media_accounts) && count(array_filter($user->social_media_accounts)) > 0)
-                    <div class="col-12">
-                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'حسابات التواصل الاجتماعي' : 'Social Media Accounts' }}</label>
-                        <div class="d-flex flex-wrap gap-2">
-                            @foreach($user->social_media_accounts as $platform => $url)
-                                @if($url)
-                                <a href="{{ $url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
-                                    @if($platform == 'instagram')
-                                        <i class="ri-instagram-line me-1"></i>
-                                    @elseif($platform == 'facebook')
-                                        <i class="ri-facebook-line me-1"></i>
-                                    @elseif($platform == 'twitter' || $platform == 'x')
-                                        <i class="ri-twitter-x-line me-1"></i>
-                                    @elseif($platform == 'tiktok')
-                                        <i class="ri-tiktok-line me-1"></i>
-                                    @elseif($platform == 'youtube')
-                                        <i class="ri-youtube-line me-1"></i>
-                                    @elseif($platform == 'snapchat')
-                                        <i class="ri-snapchat-line me-1"></i>
-                                    @elseif($platform == 'whatsapp')
-                                        <i class="ri-whatsapp-line me-1"></i>
-                                    @else
-                                        <i class="ri-link me-1"></i>
-                                    @endif
-                                    {{ ucfirst($platform) }}
-                                </a>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
                     @endif
 
                     <!-- Withdrawal Method Section -->
