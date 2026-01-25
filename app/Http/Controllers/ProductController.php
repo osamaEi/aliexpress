@@ -795,54 +795,40 @@ class ProductController extends Controller
     public function searchPage()
     {
         // Get only active categories with AliExpress IDs
-        $user = auth()->user();
+        $query = Category::where('aliexpress_category_id', '!=', null)
+            ->where('is_active', true);
 
-        // For sellers: get their assigned subcategories and their parent categories
+        // Filter categories for sellers based on their selected categories
+        // Admins can see all categories
+        $user = auth()->user();
         if ($user && $user->user_type === 'seller') {
+            // Decode the seller's selected categories
+            $mainActivities = json_decode($user->main_activity, true) ?? [];
             $subActivities = json_decode($user->sub_activity, true) ?? [];
 
-            if (empty($subActivities)) {
-                $allCategories = collect();
-                $categoriesWithChildren = collect();
+            // Combine both main and sub category IDs
+            $allowedCategoryIds = array_merge($mainActivities, $subActivities);
+
+            // Filter query to only show allowed categories
+            if (!empty($allowedCategoryIds)) {
+                $query->whereIn('id', $allowedCategoryIds);
             } else {
-                // Get allowed subcategories
-                $allowedSubcategories = Category::whereIn('id', $subActivities)
-                    ->where('is_active', true)
-                    ->orderBy('order')
-                    ->get();
-
-                // Get parent IDs
-                $parentIds = $allowedSubcategories->pluck('parent_id')->unique()->filter()->toArray();
-
-                // Get parent categories (main categories)
-                $mainCategories = Category::whereIn('id', $parentIds)
-                    ->where('is_active', true)
-                    ->orderBy('order')
-                    ->get();
-
-                // Build categories with children
-                $categoriesWithChildren = $mainCategories->map(function($parent) use ($allowedSubcategories) {
-                    $parent->children = $allowedSubcategories->where('parent_id', $parent->id)->values();
-                    return $parent;
-                });
-
-                $allCategories = $mainCategories->merge($allowedSubcategories);
+                // If no categories selected, show nothing
+                $query->whereRaw('1 = 0');
             }
-        } else {
-            // Admin/Guest: get all categories
-            $allCategories = Category::where('is_active', true)
-                ->orderBy('order')
-                ->get();
-
-            // Separate main categories (no parent)
-            $mainCategories = $allCategories->whereNull('parent_id');
-
-            // Build categories with children
-            $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
-                $parent->children = $allCategories->where('parent_id', $parent->id)->values();
-                return $parent;
-            });
         }
+        // Admin can see all categories - no filtering needed
+
+        $allCategories = $query->orderBy('order')->get();
+
+        // Separate main categories (no parent) and subcategories
+        $mainCategories = $allCategories->whereNull('parent_id');
+
+        // Organize subcategories by parent
+        $categoriesWithChildren = $mainCategories->map(function($parent) use ($allCategories) {
+            $parent->children = $allCategories->where('parent_id', $parent->id)->values();
+            return $parent;
+        });
 
         // Get assigned products for current user (if seller)
         $assignedProductIds = [];
