@@ -3,9 +3,9 @@
 @php
     $currencyCode = strtoupper($currency);
     $symbols = [
-        'AED' => 'د.إ',
-        'SAR' => 'ر.س',
-        'USD' => '$',
+        'AED' => '',
+        'SAR' => '',
+        'USD' => '',
     ];
     $symbol = $symbols[$currencyCode] ?? $currency;
 @endphp
