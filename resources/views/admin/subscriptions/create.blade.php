@@ -86,7 +86,9 @@
 
                     <!-- Price -->
                     <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">{{ __('messages.price') }} (AED) <span class="text-danger">*</span></label>
+                        <label for="price" class="form-label d-inline-flex align-items-center gap-1">
+                            {{ __('messages.price') }} (<x-session-currency-icon width="16" height="16" />) <span class="text-danger">*</span>
+                        </label>
                         <input
                             type="number"
                             step="0.01"

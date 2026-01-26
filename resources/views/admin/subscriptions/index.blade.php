@@ -25,7 +25,10 @@
                         <span class="badge mb-2" style="background-color: {{ $subscription->color }}; font-size: 1.1rem;">
                             {{ $subscription->localized_name }}
                         </span>
-                        <h2 class="mb-0">{{ number_format($subscription->price, 2) }} AED</h2>
+                        <h2 class="mb-0 d-inline-flex align-items-center gap-2" style="direction: ltr;">
+                            <x-session-currency-icon width="28" height="28" />
+                            {{ number_format(convert_price($subscription->price), 2) }}
+                        </h2>
                         <small class="text-muted">{{ __('messages.per_month') }}</small>
                     </div>
 

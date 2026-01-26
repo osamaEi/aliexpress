@@ -66,7 +66,12 @@
                                     <span class="badge bg-danger">{{ __('messages.cancelled') }}</span>
                                 @endif
                             </td>
-                            <td>${{ number_format($userSubscription->amount_paid, 2) }}</td>
+                            <td>
+                                <span class="d-inline-flex align-items-center gap-1" style="direction: ltr;">
+                                    <x-session-currency-icon width="16" height="16" />
+                                    {{ number_format(convert_price($userSubscription->amount_paid), 2) }}
+                                </span>
+                            </td>
                             <td>
                                 <span class="badge bg-label-info">
                                     {{ ucfirst($userSubscription->payment_method) }}
