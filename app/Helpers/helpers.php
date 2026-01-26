@@ -131,27 +131,31 @@ if (!function_exists('currency_symbol')) {
 
 if (!function_exists('convert_price')) {
     /**
-     * Convert price to current currency using exchange rate
+     * Convert price from AED (base currency) to target currency
      *
-     * @param float $amount The amount in base currency (USD)
+     * @param float $amount The amount in AED (base currency)
      * @param string|null $targetCurrency Target currency code (defaults to session currency)
+     * @param string $fromCurrency Source currency code (defaults to AED)
      * @return float
      */
-    function convert_price(float $amount, ?string $targetCurrency = null): float
+    function convert_price(float $amount, ?string $targetCurrency = null, string $fromCurrency = 'AED'): float
     {
         // Get current currency from session or use provided target currency
-        $currencyCode = $targetCurrency ?? session('currency_code', 'USD');
+        $targetCode = $targetCurrency ?? session('currency_code', 'AED');
 
-        // If currency is USD (base currency), no conversion needed
-        if ($currencyCode === 'USD') {
+        // If same currency, no conversion needed
+        if ($targetCode === $fromCurrency) {
             return $amount;
         }
 
-        // Get exchange rate from session
-        $exchangeRate = session('currency_rate', 1.0);
+        // Get target currency model
+        $targetCurrencyModel = \App\Models\Currency::where('code', $targetCode)->first();
+        if (!$targetCurrencyModel) {
+            return $amount;
+        }
 
-        // Convert: base amount * exchange rate
-        return $amount * $exchangeRate;
+        // Use the Currency model's convertFrom method for proper conversion
+        return $targetCurrencyModel->convertFrom($amount, $fromCurrency);
     }
 }
 
