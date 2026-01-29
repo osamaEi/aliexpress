@@ -242,7 +242,7 @@ class ProductController extends Controller
         // Check if seller has active subscription or trial to create orders
         $canCreateOrder = true; // Default for non-sellers
         if (auth()->check() && auth()->user()->user_type === 'seller') {
-            $canCreateOrder = auth()->user()->canAccessPlatform();
+            $canCreateOrder = auth()->user()->canAccessFullSystem();
         }
 
         return view('products.detail', compact('product', 'aliexpressData', 'walletBalance', 'sellerPivotData', 'canCreateOrder'));
