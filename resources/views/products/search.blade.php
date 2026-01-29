@@ -71,6 +71,7 @@
             @endphp
             <div class="source-cards-container mb-4">
                 <h6 class="mb-3 text-muted">
+                    <span class="badge bg-primary me-2" style="font-size: 1rem;">1</span>
                     <i class="ri-global-line me-2"></i>
                     {{ app()->getLocale() == 'ar' ? 'اختر المصدر' : 'Select Source' }}
                 </h6>
@@ -110,8 +111,9 @@
                 <div id="mainCategoriesSection" class="categories-scroll-container mb-4" style="display: {{ $showMainCategories ? 'block' : 'none' }}">
                     <div class="categories-section-header mb-2">
                         <h6 class="mb-0 d-flex align-items-center">
+                            <span class="badge bg-primary me-2" style="font-size: 1rem;">2</span>
                             <i class="ri-folder-3-line me-2" style="color: #e56300;"></i>
-                            <span id="categoriesSectionTitle">{{ app()->getLocale() == 'ar' ? 'الفئات الرئيسية' : 'Main Categories' }}</span>
+                            <span id="categoriesSectionTitle">{{ app()->getLocale() == 'ar' ? 'اختر الفئة الرئيسية' : 'Select Main Category' }}</span>
                         </h6>
                     </div>
                     <div class="d-flex align-items-center mb-2">
@@ -232,12 +234,13 @@
             <div id="subcategoriesContainer" class="mb-4" style="display: {{ $showSubcategories ? 'block' : 'none' }};">
                 <div class="subcategories-header">
                     <h6 class="mb-0">
+                        <span class="badge bg-primary me-2" style="font-size: 1rem;">3</span>
                         <i class="ri-folder-open-line me-2"></i>
                         <span id="selectedCategoryName">
                             @if($parentCategory)
                                 {{ app()->getLocale() == 'ar' && $parentCategory->name_ar ? $parentCategory->name_ar : $parentCategory->name }}
                             @else
-                                {{ app()->getLocale() == 'ar' ? 'الفئات الفرعية' : 'Subcategories' }}
+                                {{ app()->getLocale() == 'ar' ? 'اختر الفئة الفرعية' : 'Select Subcategory' }}
                             @endif
                         </span>
                     </h6>
@@ -396,8 +399,8 @@
                                         <i class="ri-close-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'إلغاء الكل' : 'Deselect All' }}
                                     </button>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-warning" id="bulkAssignBtn" {{ !$canAssignProducts ? 'disabled' : '' }} title="{{ !$canAssignProducts ? (app()->getLocale() == 'ar' ? 'يجب الاشتراك لإسناد المنتجات' : 'Subscription required to assign products') : '' }}">
-                                    <i class="{{ !$canAssignProducts ? 'ri-lock-line' : 'ri-pushpin-2-line' }} me-1"></i> {{ app()->getLocale() == 'ar' ? 'إسناد المنتجات المحددة' : 'Assign Selected Products' }}
+                                <button type="button" class="btn btn-sm {{ !$canAssignProducts ? 'btn-danger' : 'btn-warning' }}" id="bulkAssignBtn" onclick="{{ !$canAssignProducts ? 'window.location.href=\'' . route('subscriptions.index') . '\'' : '' }}" title="{{ !$canAssignProducts ? (app()->getLocale() == 'ar' ? 'يجب الاشتراك لإسناد المنتجات' : 'Subscription required to assign products') : '' }}">
+                                    <i class="{{ !$canAssignProducts ? 'ri-lock-line' : 'ri-pushpin-2-line' }} me-1"></i> {{ !$canAssignProducts ? (app()->getLocale() == 'ar' ? 'اشترك الآن' : 'Subscribe Now') : (app()->getLocale() == 'ar' ? 'إسناد المنتجات المحددة' : 'Assign Selected Products') }}
                                 </button>
                             </div>
                         </div>
@@ -582,14 +585,13 @@
                                                         <i class="ri-check-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'تم الإسناد' : 'Already Assigned' }}
                                                     </button>
                                                 @elseif(!$canAssignProducts)
-                                                    <button
-                                                        type="button"
+                                                    <a
+                                                        href="{{ route('subscriptions.index') }}"
                                                         class="btn btn-sm btn-danger w-100 mb-2"
-                                                        disabled
                                                         title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإسناد المنتجات' : 'Subscription required to assign products' }}"
                                                     >
                                                         <i class="ri-lock-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'اشترك الآن' : 'Subscribe Now' }}
-                                                    </button>
+                                                    </a>
                                                 @else
                                                     @php
                                                         $localCategoryId = null;

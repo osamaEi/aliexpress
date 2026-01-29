@@ -145,9 +145,9 @@
                                     <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
                                 </button>
                             @else
-                                <button type="button" class="btn btn-lg btn-danger shadow-sm" disabled style="border-radius: 12px; padding: 16px;" title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإنشاء الطلبات' : 'Subscription required to create orders' }}">
+                                <a href="{{ route('subscriptions.index') }}" class="btn btn-lg btn-danger shadow-sm" style="border-radius: 12px; padding: 16px;" title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإنشاء الطلبات' : 'Subscription required to create orders' }}">
                                     <i class="ri-lock-line me-2"></i> {{ app()->getLocale() == 'ar' ? 'اشترك الآن لإنشاء الطلبات' : 'Subscribe to Create Orders' }}
-                                </button>
+                                </a>
                             @endif
                         @else
                             @if($canCreateOrder)
@@ -155,9 +155,9 @@
                                     <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
                                 </a>
                             @else
-                                <button type="button" class="btn btn-lg btn-danger shadow-sm" disabled style="border-radius: 12px; padding: 16px;" title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإنشاء الطلبات' : 'Subscription required to create orders' }}">
+                                <a href="{{ route('subscriptions.index') }}" class="btn btn-lg btn-danger shadow-sm" style="border-radius: 12px; padding: 16px;" title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإنشاء الطلبات' : 'Subscription required to create orders' }}">
                                     <i class="ri-lock-line me-2"></i> {{ app()->getLocale() == 'ar' ? 'اشترك الآن لإنشاء الطلبات' : 'Subscribe to Create Orders' }}
-                                </button>
+                                </a>
                             @endif
                         @endif
 
