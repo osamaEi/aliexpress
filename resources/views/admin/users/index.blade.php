@@ -8,6 +8,30 @@
         <p class="text-muted">{{ __('messages.users') }}</p>
     </div>
 
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{ !request('user_type') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                <i class="ri-user-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{ request('user_type') === 'seller' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'seller']) }}">
+                <i class="ri-store-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'البائعين' : 'Sellers' }}
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{ request('user_type') === 'customer' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'customer']) }}">
+                <i class="ri-shopping-bag-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العملاء' : 'Customers' }}
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{ request('user_type') === 'admin' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'admin']) }}">
+                <i class="ri-admin-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المسؤولين' : 'Admins' }}
+            </a>
+        </li>
+    </ul>
+
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
