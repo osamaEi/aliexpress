@@ -183,7 +183,7 @@ class UserManagementController extends Controller
         ]);
 
         $subscription = Subscription::findOrFail($request->subscription_id);
-        $durationDays = $request->duration_days ?? $subscription->duration_days;
+        $durationDays = (int) ($request->duration_days ?? $subscription->duration_days);
 
         try {
             DB::beginTransaction();
