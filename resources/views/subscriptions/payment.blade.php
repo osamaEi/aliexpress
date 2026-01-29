@@ -18,7 +18,10 @@
                             <span class="badge mb-3" style="background-color: {{ $subscription->color }}; font-size: 1.3rem; padding: 10px 20px;">
                                 {{ $subscription->localized_name }}
                             </span>
-                            <h1 class="mb-1">{!! format_currency($subscription->price) !!}</h1>
+                            <h1 class="mb-1 d-inline-flex align-items-center gap-2" style="direction: ltr;">
+                                <x-session-currency-icon width="40" height="40" />
+                                {{ number_format(convert_price($subscription->price), 2) }}
+                            </h1>
                             <p class="text-muted">{{ __('messages.per_month') }}</p>
                         </div>
                     </div>
@@ -121,9 +124,12 @@
                                     @endif
 
                                     <hr class="my-3">
-                                    <div class="d-flex justify-content-between">
+                                    <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">{{ __('messages.total_with_gateway_fees') }}:</h5>
-                                        <h5 class="mb-0 text-primary">{!! format_currency($feeBreakdown['gross_amount']) !!}</h5>
+                                        <h5 class="mb-0 text-primary d-inline-flex align-items-center gap-2" style="direction: ltr;">
+                                            <x-session-currency-icon width="24" height="24" />
+                                            {{ number_format(convert_price($feeBreakdown['gross_amount']), 2) }}
+                                        </h5>
                                     </div>
                                 </div>
                             </div>

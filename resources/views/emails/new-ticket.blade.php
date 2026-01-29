@@ -1,28 +1,28 @@
 <x-mail::message>
-# New Support Ticket Received
+# {{ __('New Support Ticket Received') }}
 
-A new support ticket has been submitted.
+{{ __('A new support ticket has been submitted.') }}
 
-**Ticket ID:** #{{ $ticket->id }}
+**{{ __('Ticket ID:') }}** #{{ $ticket->id }}
 
-**Subject:** {{ $ticket->subject }}
+**{{ __('Subject:') }}** {{ $ticket->subject }}
 
-**Priority:** <span style="text-transform: uppercase;">{{ $ticket->priority }}</span>
+**{{ __('Priority:') }}** {{ ucfirst($ticket->priority) }}
 
-**Status:** {{ ucfirst($ticket->status) }}
+**{{ __('Status:') }}** {{ ucfirst($ticket->status) }}
 
-**Submitted by:** {{ $ticket->user->name }} ({{ $ticket->user->email }})
+**{{ __('Submitted by:') }}** {{ $ticket->user->name }} ({{ $ticket->user->email }})
 
-**Description:**
+**{{ __('Description:') }}**
 
 {{ $ticket->description }}
 
 <x-mail::button :url="url('/admin/tickets/' . $ticket->id)">
-View Ticket
+{{ __('View Ticket') }}
 </x-mail::button>
 
-Please respond to this ticket as soon as possible.
+{{ __('Please respond to this ticket as soon as possible.') }}
 
-Best regards,<br>
-{{ config('app.name') }} System
+{{ __('Best regards,') }}<br>
+{{ __('The') }} {{ setting('site_name', config('app.name')) }} {{ __('Team') }}
 </x-mail::message>

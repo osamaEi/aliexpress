@@ -2,14 +2,10 @@
 <tr>
 <td class="header">
 <a href="{{ $url }}" style="display: inline-block;">
-@php
-    $logoPath = public_path('logo/logo.png');
-    $siteName = setting('site_name', config('app.name'));
-@endphp
-@if (file_exists($logoPath))
-<img src="{{ asset('logo/logo.png') }}" class="logo" alt="{{ $siteName }} Logo" style="height: 60px; max-height: 60px; width: auto;">
+@if (trim($slot) === 'Laravel')
+<img src="https://laravel.com/img/notification-logo.png" class="logo" alt="Laravel Logo">
 @else
-<span style="font-size: 24px; font-weight: bold; color: {{ setting('primary_color', '#666cff') }};">{{ $siteName }}</span>
+{!! $slot !!}
 @endif
 </a>
 </td>

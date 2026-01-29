@@ -2,7 +2,7 @@
 {{-- Header --}}
 <x-slot:header>
 <x-mail::header :url="config('app.url')">
-{{ setting('site_name', config('app.name')) }}
+{{ config('app.name') }}
 </x-mail::header>
 </x-slot:header>
 
@@ -21,13 +21,7 @@
 {{-- Footer --}}
 <x-slot:footer>
 <x-mail::footer>
-© {{ date('Y') }} {{ setting('site_name', config('app.name')) }}. {{ __('All rights reserved.') }}
-
----
-
-{{ __('This email was sent from') }} [{{ setting('site_name', config('app.name')) }}]({{ config('app.url') }})
-
-{{ __('If you have any questions, please contact our support team.') }}
+© {{ date('Y') }} {{ config('app.name') }}. {{ __('All rights reserved.') }}
 </x-mail::footer>
 </x-slot:footer>
 </x-mail::layout>
