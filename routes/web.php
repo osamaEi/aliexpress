@@ -72,6 +72,9 @@ Route::prefix('distributor/register')->name('distributor.register.')->group(func
     Route::get('step-4', [DistributorRegistrationController::class, 'showStep4'])->name('step4');
     Route::post('verify-otp', [DistributorRegistrationController::class, 'verifyOTP'])->name('verify-otp');
     Route::post('resend-otp', [DistributorRegistrationController::class, 'resendOTP'])->name('resend-otp');
+    Route::get('step-5', [DistributorRegistrationController::class, 'showStep5'])->name('step5');
+    Route::post('verify-whatsapp-otp', [DistributorRegistrationController::class, 'verifyWhatsAppOTP'])->name('verify-whatsapp-otp');
+    Route::post('resend-whatsapp-otp', [DistributorRegistrationController::class, 'resendWhatsAppOTP'])->name('resend-whatsapp-otp');
     Route::get('check-slug', [DistributorRegistrationController::class, 'checkSlug'])->name('check-slug');
 });
 
