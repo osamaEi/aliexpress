@@ -222,52 +222,7 @@
     </div>
 
     <!-- Products by Country -->
-    @if($productsByCountry->count() > 0)
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header gradient-header">
-                    <h5 class="mb-0 text-white">
-                        <i class="ri-global-line me-2"></i>
-                        {{ app()->getLocale() == 'ar' ? 'المنتجات حسب الدولة' : 'Products by Country' }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        @php
-                            $countryFlags = [
-                                'AE' => ['flag' => '🇦🇪', 'ar' => 'الإمارات', 'en' => 'UAE'],
-                                'SA' => ['flag' => '🇸🇦', 'ar' => 'السعودية', 'en' => 'Saudi Arabia'],
-                                'KW' => ['flag' => '🇰🇼', 'ar' => 'الكويت', 'en' => 'Kuwait'],
-                                'QA' => ['flag' => '🇶🇦', 'ar' => 'قطر', 'en' => 'Qatar'],
-                                'BH' => ['flag' => '🇧🇭', 'ar' => 'البحرين', 'en' => 'Bahrain'],
-                                'OM' => ['flag' => '🇴🇲', 'ar' => 'عمان', 'en' => 'Oman'],
-                                'EG' => ['flag' => '🇪🇬', 'ar' => 'مصر', 'en' => 'Egypt'],
-                                'JO' => ['flag' => '🇯🇴', 'ar' => 'الأردن', 'en' => 'Jordan'],
-                                'LB' => ['flag' => '🇱🇧', 'ar' => 'لبنان', 'en' => 'Lebanon'],
-                                'CN' => ['flag' => '🇨🇳', 'ar' => 'الصين', 'en' => 'China'],
-                            ];
-                        @endphp
-                        @foreach($productsByCountry as $code => $data)
-                            @php
-                                $country = $countryFlags[$code] ?? ['flag' => '🏳️', 'ar' => $code, 'en' => $code];
-                            @endphp
-                            <div class="col-sm-6 col-md-4 col-lg-3">
-                                <div class="p-3 country-card rounded d-flex align-items-center">
-                                    <span style="font-size: 2rem;" class="me-3">{{ $country['flag'] }}</span>
-                                    <div>
-                                        <h6 class="mb-0 text-white">{{ app()->getLocale() == 'ar' ? $country['ar'] : $country['en'] }}</h6>
-                                        <small class="text-white-50">{{ $data->count }} {{ app()->getLocale() == 'ar' ? 'منتج' : 'products' }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
+
 
     <!-- Affiliate Marketing Stats -->
     <div class="row g-4 mb-4">

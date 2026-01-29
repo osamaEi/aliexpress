@@ -560,21 +560,61 @@
                         <div class="form-group">
                             <label for="phone" class="form-label">
                                 <i class="ri-phone-line"></i>
-                                {{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone Number' }}
+                                {{ app()->getLocale() == 'ar' ? 'رقم الهاتف (واتساب)' : 'Phone Number (WhatsApp)' }}
                                 <span class="required">*</span>
                             </label>
-                            <input type="tel"
-                                   class="form-control @error('phone') is-invalid @enderror"
-                                   id="phone"
-                                   name="phone"
-                                   value="{{ old('phone') }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'مثال: +971501234567' : 'e.g. +971501234567' }}"
-                                   dir="ltr"
-                                   style="text-align: left;"
-                                   required>
+                            <div style="position: relative;">
+                                <div class="phone-input-wrapper" style="display: flex; align-items: center; border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden; transition: all 0.3s; direction: ltr;" id="phoneInputWrapper">
+                                    <div class="phone-code-trigger" id="phoneCodeSelected" style="display: flex; align-items: center; gap: 6px; padding: 13px 12px; cursor: pointer; background: #f9fafb; border-{{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 2px solid #e5e7eb; flex-shrink: 0;">
+                                        <img id="selectedFlag" src="https://flagcdn.com/w20/ae.png" style="width: 20px; height: 15px; border-radius: 2px;">
+                                        <span id="selectedCode" style="font-size: 14px; font-weight: 500; color: #333;">+971</span>
+                                        <i class="ri-arrow-down-s-line" style="font-size: 14px; color: #999;"></i>
+                                    </div>
+                                    <input type="text"
+                                           class="@error('phone') is-invalid @enderror"
+                                           id="phone"
+                                           name="phone"
+                                           value="{{ old('phone') }}"
+                                           placeholder="{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone number' }}"
+                                           style="border: none; outline: none; padding: 13px 15px; flex: 1; font-size: 15px; direction: ltr; text-align: left; width: 100%;"
+                                           required>
+                                </div>
+                                <div class="phone-code-dropdown" id="phoneCodeDropdown" style="display: none; position: absolute; top: 100%; {{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 0; width: 200px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+                                    @php
+                                        $phoneCodes = [
+                                            ['code' => '971', 'flag' => 'ae', 'name' => 'UAE'],
+                                            ['code' => '966', 'flag' => 'sa', 'name' => 'KSA'],
+                                            ['code' => '20', 'flag' => 'eg', 'name' => 'Egypt'],
+                                            ['code' => '965', 'flag' => 'kw', 'name' => 'Kuwait'],
+                                            ['code' => '974', 'flag' => 'qa', 'name' => 'Qatar'],
+                                            ['code' => '973', 'flag' => 'bh', 'name' => 'Bahrain'],
+                                            ['code' => '968', 'flag' => 'om', 'name' => 'Oman'],
+                                            ['code' => '962', 'flag' => 'jo', 'name' => 'Jordan'],
+                                            ['code' => '961', 'flag' => 'lb', 'name' => 'Lebanon'],
+                                            ['code' => '963', 'flag' => 'sy', 'name' => 'Syria'],
+                                            ['code' => '970', 'flag' => 'ps', 'name' => 'Palestine'],
+                                            ['code' => '964', 'flag' => 'iq', 'name' => 'Iraq'],
+                                            ['code' => '218', 'flag' => 'ly', 'name' => 'Libya'],
+                                            ['code' => '216', 'flag' => 'tn', 'name' => 'Tunisia'],
+                                            ['code' => '213', 'flag' => 'dz', 'name' => 'Algeria'],
+                                            ['code' => '212', 'flag' => 'ma', 'name' => 'Morocco'],
+                                            ['code' => '249', 'flag' => 'sd', 'name' => 'Sudan'],
+                                            ['code' => '967', 'flag' => 'ye', 'name' => 'Yemen'],
+                                        ];
+                                    @endphp
+                                    @foreach($phoneCodes as $country)
+                                        <div class="phone-code-option" data-code="{{ $country['code'] }}" data-flag="{{ $country['flag'] }}" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; transition: background 0.2s;">
+                                            <img src="https://flagcdn.com/w20/{{ $country['flag'] }}.png" style="width: 20px; height: 15px; border-radius: 2px;">
+                                            <span>+{{ $country['code'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <input type="hidden" name="phone_code" id="phone_code" value="{{ old('phone_code', '971') }}">
+                            </div>
                             @error('phone')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
+                            <small class="text-muted d-block mt-1">{{ app()->getLocale() == 'ar' ? 'سنرسل رمز التحقق عبر واتساب' : 'We will send verification code via WhatsApp' }}</small>
                         </div>
                     </div>
 
@@ -633,29 +673,48 @@
                                 {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }}
                                 <span class="required">*</span>
                             </label>
-                            <select class="form-select @error('country') is-invalid @enderror"
-                                    id="country"
-                                    name="country"
-                                    required>
-                                <option value="">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</option>
-                                <option value="الإمارات العربية المتحدة" {{ old('country') == 'الإمارات العربية المتحدة' ? 'selected' : '' }}>الإمارات العربية المتحدة</option>
-                                <option value="السعودية" {{ old('country') == 'السعودية' ? 'selected' : '' }}>السعودية</option>
-                                <option value="مصر" {{ old('country') == 'مصر' ? 'selected' : '' }}>مصر</option>
-                                <option value="الكويت" {{ old('country') == 'الكويت' ? 'selected' : '' }}>الكويت</option>
-                                <option value="قطر" {{ old('country') == 'قطر' ? 'selected' : '' }}>قطر</option>
-                                <option value="البحرين" {{ old('country') == 'البحرين' ? 'selected' : '' }}>البحرين</option>
-                                <option value="عُمان" {{ old('country') == 'عُمان' ? 'selected' : '' }}>عُمان</option>
-                                <option value="الأردن" {{ old('country') == 'الأردن' ? 'selected' : '' }}>الأردن</option>
-                                <option value="لبنان" {{ old('country') == 'لبنان' ? 'selected' : '' }}>لبنان</option>
-                                <option value="العراق" {{ old('country') == 'العراق' ? 'selected' : '' }}>العراق</option>
-                                <option value="فلسطين" {{ old('country') == 'فلسطين' ? 'selected' : '' }}>فلسطين</option>
-                                <option value="المغرب" {{ old('country') == 'المغرب' ? 'selected' : '' }}>المغرب</option>
-                                <option value="الجزائر" {{ old('country') == 'الجزائر' ? 'selected' : '' }}>الجزائر</option>
-                                <option value="تونس" {{ old('country') == 'تونس' ? 'selected' : '' }}>تونس</option>
-                                <option value="ليبيا" {{ old('country') == 'ليبيا' ? 'selected' : '' }}>ليبيا</option>
-                                <option value="السودان" {{ old('country') == 'السودان' ? 'selected' : '' }}>السودان</option>
-                                <option value="اليمن" {{ old('country') == 'اليمن' ? 'selected' : '' }}>اليمن</option>
-                            </select>
+                            <div style="position: relative;">
+                                <div class="country-select-trigger" id="countrySelectTrigger" style="display: flex; align-items: center; gap: 10px; padding: 13px 18px; border: 2px solid #e5e7eb; border-radius: 10px; cursor: pointer; background: white; transition: all 0.3s; font-size: 15px;">
+                                    <img id="countryFlag" src="" style="width: 22px; height: 16px; border-radius: 2px; object-fit: cover; display: none;">
+                                    <span id="countryName" style="flex: 1; color: #999;">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</span>
+                                    <i class="ri-arrow-down-s-line" style="font-size: 16px; color: #999;"></i>
+                                </div>
+                                <div class="country-dropdown" id="countryDropdown" style="display: none; position: absolute; top: 100%; {{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 0; {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 0; background: white; border: 2px solid #e5e7eb; border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+                                    @php
+                                        $countries = [
+                                            ['value' => 'AE', 'flag' => 'ae', 'name_ar' => 'الإمارات العربية المتحدة', 'name_en' => 'United Arab Emirates'],
+                                            ['value' => 'SA', 'flag' => 'sa', 'name_ar' => 'المملكة العربية السعودية', 'name_en' => 'Saudi Arabia'],
+                                            ['value' => 'KW', 'flag' => 'kw', 'name_ar' => 'الكويت', 'name_en' => 'Kuwait'],
+                                            ['value' => 'QA', 'flag' => 'qa', 'name_ar' => 'قطر', 'name_en' => 'Qatar'],
+                                            ['value' => 'BH', 'flag' => 'bh', 'name_ar' => 'البحرين', 'name_en' => 'Bahrain'],
+                                            ['value' => 'OM', 'flag' => 'om', 'name_ar' => 'سلطنة عُمان', 'name_en' => 'Oman'],
+                                            ['value' => 'JO', 'flag' => 'jo', 'name_ar' => 'الأردن', 'name_en' => 'Jordan'],
+                                            ['value' => 'LB', 'flag' => 'lb', 'name_ar' => 'لبنان', 'name_en' => 'Lebanon'],
+                                            ['value' => 'SY', 'flag' => 'sy', 'name_ar' => 'سوريا', 'name_en' => 'Syria'],
+                                            ['value' => 'PS', 'flag' => 'ps', 'name_ar' => 'فلسطين', 'name_en' => 'Palestine'],
+                                            ['value' => 'IQ', 'flag' => 'iq', 'name_ar' => 'العراق', 'name_en' => 'Iraq'],
+                                            ['value' => 'EG', 'flag' => 'eg', 'name_ar' => 'مصر', 'name_en' => 'Egypt'],
+                                            ['value' => 'LY', 'flag' => 'ly', 'name_ar' => 'ليبيا', 'name_en' => 'Libya'],
+                                            ['value' => 'TN', 'flag' => 'tn', 'name_ar' => 'تونس', 'name_en' => 'Tunisia'],
+                                            ['value' => 'DZ', 'flag' => 'dz', 'name_ar' => 'الجزائر', 'name_en' => 'Algeria'],
+                                            ['value' => 'MA', 'flag' => 'ma', 'name_ar' => 'المغرب', 'name_en' => 'Morocco'],
+                                            ['value' => 'MR', 'flag' => 'mr', 'name_ar' => 'موريتانيا', 'name_en' => 'Mauritania'],
+                                            ['value' => 'SD', 'flag' => 'sd', 'name_ar' => 'السودان', 'name_en' => 'Sudan'],
+                                            ['value' => 'YE', 'flag' => 'ye', 'name_ar' => 'اليمن', 'name_en' => 'Yemen'],
+                                            ['value' => 'SO', 'flag' => 'so', 'name_ar' => 'الصومال', 'name_en' => 'Somalia'],
+                                            ['value' => 'DJ', 'flag' => 'dj', 'name_ar' => 'جيبوتي', 'name_en' => 'Djibouti'],
+                                            ['value' => 'KM', 'flag' => 'km', 'name_ar' => 'جزر القمر', 'name_en' => 'Comoros'],
+                                        ];
+                                    @endphp
+                                    @foreach($countries as $c)
+                                        <div class="country-option" data-value="{{ $c['value'] }}" data-flag="{{ $c['flag'] }}" data-name="{{ app()->getLocale() == 'ar' ? $c['name_ar'] : $c['name_en'] }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.2s; font-size: 14px;">
+                                            <img src="https://flagcdn.com/w20/{{ $c['flag'] }}.png" style="width: 20px; height: 15px; border-radius: 2px;">
+                                            <span>{{ app()->getLocale() == 'ar' ? $c['name_ar'] : $c['name_en'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <input type="hidden" name="country" id="country" value="{{ old('country') }}" required>
+                            </div>
                             @error('country')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
@@ -802,6 +861,56 @@
                     });
             }, 500);
         }
+    </script>
+
+    <script>
+        // Phone code dropdown functionality
+        const phoneCodeSelected = document.getElementById('phoneCodeSelected');
+        const phoneCodeDropdown = document.getElementById('phoneCodeDropdown');
+        const phoneCodeOptions = document.querySelectorAll('.phone-code-option');
+        const selectedFlag = document.getElementById('selectedFlag');
+        const selectedCode = document.getElementById('selectedCode');
+        const phoneCodeInput = document.getElementById('phone_code');
+        const phoneInputWrapper = document.getElementById('phoneInputWrapper');
+
+        phoneCodeSelected.addEventListener('click', function(e) {
+            e.stopPropagation();
+            phoneCodeDropdown.style.display = phoneCodeDropdown.style.display === 'none' ? 'block' : 'none';
+        });
+
+        phoneCodeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const code = this.getAttribute('data-code');
+                const flag = this.getAttribute('data-flag');
+
+                selectedFlag.src = `https://flagcdn.com/w20/${flag}.png`;
+                selectedCode.textContent = `+${code}`;
+                phoneCodeInput.value = code;
+                phoneCodeDropdown.style.display = 'none';
+            });
+
+            option.addEventListener('mouseenter', function() {
+                this.style.background = '#f3f4f6';
+            });
+
+            option.addEventListener('mouseleave', function() {
+                this.style.background = 'white';
+            });
+        });
+
+        document.addEventListener('click', function() {
+            phoneCodeDropdown.style.display = 'none';
+        });
+
+        phoneInputWrapper.addEventListener('focusin', function() {
+            this.style.borderColor = 'var(--distributor-color)';
+            this.style.boxShadow = '0 0 0 4px rgba(86, 28, 4, 0.08)';
+        });
+
+        phoneInputWrapper.addEventListener('focusout', function() {
+            this.style.borderColor = '#e5e7eb';
+            this.style.boxShadow = 'none';
+        });
     </script>
 
     @if(config('services.recaptcha.enabled'))
