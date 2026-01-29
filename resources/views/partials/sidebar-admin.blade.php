@@ -218,10 +218,18 @@
         </li>
 
         <!-- All Users -->
-        <li class="menu-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('admin.users.*') && !request('user_type') ? 'active' : '' }}">
             <a href="{{ route('admin.users.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-group-line"></i>
                 <div>{{ __('messages.all_users') }}</div>
+            </a>
+        </li>
+
+        <!-- Sellers -->
+        <li class="menu-item {{ request()->routeIs('admin.users.*') && request('user_type') === 'seller' ? 'active' : '' }}">
+            <a href="{{ route('admin.users.index', ['user_type' => 'seller']) }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-store-2-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'البائعين' : 'Sellers' }}</div>
             </a>
         </li>
 
