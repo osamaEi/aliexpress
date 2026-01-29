@@ -140,13 +140,25 @@
                     <div class="d-grid gap-3">
                         @if($product->isAliexpressProduct())
                             {{-- All AliExpress products: Calculate shipping first --}}
-                            <button type="button" class="btn btn-lg btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#shippingCalculatorModal" style="border-radius: 12px; padding: 16px;">
-                                <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
-                            </button>
+                            @if($canCreateOrder)
+                                <button type="button" class="btn btn-lg btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#shippingCalculatorModal" style="border-radius: 12px; padding: 16px;">
+                                    <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-lg btn-danger shadow-sm" disabled style="border-radius: 12px; padding: 16px;" title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإنشاء الطلبات' : 'Subscription required to create orders' }}">
+                                    <i class="ri-lock-line me-2"></i> {{ app()->getLocale() == 'ar' ? 'اشترك الآن لإنشاء الطلبات' : 'Subscribe to Create Orders' }}
+                                </button>
+                            @endif
                         @else
-                            <a href="{{ route('orders.create', ['product_id' => $product->id]) }}" class="btn btn-lg btn-success shadow-sm" style="border-radius: 12px; padding: 16px;">
-                                <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
-                            </a>
+                            @if($canCreateOrder)
+                                <a href="{{ route('orders.create', ['product_id' => $product->id]) }}" class="btn btn-lg btn-success shadow-sm" style="border-radius: 12px; padding: 16px;">
+                                    <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
+                                </a>
+                            @else
+                                <button type="button" class="btn btn-lg btn-danger shadow-sm" disabled style="border-radius: 12px; padding: 16px;" title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإنشاء الطلبات' : 'Subscription required to create orders' }}">
+                                    <i class="ri-lock-line me-2"></i> {{ app()->getLocale() == 'ar' ? 'اشترك الآن لإنشاء الطلبات' : 'Subscribe to Create Orders' }}
+                                </button>
+                            @endif
                         @endif
 
                     </div>

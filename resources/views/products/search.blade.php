@@ -396,8 +396,8 @@
                                         <i class="ri-close-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'إلغاء الكل' : 'Deselect All' }}
                                     </button>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-warning" id="bulkAssignBtn">
-                                    <i class="ri-pushpin-2-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'إسناد المنتجات المحددة' : 'Assign Selected Products' }}
+                                <button type="button" class="btn btn-sm btn-warning" id="bulkAssignBtn" {{ !$canAssignProducts ? 'disabled' : '' }} title="{{ !$canAssignProducts ? (app()->getLocale() == 'ar' ? 'يجب الاشتراك لإسناد المنتجات' : 'Subscription required to assign products') : '' }}">
+                                    <i class="{{ !$canAssignProducts ? 'ri-lock-line' : 'ri-pushpin-2-line' }} me-1"></i> {{ app()->getLocale() == 'ar' ? 'إسناد المنتجات المحددة' : 'Assign Selected Products' }}
                                 </button>
                             </div>
                         </div>
@@ -580,6 +580,15 @@
                                                         disabled
                                                     >
                                                         <i class="ri-check-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'تم الإسناد' : 'Already Assigned' }}
+                                                    </button>
+                                                @elseif(!$canAssignProducts)
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-danger w-100 mb-2"
+                                                        disabled
+                                                        title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإسناد المنتجات' : 'Subscription required to assign products' }}"
+                                                    >
+                                                        <i class="ri-lock-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'اشترك الآن' : 'Subscribe Now' }}
                                                     </button>
                                                 @else
                                                     @php

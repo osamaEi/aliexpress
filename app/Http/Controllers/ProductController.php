@@ -239,7 +239,13 @@ class ProductController extends Controller
             }
         }
 
-        return view('products.detail', compact('product', 'aliexpressData', 'walletBalance', 'sellerPivotData'));
+        // Check if seller has active subscription or trial to create orders
+        $canCreateOrder = true; // Default for non-sellers
+        if (auth()->check() && auth()->user()->user_type === 'seller') {
+            $canCreateOrder = auth()->user()->canAccessPlatform();
+        }
+
+        return view('products.detail', compact('product', 'aliexpressData', 'walletBalance', 'sellerPivotData', 'canCreateOrder'));
     }
 
     /**
@@ -860,12 +866,19 @@ class ProductController extends Controller
             ->get()
             ->groupBy('country');
 
+        // Check if seller has active subscription or trial
+        $canAssignProducts = false;
+        if (auth()->check() && auth()->user()->user_type === 'seller') {
+            $canAssignProducts = auth()->user()->canAccessPlatform();
+        }
+
         return view('products.search', [
             'categories' => $categoriesWithChildren,
             'allCategories' => $allCategories,
             'assignedProductIds' => $assignedProductIds,
             'distributorCountries' => $distributorCountries,
             'distributorsByCountry' => $distributorsByCountry,
+            'canAssignProducts' => $canAssignProducts,
         ]);
     }
 
@@ -1338,6 +1351,12 @@ class ProductController extends Controller
                 })
                 ->toArray();
 
+            // Check if seller has active subscription or trial
+            $canAssignProducts = false;
+            if (auth()->check() && auth()->user()->user_type === 'seller') {
+                $canAssignProducts = auth()->user()->canAccessPlatform();
+            }
+
             return view('products.search', [
                 'products' => $result['products'],
                 'total_count' => $result['total_count'] ?? 0,
@@ -1347,6 +1366,7 @@ class ProductController extends Controller
                 'assignedProductIds' => $assignedProductIds,
                 'distributorCountries' => $distributorCountries,
                 'distributorsByCountry' => $distributorsByCountry,
+                'canAssignProducts' => $canAssignProducts,
                 'debug' => $request->get('debug') ? $result : null,
             ]);
 
