@@ -25,11 +25,10 @@
                         <span class="badge mb-3" style="background-color: {{ $subscription->color }}; font-size: 1.5rem; padding: 12px 24px;">
                             {{ $subscription->localized_name }}
                         </span>
-                        <h2 class="mb-0 d-flex align-items-center justify-content-center gap-2">
-                                            {{ number_format($subscription->price, 2) }}
-                                            <x-dirham-icon width="28" height="28" />
-
-                                        </h2>
+                        <h2 class="mb-0 d-flex align-items-center justify-content-center gap-2" style="direction: ltr;">
+                            <x-session-currency-icon width="28" height="28" />
+                            {{ number_format(convert_price($subscription->price), 2) }}
+                        </h2>
                         <small class="text-muted">{{ __('messages.per_month') }}</small>
                     </div>
 
@@ -140,10 +139,10 @@
                         </div>
                     @else
                         <h6 class="mb-3">{{ __('messages.payment_amount') }}</h6>
-                        <h3 class="mb-4 d-flex align-items-center justify-content-center gap-2">
-                                            <x-dirham-icon width="24" height="24" />
-                                            {{ number_format($subscription->price, 2) }}
-                                        </h3>
+                        <h3 class="mb-4 d-flex align-items-center justify-content-center gap-2" style="direction: ltr;">
+                            <x-session-currency-icon width="24" height="24" />
+                            {{ number_format(convert_price($subscription->price), 2) }}
+                        </h3>
 
                         <a href="{{ route('subscriptions.subscribe', $subscription) }}" class="btn btn-success btn-lg w-100">
                             <i class="ri-secure-payment-line me-2"></i>
