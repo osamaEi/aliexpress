@@ -869,7 +869,7 @@ class ProductController extends Controller
         // Check if seller has active subscription or trial
         $canAssignProducts = false;
         if (auth()->check() && auth()->user()->user_type === 'seller') {
-            $canAssignProducts = auth()->user()->canAccessPlatform();
+            $canAssignProducts = auth()->user()->canAccessFullSystem();
         }
 
         return view('products.search', [
@@ -1354,7 +1354,7 @@ class ProductController extends Controller
             // Check if seller has active subscription or trial
             $canAssignProducts = false;
             if (auth()->check() && auth()->user()->user_type === 'seller') {
-                $canAssignProducts = auth()->user()->canAccessPlatform();
+                $canAssignProducts = auth()->user()->canAccessFullSystem();
             }
 
             return view('products.search', [
