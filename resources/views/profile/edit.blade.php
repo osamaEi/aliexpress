@@ -622,7 +622,7 @@
                         @enderror
                     </div>
 
-                    @if($user->user_type == 'seller')
+                    @if($user->user_type == 'seller' || $user->user_type == 'distributor')
                     <!-- Seller Store Information (Required) -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
