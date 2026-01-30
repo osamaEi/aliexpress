@@ -99,10 +99,65 @@
                                         <strong>{{ $user->company_name }}</strong>
                                     </p>
                                 @endif
+                                @if($user->phone)
+                                    <p class="mb-2">
+                                        <i class="ri-phone-line text-success {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
+                                        @if($user->phone_code)
+                                            @php
+                                                $countryCode = strtolower(str_replace('+', '', $user->phone_code));
+                                                $flagMap = [
+                                                    '971' => 'ae', '966' => 'sa', '965' => 'kw', '974' => 'qa',
+                                                    '973' => 'bh', '968' => 'om', '962' => 'jo', '961' => 'lb',
+                                                    '963' => 'sy', '970' => 'ps', '964' => 'iq', '20' => 'eg',
+                                                    '218' => 'ly', '216' => 'tn', '213' => 'dz', '212' => 'ma',
+                                                    '222' => 'mr', '249' => 'sd', '967' => 'ye', '252' => 'so',
+                                                    '253' => 'dj', '269' => 'km'
+                                                ];
+                                                $flagCode = $flagMap[$countryCode] ?? 'ae';
+                                            @endphp
+                                            <img src="https://flagcdn.com/w20/{{ $flagCode }}.png" style="width: 20px; height: 15px; {{ app()->getLocale() == 'ar' ? 'margin-left' : 'margin-right' }}: 5px; border-radius: 2px; vertical-align: middle;">
+                                            <span style="direction: ltr; display: inline-block;">{{ $user->phone_code }} {{ $user->phone }}</span>
+                                        @else
+                                            {{ $user->phone }}
+                                        @endif
+                                    </p>
+                                @endif
                                 @if($user->country)
                                     <p class="mb-2">
                                         <i class="ri-map-pin-line text-danger {{ app()->getLocale() == 'ar' ? 'ms-2' : 'me-2' }}"></i>
-                                        {{ $user->country }}
+                                        @php
+                                            $countryFlagMap = [
+                                                'AE' => ['flag' => 'ae', 'name_ar' => 'الإمارات العربية المتحدة', 'name_en' => 'United Arab Emirates'],
+                                                'SA' => ['flag' => 'sa', 'name_ar' => 'المملكة العربية السعودية', 'name_en' => 'Saudi Arabia'],
+                                                'KW' => ['flag' => 'kw', 'name_ar' => 'الكويت', 'name_en' => 'Kuwait'],
+                                                'QA' => ['flag' => 'qa', 'name_ar' => 'قطر', 'name_en' => 'Qatar'],
+                                                'BH' => ['flag' => 'bh', 'name_ar' => 'البحرين', 'name_en' => 'Bahrain'],
+                                                'OM' => ['flag' => 'om', 'name_ar' => 'سلطنة عُمان', 'name_en' => 'Oman'],
+                                                'JO' => ['flag' => 'jo', 'name_ar' => 'الأردن', 'name_en' => 'Jordan'],
+                                                'LB' => ['flag' => 'lb', 'name_ar' => 'لبنان', 'name_en' => 'Lebanon'],
+                                                'SY' => ['flag' => 'sy', 'name_ar' => 'سوريا', 'name_en' => 'Syria'],
+                                                'PS' => ['flag' => 'ps', 'name_ar' => 'فلسطين', 'name_en' => 'Palestine'],
+                                                'IQ' => ['flag' => 'iq', 'name_ar' => 'العراق', 'name_en' => 'Iraq'],
+                                                'EG' => ['flag' => 'eg', 'name_ar' => 'مصر', 'name_en' => 'Egypt'],
+                                                'LY' => ['flag' => 'ly', 'name_ar' => 'ليبيا', 'name_en' => 'Libya'],
+                                                'TN' => ['flag' => 'tn', 'name_ar' => 'تونس', 'name_en' => 'Tunisia'],
+                                                'DZ' => ['flag' => 'dz', 'name_ar' => 'الجزائر', 'name_en' => 'Algeria'],
+                                                'MA' => ['flag' => 'ma', 'name_ar' => 'المغرب', 'name_en' => 'Morocco'],
+                                                'MR' => ['flag' => 'mr', 'name_ar' => 'موريتانيا', 'name_en' => 'Mauritania'],
+                                                'SD' => ['flag' => 'sd', 'name_ar' => 'السودان', 'name_en' => 'Sudan'],
+                                                'YE' => ['flag' => 'ye', 'name_ar' => 'اليمن', 'name_en' => 'Yemen'],
+                                                'SO' => ['flag' => 'so', 'name_ar' => 'الصومال', 'name_en' => 'Somalia'],
+                                                'DJ' => ['flag' => 'dj', 'name_ar' => 'جيبوتي', 'name_en' => 'Djibouti'],
+                                                'KM' => ['flag' => 'km', 'name_ar' => 'جزر القمر', 'name_en' => 'Comoros'],
+                                            ];
+                                            $countryData = $countryFlagMap[$user->country] ?? null;
+                                        @endphp
+                                        @if($countryData)
+                                            <img src="https://flagcdn.com/w20/{{ $countryData['flag'] }}.png" style="width: 20px; height: 15px; {{ app()->getLocale() == 'ar' ? 'margin-left' : 'margin-right' }}: 5px; border-radius: 2px; vertical-align: middle;">
+                                            {{ app()->getLocale() == 'ar' ? $countryData['name_ar'] : $countryData['name_en'] }}
+                                        @else
+                                            {{ $user->country }}
+                                        @endif
                                     </p>
                                 @endif
                             </div>

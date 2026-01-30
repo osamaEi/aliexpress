@@ -864,7 +864,7 @@
     </script>
 
     <script>
-        // Phone code dropdown functionality
+        // Declare all variables first
         const phoneCodeSelected = document.getElementById('phoneCodeSelected');
         const phoneCodeDropdown = document.getElementById('phoneCodeDropdown');
         const phoneCodeOptions = document.querySelectorAll('.phone-code-option');
@@ -873,9 +873,18 @@
         const phoneCodeInput = document.getElementById('phone_code');
         const phoneInputWrapper = document.getElementById('phoneInputWrapper');
 
+        const countrySelectTrigger = document.getElementById('countrySelectTrigger');
+        const countryDropdown = document.getElementById('countryDropdown');
+        const countryOptions = document.querySelectorAll('.country-option');
+        const countryFlag = document.getElementById('countryFlag');
+        const countryName = document.getElementById('countryName');
+        const countryInput = document.getElementById('country');
+
+        // Phone code dropdown functionality
         phoneCodeSelected.addEventListener('click', function(e) {
             e.stopPropagation();
             phoneCodeDropdown.style.display = phoneCodeDropdown.style.display === 'none' ? 'block' : 'none';
+            countryDropdown.style.display = 'none'; // Close country dropdown
         });
 
         phoneCodeOptions.forEach(option => {
@@ -898,10 +907,6 @@
             });
         });
 
-        document.addEventListener('click', function() {
-            phoneCodeDropdown.style.display = 'none';
-        });
-
         phoneInputWrapper.addEventListener('focusin', function() {
             this.style.borderColor = 'var(--distributor-color)';
             this.style.boxShadow = '0 0 0 4px rgba(86, 28, 4, 0.08)';
@@ -910,6 +915,43 @@
         phoneInputWrapper.addEventListener('focusout', function() {
             this.style.borderColor = '#e5e7eb';
             this.style.boxShadow = 'none';
+        });
+
+        // Country dropdown functionality
+
+        countrySelectTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            countryDropdown.style.display = countryDropdown.style.display === 'none' ? 'block' : 'none';
+            phoneCodeDropdown.style.display = 'none'; // Close phone dropdown
+        });
+
+        countryOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const flag = this.getAttribute('data-flag');
+                const name = this.getAttribute('data-name');
+
+                countryFlag.src = `https://flagcdn.com/w20/${flag}.png`;
+                countryFlag.style.display = 'block';
+                countryName.textContent = name;
+                countryName.style.color = '#333';
+                countryInput.value = value;
+                countryDropdown.style.display = 'none';
+                countrySelectTrigger.style.borderColor = 'var(--distributor-color)';
+            });
+
+            option.addEventListener('mouseenter', function() {
+                this.style.background = '#f3f4f6';
+            });
+
+            option.addEventListener('mouseleave', function() {
+                this.style.background = 'white';
+            });
+        });
+
+        document.addEventListener('click', function() {
+            phoneCodeDropdown.style.display = 'none';
+            countryDropdown.style.display = 'none';
         });
     </script>
 
