@@ -4,13 +4,10 @@ namespace App\Listeners;
 
 use App\Events\OrderCreated;
 use App\Models\Profit;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 
-class CreateProfitRecord implements ShouldQueue
+class CreateProfitRecord
 {
-    use InteractsWithQueue;
 
     /**
      * Create the event listener.
@@ -57,7 +54,7 @@ class CreateProfitRecord implements ShouldQueue
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Re-throw to mark job as failed if using queue
+            // Re-throw the exception
             throw $e;
         }
     }
