@@ -452,82 +452,267 @@
 
                     <div class="mb-3">
                         <label class="form-label">{{ __('messages.country') }}</label>
-                        <select class="form-select form-select-lg" id="shipping-country">
-                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'دول الخليج العربي' : 'Gulf Countries' }}">
-                                <option value="AE">{{ __('messages.united_arab_emirates') }}</option>
-                                <option value="SA">{{ __('messages.saudi_arabia') }}</option>
-                                <option value="KW">{{ __('messages.kuwait') }}</option>
-                                <option value="QA">{{ __('messages.qatar') }}</option>
-                                <option value="BH">{{ __('messages.bahrain') }}</option>
-                                <option value="OM">{{ __('messages.oman') }}</option>
-                            </optgroup>
-                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'الدول العربية' : 'Arab Countries' }}">
-                                <option value="EG">{{ __('messages.egypt') }}</option>
-                                <option value="JO">{{ __('messages.jordan') }}</option>
-                                <option value="LB">{{ __('messages.lebanon') }}</option>
-                                <option value="IQ">{{ __('messages.iraq') }}</option>
-                                <option value="SY">{{ __('messages.syria') }}</option>
-                                <option value="YE">{{ __('messages.yemen') }}</option>
-                                <option value="MA">{{ __('messages.morocco') }}</option>
-                                <option value="TN">{{ __('messages.tunisia') }}</option>
-                                <option value="DZ">{{ __('messages.algeria') }}</option>
-                                <option value="LY">{{ __('messages.libya') }}</option>
-                            </optgroup>
-                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'أوروبا' : 'Europe' }}">
-                                <option value="GB">{{ __('messages.united_kingdom') }}</option>
-                                <option value="DE">{{ __('messages.germany') }}</option>
-                                <option value="FR">{{ __('messages.france') }}</option>
-                                <option value="IT">{{ __('messages.italy') }}</option>
-                                <option value="ES">{{ __('messages.spain') }}</option>
-                                <option value="NL">{{ __('messages.netherlands') }}</option>
-                                <option value="BE">{{ __('messages.belgium') }}</option>
-                                <option value="SE">{{ __('messages.sweden') }}</option>
-                                <option value="NO">{{ __('messages.norway') }}</option>
-                                <option value="DK">{{ __('messages.denmark') }}</option>
-                                <option value="CH">{{ __('messages.switzerland') }}</option>
-                                <option value="AT">{{ __('messages.austria') }}</option>
-                                <option value="PL">{{ __('messages.poland') }}</option>
-                                <option value="PT">{{ __('messages.portugal') }}</option>
-                                <option value="GR">{{ __('messages.greece') }}</option>
-                                <option value="CZ">{{ __('messages.czech_republic') }}</option>
-                                <option value="HU">{{ __('messages.hungary') }}</option>
-                                <option value="TR">{{ __('messages.turkey') }}</option>
-                                <option value="RU">{{ __('messages.russia') }}</option>
-                            </optgroup>
-                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'أمريكا الشمالية' : 'North America' }}">
-                                <option value="US">{{ __('messages.united_states') }}</option>
-                                <option value="CA">{{ __('messages.canada') }}</option>
-                                <option value="MX">{{ __('messages.mexico') }}</option>
-                            </optgroup>
-                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'آسيا والمحيط الهادئ' : 'Asia & Pacific' }}">
-                                <option value="CN">{{ __('messages.china') }}</option>
-                                <option value="JP">{{ __('messages.japan') }}</option>
-                                <option value="KR">{{ __('messages.south_korea') }}</option>
-                                <option value="IN">{{ __('messages.india') }}</option>
-                                <option value="PK">{{ __('messages.pakistan') }}</option>
-                                <option value="MY">{{ __('messages.malaysia') }}</option>
-                                <option value="ID">{{ __('messages.indonesia') }}</option>
-                                <option value="SG">{{ __('messages.singapore') }}</option>
-                                <option value="TH">{{ __('messages.thailand') }}</option>
-                                <option value="PH">{{ __('messages.philippines') }}</option>
-                                <option value="VN">{{ __('messages.vietnam') }}</option>
-                                <option value="AU">{{ __('messages.australia') }}</option>
-                                <option value="NZ">{{ __('messages.new_zealand') }}</option>
-                            </optgroup>
-                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'أفريقيا' : 'Africa' }}">
-                                <option value="ZA">{{ __('messages.south_africa') }}</option>
-                                <option value="NG">{{ __('messages.nigeria') }}</option>
-                                <option value="KE">{{ __('messages.kenya') }}</option>
-                                <option value="GH">{{ __('messages.ghana') }}</option>
-                            </optgroup>
-                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'أمريكا اللاتينية' : 'Latin America' }}">
-                                <option value="BR">{{ __('messages.brazil') }}</option>
-                                <option value="AR">{{ __('messages.argentina') }}</option>
-                                <option value="CL">{{ __('messages.chile') }}</option>
-                                <option value="CO">{{ __('messages.colombia') }}</option>
-                            </optgroup>
-                        </select>
+                        {{-- Hidden input used by calculateShipping() --}}
+                        <input type="hidden" id="shipping-country" value="AE">
+                        <div class="flag-select-wrapper" id="flagSelectWrapper">
+                            <div class="flag-select-trigger" id="flagSelectTrigger" onclick="toggleFlagDropdown()">
+                                <span id="flagSelectDisplay" class="d-flex align-items-center gap-2"></span>
+                                <i class="ri-arrow-down-s-line ms-auto"></i>
+                            </div>
+                            <div class="flag-select-dropdown" id="flagSelectDropdown" style="display:none;">
+                                <div class="flag-select-search-wrap px-2 pt-2 pb-1">
+                                    <input type="text" class="form-control form-control-sm" id="flagSelectSearch"
+                                           placeholder="{{ app()->getLocale() == 'ar' ? 'بحث...' : 'Search...' }}"
+                                           oninput="filterFlagOptions(this.value)" onclick="event.stopPropagation()">
+                                </div>
+                                <div id="flagSelectOptions"></div>
+                            </div>
+                        </div>
                     </div>
+
+                    <style>
+                    .flag-select-wrapper { position: relative; }
+                    .flag-select-trigger {
+                        display: flex; align-items: center; gap: 8px;
+                        padding: .6rem 1rem; font-size: 1rem;
+                        border: 1px solid #dee2e6; border-radius: .375rem;
+                        background: #fff; cursor: pointer; min-height: 48px;
+                        user-select: none;
+                    }
+                    .flag-select-trigger:hover { border-color: #86b7fe; }
+                    .flag-select-dropdown {
+                        position: absolute; z-index: 9999; width: 100%;
+                        background: #fff; border: 1px solid #dee2e6;
+                        border-radius: .375rem; box-shadow: 0 4px 16px rgba(0,0,0,.12);
+                        max-height: 320px; overflow-y: auto; top: calc(100% + 4px);
+                    }
+                    .flag-option-group { padding: 6px 12px 2px; font-size: .75rem;
+                        font-weight: 700; color: #6c757d; text-transform: uppercase;
+                        letter-spacing: .5px; background: #f8f9fa; }
+                    .flag-option {
+                        display: flex; align-items: center; gap: 10px;
+                        padding: 8px 14px; cursor: pointer; font-size: .95rem;
+                    }
+                    .flag-option:hover, .flag-option.active { background: #f0f4ff; }
+                    .flag-option svg { flex-shrink: 0; border-radius: 2px; }
+                    </style>
+
+                    <script>
+                    const isAr = {{ app()->getLocale() == 'ar' ? 'true' : 'false' }};
+
+                    const flagSvgs = {
+                        AE:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#00732f" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="red" d="M0 0h220v480H0z"/></svg>',
+                        SA:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#006c35" d="M0 0h640v480H0z"/><path fill="#fff" d="M110 195h420v90H110z"/><path fill="#fff" d="M380 150h40v180h-40z"/></svg>',
+                        KW:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#007a3d" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ce1126" d="M0 320h640v160H0z"/><path d="M0 0l180 240L0 480z"/></svg>',
+                        QA:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#8d1b3d" d="M180 0l-50 24 50 24-50 24 50 24-50 24 50 24-50 24 50 24-50 24 50 24-50 24 50 24-50 24 50 24-50 24 50 24-50 24 50 24-50 24 50 24H640V0z"/></svg>',
+                        BH:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#ce1126" d="M160 0l60 40-60 40 60 40-60 40 60 40-60 40 60 40-60 40 60 40-60 40 60 40-60 40H640V0z"/></svg>',
+                        OM:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ef2b2d" d="M0 0h640v160H0z"/><path fill="#009025" d="M0 320h640v160H0z"/><path fill="#ef2b2d" d="M0 0h160v480H0z"/></svg>',
+                        EG:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#ce1126" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="#c09300" d="M280 175h80v130h-80z"/></svg>',
+                        JO:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#007a3d" d="M0 320h640v160H0z"/><path fill="#ce1126" d="M0 0l320 240L0 480z"/><path fill="#fff" d="M110 230l6 18h19l-15 11 6 18-16-12-16 12 6-18-15-11h19z"/></svg>',
+                        LB:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#ed1c24" d="M0 0h640v120H0z"/><path fill="#fff" d="M0 120h640v240H0z"/><path fill="#ed1c24" d="M0 360h640v120H0z"/><path fill="#00a651" d="M255 120h130v240H255z"/></svg>',
+                        IQ:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#ce1126" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="#007a3d" d="M240 210h160v60H240z"/></svg>',
+                        SY:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#ce1126" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="#007a3d" d="M200 200l40 60 40-60m80 0l40 60 40-60" stroke="#007a3d" stroke-width="10" fill="none"/></svg>',
+                        YE:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#ce1126" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/></svg>',
+                        MA:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#c1272d" d="M0 0h640v480H0z"/><path fill="none" stroke="#006233" stroke-width="18" d="M320 170l-57 175 149-108H228l149 108z"/></svg>',
+                        TN:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#e70013" d="M0 0h640v480H0z"/><circle cx="320" cy="240" r="110" fill="#fff"/><circle cx="320" cy="240" r="80" fill="#e70013"/><path fill="#fff" d="M335 195a60 60 0 1 0 0 90 50 50 0 1 1 0-90z"/><path fill="#fff" d="M355 225l-15 15 15 15 15-15z"/></svg>',
+                        DZ:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M320 0h320v480H320z"/><path fill="#006233" d="M0 0h320v480H0z"/><path fill="#d21034" d="M355 182a120 120 0 1 0 0 116 100 100 0 1 1 0-116z"/><path fill="#d21034" d="M390 230l-20 10 20 10 20-10z"/></svg>',
+                        LY:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path d="M0 0h640v480H0z"/><path fill="#239e46" d="M0 0h640v120H0z"/><path fill="#e70013" d="M0 360h640v120H0z"/><path fill="#fff" d="M296 200l24 74 62-45H258l62 45z"/></svg>',
+                        GB:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#012169" d="M0 0h640v480H0z"/><path fill="#FFF" d="M75 0l244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0h75z"/><path fill="#C8102E" d="M424 281l216 159v40L369 281h55zm-184 20l6 35L54 480H0l240-179zM640 0v3L391 191l2-44L590 0h50zM0 0l239 176h-60L0 42V0z"/><path fill="#FFF" d="M241 0v480h160V0H241zM0 160v160h640V160H0z"/><path fill="#C8102E" d="M0 193v96h640v-96H0zM273 0v480h96V0h-96z"/></svg>',
+                        DE:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path d="M0 320h640v160H0z"/><path fill="#D00" d="M0 160h640v160H0z"/><path fill="#FFCE00" d="M0 0h640v160H0z"/></svg>',
+                        FR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#ED2939" d="M426 0h214v480H426z"/><path fill="#fff" d="M213 0h213v480H213z"/><path fill="#002395" d="M0 0h213v480H0z"/></svg>',
+                        IT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#CE2B37" d="M426 0h214v480H426z"/><path fill="#fff" d="M213 0h213v480H213z"/><path fill="#009246" d="M0 0h213v480H0z"/></svg>',
+                        ES:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#c60b1e" d="M0 0h640v480H0z"/><path fill="#ffc400" d="M0 120h640v240H0z"/></svg>',
+                        NL:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#21468B" d="M0 320h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#AE1C28" d="M0 0h640v160H0z"/></svg>',
+                        BE:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#FAE042" d="M213 0h214v480H213z"/><path fill="#F31830" d="M427 0h213v480H427z"/><path d="M0 0h213v480H0z"/></svg>',
+                        SE:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#006AA7" d="M0 0h640v480H0z"/><path fill="#FECC02" d="M0 192h640v96H0z"/><path fill="#FECC02" d="M176 0h96v480h-96z"/></svg>',
+                        NO:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#ef2b2d" d="M0 0h640v480H0z"/><path fill="#fff" d="M180 0h120v480H180z"/><path fill="#fff" d="M0 180h640v120H0z"/><path fill="#002868" d="M210 0h60v480h-60z"/><path fill="#002868" d="M0 210h640v60H0z"/></svg>',
+                        DK:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#c60c30" d="M0 0h640v480H0z"/><path fill="#fff" d="M205 0h90v480h-90z"/><path fill="#fff" d="M0 195h640v90H0z"/></svg>',
+                        CH:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#D52B1E" d="M0 0h640v480H0z"/><path fill="#fff" d="M170 190h100v-100h100v100h100v100H370v100H270V290H170z"/></svg>',
+                        AT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#ED2939" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#ED2939" d="M0 320h640v160H0z"/></svg>',
+                        PL:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M0 0h640v240H0z"/><path fill="#DC143C" d="M0 240h640v240H0z"/></svg>',
+                        PT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#006600" d="M0 0h250v480H0z"/><path fill="#FF0000" d="M250 0h390v480H250z"/><circle cx="250" cy="240" r="90" fill="#FFD700" stroke="#000" stroke-width="3"/></svg>',
+                        GR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#0D5EAF" d="M0 0h640v480H0z"/><path fill="#fff" d="M0 53h640v53H0zm0 107h640v53H0zm0 107h640v53H0zm0 107h640v53H0z"/><path fill="#0D5EAF" d="M0 0h213v213H0z"/><path fill="#fff" d="M85 0h43v213H85zM0 85h213v43H0z"/></svg>',
+                        CZ:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#D7141A" d="M0 240h640v240H0z"/><path fill="#fff" d="M0 0h640v240H0z"/><path fill="#11457E" d="M0 0l320 240L0 480z"/></svg>',
+                        HU:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#CE2939" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#477050" d="M0 320h640v160H0z"/></svg>',
+                        TR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#E30A17" d="M0 0h640v480H0z"/><circle fill="#fff" cx="222" cy="240" r="120"/><circle fill="#E30A17" cx="258" cy="240" r="96"/><path fill="#fff" d="M374 178l-14 56 52-38H346l52 38z"/></svg>',
+                        RU:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M0 0h640v160H0z"/><path fill="#0039A6" d="M0 160h640v160H0z"/><path fill="#D52B1E" d="M0 320h640v160H0z"/></svg>',
+                        US:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#BD3D44" d="M0 0h640v37H0zm0 73h640v37H0zm0 74h640v36H0zm0 73h640v37H0zm0 74h640v36H0zm0 74h640v36H0zm0 73h640v37H0z"/><path fill="#fff" d="M0 37h640v36H0zm0 73h640v37H0zm0 73h640v37H0zm0 74h640v36H0zm0 73h640v37H0zm0 74h640v36H0z"/><path fill="#192F5D" d="M0 0h364v258H0z"/></svg>',
+                        CA:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M150 0h340v480H150z"/><path fill="#FF0000" d="M0 0h150v480H0zm490 0h150v480H490z"/><path fill="#FF0000" d="M315 100l-16 50H250l44 32-17 50 38-28 38 28-17-50 44-32h-49z"/></svg>',
+                        MX:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#006847" d="M0 0h213v480H0z"/><path fill="#fff" d="M213 0h214v480H213z"/><path fill="#CE1126" d="M427 0h213v480H427z"/><circle cx="320" cy="240" r="55" fill="none" stroke="#8B4513" stroke-width="8"/></svg>',
+                        CN:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#DE2910" d="M0 0h640v480H0z"/><path fill="#FFDE00" d="M120 60l18 56 47-34H129l47 34zm105-38l6 18h19l-15 11 6 18-16-12-16 12 6-18-15-11h19zm47 55l6 18h19l-15 11 6 18-16-12-16 12 6-18-15-11h19zm0 80l6 18h19l-15 11 6 18-16-12-16 12 6-18-15-11h19zm-47 55l6 18h19l-15 11 6 18-16-12-16 12 6-18-15-11h19z"/></svg>',
+                        JP:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M0 0h640v480H0z"/><circle fill="#BC002D" cx="320" cy="240" r="140"/></svg>',
+                        KR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#fff" d="M0 0h640v480H0z"/><circle cx="320" cy="240" r="120" fill="#CD2E3A"/><path fill="#0047A0" d="M320 120a120 120 0 0 1 0 120 60 60 0 0 0 0-120z"/></svg>',
+                        IN:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#f93" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#128807" d="M0 320h640v160H0z"/><circle cx="320" cy="240" r="55" fill="none" stroke="#000088" stroke-width="10"/><circle cx="320" cy="240" r="8" fill="#000088"/></svg>',
+                        PK:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#01411C" d="M160 0h480v480H160z"/><path fill="#fff" d="M0 0h160v480H0z"/><circle fill="none" stroke="#fff" stroke-width="22" cx="355" cy="240" r="100"/><circle fill="#01411C" cx="385" cy="240" r="90"/><path fill="#fff" d="M400 180l-12 38 40-29H372l40 29z"/></svg>',
+                        MY:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#CC0001" d="M0 0h640v480H0z"/><path fill="#fff" d="M0 35h640v34H0zm0 69h640v34H0zm0 69h640v34H0zm0 69h640v34H0zm0 69h640v34H0zm0 69h640v34H0zm0 70h640v34H0z"/><path fill="#006" d="M0 0h320v270H0z"/><circle fill="#FC0" cx="145" cy="130" r="80"/><circle fill="#006" cx="165" cy="130" r="64"/><path fill="#FC0" d="M215 85l-11 34 36-26H191l36 26zm21 51l-3 10h11l-9 6 3 10-9-7-9 7 3-10-9-6h11z"/></svg>',
+                        ID:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#CE1126" d="M0 0h640v240H0z"/><path fill="#fff" d="M0 240h640v240H0z"/></svg>',
+                        SG:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#EF3340" d="M0 0h640v240H0z"/><path fill="#fff" d="M0 240h640v240H0z"/><circle fill="#fff" cx="145" cy="120" r="80"/><circle fill="#EF3340" cx="175" cy="120" r="64"/><path fill="#fff" d="M200 75l-8 26 28-20H180l28 20z M195 107l-3 8h9l-7 5 3 8-7-5-7 5 3-8-7-5h9zm-50-32l-3 8h9l-7 5 3 8-7-5-7 5 3-8-7-5h9zm25-25l-3 8h9l-7 5 3 8-7-5-7 5 3-8-7-5h9zm50 25l-3 8h9l-7 5 3 8-7-5-7 5 3-8-7-5h9zm-25 50l-3 8h9l-7 5 3 8-7-5-7 5 3-8-7-5h9z"/></svg>',
+                        TH:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#A51931" d="M0 0h640v480H0z"/><path fill="#F4F5F8" d="M0 80h640v320H0z"/><path fill="#2D2A4A" d="M0 160h640v160H0z"/></svg>',
+                        PH:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#0038A8" d="M0 0h640v240H0z"/><path fill="#CE1126" d="M0 240h640v240H0z"/><path fill="#fff" d="M0 0l360 240L0 480z"/><circle fill="#FCD116" cx="115" cy="240" r="38"/></svg>',
+                        VN:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#DA251D" d="M0 0h640v480H0z"/><path fill="#FF0" d="M320 110l29 90H460l-90 66 34 104-113-82-113 82 34-104-90-66h111z"/></svg>',
+                        AU:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#00008B" d="M0 0h640v480H0z"/><path fill="#fff" d="M0 0h320v240H0z"/><path fill="#CC0001" d="M140 0h40v240h-40zM0 100h320v40H0z"/><path fill="#00008B" d="M0 0h130v110H0zm190 0h130v110H190zM0 130h130v110H0zm190 0h130v110H190z"/><path fill="#fff" d="M60 0l65 49-25 76-65-47-65 47 25-76L60 0zm0 15l-44 32 17 52 44-32 44 32 17-52zm245 165l15 46-39-28-39 28 15-46-39-28h48l15-46 15 46h48zm0 60l8 24-21-15-21 15 8-24-21-15h26l8-24 8 24h26zm45-155l8 24-21-15-21 15 8-24-21-15h26l8-24 8 24h26zm45 80l8 24-21-15-21 15 8-24-21-15h26l8-24 8 24h26zm-90 80l8 24-21-15-21 15 8-24-21-15h26l8-24 8 24h26z"/></svg>',
+                        NZ:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#00247D" d="M0 0h640v480H0z"/><path fill="#fff" d="M0 0h320v240H0z"/><path fill="#CC0001" d="M140 0h40v240h-40zM0 100h320v40H0z"/><path fill="#00247D" d="M0 0h130v110H0zm190 0h130v110H190zM0 130h130v110H0zm190 0h130v110H190z"/><path fill="#fff" d="M60 0l65 49-25 76-65-47-65 47 25-76z"/></svg>',
+                        ZA:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#007A4D" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#DE3831" d="M0 320h640v160H0z"/><path d="M0 0l320 240L0 480z"/><path fill="#FFB612" d="M0 0l240 240L0 480z" stroke="#fff" stroke-width="30"/><path fill="#002395" d="M0 0l220 240L0 480z"/></svg>',
+                        NG:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#008751" d="M0 0h213v480H0zm427 0h213v480H427z"/><path fill="#fff" d="M213 0h214v480H213z"/></svg>',
+                        KE:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#006600" d="M0 320h640v160H0z"/><path fill="#BB0000" d="M0 80h640v320H0z"/><path d="M0 0h640v80H0z"/><path fill="#fff" d="M0 188h640v104H0z"/><path d="M220 240l200-120v240z" fill="#BB0000" stroke="#fff" stroke-width="12"/></svg>',
+                        GH:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#006B3F" d="M0 320h640v160H0z"/><path fill="#FCD116" d="M0 160h640v160H0z"/><path fill="#CE1126" d="M0 0h640v160H0z"/><path d="M320 160l24 74H260l53-38-53-38h84z"/></svg>',
+                        BR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#009c3b" d="M0 0h640v480H0z"/><path fill="#FEDF00" d="M320 70l284 170-284 170L36 240z"/><circle fill="#002776" cx="320" cy="240" r="103"/><path fill="#fff" d="M220 270a120 120 0 0 1 200-40"/></svg>',
+                        AR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#74ACDF" d="M0 0h640v160H0zm0 320h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><circle fill="#F6B40E" cx="320" cy="240" r="50" stroke="#85340A" stroke-width="6"/></svg>',
+                        CL:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#D52B1E" d="M0 240h640v240H0z"/><path fill="#fff" d="M0 0h640v240H0z"/><path fill="#002D62" d="M0 0h240v240H0z"/><path fill="#fff" d="M120 50l24 74H56l53-38-53-38h84z"/></svg>',
+                        CO:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="22" height="16"><path fill="#FCD116" d="M0 0h640v240H0z"/><path fill="#003087" d="M0 240h640v120H0z"/><path fill="#CE1126" d="M0 360h640v120H0z"/></svg>',
+                    };
+
+                    const countryGroups = [
+                        {
+                            label: isAr ? 'دول الخليج العربي' : 'Gulf Countries',
+                            countries: [
+                                {code:'AE', name: isAr?'الإمارات العربية المتحدة':'United Arab Emirates'},
+                                {code:'SA', name: isAr?'المملكة العربية السعودية':'Saudi Arabia'},
+                                {code:'KW', name: isAr?'الكويت':'Kuwait'},
+                                {code:'QA', name: isAr?'قطر':'Qatar'},
+                                {code:'BH', name: isAr?'البحرين':'Bahrain'},
+                                {code:'OM', name: isAr?'عُمان':'Oman'},
+                            ]
+                        },
+                        {
+                            label: isAr ? 'الدول العربية' : 'Arab Countries',
+                            countries: [
+                                {code:'EG', name: isAr?'مصر':'Egypt'},
+                                {code:'JO', name: isAr?'الأردن':'Jordan'},
+                                {code:'LB', name: isAr?'لبنان':'Lebanon'},
+                                {code:'IQ', name: isAr?'العراق':'Iraq'},
+                                {code:'SY', name: isAr?'سوريا':'Syria'},
+                                {code:'YE', name: isAr?'اليمن':'Yemen'},
+                                {code:'MA', name: isAr?'المغرب':'Morocco'},
+                                {code:'TN', name: isAr?'تونس':'Tunisia'},
+                                {code:'DZ', name: isAr?'الجزائر':'Algeria'},
+                                {code:'LY', name: isAr?'ليبيا':'Libya'},
+                            ]
+                        },
+                        {
+                            label: isAr ? 'أوروبا' : 'Europe',
+                            countries: [
+                                {code:'GB', name: isAr?'المملكة المتحدة':'United Kingdom'},
+                                {code:'DE', name: isAr?'ألمانيا':'Germany'},
+                                {code:'FR', name: isAr?'فرنسا':'France'},
+                                {code:'IT', name: isAr?'إيطاليا':'Italy'},
+                                {code:'ES', name: isAr?'إسبانيا':'Spain'},
+                                {code:'NL', name: isAr?'هولندا':'Netherlands'},
+                                {code:'BE', name: isAr?'بلجيكا':'Belgium'},
+                                {code:'SE', name: isAr?'السويد':'Sweden'},
+                                {code:'NO', name: isAr?'النرويج':'Norway'},
+                                {code:'DK', name: isAr?'الدنمارك':'Denmark'},
+                                {code:'CH', name: isAr?'سويسرا':'Switzerland'},
+                                {code:'AT', name: isAr?'النمسا':'Austria'},
+                                {code:'PL', name: isAr?'بولندا':'Poland'},
+                                {code:'PT', name: isAr?'البرتغال':'Portugal'},
+                                {code:'GR', name: isAr?'اليونان':'Greece'},
+                                {code:'CZ', name: isAr?'التشيك':'Czech Republic'},
+                                {code:'HU', name: isAr?'المجر':'Hungary'},
+                                {code:'TR', name: isAr?'تركيا':'Turkey'},
+                                {code:'RU', name: isAr?'روسيا':'Russia'},
+                            ]
+                        },
+                        {
+                            label: isAr ? 'أمريكا الشمالية' : 'North America',
+                            countries: [
+                                {code:'US', name: isAr?'الولايات المتحدة':'United States'},
+                                {code:'CA', name: isAr?'كندا':'Canada'},
+                                {code:'MX', name: isAr?'المكسيك':'Mexico'},
+                            ]
+                        },
+                        {
+                            label: isAr ? 'آسيا والمحيط الهادئ' : 'Asia & Pacific',
+                            countries: [
+                                {code:'CN', name: isAr?'الصين':'China'},
+                                {code:'JP', name: isAr?'اليابان':'Japan'},
+                                {code:'KR', name: isAr?'كوريا الجنوبية':'South Korea'},
+                                {code:'IN', name: isAr?'الهند':'India'},
+                                {code:'PK', name: isAr?'باكستان':'Pakistan'},
+                                {code:'MY', name: isAr?'ماليزيا':'Malaysia'},
+                                {code:'ID', name: isAr?'إندونيسيا':'Indonesia'},
+                                {code:'SG', name: isAr?'سنغافورة':'Singapore'},
+                                {code:'TH', name: isAr?'تايلاند':'Thailand'},
+                                {code:'PH', name: isAr?'الفلبين':'Philippines'},
+                                {code:'VN', name: isAr?'فيتنام':'Vietnam'},
+                                {code:'AU', name: isAr?'أستراليا':'Australia'},
+                                {code:'NZ', name: isAr?'نيوزيلندا':'New Zealand'},
+                            ]
+                        },
+                        {
+                            label: isAr ? 'أفريقيا' : 'Africa',
+                            countries: [
+                                {code:'ZA', name: isAr?'جنوب أفريقيا':'South Africa'},
+                                {code:'NG', name: isAr?'نيجيريا':'Nigeria'},
+                                {code:'KE', name: isAr?'كينيا':'Kenya'},
+                                {code:'GH', name: isAr?'غانا':'Ghana'},
+                            ]
+                        },
+                        {
+                            label: isAr ? 'أمريكا اللاتينية' : 'Latin America',
+                            countries: [
+                                {code:'BR', name: isAr?'البرازيل':'Brazil'},
+                                {code:'AR', name: isAr?'الأرجنتين':'Argentina'},
+                                {code:'CL', name: isAr?'تشيلي':'Chile'},
+                                {code:'CO', name: isAr?'كولومبيا':'Colombia'},
+                            ]
+                        },
+                    ];
+
+                    function buildFlagOptions(filter) {
+                        const container = document.getElementById('flagSelectOptions');
+                        container.innerHTML = '';
+                        const q = (filter || '').toLowerCase();
+                        countryGroups.forEach(group => {
+                            const matches = group.countries.filter(c => !q || c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q));
+                            if (!matches.length) return;
+                            const lbl = document.createElement('div');
+                            lbl.className = 'flag-option-group';
+                            lbl.textContent = group.label;
+                            container.appendChild(lbl);
+                            matches.forEach(c => {
+                                const el = document.createElement('div');
+                                el.className = 'flag-option';
+                                if (document.getElementById('shipping-country').value === c.code) el.classList.add('active');
+                                el.innerHTML = (flagSvgs[c.code] || '') + '<span>' + c.name + '</span>';
+                                el.onclick = () => selectFlagCountry(c.code, c.name);
+                                container.appendChild(el);
+                            });
+                        });
+                    }
+
+                    function selectFlagCountry(code, name) {
+                        document.getElementById('shipping-country').value = code;
+                        document.getElementById('flagSelectDisplay').innerHTML = (flagSvgs[code] || '') + '<span>' + name + '</span>';
+                        document.getElementById('flagSelectDropdown').style.display = 'none';
+                        buildFlagOptions('');
+                    }
+
+                    function toggleFlagDropdown() {
+                        const dd = document.getElementById('flagSelectDropdown');
+                        const isOpen = dd.style.display !== 'none';
+                        dd.style.display = isOpen ? 'none' : 'block';
+                        if (!isOpen) {
+                            buildFlagOptions('');
+                            document.getElementById('flagSelectSearch').value = '';
+                            document.getElementById('flagSelectSearch').focus();
+                        }
+                    }
+
+                    function filterFlagOptions(val) { buildFlagOptions(val); }
+
+                    // Close on outside click
+                    document.addEventListener('click', function(e) {
+                        if (!document.getElementById('flagSelectWrapper').contains(e.target)) {
+                            document.getElementById('flagSelectDropdown').style.display = 'none';
+                        }
+                    });
+
+                    // Init with AE selected
+                    document.addEventListener('DOMContentLoaded', function() {
+                        selectFlagCountry('AE', isAr ? 'الإمارات العربية المتحدة' : 'United Arab Emirates');
+                    });
+                    </script>
 
                     <div class="mb-3">
                         <label class="form-label">{{ __('messages.city') }}</label>
