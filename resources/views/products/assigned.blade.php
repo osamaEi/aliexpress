@@ -1,9 +1,9 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <div class="card mb-6">
-        <div class="card-header d-flex justify-content-between align-items-center" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'المنتجات المخصصة لي' : 'My Assigned Products' }}</h5>
                 <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'المنتجات التي قمت بتخصيصها' : 'Products you have assigned' }}</small>
@@ -56,7 +56,7 @@
                     $colWidth = $activeTabs == 1 ? 6 : ($activeTabs == 2 ? 4 : 3);
                 @endphp
                 <!-- Stats Cards - Only show cards for tabs with products -->
-                <div class="row mb-4" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+                <div class="row mb-4">
                     <div class="col-md-{{ $colWidth }}">
                         <div class="card text-white" style="background-color: #561C04;">
                             <div class="card-body">
@@ -104,7 +104,7 @@
                 </div>
 
                 <!-- Tabs Navigation - Only show tabs that have products -->
-                <ul class="nav nav-tabs mb-4" role="tablist" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+                <ul class="nav nav-tabs mb-4" role="tablist">
                     @if(($chinaCount ?? 0) > 0)
                     <li class="nav-item" role="presentation">
                         <a class="nav-link {{ $currentTab === 'china' ? 'active' : '' }}" href="{{ route('products.my-assigned', ['tab' => 'china']) }}">
@@ -142,7 +142,7 @@
 
                 <!-- Products Table -->
                 @if($assignedProducts->count() > 0)
-                    <div class="table-responsive" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+                    <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
@@ -295,7 +295,7 @@
                 @endif
             @else
                 <!-- Empty State -->
-                <div class="text-center py-5" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+                <div class="text-center py-5">
                     <i class="ri-inbox-line" style="font-size: 4rem; color: #ccc;"></i>
                     <h5 class="mt-3">{{ app()->getLocale() == 'ar' ? 'لا توجد منتجات مخصصة بعد' : 'No Assigned Products Yet' }}</h5>
                     <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'ابدأ بالبحث عن المنتجات وتخصيصها لحسابك.' : 'Start by searching products and assigning them to your account.' }}</p>

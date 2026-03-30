@@ -1,7 +1,7 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+<div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
     <!-- Hero Section with Product Images -->
     <div class="card mb-4" style="border-radius: 16px; overflow: hidden;">
         <div class="card-body p-0">
@@ -322,9 +322,25 @@
 
     <!-- Store Information -->
     @if($aliexpressData && isset($aliexpressData['ae_store_info']))
+        @php
+            $storeCountryCode = strtolower($aliexpressData['ae_store_info']['store_country_code'] ?? '');
+            $countryFlagsSvg = [
+                'cn' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#de2910" d="M0 0h640v480H0z"/><path fill="#ffde00" d="M140 60l20 60h63l-51 37 20 60-52-38-52 38 20-60-51-37h63z"/></svg>',
+                'ae' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#00732f" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="red" d="M0 0h220v480H0z"/></svg>',
+                'sa' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#006c35" d="M0 0h640v480H0z"/><path fill="#fff" d="M170 195h300v90H170z"/></svg>',
+                'us' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#bd3d44" d="M0 0h640v480H0z"/><path fill="#fff" d="M0 55h640v37H0zm0 73h640v37H0zm0 73h640v37H0zm0 73h640v37H0zm0 73h640v37H0zm0 73h640v37H0z"/><path fill="#192f5d" d="M0 0h364v258H0z"/></svg>',
+                'gb' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#012169" d="M0 0h640v480H0z"/><path fill="#FFF" d="M75 0l244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0h75z"/><path fill="#C8102E" d="M424 281l216 159v40L369 281h55zm-184 20l6 35L54 480H0l240-179zM640 0v3L391 191l2-44L590 0h50zM0 0l239 176h-60L0 42V0z"/><path fill="#FFF" d="M241 0v480h160V0H241zM0 160v160h640V160H0z"/><path fill="#C8102E" d="M0 193v96h640v-96H0zM273 0v480h96V0h-96z"/></svg>',
+                'de' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path d="M0 320h640v160H0z"/><path fill="#D00" d="M0 160h640v160H0z"/><path fill="#FFCE00" d="M0 0h640v160H0z"/></svg>',
+                'tr' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#E30A17" d="M0 0h640v480H0z"/><path fill="#fff" d="M407 240.5a167 167 0 1 1-334 0 167 167 0 0 1 334 0z"/><path fill="#E30A17" d="M413 240.5a129 129 0 1 1-258 0 129 129 0 0 1 258 0z"/><path fill="#fff" d="M430.7 191.3l-1 43.2-41.3 11.5 40.3 14.3-1 43.2 26.5-33.5 40.3 14.3-22.2-36.8 26.5-33.5-41.3 11.5z"/></svg>',
+                'in' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#f93" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path fill="#128807" d="M0 320h640v160H0z"/><circle cx="320" cy="240" r="55" fill="none" stroke="#000088" stroke-width="10"/></svg>',
+                'jp' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#fff" d="M0 0h640v480H0z"/><circle fill="#bc002d" cx="320" cy="240" r="135"/></svg>',
+                'kr' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:20px;height:15px;vertical-align:middle"><path fill="#fff" d="M0 0h640v480H0z"/><circle cx="320" cy="240" r="110" fill="#c60c30"/></svg>',
+            ];
+            $storeFlag = $countryFlagsSvg[$storeCountryCode] ?? null;
+        @endphp
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="ri-store-2-line me-2"></i> Store Information</h5>
+                <h5 class="mb-0"><i class="ri-store-2-line me-2"></i> {{ __('messages.store_information') }}</h5>
             </div>
             <div class="card-body">
                 <div class="row align-items-center">
@@ -332,7 +348,10 @@
                         <h6 class="mb-1">{{ $aliexpressData['ae_store_info']['store_name'] }}</h6>
                         <small class="text-muted">
                             <i class="ri-map-pin-line me-1"></i>
-                            {{ $aliexpressData['ae_store_info']['store_country_code'] }}
+                            @if($storeFlag)
+                                {!! $storeFlag !!}
+                            @endif
+                            {{ strtoupper($storeCountryCode) }}
                         </small>
                     </div>
                     <div class="col-md-8">
@@ -340,19 +359,19 @@
                             <div class="col-4">
                                 <div class="rating-badge">
                                     <div class="fs-5 fw-bold text-success">{{ $aliexpressData['ae_store_info']['item_as_described_rating'] }}</div>
-                                    <small class="text-muted">Item as Described</small>
+                                    <small class="text-muted">{{ __('messages.item_as_described') }}</small>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="rating-badge">
                                     <div class="fs-5 fw-bold text-info">{{ $aliexpressData['ae_store_info']['communication_rating'] }}</div>
-                                    <small class="text-muted">Communication</small>
+                                    <small class="text-muted">{{ __('messages.communication') }}</small>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="rating-badge">
                                     <div class="fs-5 fw-bold text-warning">{{ $aliexpressData['ae_store_info']['shipping_speed_rating'] }}</div>
-                                    <small class="text-muted">Shipping Speed</small>
+                                    <small class="text-muted">{{ __('messages.shipping_speed') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -366,38 +385,38 @@
     @if($aliexpressData && isset($aliexpressData['package_info_dto']))
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="ri-box-3-line me-2"></i> Package & Shipping</h5>
+                <h5 class="mb-0"><i class="ri-box-3-line me-2"></i> {{ __('messages.package_shipping') }}</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <h6 class="mb-3">Package Dimensions</h6>
+                        <h6 class="mb-3">{{ __('messages.package_dimensions') }}</h6>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Length:</span>
+                            <span>{{ __('messages.length') }}:</span>
                             <strong>{{ $aliexpressData['package_info_dto']['package_length'] ?? 'N/A' }} cm</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Width:</span>
+                            <span>{{ __('messages.width') }}:</span>
                             <strong>{{ $aliexpressData['package_info_dto']['package_width'] ?? 'N/A' }} cm</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Height:</span>
+                            <span>{{ __('messages.height') }}:</span>
                             <strong>{{ $aliexpressData['package_info_dto']['package_height'] ?? 'N/A' }} cm</strong>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span>Weight:</span>
+                            <span>{{ __('messages.weight') }}:</span>
                             <strong>{{ $aliexpressData['package_info_dto']['gross_weight'] ?? 'N/A' }} kg</strong>
                         </div>
                     </div>
                     @if(isset($aliexpressData['logistics_info_dto']))
                         <div class="col-md-6">
-                            <h6 class="mb-3">Shipping Information</h6>
+                            <h6 class="mb-3">{{ __('messages.delivery_information') }}</h6>
                             <div class="d-flex justify-content-between mb-2">
-                                <span>Delivery Time:</span>
-                                <strong>{{ $aliexpressData['logistics_info_dto']['delivery_time'] ?? 'N/A' }} days</strong>
+                                <span>{{ __('messages.delivery_time') }}:</span>
+                                <strong>{{ $aliexpressData['logistics_info_dto']['delivery_time'] ?? 'N/A' }} {{ __('messages.days') }}</strong>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <span>Ships To:</span>
+                                <span>{{ __('messages.ships_to') }}:</span>
                                 <strong>{{ $aliexpressData['logistics_info_dto']['ship_to_country'] ?? 'N/A' }}</strong>
                             </div>
                         </div>
@@ -414,7 +433,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createOrderModalLabel">
-                    <i class="ri-shopping-bag-line me-2"></i> Create Order for {{ $product->name }}
+                    <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }} - {{ app()->getLocale() == 'ar' && $product->name_ar ? $product->name_ar : $product->name }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -425,7 +444,7 @@
                     @if($aliexpressData && isset($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o']))
                         <div class="mb-4">
                             <h6 class="mb-3">
-                                <i class="ri-palette-line me-2"></i> Select Variant
+                                <i class="ri-palette-line me-2"></i> {{ __('messages.select_variant') }}
                             </h6>
                             <div class="row g-3" id="variantsList">
                                 @foreach($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'] as $index => $sku)
@@ -454,7 +473,7 @@
                                                                         ${{ $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 'N/A' }}
                                                                     </div>
                                                                     <span class="badge {{ $sku['sku_available_stock'] > 0 ? 'bg-success' : 'bg-danger' }}">
-                                                                        {{ $sku['sku_available_stock'] > 0 ? 'In Stock' : 'Out of Stock' }}
+                                                                        {{ $sku['sku_available_stock'] > 0 ? __('messages.in_stock') : __('messages.out_of_stock') }}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -474,7 +493,7 @@
                     <!-- Quantity Selection -->
                     <div class="mb-4">
                         <label for="quantity" class="form-label">
-                            <i class="ri-shopping-cart-line me-2"></i> Quantity
+                            <i class="ri-shopping-cart-line me-2"></i> {{ __('messages.quantity') }}
                         </label>
                         <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="999" required>
                     </div>
@@ -482,23 +501,23 @@
                     <!-- Customer Notes -->
                     <div class="mb-3">
                         <label for="customer_notes" class="form-label">
-                            <i class="ri-message-3-line me-2"></i> Additional Notes (Optional)
+                            <i class="ri-message-3-line me-2"></i> {{ __('messages.order_notes_optional') }}
                         </label>
-                        <textarea class="form-control" id="customer_notes" name="customer_notes" rows="3" placeholder="Any special instructions or preferences..."></textarea>
+                        <textarea class="form-control" id="customer_notes" name="customer_notes" rows="3" placeholder="{{ __('messages.any_special_instructions') }}"></textarea>
                     </div>
 
                     <!-- Selected Variant Details Display -->
                     <div id="selectedVariantDetails" class="alert alert-info d-none">
-                        <h6 class="alert-heading mb-2">Selected Variant:</h6>
+                        <h6 class="alert-heading mb-2">{{ __('messages.select_variant') }}:</h6>
                         <div id="selectedVariantContent"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="ri-close-line me-1"></i> Cancel
+                        <i class="ri-close-line me-1"></i> {{ __('messages.back') }}
                     </button>
                     <button type="submit" class="btn btn-success" id="proceedToOrderBtn">
-                        <i class="ri-arrow-right-line me-1"></i> Proceed to Order Details
+                        <i class="ri-arrow-right-line me-1"></i> {{ __('messages.create_order') }}
                     </button>
                 </div>
             </form>

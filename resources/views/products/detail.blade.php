@@ -266,7 +266,7 @@
                                                     <div class="text-primary fw-bold fs-5">{!! $currentCurrency->format($convertedPrice) !!}</div>
                                                 </div>
                                                 <span class="badge {{ $sku['sku_available_stock'] > 0 ? 'bg-success' : 'bg-danger' }} px-3 py-2">
-                                                    {{ $sku['sku_available_stock'] > 0 ? $sku['sku_available_stock'] . ' in stock' : 'Out of Stock' }}
+                                                    {{ $sku['sku_available_stock'] > 0 ? $sku['sku_available_stock'] . ' ' . __('messages.in_stock') : __('messages.out_of_stock') }}
                                                 </span>
                                             </div>
                                         </div>
@@ -314,19 +314,19 @@
                                 <div class="table-responsive">
                                     <table class="table">
                                         <tr>
-                                            <th>Length:</th>
+                                            <th>{{ __('messages.length') }}:</th>
                                             <td>{{ $aliexpressData['package_info_dto']['package_length'] ?? 'N/A' }} cm</td>
                                         </tr>
                                         <tr>
-                                            <th>Width:</th>
+                                            <th>{{ __('messages.width') }}:</th>
                                             <td>{{ $aliexpressData['package_info_dto']['package_width'] ?? 'N/A' }} cm</td>
                                         </tr>
                                         <tr>
-                                            <th>Height:</th>
+                                            <th>{{ __('messages.height') }}:</th>
                                             <td>{{ $aliexpressData['package_info_dto']['package_height'] ?? 'N/A' }} cm</td>
                                         </tr>
                                         <tr>
-                                            <th>Weight:</th>
+                                            <th>{{ __('messages.weight') }}:</th>
                                             <td>{{ $aliexpressData['package_info_dto']['gross_weight'] ?? 'N/A' }} kg</td>
                                         </tr>
                                     </table>
@@ -338,11 +338,11 @@
                                     <div class="table-responsive">
                                         <table class="table">
                                             <tr>
-                                                <th>Delivery Time:</th>
-                                                <td>{{ $aliexpressData['logistics_info_dto']['delivery_time'] ?? 'N/A' }} days</td>
+                                                <th>{{ __('messages.delivery_time') }}:</th>
+                                                <td>{{ $aliexpressData['logistics_info_dto']['delivery_time'] ?? 'N/A' }} {{ __('messages.days') }}</td>
                                             </tr>
                                             <tr>
-                                                <th>Ships To:</th>
+                                                <th>{{ __('messages.ships_to') }}:</th>
                                                 <td>{{ $aliexpressData['logistics_info_dto']['ship_to_country'] ?? 'N/A' }}</td>
                                             </tr>
                                         </table>
@@ -422,7 +422,7 @@
                                                                     {!! $currentCurrency->format($convertedPrice) !!}
                                                                 </div>
                                                                 <span class="badge {{ $sku['sku_available_stock'] > 0 ? 'bg-success' : 'bg-danger' }}">
-                                                                    {{ $sku['sku_available_stock'] > 0 ? 'In Stock' : 'Out' }}
+                                                                    {{ $sku['sku_available_stock'] > 0 ? __('messages.in_stock') : __('messages.out_of_stock') }}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -453,10 +453,79 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('messages.country') }}</label>
                         <select class="form-select form-select-lg" id="shipping-country">
-                            <option value="AE">{{ __('messages.united_arab_emirates') }}</option>
-                            <option value="SA">{{ __('messages.saudi_arabia') }}</option>
-                            <option value="US">United States</option>
-                            <option value="GB">United Kingdom</option>
+                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'دول الخليج العربي' : 'Gulf Countries' }}">
+                                <option value="AE">{{ __('messages.united_arab_emirates') }}</option>
+                                <option value="SA">{{ __('messages.saudi_arabia') }}</option>
+                                <option value="KW">{{ __('messages.kuwait') }}</option>
+                                <option value="QA">{{ __('messages.qatar') }}</option>
+                                <option value="BH">{{ __('messages.bahrain') }}</option>
+                                <option value="OM">{{ __('messages.oman') }}</option>
+                            </optgroup>
+                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'الدول العربية' : 'Arab Countries' }}">
+                                <option value="EG">{{ __('messages.egypt') }}</option>
+                                <option value="JO">{{ __('messages.jordan') }}</option>
+                                <option value="LB">{{ __('messages.lebanon') }}</option>
+                                <option value="IQ">{{ __('messages.iraq') }}</option>
+                                <option value="SY">{{ __('messages.syria') }}</option>
+                                <option value="YE">{{ __('messages.yemen') }}</option>
+                                <option value="MA">{{ __('messages.morocco') }}</option>
+                                <option value="TN">{{ __('messages.tunisia') }}</option>
+                                <option value="DZ">{{ __('messages.algeria') }}</option>
+                                <option value="LY">{{ __('messages.libya') }}</option>
+                            </optgroup>
+                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'أوروبا' : 'Europe' }}">
+                                <option value="GB">{{ __('messages.united_kingdom') }}</option>
+                                <option value="DE">{{ __('messages.germany') }}</option>
+                                <option value="FR">{{ __('messages.france') }}</option>
+                                <option value="IT">{{ __('messages.italy') }}</option>
+                                <option value="ES">{{ __('messages.spain') }}</option>
+                                <option value="NL">{{ __('messages.netherlands') }}</option>
+                                <option value="BE">{{ __('messages.belgium') }}</option>
+                                <option value="SE">{{ __('messages.sweden') }}</option>
+                                <option value="NO">{{ __('messages.norway') }}</option>
+                                <option value="DK">{{ __('messages.denmark') }}</option>
+                                <option value="CH">{{ __('messages.switzerland') }}</option>
+                                <option value="AT">{{ __('messages.austria') }}</option>
+                                <option value="PL">{{ __('messages.poland') }}</option>
+                                <option value="PT">{{ __('messages.portugal') }}</option>
+                                <option value="GR">{{ __('messages.greece') }}</option>
+                                <option value="CZ">{{ __('messages.czech_republic') }}</option>
+                                <option value="HU">{{ __('messages.hungary') }}</option>
+                                <option value="TR">{{ __('messages.turkey') }}</option>
+                                <option value="RU">{{ __('messages.russia') }}</option>
+                            </optgroup>
+                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'أمريكا الشمالية' : 'North America' }}">
+                                <option value="US">{{ __('messages.united_states') }}</option>
+                                <option value="CA">{{ __('messages.canada') }}</option>
+                                <option value="MX">{{ __('messages.mexico') }}</option>
+                            </optgroup>
+                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'آسيا والمحيط الهادئ' : 'Asia & Pacific' }}">
+                                <option value="CN">{{ __('messages.china') }}</option>
+                                <option value="JP">{{ __('messages.japan') }}</option>
+                                <option value="KR">{{ __('messages.south_korea') }}</option>
+                                <option value="IN">{{ __('messages.india') }}</option>
+                                <option value="PK">{{ __('messages.pakistan') }}</option>
+                                <option value="MY">{{ __('messages.malaysia') }}</option>
+                                <option value="ID">{{ __('messages.indonesia') }}</option>
+                                <option value="SG">{{ __('messages.singapore') }}</option>
+                                <option value="TH">{{ __('messages.thailand') }}</option>
+                                <option value="PH">{{ __('messages.philippines') }}</option>
+                                <option value="VN">{{ __('messages.vietnam') }}</option>
+                                <option value="AU">{{ __('messages.australia') }}</option>
+                                <option value="NZ">{{ __('messages.new_zealand') }}</option>
+                            </optgroup>
+                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'أفريقيا' : 'Africa' }}">
+                                <option value="ZA">{{ __('messages.south_africa') }}</option>
+                                <option value="NG">{{ __('messages.nigeria') }}</option>
+                                <option value="KE">{{ __('messages.kenya') }}</option>
+                                <option value="GH">{{ __('messages.ghana') }}</option>
+                            </optgroup>
+                            <optgroup label="{{ app()->getLocale() == 'ar' ? 'أمريكا اللاتينية' : 'Latin America' }}">
+                                <option value="BR">{{ __('messages.brazil') }}</option>
+                                <option value="AR">{{ __('messages.argentina') }}</option>
+                                <option value="CL">{{ __('messages.chile') }}</option>
+                                <option value="CO">{{ __('messages.colombia') }}</option>
+                            </optgroup>
                         </select>
                     </div>
 
@@ -618,7 +687,7 @@
                     <div id="order-creation-result" style="display: none;">
                         <div id="order-creation-loading" class="text-center py-5" style="display: none;">
                             <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;"></div>
-                            <p class="text-muted">Creating your order...</p>
+                            <p class="text-muted">{{ __('messages.creating_order') }}</p>
                         </div>
 
                         <div id="order-creation-success" style="display: none;" class="alert alert-success">

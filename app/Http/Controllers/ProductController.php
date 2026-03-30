@@ -1208,13 +1208,51 @@ class ProductController extends Controller
                     ->toArray();
             }
 
-            // Only fetch Arabic titles if app locale is Arabic AND initial search was in English
-            // If initial search used ar_MA locale, products already have Arabic titles - skip second call
-            $appLocaleIsar = app()->getLocale() === 'ar';
+            // Always populate both title_en (English) and title_ar (Arabic) for every product
+            // regardless of app locale, so assign always saves correct bilingual data to the DB.
             $initialLocaleWasArabic = isset($apiOptions['locale']) && $apiOptions['locale'] === 'ar_MA';
-            if (!empty($result['products']) && $appLocaleIsar && !$initialLocaleWasArabic) {
+            $searchKeyword = $keyword ?? $categoryKeyword ?? 'product';
+
+            if (!empty($result['products'])) {
                 try {
-                        // Current results are in English, fetch Arabic versions
+                    if ($initialLocaleWasArabic) {
+                        // Primary results have Arabic titles → get English via a second cached API call
+                        foreach ($result['products'] as &$product) {
+                            $product['title_ar'] = $product['title'];
+                        }
+                        unset($product);
+
+                        $englishApiOptions = $apiOptions;
+                        $englishApiOptions['locale'] = 'en_US';
+                        $englishCacheKey = 'aliexpress_search_en_' . md5(json_encode([
+                            'keyword' => $searchKeyword,
+                            'options' => $englishApiOptions
+                        ]));
+
+                        $englishResult = \Cache::remember($englishCacheKey, 1800, function() use ($searchKeyword, $englishApiOptions) {
+                            return $this->aliexpressTextService->searchProductsByText($searchKeyword, $englishApiOptions);
+                        });
+
+                        $englishTitles = [];
+                        foreach ($englishResult['products'] ?? [] as $enProd) {
+                            $englishTitles[$enProd['item_id']] = $enProd['title'] ?? null;
+                        }
+
+                        foreach ($result['products'] as &$product) {
+                            $enTitle = $englishTitles[$product['item_id']] ?? null;
+                            $product['title_en'] = ($enTitle && $enTitle !== $product['title_ar'])
+                                ? $enTitle
+                                : $product['title_ar']; // fallback to Arabic if English unavailable
+                        }
+                        unset($product);
+
+                    } else {
+                        // Primary results have English titles → get Arabic via a second cached API call
+                        foreach ($result['products'] as &$product) {
+                            $product['title_en'] = $product['title'];
+                        }
+                        unset($product);
+
                         $arabicApiOptions = [
                             'locale' => 'ar_MA',
                             'page' => 1,
@@ -1222,8 +1260,6 @@ class ProductController extends Controller
                             'country' => $request->get('country', 'AE'),
                             'currency' => $request->get('currency', 'AED'),
                         ];
-
-                        // Add all filters to ensure we get the same products
                         if (!empty($aliexpressCategoryId)) {
                             $arabicApiOptions['category_id'] = $aliexpressCategoryId;
                         }
@@ -1234,68 +1270,49 @@ class ProductController extends Controller
                             $arabicApiOptions['ship_from'] = $request->get('ship_from');
                         }
 
-                        // Determine search keyword
-                        $searchKeyword = $keyword ?? $categoryKeyword ?? 'product';
-
-                        // Cache Arabic search results
                         $arabicCacheKey = 'aliexpress_search_ar_' . md5(json_encode([
                             'keyword' => $searchKeyword,
                             'options' => $arabicApiOptions
                         ]));
 
                         $arabicResult = \Cache::remember($arabicCacheKey, 1800, function() use ($searchKeyword, $arabicApiOptions) {
-                            return $this->aliexpressTextService->searchProductsByText(
-                                $searchKeyword,
-                                $arabicApiOptions
-                            );
+                            return $this->aliexpressTextService->searchProductsByText($searchKeyword, $arabicApiOptions);
                         });
 
-                        // Create a map of product IDs to Arabic titles
                         $arabicTitles = [];
-                        if (!empty($arabicResult['products'])) {
-                            foreach ($arabicResult['products'] as $arabicProduct) {
-                                $arabicTitles[$arabicProduct['item_id']] = $arabicProduct['title'] ?? null;
-                            }
+                        foreach ($arabicResult['products'] ?? [] as $arProd) {
+                            $arabicTitles[$arProd['item_id']] = $arProd['title'] ?? null;
                         }
 
-                        // Add Arabic titles to original products (English is already there)
                         foreach ($result['products'] as &$product) {
-                            $product['title_en'] = $product['title']; // Original English title
-                            $arabicFromApi = $arabicTitles[$product['item_id']] ?? null;
-
-                            // Check if Arabic title is actually different from English
-                            if ($arabicFromApi && $arabicFromApi !== $product['title']) {
-                                $product['title_ar'] = $arabicFromApi;
+                            $arTitle = $arabicTitles[$product['item_id']] ?? null;
+                            if ($arTitle && $arTitle !== $product['title_en']) {
+                                $product['title_ar'] = $arTitle;
                             } else {
-                                // Use Google Translate
-                                // Cache translation for 7 days
-                                $translationKey = 'translation_' . md5($product['title']);
+                                // Fallback: translate via Google Translate (cached 7 days)
+                                $translationKey = 'translation_' . md5($product['title_en']);
                                 $product['title_ar'] = \Cache::remember($translationKey, 604800, function() use ($product) {
-                                    return $this->translationService->translate($product['title'], 'ar', 'en');
+                                    return $this->translationService->translate($product['title_en'], 'ar', 'en');
                                 });
                             }
                         }
                         unset($product);
+                    }
 
-                    Log::info('Arabic titles fetched', [
-                        'arabic_titles_found' => count($arabicTitles),
+                    Log::info('Bilingual titles populated', [
+                        'initial_locale' => $initialLocaleWasArabic ? 'ar_MA' : 'en_US',
                         'total_products' => count($result['products'])
                     ]);
+
                 } catch (\Exception $e) {
-                    Log::warning('Failed to fetch bilingual titles', [
-                        'error' => $e->getMessage()
-                    ]);
-                    // Fallback: use Google Translate
+                    Log::warning('Failed to fetch bilingual titles', ['error' => $e->getMessage()]);
+                    // Fallback: ensure at least both fields exist (same value)
                     foreach ($result['products'] as &$product) {
                         if (!isset($product['title_en'])) {
                             $product['title_en'] = $product['title'];
                         }
                         if (!isset($product['title_ar'])) {
-                            // Cache translation for 7 days
-                            $translationKey = 'translation_' . md5($product['title']);
-                            $product['title_ar'] = \Cache::remember($translationKey, 604800, function() use ($product) {
-                                return $this->translationService->translate($product['title'], 'ar', 'en');
-                            });
+                            $product['title_ar'] = $product['title'];
                         }
                     }
                     unset($product);
@@ -1532,18 +1549,31 @@ class ProductController extends Controller
             }
         }
 
-        // Get Arabic title from request or fallback to English
+        // English title: use product_title (always English from search button onclick)
+        $englishTitle = $request->product_title;
+
+        // Arabic title: use product_title_ar; if same as English or empty, translate
         $arabicTitle = $request->product_title_ar;
+        if (empty($arabicTitle) || $arabicTitle === $englishTitle) {
+            $translationKey = 'translation_' . md5($englishTitle);
+            try {
+                $arabicTitle = \Cache::remember($translationKey, 604800, function() use ($englishTitle) {
+                    return $this->translationService->translate($englishTitle, 'ar', 'en');
+                });
+            } catch (\Exception $e) {
+                $arabicTitle = $englishTitle; // fallback
+            }
+        }
 
         if (!$product) {
             // Create the product in products table (with base price only, no seller-specific profit)
             $product = Product::create([
-                'name' => $request->product_title,
+                'name' => $englishTitle,
                 'name_ar' => $arabicTitle,
-                'slug' => \Str::slug($request->product_title) . '-' . $aliexpressProductId,
-                'description' => $request->product_title,
+                'slug' => \Str::slug($englishTitle) . '-' . $aliexpressProductId,
+                'description' => $englishTitle,
                 'description_ar' => $arabicTitle,
-                'short_description' => $request->product_title,
+                'short_description' => $englishTitle,
                 'short_description_ar' => $arabicTitle,
                 'price' => $basePrice, // Store base price only
                 'currency' => $request->currency ?? 'AED',
@@ -1678,16 +1708,30 @@ class ProductController extends Controller
                     }
                 }
 
+                // Ensure Arabic title is distinct from English (translate if needed)
+                $bulkEnTitle = $productData['product_title'];
+                $bulkArTitle = $productData['product_title_ar'] ?? null;
+                if (empty($bulkArTitle) || $bulkArTitle === $bulkEnTitle) {
+                    $translationKey = 'translation_' . md5($bulkEnTitle);
+                    try {
+                        $bulkArTitle = \Cache::remember($translationKey, 604800, function() use ($bulkEnTitle) {
+                            return $this->translationService->translate($bulkEnTitle, 'ar', 'en');
+                        });
+                    } catch (\Exception $e) {
+                        $bulkArTitle = $bulkEnTitle;
+                    }
+                }
+
                 if (!$product) {
                     // Create new product (with base price only, no seller-specific profit)
                     $product = Product::create([
-                        'name' => $productData['product_title'],
-                        'name_ar' => $productData['product_title_ar'] ?? null,
-                        'slug' => \Str::slug($productData['product_title']) . '-' . $aliexpressProductId,
-                        'description' => $productData['product_title'],
-                        'description_ar' => $productData['product_title_ar'] ?? null,
-                        'short_description' => $productData['product_title'],
-                        'short_description_ar' => $productData['product_title_ar'] ?? null,
+                        'name' => $bulkEnTitle,
+                        'name_ar' => $bulkArTitle,
+                        'slug' => \Str::slug($bulkEnTitle) . '-' . $aliexpressProductId,
+                        'description' => $bulkEnTitle,
+                        'description_ar' => $bulkArTitle,
+                        'short_description' => $bulkEnTitle,
+                        'short_description_ar' => $bulkArTitle,
                         'price' => $basePrice, // Store base price only
                         'currency' => $productData['currency'] ?? 'AED',
                         'original_price' => $basePrice,
@@ -1702,7 +1746,8 @@ class ProductController extends Controller
                     // Update existing product with category if needed (no seller-specific profit)
                     $product->update([
                         'category_id' => $categoryId ?? $product->category_id,
-                        'name_ar' => $productData['product_title_ar'] ?? $product->name_ar,
+                        'name_ar' => $bulkArTitle ?? $product->name_ar,
+                        'name' => $product->name ?? $bulkEnTitle,
                     ]);
                 }
 
