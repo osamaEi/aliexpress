@@ -1549,19 +1549,38 @@ class ProductController extends Controller
             }
         }
 
-        // English title: use product_title (always English from search button onclick)
-        $englishTitle = $request->product_title;
+        $rawTitle   = $request->product_title;
+        $rawTitleAr = $request->product_title_ar;
 
-        // Arabic title: use product_title_ar; if same as English or empty, translate
-        $arabicTitle = $request->product_title_ar;
-        if (empty($arabicTitle) || $arabicTitle === $englishTitle) {
-            $translationKey = 'translation_' . md5($englishTitle);
+        // Detect whether the supplied title is Arabic (contains Arabic chars)
+        $rawTitleIsArabic = (bool) preg_match('/[\x{0600}-\x{06FF}]/u', $rawTitle);
+
+        if ($rawTitleIsArabic) {
+            // product_title came in as Arabic → it IS the Arabic title
+            $arabicTitle  = $rawTitle;
+            // Translate Arabic → English to get the proper name field
+            $transKeyEn = 'translate_en_' . md5($arabicTitle);
             try {
-                $arabicTitle = \Cache::remember($translationKey, 604800, function() use ($englishTitle) {
-                    return $this->translationService->translate($englishTitle, 'ar', 'en');
+                $englishTitle = \Cache::remember($transKeyEn, 604800, function() use ($arabicTitle) {
+                    return $this->translationService->translate($arabicTitle, 'en', 'ar');
                 });
             } catch (\Exception $e) {
-                $arabicTitle = $englishTitle; // fallback
+                $englishTitle = $arabicTitle; // fallback – better than losing the title
+            }
+        } else {
+            // product_title is English
+            $englishTitle = $rawTitle;
+            $arabicTitle  = $rawTitleAr;
+            // If Arabic is missing or identical to English, translate
+            if (empty($arabicTitle) || $arabicTitle === $englishTitle) {
+                $transKeyAr = 'translation_' . md5($englishTitle);
+                try {
+                    $arabicTitle = \Cache::remember($transKeyAr, 604800, function() use ($englishTitle) {
+                        return $this->translationService->translate($englishTitle, 'ar', 'en');
+                    });
+                } catch (\Exception $e) {
+                    $arabicTitle = $englishTitle;
+                }
             }
         }
 
@@ -1708,17 +1727,34 @@ class ProductController extends Controller
                     }
                 }
 
-                // Ensure Arabic title is distinct from English (translate if needed)
-                $bulkEnTitle = $productData['product_title'];
-                $bulkArTitle = $productData['product_title_ar'] ?? null;
-                if (empty($bulkArTitle) || $bulkArTitle === $bulkEnTitle) {
-                    $translationKey = 'translation_' . md5($bulkEnTitle);
+                // Detect language and ensure both English and Arabic titles are correct
+                $bulkRawTitle   = $productData['product_title'];
+                $bulkRawTitleAr = $productData['product_title_ar'] ?? null;
+                $bulkTitleIsAr  = (bool) preg_match('/[\x{0600}-\x{06FF}]/u', $bulkRawTitle);
+
+                if ($bulkTitleIsAr) {
+                    // product_title is Arabic → translate to English
+                    $bulkArTitle = $bulkRawTitle;
+                    $transKeyEn  = 'translate_en_' . md5($bulkArTitle);
                     try {
-                        $bulkArTitle = \Cache::remember($translationKey, 604800, function() use ($bulkEnTitle) {
-                            return $this->translationService->translate($bulkEnTitle, 'ar', 'en');
+                        $bulkEnTitle = \Cache::remember($transKeyEn, 604800, function() use ($bulkArTitle) {
+                            return $this->translationService->translate($bulkArTitle, 'en', 'ar');
                         });
                     } catch (\Exception $e) {
-                        $bulkArTitle = $bulkEnTitle;
+                        $bulkEnTitle = $bulkArTitle;
+                    }
+                } else {
+                    $bulkEnTitle = $bulkRawTitle;
+                    $bulkArTitle = $bulkRawTitleAr;
+                    if (empty($bulkArTitle) || $bulkArTitle === $bulkEnTitle) {
+                        $transKeyAr = 'translation_' . md5($bulkEnTitle);
+                        try {
+                            $bulkArTitle = \Cache::remember($transKeyAr, 604800, function() use ($bulkEnTitle) {
+                                return $this->translationService->translate($bulkEnTitle, 'ar', 'en');
+                            });
+                        } catch (\Exception $e) {
+                            $bulkArTitle = $bulkEnTitle;
+                        }
                     }
                 }
 
