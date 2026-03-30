@@ -898,6 +898,42 @@ class ProductController extends Controller
             $requestedCategoryId = $request->get('category_id');
             $sortFilter = $request->get('sort_filter', 'orders');
 
+            // Expand Arabic keyword synonyms so users can find products by alternative names
+            $arabicSynonyms = [
+                'تلفون'    => 'هاتف',
+                'موبايل'   => 'هاتف',
+                'جوال'     => 'هاتف',
+                'ايفون'    => 'iPhone',
+                'سامسونج'  => 'Samsung',
+                'لابتوب'   => 'laptop',
+                'كمبيوتر'  => 'computer',
+                'تابلت'    => 'tablet',
+                'ساعة ذكية'=> 'smart watch',
+                'سماعة'    => 'headphone',
+                'شاحن'     => 'charger',
+                'كاميرا'   => 'camera',
+                'طابعة'    => 'printer',
+                'شاشة'     => 'monitor',
+                'مكيف'     => 'air conditioner',
+                'غسالة'    => 'washing machine',
+                'ثلاجة'    => 'refrigerator',
+                'مروحة'    => 'fan',
+                'مكنسة'    => 'vacuum cleaner',
+                'خاتم'     => 'ring',
+                'عطر'      => 'perfume',
+                'حذاء'     => 'shoes',
+                'حقيبة'    => 'bag',
+                'ملابس'    => 'clothes',
+                'فستان'    => 'dress',
+                'عباية'    => 'abaya',
+                'لعبة'     => 'toy',
+                'كتاب'     => 'book',
+                'قلم'      => 'pen',
+            ];
+            if (!empty($keyword) && isset($arabicSynonyms[trim($keyword)])) {
+                $keyword = $arabicSynonyms[trim($keyword)];
+            }
+
             // The category_id from the request is the AliExpress category ID (from the subcategory dropdown)
             // We use it directly for the API call
             $aliexpressCategoryId = null;
@@ -1053,9 +1089,9 @@ class ProductController extends Controller
                     'choice_filter' => $request->get('choice_only') ? 'enabled' : 'disabled'
                 ]);
 
-                // ALWAYS use English locale for primary search to ensure clean English titles
-                // We'll fetch Arabic translations separately
-                $aliexpressLocale = 'en_US';
+                // Detect keyword language: use Arabic locale if keyword contains Arabic characters
+                $keywordIsArabic = preg_match('/[\x{0600}-\x{06FF}]/u', $keyword);
+                $aliexpressLocale = ($keywordIsArabic || app()->getLocale() === 'ar') ? 'ar_MA' : 'en_US';
 
                 // Prepare API options
                 $apiOptions = [
@@ -1172,9 +1208,11 @@ class ProductController extends Controller
                     ->toArray();
             }
 
-            // Only fetch Arabic titles if app locale is Arabic (performance optimization)
+            // Only fetch Arabic titles if app locale is Arabic AND initial search was in English
+            // If initial search used ar_MA locale, products already have Arabic titles - skip second call
             $appLocaleIsar = app()->getLocale() === 'ar';
-            if (!empty($result['products']) && $appLocaleIsar) {
+            $initialLocaleWasArabic = isset($apiOptions['locale']) && $apiOptions['locale'] === 'ar_MA';
+            if (!empty($result['products']) && $appLocaleIsar && !$initialLocaleWasArabic) {
                 try {
                         // Current results are in English, fetch Arabic versions
                         $arabicApiOptions = [

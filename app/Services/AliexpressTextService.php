@@ -67,7 +67,7 @@ class AliexpressTextService
         $params = [
             'app_key' => $this->appKey,
             'countryCode' => $options['country'] ?? 'AE',  // Price display country
-            'shipToCountry' => $options['country'] ?? 'AE', // SHIPPING filter - only show products that ship to this country
+            // shipToCountry is optional: only add when explicitly requested to avoid filtering out valid products
             'currency' => $options['currency'] ?? 'AED',
             'format' => 'json',
             'keyWord' => $keyword,
@@ -82,6 +82,11 @@ class AliexpressTextService
         ];
 
         // Add optional parameters
+        // shipToCountry: only add when explicitly set to true, otherwise show all products
+        if (!empty($options['ship_to_country'])) {
+            $params['shipToCountry'] = $options['country'] ?? 'AE';
+        }
+
         if (!empty($options['category_id'])) {
             // Convert to integer to ensure proper API format
             $params['categoryId'] = (int)$options['category_id'];
