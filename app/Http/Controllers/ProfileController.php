@@ -39,20 +39,14 @@ class ProfileController extends Controller
             'phone_code' => ['nullable', 'string', 'max:10'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:100'],
-            // Withdrawal method fields
-            'withdrawal_method' => [$isSeller ? 'required' : 'nullable', 'string', 'in:paypal,bank_transfer,mobile_wallet'],
-            // PayPal fields
-            'paypal_email' => ['nullable', 'required_if:withdrawal_method,paypal', 'email', 'max:255'],
+            // Withdrawal method - bank transfer only
+            'withdrawal_method' => ['nullable', 'string', 'in:bank_transfer'],
             // Bank transfer fields
-            'bank_name' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:255'],
-            'bank_account_name' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:255'],
-            'bank_account_number' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:50'],
-            'bank_iban' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:50'],
-            'bank_swift_code' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:20'],
-            // Mobile wallet fields
-            'wallet_provider' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:50'],
-            'wallet_phone_number' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:20'],
-            'wallet_holder_name' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:255'],
+            'bank_name' => [$isSeller ? 'required' : 'nullable', 'string', 'max:255'],
+            'bank_account_name' => [$isSeller ? 'required' : 'nullable', 'string', 'max:255'],
+            'bank_account_number' => [$isSeller ? 'required' : 'nullable', 'string', 'max:50'],
+            'bank_iban' => [$isSeller ? 'required' : 'nullable', 'string', 'max:50'],
+            'bank_swift_code' => [$isSeller ? 'required' : 'nullable', 'string', 'max:20'],
             'website_url' => ['nullable', 'url', 'max:255'],
             // Social media accounts
             'social_media_accounts' => ['nullable', 'array'],

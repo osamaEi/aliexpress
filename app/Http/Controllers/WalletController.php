@@ -86,33 +86,20 @@ class WalletController extends Controller
      */
     public function withdrawal(Request $request)
     {
-        // Base validation rules
-        $rules = [
+        $request->validate([
             'amount' => 'required|numeric|min:10',
-            'withdrawal_method' => 'required|in:paypal,bank_transfer,mobile_wallet',
             'seller_note' => 'nullable|string|max:1000',
-        ];
-
-        // Add method-specific validation rules
-        $withdrawalMethod = $request->withdrawal_method;
-
-        if ($withdrawalMethod === 'paypal') {
-            $rules['paypal_email'] = 'required|email';
-        } elseif ($withdrawalMethod === 'bank_transfer') {
-            $rules['iban'] = 'required|string|min:15|max:34';
-            $rules['swift_code'] = 'nullable|string|max:11';
-            $rules['bank_name'] = 'required|string|max:255';
-            $rules['account_holder_name'] = 'required|string|max:255';
-        } elseif ($withdrawalMethod === 'mobile_wallet') {
-            $rules['wallet_provider'] = 'required|string';
-            $rules['wallet_mobile_number'] = 'required|string';
-            $rules['wallet_holder_name'] = 'required|string|max:255';
-        }
-
-        $request->validate($rules);
+        ]);
 
         $user = Auth::user();
         $amount = $request->amount;
+
+        // Ensure user has bank details saved in profile
+        if (empty($user->bank_iban) || empty($user->bank_name) || empty($user->bank_account_name)) {
+            return back()->with('error', app()->getLocale() === 'ar'
+                ? 'يرجى إكمال بيانات التحويل البنكي في الملف الشخصي أولاً.'
+                : 'Please complete your bank transfer details in your profile first.');
+        }
 
         // Check if user has sufficient balance
         if (!$this->walletService->hasSufficientBalance($user, $amount)) {
@@ -125,29 +112,19 @@ class WalletController extends Controller
             // Hold the amount
             $this->walletService->hold($user, $amount);
 
-            // Build withdrawal data based on method
+            // Use bank details from user profile
             $withdrawalData = [
                 'user_id' => $user->id,
-                'withdrawal_method' => $withdrawalMethod,
+                'withdrawal_method' => 'bank_transfer',
                 'amount' => $amount,
                 'currency' => 'AED',
                 'status' => 'pending',
                 'seller_note' => $request->seller_note,
+                'iban' => $user->bank_iban,
+                'swift_code' => $user->bank_swift_code,
+                'bank_name' => $user->bank_name,
+                'account_holder_name' => $user->bank_account_name,
             ];
-
-            // Add method-specific data
-            if ($withdrawalMethod === 'paypal') {
-                $withdrawalData['paypal_email'] = $request->paypal_email;
-            } elseif ($withdrawalMethod === 'bank_transfer') {
-                $withdrawalData['iban'] = $request->iban;
-                $withdrawalData['swift_code'] = $request->swift_code;
-                $withdrawalData['bank_name'] = $request->bank_name;
-                $withdrawalData['account_holder_name'] = $request->account_holder_name;
-            } elseif ($withdrawalMethod === 'mobile_wallet') {
-                $withdrawalData['wallet_provider'] = $request->wallet_provider;
-                $withdrawalData['wallet_mobile_number'] = $request->wallet_mobile_number;
-                $withdrawalData['wallet_holder_name'] = $request->wallet_holder_name;
-            }
 
             // Create withdrawal request (pending admin approval)
             \App\Models\WithdrawalRequest::create($withdrawalData);
