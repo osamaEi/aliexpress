@@ -137,23 +137,41 @@
 
                     <div class="col-md-6">
                         <label for="phone" class="form-label">{{ __('messages.phone') }}</label>
-                        <div class="input-group" style="direction: ltr;">
-                            <select class="form-select flex-grow-0" id="phone_code" name="phone_code" style="max-width: 120px; direction: ltr;">
-                                <option value="+971" {{ old('phone_code', $user->phone_code ?? '+971') == '+971' ? 'selected' : '' }}>🇦🇪 +971</option>
-                                <option value="+966" {{ old('phone_code', $user->phone_code ?? '+971') == '+966' ? 'selected' : '' }}>🇸🇦 +966</option>
-                                <option value="+20"  {{ old('phone_code', $user->phone_code ?? '+971') == '+20'  ? 'selected' : '' }}>🇪🇬 +20</option>
-                                <option value="+965" {{ old('phone_code', $user->phone_code ?? '+971') == '+965' ? 'selected' : '' }}>🇰🇼 +965</option>
-                                <option value="+974" {{ old('phone_code', $user->phone_code ?? '+971') == '+974' ? 'selected' : '' }}>🇶🇦 +974</option>
-                                <option value="+973" {{ old('phone_code', $user->phone_code ?? '+971') == '+973' ? 'selected' : '' }}>🇧🇭 +973</option>
-                                <option value="+968" {{ old('phone_code', $user->phone_code ?? '+971') == '+968' ? 'selected' : '' }}>🇴🇲 +968</option>
-                                <option value="+962" {{ old('phone_code', $user->phone_code ?? '+971') == '+962' ? 'selected' : '' }}>🇯🇴 +962</option>
-                                <option value="+961" {{ old('phone_code', $user->phone_code ?? '+971') == '+961' ? 'selected' : '' }}>🇱🇧 +961</option>
-                                <option value="+86"  {{ old('phone_code', $user->phone_code ?? '+971') == '+86'  ? 'selected' : '' }}>🇨🇳 +86</option>
-                            </select>
-                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                        @php
+                            $selectedCode = old('phone_code', $user->phone_code ?? '+971');
+                            $phoneCodes = [
+                                '+971' => ['flag' => '🇦🇪', 'name' => 'UAE'],
+                                '+966' => ['flag' => '🇸🇦', 'name' => 'KSA'],
+                                '+20'  => ['flag' => '🇪🇬', 'name' => 'EGY'],
+                                '+965' => ['flag' => '🇰🇼', 'name' => 'KWT'],
+                                '+974' => ['flag' => '🇶🇦', 'name' => 'QAT'],
+                                '+973' => ['flag' => '🇧🇭', 'name' => 'BHR'],
+                                '+968' => ['flag' => '🇴🇲', 'name' => 'OMN'],
+                                '+962' => ['flag' => '🇯🇴', 'name' => 'JOR'],
+                                '+961' => ['flag' => '🇱🇧', 'name' => 'LBN'],
+                                '+86'  => ['flag' => '🇨🇳', 'name' => 'CHN'],
+                            ];
+                        @endphp
+                        <input type="hidden" id="phone_code" name="phone_code" value="{{ $selectedCode }}">
+                        <div class="phone-input-wrapper @error('phone') is-invalid-wrapper @enderror">
+                            <div class="phone-code-btn" id="phoneCodeBtn" tabindex="0">
+                                <span class="phone-flag">{{ $phoneCodes[$selectedCode]['flag'] ?? '🇦🇪' }}</span>
+                                <span class="phone-dial" id="phoneDialDisplay">{{ $selectedCode }}</span>
+                                <i class="ri-arrow-down-s-line phone-arrow"></i>
+                            </div>
+                            <div class="phone-dropdown" id="phoneDropdown">
+                                @foreach($phoneCodes as $code => $info)
+                                <div class="phone-option {{ $code === $selectedCode ? 'active' : '' }}" data-code="{{ $code }}">
+                                    <span>{{ $info['flag'] }}</span>
+                                    <span class="phone-option-dial">{{ $code }}</span>
+                                    <span class="phone-option-name">{{ $info['name'] }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                            <input type="text" class="phone-number-input @error('phone') is-invalid @enderror"
                                    id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
                                    placeholder="501234567"
-                                   dir="ltr" style="text-align: left;">
+                                   dir="ltr">
                         </div>
                         @error('phone')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -1047,6 +1065,91 @@
 </div>
 
 <style>
+    /* Phone Input Styles */
+    .phone-input-wrapper {
+        display: flex;
+        align-items: stretch;
+        direction: ltr;
+        border: 1px solid #d9dee3;
+        border-radius: 0.375rem;
+        overflow: visible;
+        position: relative;
+        background: #fff;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .phone-input-wrapper:focus-within {
+        border-color: #696cff;
+        box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.25);
+    }
+    .phone-input-wrapper.is-invalid-wrapper {
+        border-color: #ff3e1d;
+    }
+    .phone-code-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 0 10px;
+        cursor: pointer;
+        border-right: 1px solid #d9dee3;
+        background: #f8f9fa;
+        border-radius: 0.375rem 0 0 0.375rem;
+        user-select: none;
+        min-width: 95px;
+        white-space: nowrap;
+        font-size: 0.9rem;
+        transition: background 0.15s;
+    }
+    .phone-code-btn:hover {
+        background: #e9ecef;
+    }
+    .phone-flag { font-size: 1.2rem; line-height: 1; }
+    .phone-dial { font-weight: 600; color: #333; font-size: 0.85rem; }
+    .phone-arrow { color: #888; font-size: 1rem; margin-left: 2px; transition: transform 0.2s; }
+    .phone-code-btn.open .phone-arrow { transform: rotate(180deg); }
+
+    .phone-dropdown {
+        display: none;
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        z-index: 1050;
+        background: #fff;
+        border: 1px solid #d9dee3;
+        border-radius: 0.5rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        min-width: 180px;
+        max-height: 280px;
+        overflow-y: auto;
+        padding: 4px 0;
+    }
+    .phone-dropdown.show { display: block; }
+    .phone-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: background 0.1s;
+    }
+    .phone-option:hover { background: #f5f5f5; }
+    .phone-option.active { background: rgba(105,108,255,0.08); font-weight: 600; }
+    .phone-option-dial { font-weight: 600; color: #444; min-width: 38px; }
+    .phone-option-name { color: #888; font-size: 0.8rem; }
+
+    .phone-number-input {
+        flex: 1;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9375rem;
+        border-radius: 0 0.375rem 0.375rem 0;
+        background: transparent;
+        min-width: 0;
+    }
+    .phone-number-input:focus { outline: none; box-shadow: none; }
+
     /* Custom Select Styles */
     .custom-select-wrapper {
         position: relative;
@@ -1328,5 +1431,62 @@
         // Initialize on page load
         toggleWithdrawalFields();
     }
+</script>
+
+<script>
+// Custom Phone Code Picker
+(function() {
+    const btn = document.getElementById('phoneCodeBtn');
+    const dropdown = document.getElementById('phoneDropdown');
+    const hiddenInput = document.getElementById('phone_code');
+    const dialDisplay = document.getElementById('phoneDialDisplay');
+
+    if (!btn || !dropdown) return;
+
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = dropdown.classList.contains('show');
+        dropdown.classList.toggle('show', !isOpen);
+        btn.classList.toggle('open', !isOpen);
+    });
+
+    btn.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            btn.click();
+        }
+    });
+
+    dropdown.querySelectorAll('.phone-option').forEach(function(opt) {
+        opt.addEventListener('click', function() {
+            const code = this.dataset.code;
+            const flag = this.querySelector('span').textContent;
+
+            // Update hidden input & display
+            hiddenInput.value = code;
+            dialDisplay.textContent = code;
+            btn.querySelector('.phone-flag').textContent = flag;
+
+            // Mark active
+            dropdown.querySelectorAll('.phone-option').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+
+            // Close
+            dropdown.classList.remove('show');
+            btn.classList.remove('open');
+
+            // Focus phone input
+            document.getElementById('phone').focus();
+        });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('show');
+            btn.classList.remove('open');
+        }
+    });
+})();
 </script>
 @endsection
