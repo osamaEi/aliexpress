@@ -145,8 +145,8 @@
                                     <i class="ri-ship-line me-2"></i> {{ __('messages.calculate_shipping_create_order') }}
                                 </button>
                             @else
-                                <a href="{{ route('subscriptions.index') }}" class="btn btn-lg btn-danger shadow-sm" style="border-radius: 12px; padding: 16px;" title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإنشاء الطلبات' : 'Subscription required to create orders' }}">
-                                    <i class="ri-lock-line me-2"></i> {{ app()->getLocale() == 'ar' ? 'اشترك الآن لإنشاء الطلبات' : 'Subscribe to Create Orders' }}
+                                <a href="{{ route('subscriptions.index') }}" class="btn btn-lg btn-danger shadow-sm" style="border-radius: 12px; padding: 16px;" title="{{ __('messages.subscription_required_orders') }}">
+                                    <i class="ri-lock-line me-2"></i> {{ __('messages.subscribe_to_create_orders') }}
                                 </a>
                             @endif
                         @else
@@ -155,8 +155,8 @@
                                     <i class="ri-shopping-bag-line me-2"></i> {{ __('messages.create_order') }}
                                 </a>
                             @else
-                                <a href="{{ route('subscriptions.index') }}" class="btn btn-lg btn-danger shadow-sm" style="border-radius: 12px; padding: 16px;" title="{{ app()->getLocale() == 'ar' ? 'يجب الاشتراك لإنشاء الطلبات' : 'Subscription required to create orders' }}">
-                                    <i class="ri-lock-line me-2"></i> {{ app()->getLocale() == 'ar' ? 'اشترك الآن لإنشاء الطلبات' : 'Subscribe to Create Orders' }}
+                                <a href="{{ route('subscriptions.index') }}" class="btn btn-lg btn-danger shadow-sm" style="border-radius: 12px; padding: 16px;" title="{{ __('messages.subscription_required_orders') }}">
+                                    <i class="ri-lock-line me-2"></i> {{ __('messages.subscribe_to_create_orders') }}
                                 </a>
                             @endif
                         @endif
@@ -175,7 +175,7 @@
                                     <polygon fill="#ffde00" points="371.25,243.5 382.68,278.59 419.75,278.59 390.25,300.41 401.68,335.5 371.25,314.32 340.82,335.5 352.25,300.41 322.75,278.59 359.82,278.59"/>
                                     <polygon fill="#ffde00" points="299.75,313 311.18,348.09 348.25,348.09 318.75,369.91 330.18,405 299.75,383.82 269.32,405 280.75,369.91 251.25,348.09 288.32,348.09"/>
                                 </svg>
-                                {{ app()->getLocale() == 'ar' ? 'عرض على موقع الصين' : 'View on China Store' }}
+                                {{ __('messages.view_on_china_store') }}
                             </a>
                         </div>
                     @endif
@@ -462,7 +462,7 @@
                             <div class="flag-select-dropdown" id="flagSelectDropdown" style="display:none;">
                                 <div class="flag-select-search-wrap px-2 pt-2 pb-1">
                                     <input type="text" class="form-control form-control-sm" id="flagSelectSearch"
-                                           placeholder="{{ app()->getLocale() == 'ar' ? 'بحث...' : 'Search...' }}"
+                                           placeholder="{{ __('messages.search') }}..."
                                            oninput="filterFlagOptions(this.value)" onclick="event.stopPropagation()">
                                 </div>
                                 <div id="flagSelectOptions"></div>
@@ -791,16 +791,16 @@
                             </div>
                             <hr>
                             <div class="d-flex justify-content-between mb-2">
-                                <span>{{ app()->getLocale() == 'ar' ? 'رصيد المحفظة:' : 'Wallet Balance:' }}</span>
+                                <span>{{ __('messages.wallet_balance') }}:</span>
                                 <strong id="order-wallet-balance" class="text-success"></strong>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <span>{{ app()->getLocale() == 'ar' ? 'الرصيد المتبقي:' : 'Remaining Balance:' }}</span>
+                                <span>{{ __('messages.remaining_balance') }}:</span>
                                 <strong id="order-remaining-balance"></strong>
                             </div>
                             <div id="insufficient-balance-warning" class="alert alert-danger mt-3 mb-0" style="display: none;">
                                 <i class="ri-error-warning-line me-2"></i>
-                                <span>{{ app()->getLocale() == 'ar' ? 'رصيد المحفظة غير كافٍ. يرجى شحن محفظتك قبل إنشاء الطلب.' : 'Insufficient wallet balance. Please top up your wallet before creating the order.' }}</span>
+                                <span>{{ __('messages.insufficient_balance_top_up') }}</span>
                             </div>
                         </div>
                     </div>
@@ -906,8 +906,8 @@
                     <div class="d-flex align-items-center">
                         <i class="ri-vip-crown-line me-2" style="font-size: 24px;"></i>
                         <div>
-                            <strong>{{ app()->getLocale() == 'ar' ? 'منتج Choice - شحن مجاني!' : 'Choice Product - Free Shipping!' }}</strong>
-                            <p class="mb-0 small">{{ app()->getLocale() == 'ar' ? 'منتجات Choice تأتي بشحن مجاني وسريع' : 'Choice products come with free and fast shipping' }}</p>
+                            <strong>{{ __('messages.choice_free_shipping') }}</strong>
+                            <p class="mb-0 small">{{ __('messages.choice_free_shipping_desc') }}</p>
                         </div>
                     </div>
                 </div>
@@ -934,7 +934,7 @@
                                 <i class="ri-palette-line me-1"></i>{{ __('messages.select_product_variant') }} <span class="text-danger">*</span>
                             </label>
                             <select class="form-select form-select-lg" name="variant_index" id="directVariantSelect" required>
-                                <option value="">{{ app()->getLocale() == 'ar' ? 'اختر النوع' : 'Select Variant' }}</option>
+                                <option value="">{{ __('messages.select_variant') }}</option>
                                 @foreach($aliexpressData['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'] as $index => $sku)
                                     <option value="{{ $index }}"
                                             data-price="{{ $sku['offer_sale_price'] ?? $sku['sku_price'] ?? 0 }}"
@@ -958,69 +958,69 @@
 
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'الاسم الكامل' : 'Full Name' }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('messages.full_name') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="customer_name" required>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'البريد الإلكتروني' : 'Email' }}</label>
+                            <label class="form-label">{{ __('messages.email') }}</label>
                             <input type="email" class="form-control" name="customer_email">
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'كود الهاتف' : 'Phone Code' }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('messages.phone_code') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="phone_country" placeholder="+971" required>
                         </div>
 
                         <div class="col-md-9">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone Number' }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('messages.phone_number') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="customer_phone" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('messages.country') }} <span class="text-danger">*</span></label>
                             <select class="form-select" name="shipping_country" required>
                                 <option value="AE">{{ __('messages.united_arab_emirates') }}</option>
                                 <option value="SA">{{ __('messages.saudi_arabia') }}</option>
-                                <option value="US">United States</option>
-                                <option value="GB">United Kingdom</option>
+                                <option value="US">{{ __('messages.united_states') }}</option>
+                                <option value="GB">{{ __('messages.united_kingdom') }}</option>
                             </select>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'المدينة' : 'City' }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('messages.city') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="shipping_city" placeholder="e.g., Dubai" required>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'العنوان' : 'Street Address' }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('messages.street_address') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="shipping_address" required>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'شقة/جناح (اختياري)' : 'Apartment, Suite, etc. (Optional)' }}</label>
+                            <label class="form-label">{{ __('messages.apartment_optional') }}</label>
                             <input type="text" class="form-control" name="shipping_address2">
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'المقاطعة/الولاية' : 'Province/State' }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('messages.province_state') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="shipping_province" placeholder="e.g., Dubai" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'الرمز البريدي' : 'Postal/ZIP Code' }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('messages.postal_zip_code') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="shipping_zip" required>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'ملاحظات الطلب (اختياري)' : 'Order Notes (Optional)' }}</label>
-                            <textarea class="form-control" name="customer_notes" rows="3" placeholder="{{ app()->getLocale() == 'ar' ? 'أي تعليمات خاصة؟' : 'Any special instructions?' }}"></textarea>
+                            <label class="form-label">{{ __('messages.order_notes_optional') }}</label>
+                            <textarea class="form-control" name="customer_notes" rows="3" placeholder="{{ __('messages.any_special_instructions') }}"></textarea>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
                         <button type="submit" class="btn btn-success btn-lg">
-                            <i class="ri-shopping-bag-line me-2"></i>{{ app()->getLocale() == 'ar' ? 'تأكيد وإنشاء الطلب' : 'Confirm & Create Order' }}
+                            <i class="ri-shopping-bag-line me-2"></i>{{ __('messages.confirm_create_order') }}
                         </button>
                     </div>
                 </form>
@@ -1029,7 +1029,7 @@
                 <div id="direct-order-result" style="display: none;">
                     <div id="direct-order-loading" class="text-center py-5" style="display: none;">
                         <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;"></div>
-                        <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'جاري إنشاء طلبك...' : 'Creating your order...' }}</p>
+                        <p class="text-muted">{{ __('messages.creating_order') }}</p>
                     </div>
 
                     <div id="direct-order-success" style="display: none;" class="alert alert-success"></div>

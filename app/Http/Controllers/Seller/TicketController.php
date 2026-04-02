@@ -58,11 +58,18 @@ class TicketController extends Controller
         // Send email notification to admin
         $adminEmail = env('MAIL_USERNAME');
         if ($adminEmail) {
-            Mail::to($adminEmail)->send(new NewTicketNotification($ticket));
+            try {
+                Mail::to($adminEmail)->send(new NewTicketNotification($ticket));
+            } catch (\Exception $e) {
+                // Email failure should not block ticket creation
+            }
         }
 
-        return redirect()->route('seller.tickets.show', $ticket)
-            ->with('success', __('messages.ticket_created_successfully'));
+        // Redirect to WhatsApp with ticket details
+        $message = "Ticket #" . $ticket->id . "\nSubject: " . $ticket->subject . "\nPriority: " . ucfirst($ticket->priority);
+        $whatsappUrl = 'https://wa.me/971501774477?text=' . rawurlencode($message);
+
+        return redirect()->away($whatsappUrl);
     }
 
     /**

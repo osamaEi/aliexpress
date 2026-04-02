@@ -31,15 +31,10 @@
                                     id="priority"
                                     name="priority"
                                     required>
-                                <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>
-                                    {{ __('messages.priority_low') }}
-                                </option>
-                                <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>
-                                    {{ __('messages.priority_medium') }}
-                                </option>
-                                <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>
-                                    {{ __('messages.priority_high') }}
-                                </option>
+                                <option value="" disabled {{ old('priority') ? '' : 'selected' }}>{{ __('messages.select_priority') }}</option>
+                                <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>{{ __('messages.priority_low') }}</option>
+                                <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>{{ __('messages.priority_medium') }}</option>
+                                <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>{{ __('messages.priority_high') }}</option>
                             </select>
                             @error('priority')
                                 <div class="invalid-feedback">{{ $message }}</div>
