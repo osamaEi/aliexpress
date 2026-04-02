@@ -302,10 +302,29 @@
                     </div>
 
                     @if($order->tracking_number)
+                        @php
+                            $shippingNames = [
+                                'CAINIAO_FULFILLMENT_STD'   => $isAr ? 'كينياو - شحن قياسي'      : 'Cainiao Standard Shipping',
+                                'CAINIAO_FULFILLMENT_FAST'  => $isAr ? 'كينياو - شحن سريع'        : 'Cainiao Fast Shipping',
+                                'CAINIAO_STANDARD'          => $isAr ? 'كينياو - قياسي'            : 'Cainiao Standard',
+                                'CAINIAO_ECONOMY'           => $isAr ? 'كينياو - اقتصادي'          : 'Cainiao Economy',
+                                'AE_STANDARD'               => $isAr ? 'علي إكسبريس - قياسي'       : 'AliExpress Standard',
+                                'AE_PLUS'                   => $isAr ? 'علي إكسبريس - بلس'         : 'AliExpress Plus',
+                                'YANWEN_JYT'                => $isAr ? 'يانوين - اقتصادي'           : 'Yanwen Economy',
+                                'EMS'                       => $isAr ? 'بريد سريع دولي (EMS)'       : 'EMS International',
+                                'DHL'                       => 'DHL Express',
+                                'UPS'                       => 'UPS',
+                                'FEDEX'                     => 'FedEx',
+                                'SF_EXPRESS'                => $isAr ? 'SF إكسبريس'                 : 'SF Express',
+                                'ARAMEX'                    => 'Aramex',
+                                'SELLER_SHIPPING'           => $isAr ? 'شحن البائع'                 : 'Seller Shipping',
+                            ];
+                            $methodLabel = $shippingNames[$order->shipping_method] ?? str_replace('_', ' ', $order->shipping_method);
+                        @endphp
                         <div class="mt-3 p-3 bg-light rounded">
                             <p class="mb-1"><strong>{{ __('messages.tracking_number') }}:</strong> {{ $order->tracking_number }}</p>
                             @if($order->shipping_method)
-                                <p class="mb-0"><strong>{{ __('messages.shipping_method') }}:</strong> {{ $order->shipping_method }}</p>
+                                <p class="mb-0"><strong>{{ __('messages.shipping_method') }}:</strong> {{ $methodLabel }}</p>
                             @endif
                         </div>
                     @endif
@@ -319,75 +338,109 @@
                 <div class="card-header">
                     <h6 class="mb-0">{{ __('messages.order_timeline') }}</h6>
                 </div>
-                <div class="card-body">
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <i class="ri-checkbox-circle-line text-success"></i>
-                            <div>
-                                <strong>{{ __('messages.order_created') }}</strong>
-                                <p class="text-muted small mb-0">{{ $order->created_at->format('d M Y, h:i A') }}</p>
+                @php
+                    $shippingMethodNames = [
+                        'CAINIAO_FULFILLMENT_STD'  => $isAr ? 'كينياو - شحن قياسي'   : 'Cainiao Standard Shipping',
+                        'CAINIAO_FULFILLMENT_FAST' => $isAr ? 'كينياو - شحن سريع'    : 'Cainiao Fast Shipping',
+                        'CAINIAO_STANDARD'         => $isAr ? 'كينياو - قياسي'        : 'Cainiao Standard',
+                        'CAINIAO_ECONOMY'          => $isAr ? 'كينياو - اقتصادي'      : 'Cainiao Economy',
+                        'AE_STANDARD'              => $isAr ? 'علي إكسبريس - قياسي'   : 'AliExpress Standard',
+                        'AE_PLUS'                  => $isAr ? 'علي إكسبريس - بلس'     : 'AliExpress Plus',
+                        'YANWEN_JYT'               => $isAr ? 'يانوين - اقتصادي'      : 'Yanwen Economy',
+                        'EMS'                      => $isAr ? 'بريد سريع دولي (EMS)'  : 'EMS International',
+                        'DHL'                      => 'DHL Express',
+                        'UPS'                      => 'UPS',
+                        'FEDEX'                    => 'FedEx',
+                        'SF_EXPRESS'               => 'SF Express',
+                        'ARAMEX'                   => 'Aramex',
+                        'SELLER_SHIPPING'          => $isAr ? 'شحن البائع' : 'Seller Shipping',
+                    ];
+
+                    // Determine which steps are completed
+                    $steps = [
+                        'created'  => true,
+                        'placed'   => !empty($order->placed_at),
+                        'shipped'  => !empty($order->shipped_at),
+                        'delivered'=> !empty($order->delivered_at),
+                    ];
+                    $shipping      = $order->shipping ?? null;
+                    $trackingEvents = $shipping && $shipping->tracking_events ? $shipping->tracking_events : [];
+                @endphp
+                <div class="card-body px-3 py-3">
+                    <div class="order-timeline">
+
+                        {{-- Step 1: Created --}}
+                        <div class="ot-step done">
+                            <div class="ot-icon"><i class="ri-file-list-3-line"></i></div>
+                            <div class="ot-line"></div>
+                            <div class="ot-content">
+                                <span class="ot-label">{{ __('messages.order_created') }}</span>
+                                <span class="ot-date">{{ $order->created_at->format('d M Y, h:i A') }}</span>
                             </div>
                         </div>
 
-                        @if($order->placed_at)
-                            <div class="timeline-item">
-                                <i class="ri-shopping-cart-line text-primary"></i>
-                                <div>
-                                    <strong>{{ __('messages.placed_with_supplier') }}</strong>
-                                    <p class="text-muted small mb-0">{{ $order->placed_at->format('d M Y, h:i A') }}</p>
-                                </div>
+                        {{-- Step 2: Placed with supplier --}}
+                        <div class="ot-step {{ $steps['placed'] ? 'done' : 'pending' }}">
+                            <div class="ot-icon"><i class="ri-shopping-cart-2-line"></i></div>
+                            <div class="ot-line"></div>
+                            <div class="ot-content">
+                                <span class="ot-label">{{ __('messages.placed_with_supplier') }}</span>
+                                @if($steps['placed'])
+                                    <span class="ot-date">{{ $order->placed_at->format('d M Y, h:i A') }}</span>
+                                @endif
                             </div>
-                        @endif
+                        </div>
 
-                        @if($order->shipped_at)
-                            <div class="timeline-item">
-                                <i class="ri-truck-line text-info"></i>
-                                <div>
-                                    <strong>{{ __('messages.shipped') }}</strong>
-                                    <p class="text-muted small mb-0">{{ $order->shipped_at->format('d M Y, h:i A') }}</p>
+                        {{-- Step 3: Shipped --}}
+                        <div class="ot-step {{ $steps['shipped'] ? 'done' : 'pending' }}">
+                            <div class="ot-icon"><i class="ri-truck-line"></i></div>
+                            <div class="ot-line"></div>
+                            <div class="ot-content">
+                                <span class="ot-label">{{ __('messages.shipped') }}</span>
+                                @if($steps['shipped'])
+                                    <span class="ot-date">{{ $order->shipped_at->format('d M Y, h:i A') }}</span>
                                     @if($order->tracking_number)
-                                        <p class="small mb-0 mt-1">
-                                            <span class="badge bg-info">{{ $order->tracking_number }}</span>
-                                        </p>
+                                        <span class="badge bg-dark mt-1" style="font-size:11px; letter-spacing:.5px;">{{ $order->tracking_number }}</span>
                                     @endif
                                     @if($order->shipping_method)
-                                        <p class="text-muted small mb-0">{{ $order->shipping_method }}</p>
+                                        <span class="ot-sub">{{ $shippingMethodNames[$order->shipping_method] ?? str_replace('_', ' ', $order->shipping_method) }}</span>
                                     @endif
-                                </div>
+                                @endif
                             </div>
+                        </div>
 
-                            @php
-                                $shipping = $order->shipping;
-                                $trackingEvents = $shipping && $shipping->tracking_events ? $shipping->tracking_events : [];
-                            @endphp
-
-                            @if(!empty($trackingEvents))
-                                @foreach($trackingEvents as $event)
-                                    <div class="timeline-item">
-                                        <i class="ri-map-pin-line text-secondary" style="font-size: 14px;"></i>
-                                        <div>
-                                            <strong class="small">{{ $event['status'] ?? 'Update' }}</strong>
-                                            <p class="text-muted small mb-0">{{ $event['description'] ?? '' }}</p>
-                                            @if(isset($event['timestamp']))
-                                                <p class="text-muted small mb-0" style="font-size: 0.75rem;">
-                                                    {{ \Carbon\Carbon::createFromTimestampMs($event['timestamp'])->format('d M Y, h:i A') }}
-                                                </p>
-                                            @endif
-                                        </div>
+                        {{-- Tracking events (sub-steps) --}}
+                        @if(!empty($trackingEvents))
+                            @foreach($trackingEvents as $event)
+                                <div class="ot-step ot-event done">
+                                    <div class="ot-icon"><i class="ri-map-pin-2-line"></i></div>
+                                    <div class="ot-line"></div>
+                                    <div class="ot-content">
+                                        <span class="ot-label small">{{ $event['status'] ?? ($isAr ? 'تحديث' : 'Update') }}</span>
+                                        @if(!empty($event['description']))
+                                            <span class="ot-sub">{{ $event['description'] }}</span>
+                                        @endif
+                                        @if(isset($event['timestamp']))
+                                            <span class="ot-date" style="font-size:.7rem;">
+                                                {{ \Carbon\Carbon::createFromTimestampMs($event['timestamp'])->format('d M Y, h:i A') }}
+                                            </span>
+                                        @endif
                                     </div>
-                                @endforeach
-                            @endif
+                                </div>
+                            @endforeach
                         @endif
 
-                        @if($order->delivered_at)
-                            <div class="timeline-item">
-                                <i class="ri-check-double-line text-success"></i>
-                                <div>
-                                    <strong>{{ __('messages.delivered') }}</strong>
-                                    <p class="text-muted small mb-0">{{ $order->delivered_at->format('d M Y, h:i A') }}</p>
-                                </div>
+                        {{-- Step 4: Delivered --}}
+                        <div class="ot-step {{ $steps['delivered'] ? 'done' : 'pending' }} last">
+                            <div class="ot-icon"><i class="ri-checkbox-circle-line"></i></div>
+                            <div class="ot-content">
+                                <span class="ot-label">{{ __('messages.delivered') }}</span>
+                                @if($steps['delivered'])
+                                    <span class="ot-date">{{ $order->delivered_at->format('d M Y, h:i A') }}</span>
+                                @endif
                             </div>
-                        @endif
+                        </div>
+
                     </div>
 
                     @if($order->admin_notes)
@@ -403,18 +456,102 @@
 </div>
 
 <style>
-.timeline {
+/* ── Order Timeline ── */
+.order-timeline { padding: 4px 0; }
+
+.ot-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
     position: relative;
-    padding-left: 30px;
 }
 
+/* vertical connector line inside each step */
+.ot-line {
+    position: absolute;
+    {{ $isAr ? 'right' : 'left' }}: 18px;
+    top: 36px;
+    bottom: -4px;
+    width: 2px;
+    background: #dee2e6;
+    z-index: 0;
+}
+.ot-step.last .ot-line { display: none; }
+
+/* icon circle */
+.ot-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    position: relative; z-index: 1;
+    border: 2px solid #dee2e6;
+    background: #fff;
+    color: #adb5bd;
+    transition: all .25s;
+}
+
+/* done state */
+.ot-step.done .ot-icon {
+    background: #561C04;
+    border-color: #561C04;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(86,28,4,.12);
+}
+.ot-step.done .ot-line { background: #561C04; }
+
+/* sub-events (smaller) */
+.ot-step.ot-event .ot-icon {
+    width: 26px; height: 26px;
+    font-size: 12px;
+    background: #e56300;
+    border-color: #e56300;
+    margin-{{ $isAr ? 'right' : 'left' }}: 5px;
+}
+.ot-step.ot-event { margin-{{ $isAr ? 'right' : 'left' }}: 10px; }
+.ot-step.ot-event .ot-line {
+    {{ $isAr ? 'right' : 'left' }}: 18px;
+    background: #e56300;
+}
+
+/* content area */
+.ot-content {
+    display: flex; flex-direction: column;
+    padding-bottom: 22px;
+    padding-top: 4px;
+}
+.ot-step.last .ot-content { padding-bottom: 0; }
+
+.ot-label {
+    font-weight: 600;
+    font-size: .9rem;
+    color: #3d3d3d;
+}
+.ot-step.pending .ot-label { color: #adb5bd; }
+
+.ot-date {
+    font-size: .78rem;
+    color: #6c757d;
+    margin-top: 2px;
+}
+.ot-sub {
+    font-size: .78rem;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+/* old timeline kept for compatibility */
+.timeline {
+    position: relative;
+    padding-{{ $isAr ? 'right' : 'left' }}: 30px;
+}
 .timeline-item {
     position: relative;
     padding-bottom: 20px;
     display: flex;
     gap: 15px;
 }
-
 .timeline-item i {
     font-size: 20px;
     flex-shrink: 0;
