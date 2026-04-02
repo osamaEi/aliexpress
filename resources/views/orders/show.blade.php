@@ -1,7 +1,8 @@
 @extends('dashboard')
 
 @section('content')
-<div class="col-12">
+@php $isAr = app()->getLocale() == 'ar'; @endphp
+<div class="col-12" dir="{{ $isAr ? 'rtl' : 'ltr' }}">
     <!-- Order Header -->
     <div class="card mb-4">
         <div class="card-body">
@@ -66,24 +67,158 @@
                             <img src="{{ $order->product->images[0] }}" alt="{{ $order->product->name }}" class="me-3" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
                         @endif
                         <div class="flex-grow-1">
-                            <h6>{{ $order->product->name }}</h6>
-                            <p class="text-muted mb-2">{{ __('messages.quantity') }}: {{ $order->quantity }}</p>
-                            <p class="mb-0">
-                                <strong>{{ app()->getLocale() == 'ar' ? 'سعر الوحدة:' : 'Unit Price:' }}</strong>
-                                <span class="d-inline-flex align-items-center gap-1" style="direction: ltr;">
-                                    <x-session-currency-icon width="16" height="16" />
-                                    {{ number_format($currentCurrency->convertFrom($order->unit_price, $order->currency ?? 'USD'), 2) }}
-                                </span>
-                                <br>
-                                <strong>{{ app()->getLocale() == 'ar' ? 'الإجمالي:' : 'Total:' }}</strong>
-                                <span class="d-inline-flex align-items-center gap-1 fs-5" style="direction: ltr; color: #561C04;">
-                                    <x-session-currency-icon width="18" height="18" />
-                                    {{ number_format($currentCurrency->convertFrom($order->total_price, $order->currency ?? 'USD'), 2) }}
-                                </span>
-                            </p>
+                            @php
+                                $cur       = $order->currency ?? 'AED';
+                                $unitPrice = $currentCurrency->convertFrom($order->unit_price, $cur);
+                                $freight   = $currentCurrency->convertFrom($order->freight_amount ?? 0, $cur);
+                                $subtotal  = $unitPrice * $order->quantity;
+                                $grandTotal = $subtotal + $freight;
+                                $productName = $isAr && $order->product->name_ar ? $order->product->name_ar : $order->product->name;
+                            @endphp
+                            <h6>{{ $productName }}</h6>
+
+                            {{-- Price breakdown table --}}
+                            <table class="table table-sm table-borderless mb-0 mt-2" style="width: auto; min-width: 280px;">
+                                <tr>
+                                    <td class="text-muted py-1">{{ __('messages.unit_price') }}</td>
+                                    <td class="py-1" style="direction:ltr;">
+                                        <x-session-currency-icon width="13" height="13" />
+                                        {{ number_format($unitPrice, 2) }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted py-1">{{ __('messages.quantity') }}</td>
+                                    <td class="py-1">× {{ $order->quantity }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted py-1">{{ $isAr ? 'سعر المنتج' : 'Products Subtotal' }}</td>
+                                    <td class="py-1" style="direction:ltr;">
+                                        <x-session-currency-icon width="13" height="13" />
+                                        {{ number_format($subtotal, 2) }}
+                                    </td>
+                                </tr>
+                                @if($freight > 0)
+                                <tr>
+                                    <td class="text-muted py-1">{{ __('messages.shipping_cost') }}</td>
+                                    <td class="py-1 text-info" style="direction:ltr;">
+                                        + <x-session-currency-icon width="13" height="13" />
+                                        {{ number_format($freight, 2) }}
+                                    </td>
+                                </tr>
+                                @endif
+                                <tr class="border-top">
+                                    <td class="py-1 fw-bold">{{ __('messages.total_amount') }}</td>
+                                    <td class="py-1 fw-bold fs-5" style="direction:ltr; color:#561C04;">
+                                        <x-session-currency-icon width="16" height="16" />
+                                        {{ number_format($grandTotal, 2) }}
+                                    </td>
+                                </tr>
+                                @if($order->seller_profit > 0)
+                                <tr>
+                                    <td class="text-muted py-1">{{ __('messages.your_profit') }}</td>
+                                    <td class="py-1 text-success fw-semibold" style="direction:ltr;">
+                                        + <x-session-currency-icon width="13" height="13" />
+                                        {{ number_format($currentCurrency->convertFrom($order->seller_profit, $cur), 2) }}
+                                    </td>
+                                </tr>
+                                @endif
+                            </table>
                         </div>
-                        <div>
-                            <a href="{{ route('products.detail', $order->product) }}" class="btn btn-sm btn-outline-primary">{{ __('messages.view_product') }}</a>
+                        <div class="align-self-start">
+                            <a href="{{ route('products.detail', $order->product) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="ri-external-link-line me-1"></i>{{ __('messages.view_product') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="ri-bank-card-line me-2"></i>{{ $isAr ? 'تفاصيل الدفع' : 'Payment Details' }}</h6>
+                    @php
+                        $payBadge = match($order->payment_status) {
+                            'paid'     => 'success',
+                            'failed'   => 'danger',
+                            'refunded' => 'warning',
+                            default    => 'secondary',
+                        };
+                        $payLabel = match($order->payment_status) {
+                            'paid'     => $isAr ? 'مدفوع'  : 'Paid',
+                            'failed'   => $isAr ? 'فشل'    : 'Failed',
+                            'refunded' => $isAr ? 'مسترجع' : 'Refunded',
+                            default    => $isAr ? 'معلق'   : 'Pending',
+                        };
+                    @endphp
+                    <span class="badge bg-{{ $payBadge }}">{{ $payLabel }}</span>
+                </div>
+                <div class="card-body">
+                    @php
+                        $cur        = $order->currency ?? 'AED';
+                        $unitPrice  = $currentCurrency->convertFrom($order->unit_price, $cur);
+                        $freight    = $currentCurrency->convertFrom($order->freight_amount ?? 0, $cur);
+                        $subtotal   = $unitPrice * $order->quantity;
+                        $grandTotal = $subtotal + $freight;
+                    @endphp
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">{{ __('messages.unit_price') }}</span>
+                                    <span style="direction:ltr;" class="d-inline-flex align-items-center gap-1">
+                                        <x-session-currency-icon width="13" height="13" />{{ number_format($unitPrice, 2) }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">{{ __('messages.quantity') }}</span>
+                                    <span>× {{ $order->quantity }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">{{ $isAr ? 'سعر المنتج' : 'Products Subtotal' }}</span>
+                                    <span style="direction:ltr;" class="d-inline-flex align-items-center gap-1">
+                                        <x-session-currency-icon width="13" height="13" />{{ number_format($subtotal, 2) }}
+                                    </span>
+                                </div>
+                                @if($freight > 0)
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">{{ __('messages.shipping_cost') }}</span>
+                                    <span class="text-info" style="direction:ltr;" class="d-inline-flex align-items-center gap-1">
+                                        + <x-session-currency-icon width="13" height="13" />{{ number_format($freight, 2) }}
+                                    </span>
+                                </div>
+                                @endif
+                                <div class="d-flex justify-content-between pt-2 border-top">
+                                    <span class="fw-bold">{{ __('messages.total_amount') }}</span>
+                                    <span class="fw-bold fs-5 d-inline-flex align-items-center gap-1" style="direction:ltr; color:#561C04;">
+                                        <x-session-currency-icon width="16" height="16" />{{ number_format($grandTotal, 2) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded h-100">
+                                <p class="mb-2">
+                                    <span class="text-muted">{{ $isAr ? 'طريقة الدفع:' : 'Payment Method:' }}</span>
+                                    <strong class="ms-2">{{ $isAr ? 'المحفظة الإلكترونية' : 'Wallet' }}</strong>
+                                </p>
+                                <p class="mb-2">
+                                    <span class="text-muted">{{ $isAr ? 'حالة الدفع:' : 'Payment Status:' }}</span>
+                                    <span class="badge bg-{{ $payBadge }} ms-2">{{ $payLabel }}</span>
+                                </p>
+                                @if($order->seller_profit > 0)
+                                <p class="mb-2">
+                                    <span class="text-muted">{{ __('messages.your_profit') }}:</span>
+                                    <strong class="text-success ms-2 d-inline-flex align-items-center gap-1" style="direction:ltr;">
+                                        + <x-session-currency-icon width="13" height="13" />{{ number_format($currentCurrency->convertFrom($order->seller_profit, $cur), 2) }}
+                                    </strong>
+                                </p>
+                                @endif
+                                <p class="mb-0">
+                                    <span class="text-muted">{{ $isAr ? 'تاريخ الإنشاء:' : 'Created At:' }}</span>
+                                    <strong class="ms-2">{{ $order->created_at->format('Y-m-d H:i') }}</strong>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -106,7 +241,7 @@
                     </div>
                     @if($order->customer_notes)
                         <div class="mt-3">
-                            <strong>Customer Notes:</strong>
+                            <strong>{{ __('messages.customer_notes') }}:</strong>
                             <p class="mb-0 mt-1">{{ $order->customer_notes }}</p>
                         </div>
                     @endif
@@ -122,20 +257,20 @@
                     <div class="row">
                         <div class="col-md-6">
                             <p class="mb-2">
-                                <strong><i class="ri-user-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الاسم:' : 'Name:' }}</strong>
+                                <strong><i class="ri-user-line me-1"></i>{{ $isAr ? 'الاسم:' : 'Name:' }}</strong>
                                 {{ $order->customer_name }}
                             </p>
                             <p class="mb-2">
-                                <strong><i class="ri-phone-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'رقم الهاتف:' : 'Phone:' }}</strong>
+                                <strong><i class="ri-phone-line me-1"></i>{{ $isAr ? 'رقم الهاتف:' : 'Phone:' }}</strong>
                                 +{{ $order->phone_country }} {{ $order->customer_phone }}
                             </p>
                             <p class="mb-2">
-                                <strong><i class="ri-global-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الدولة:' : 'Country:' }}</strong>
+                                <strong><i class="ri-global-line me-1"></i>{{ $isAr ? 'الدولة:' : 'Country:' }}</strong>
                                 {{ $order->shipping_country }}
                             </p>
                             @if($order->shipping_province)
                                 <p class="mb-2">
-                                    <strong><i class="ri-map-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المنطقة/المحافظة:' : 'Region/Province:' }}</strong>
+                                    <strong><i class="ri-map-2-line me-1"></i>{{ $isAr ? 'المنطقة/المحافظة:' : 'Region/Province:' }}</strong>
                                     {{ $order->shipping_province }}
                                 </p>
                             @endif
@@ -143,23 +278,23 @@
                         <div class="col-md-6">
                             @if($order->shipping_city)
                                 <p class="mb-2">
-                                    <strong><i class="ri-building-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المدينة:' : 'City:' }}</strong>
+                                    <strong><i class="ri-building-line me-1"></i>{{ $isAr ? 'المدينة:' : 'City:' }}</strong>
                                     {{ $order->shipping_city }}
                                 </p>
                             @endif
                             <p class="mb-2">
-                                <strong><i class="ri-home-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العنوان:' : 'Address:' }}</strong>
+                                <strong><i class="ri-home-line me-1"></i>{{ $isAr ? 'العنوان:' : 'Address:' }}</strong>
                                 {{ $order->shipping_address }}
                             </p>
                             @if($order->shipping_address2)
                                 <p class="mb-2">
-                                    <strong><i class="ri-home-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العنوان 2:' : 'Address 2:' }}</strong>
+                                    <strong><i class="ri-home-2-line me-1"></i>{{ $isAr ? 'العنوان 2:' : 'Address 2:' }}</strong>
                                     {{ $order->shipping_address2 }}
                                 </p>
                             @endif
                             @if($order->shipping_zip)
                                 <p class="mb-2">
-                                    <strong><i class="ri-mail-send-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'صندوق البريد/الرمز البريدي:' : 'P.O. Box/Zip Code:' }}</strong>
+                                    <strong><i class="ri-mail-send-line me-1"></i>{{ $isAr ? 'صندوق البريد/الرمز البريدي:' : 'P.O. Box/Zip Code:' }}</strong>
                                     {{ $order->shipping_zip }}
                                 </p>
                             @endif
@@ -257,7 +392,7 @@
 
                     @if($order->admin_notes)
                         <div class="mt-3 p-3 bg-light rounded">
-                            <strong>Admin Notes:</strong>
+                            <strong>{{ __('messages.admin_notes') }}:</strong>
                             <p class="mb-0 mt-1 small">{{ $order->admin_notes }}</p>
                         </div>
                     @endif
