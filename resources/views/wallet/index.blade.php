@@ -258,26 +258,43 @@
                             </td>
                             <td>
                                 @php
-                                    $txType = $transaction->transaction_type;
+                                    $txType = $transaction->transaction_type ?? '';
                                     $meta   = $transaction->metadata ?? [];
-                                    if ($txType === 'order_payment') {
+                                    // Normalise legacy records where full description was saved as transaction_type
+                                    if (str_starts_with($txType, 'Order payment for order') || str_starts_with($txType, 'Payment for order')) {
+                                        preg_match('/#([\w-]+)/', $txType, $m);
+                                        $normType = 'order_payment';
+                                        $txLabel  = __('messages.order_payment');
+                                        $txDesc   = __('messages.order_payment_desc', ['number' => $m[1] ?? '']);
+                                    } elseif (str_starts_with($txType, 'Subscription payment') || str_starts_with($txType, 'Payment for') && str_contains($txType, 'subscription')) {
+                                        $normType = 'subscription_payment';
+                                        $txLabel  = __('messages.subscription_payment');
+                                        $txDesc   = __('messages.subscription_payment_desc', ['name' => $meta['subscription_name'] ?? '']);
+                                    } elseif ($txType === 'order_payment') {
+                                        $normType = $txType;
+                                        $txLabel  = __('messages.order_payment');
                                         $num = $meta['order_number'] ?? ($meta['order_id'] ?? '');
                                         $txDesc = __('messages.order_payment_desc', ['number' => $num]);
                                     } elseif ($txType === 'subscription_payment') {
-                                        $planName = $meta['subscription_name'] ?? '';
-                                        $txDesc = __('messages.subscription_payment_desc', ['name' => $planName]);
-                                    } elseif ($txType === 'admin_credit') {
-                                        $txDesc = __('messages.admin_credit_desc');
-                                        if (!empty($transaction->description) && $transaction->description !== 'Admin credit') {
-                                            $txDesc .= ' — ' . $transaction->description;
-                                        }
+                                        $normType = $txType;
+                                        $txLabel  = __('messages.subscription_payment');
+                                        $txDesc   = __('messages.subscription_payment_desc', ['name' => $meta['subscription_name'] ?? '']);
+                                    } elseif ($txType === 'admin_credit' || str_starts_with($txType, 'Admin credit')) {
+                                        $normType = 'admin_credit';
+                                        $txLabel  = __('messages.admin_credit');
+                                        $note     = $transaction->description && $transaction->description !== 'Admin credit' ? ' — ' . $transaction->description : '';
+                                        $txDesc   = __('messages.admin_credit_desc') . $note;
                                     } else {
-                                        $txDesc = $transaction->description ?: __('messages.' . $txType, [], null) ?? ucfirst(str_replace('_', ' ', $txType));
+                                        $normType = $txType;
+                                        $txLabel  = ucfirst(str_replace('_', ' ', $txType));
+                                        $txDesc   = $transaction->description ?? '';
                                     }
                                 @endphp
                                 <div>
-                                    <strong>{{ __('messages.' . $txType, [], null) ?? ucfirst(str_replace('_', ' ', $txType)) }}</strong>
-                                    <div class="text-muted small">{{ $txDesc }}</div>
+                                    <strong>{{ $txLabel }}</strong>
+                                    @if($txDesc)
+                                        <div class="text-muted small">{{ $txDesc }}</div>
+                                    @endif
                                 </div>
                             </td>
                             <td>
