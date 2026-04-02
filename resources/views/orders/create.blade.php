@@ -877,7 +877,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Store product data in cache
                         productData[selectedProductId] = {
                             isAliexpress: data.product.is_aliexpress,
-                            aliexpressId: data.product.aliexpress_id
+                            aliexpressId: data.product.aliexpress_id,
+                            price: data.product.price,
+                            currency: data.product.currency
                         };
 
                         updateFreightSectionVisibility();
@@ -910,7 +912,9 @@ document.addEventListener('DOMContentLoaded', function() {
         skuSelectionSection.style.display = 'block';
         productData[{{ $product->id }}] = {
             isAliexpress: true,
-            aliexpressId: '{{ $product->aliexpress_id }}'
+            aliexpressId: '{{ $product->aliexpress_id }}',
+            price: {{ $product->price }},
+            currency: '{{ $product->currency ?? "AED" }}'
         };
         loadProductSkus({{ $product->id }});
     @endif
@@ -1063,6 +1067,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 html += '</div>';
+
+                // Grand Total Section
+                const productInfo = productData[currentProductId];
+                const quantity = parseInt(quantityInput.value) || 1;
+                if (productInfo && productInfo.price) {
+                    const productSubtotal = parseFloat(productInfo.price) * quantity;
+                    const freightAmt = parseFloat(data.freight_amount) || 0;
+                    const grandTotal = productSubtotal + freightAmt;
+                    const currency = data.freight_currency || productInfo.currency || 'AED';
+                    html += '<div class="mt-3 p-3 rounded" style="background-color: rgba(86,28,4,0.08); border: 2px solid #561C04;">';
+                    html += '<div class="d-flex justify-content-between mb-2">';
+                    html += '<span class="text-muted">{{ __("messages.products_subtotal") }} (× ' + quantity + ')</span>';
+                    html += '<span style="direction:ltr;">' + currency + ' ' + productSubtotal.toFixed(2) + '</span>';
+                    html += '</div>';
+                    html += '<div class="d-flex justify-content-between mb-2">';
+                    html += '<span class="text-muted">{{ __("messages.shipping_cost") }}</span>';
+                    html += '<span style="direction:ltr;">' + (freightAmt > 0 ? currency + ' ' + freightAmt.toFixed(2) : '{{ __("messages.free") }}') + '</span>';
+                    html += '</div>';
+                    html += '<div class="d-flex justify-content-between pt-2 border-top fw-bold">';
+                    html += '<span style="color:#561C04;">{{ __("messages.total_amount") }}</span>';
+                    html += '<span style="direction:ltr; color:#561C04; font-size:1.2em;">' + currency + ' ' + grandTotal.toFixed(2) + '</span>';
+                    html += '</div>';
+                    html += '</div>';
+                }
 
                 freightResult.innerHTML = html;
                 freightResult.style.display = 'block';
