@@ -153,12 +153,6 @@
                                         <a href="{{ route('products.show', $order->product) }}" class="text-decoration-none">
                                             {{ $order->product->name }}
                                         </a>
-                                        @if($order->product->isAliexpressProduct())
-                                            <br><small class="text-muted">
-                                                <img src="https://flagcdn.com/w20/cn.png" alt="CN" style="width:16px;height:12px;object-fit:cover;vertical-align:middle;border-radius:2px;" />
-                                                {{ __('messages.from_china') }}
-                                            </small>
-                                        @endif
                                     </td>
                                     <td>{{ $order->quantity }}</td>
                                     <td style="direction: ltr; text-align: left;">

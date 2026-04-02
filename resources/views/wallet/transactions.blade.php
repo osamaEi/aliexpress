@@ -184,16 +184,25 @@
                                 </span>
                             </td>
                             <td>
-                                <div>{{ $transaction->description }}</div>
-                                @if($transaction->metadata)
-                                <small class="text-muted">
-                                    @if(isset($transaction->metadata['order_id']))
-                                        {{ __('messages.order') }} #{{ $transaction->metadata['order_id'] }}
-                                    @elseif(isset($transaction->metadata['subscription_id']))
-                                        {{ __('messages.subscription') }} #{{ $transaction->metadata['subscription_id'] }}
-                                    @endif
-                                </small>
-                                @endif
+                                @php
+                                    $txType = $transaction->transaction_type;
+                                    $meta   = $transaction->metadata ?? [];
+                                    if ($txType === 'order_payment') {
+                                        $num = $meta['order_number'] ?? ($meta['order_id'] ?? '');
+                                        $txDesc = __('messages.order_payment_desc', ['number' => $num]);
+                                    } elseif ($txType === 'subscription_payment') {
+                                        $planName = $meta['subscription_name'] ?? '';
+                                        $txDesc = __('messages.subscription_payment_desc', ['name' => $planName]);
+                                    } elseif ($txType === 'admin_credit') {
+                                        $txDesc = __('messages.admin_credit_desc');
+                                        if (!empty($transaction->description) && $transaction->description !== 'Admin credit') {
+                                            $txDesc .= ' — ' . $transaction->description;
+                                        }
+                                    } else {
+                                        $txDesc = $transaction->description;
+                                    }
+                                @endphp
+                                <div>{{ $txDesc }}</div>
                             </td>
                             <td class="text-end" style="direction: ltr;">
                                 <strong class="{{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }} d-inline-flex align-items-center gap-1">

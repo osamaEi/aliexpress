@@ -72,12 +72,14 @@
                                     <span class="badge bg-info">
                                         @if($subscription->payment_method === 'ziina')
                                             <i class="ri-secure-payment-line me-1"></i>Ziina
-                                        @elseif($subscription->payment_method === 'wallet')
+                                                        @elseif($subscription->payment_method === 'wallet')
                                             <i class="ri-wallet-line me-1"></i>{{ __('messages.wallet') }}
                                         @elseif($subscription->payment_method === 'paymob')
                                             <i class="ri-bank-card-line me-1"></i>Paymob
+                                        @elseif($subscription->payment_method === 'admin_assigned')
+                                            <i class="ri-shield-user-line me-1"></i>{{ __('messages.admin_assigned') }}
                                         @else
-                                            {{ ucfirst($subscription->payment_method) }}
+                                            {{ ucfirst(str_replace('_', ' ', $subscription->payment_method)) }}
                                         @endif
                                     </span>
                                 @else

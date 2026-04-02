@@ -84,11 +84,8 @@ class TicketController extends Controller
             // WhatsApp failure should not block ticket creation
         }
 
-        // Redirect user to WhatsApp chat
-        $userMessage = "مرحباً، أريد المتابعة بخصوص تذكرة الدعم #" . $ticket->id . " - " . $ticket->subject;
-        $whatsappUrl = 'https://wa.me/971501774477?text=' . rawurlencode($userMessage);
-
-        return redirect()->away($whatsappUrl);
+        return redirect()->route('seller.tickets.show', $ticket)
+            ->with('success', __('messages.ticket_created_successfully'));
     }
 
     /**

@@ -257,11 +257,27 @@
                                 @endif
                             </td>
                             <td>
+                                @php
+                                    $txType = $transaction->transaction_type;
+                                    $meta   = $transaction->metadata ?? [];
+                                    if ($txType === 'order_payment') {
+                                        $num = $meta['order_number'] ?? ($meta['order_id'] ?? '');
+                                        $txDesc = __('messages.order_payment_desc', ['number' => $num]);
+                                    } elseif ($txType === 'subscription_payment') {
+                                        $planName = $meta['subscription_name'] ?? '';
+                                        $txDesc = __('messages.subscription_payment_desc', ['name' => $planName]);
+                                    } elseif ($txType === 'admin_credit') {
+                                        $txDesc = __('messages.admin_credit_desc');
+                                        if (!empty($transaction->description) && $transaction->description !== 'Admin credit') {
+                                            $txDesc .= ' — ' . $transaction->description;
+                                        }
+                                    } else {
+                                        $txDesc = $transaction->description ?: __('messages.' . $txType, [], null) ?? ucfirst(str_replace('_', ' ', $txType));
+                                    }
+                                @endphp
                                 <div>
-                                    <strong>{{ ucfirst(str_replace('_', ' ', $transaction->transaction_type)) }}</strong>
-                                    @if($transaction->description)
-                                    <div class="text-muted small">{{ $transaction->description }}</div>
-                                    @endif
+                                    <strong>{{ __('messages.' . $txType, [], null) ?? ucfirst(str_replace('_', ' ', $txType)) }}</strong>
+                                    <div class="text-muted small">{{ $txDesc }}</div>
                                 </div>
                             </td>
                             <td>
