@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\NewTicketNotification;
 use App\Models\Ticket;
 use App\Models\TicketReply;
+use App\Services\WhatsAppOTPService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -55,6 +56,9 @@ class TicketController extends Controller
         // Load the user relationship for the email
         $ticket->load('user');
 
+        // Load the user for notifications
+        $seller = $ticket->user;
+
         // Send email notification to admin
         $adminEmail = env('MAIL_USERNAME');
         if ($adminEmail) {
@@ -65,9 +69,24 @@ class TicketController extends Controller
             }
         }
 
-        // Redirect to WhatsApp with ticket details
-        $message = "Ticket #" . $ticket->id . "\nSubject: " . $ticket->subject . "\nPriority: " . ucfirst($ticket->priority);
-        $whatsappUrl = 'https://wa.me/971501774477?text=' . rawurlencode($message);
+        // Send WhatsApp notification to admin via 4jawaly API
+        try {
+            $whatsapp = new WhatsAppOTPService();
+            $notifyMessage =
+                "🎫 تذكرة دعم جديدة\n" .
+                "رقم التذكرة: #" . $ticket->id . "\n" .
+                "الموضوع: " . $ticket->subject . "\n" .
+                "الأولوية: " . ucfirst($ticket->priority) . "\n" .
+                "المرسل: " . $seller->name . " (" . $seller->email . ")\n" .
+                "الرابط: " . url('/admin/tickets/' . $ticket->id);
+            $whatsapp->sendText('201116073816', $notifyMessage);
+        } catch (\Exception $e) {
+            // WhatsApp failure should not block ticket creation
+        }
+
+        // Redirect user to WhatsApp chat
+        $userMessage = "مرحباً، أريد المتابعة بخصوص تذكرة الدعم #" . $ticket->id . " - " . $ticket->subject;
+        $whatsappUrl = 'https://wa.me/971501774477?text=' . rawurlencode($userMessage);
 
         return redirect()->away($whatsappUrl);
     }

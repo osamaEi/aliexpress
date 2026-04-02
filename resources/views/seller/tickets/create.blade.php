@@ -26,19 +26,32 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="priority" class="form-label">{{ __('messages.priority') }}</label>
-                            <select class="form-select @error('priority') is-invalid @enderror"
-                                    id="priority"
-                                    name="priority"
-                                    required>
-                                <option value="" disabled {{ old('priority') ? '' : 'selected' }}>{{ __('messages.select_priority') }}</option>
-                                <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>{{ __('messages.priority_low') }}</option>
-                                <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>{{ __('messages.priority_medium') }}</option>
-                                <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>{{ __('messages.priority_high') }}</option>
-                            </select>
+                            <label class="form-label d-block">{{ __('messages.priority') }}</label>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <label class="priority-btn">
+                                    <input type="radio" name="priority" value="low" {{ old('priority') == 'low' ? 'checked' : '' }} required>
+                                    <span class="btn btn-outline-success">{{ __('messages.priority_low') }}</span>
+                                </label>
+                                <label class="priority-btn">
+                                    <input type="radio" name="priority" value="medium" {{ old('priority') == 'medium' ? 'checked' : '' }}>
+                                    <span class="btn btn-outline-warning">{{ __('messages.priority_medium') }}</span>
+                                </label>
+                                <label class="priority-btn">
+                                    <input type="radio" name="priority" value="high" {{ old('priority') == 'high' ? 'checked' : '' }}>
+                                    <span class="btn btn-outline-danger">{{ __('messages.priority_high') }}</span>
+                                </label>
+                            </div>
                             @error('priority')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
+                            <style>
+                                .priority-btn input[type="radio"] { display: none; }
+                                .priority-btn input[type="radio"]:checked + span { opacity: 1; filter: none; color: #fff !important; }
+                                .priority-btn span { opacity: 0.55; cursor: pointer; transition: opacity .2s; min-width: 90px; }
+                                .priority-btn input[type="radio"]:checked + span.btn-outline-success { background-color: var(--bs-success) !important; border-color: var(--bs-success) !important; }
+                                .priority-btn input[type="radio"]:checked + span.btn-outline-warning { background-color: var(--bs-warning) !important; border-color: var(--bs-warning) !important; }
+                                .priority-btn input[type="radio"]:checked + span.btn-outline-danger  { background-color: var(--bs-danger)  !important; border-color: var(--bs-danger)  !important; }
+                            </style>
                         </div>
 
                         <div class="mb-3">

@@ -10,6 +10,29 @@ class WhatsAppOTPService
     private $baseUrl = "https://api-users.4jawaly.com/api/v1/whatsapp/";
     private $namespace = "d62f7444_aa0b_40b8_8f46_0bb55ef2862e";
 
+    public function sendText($phoneNumber, $message)
+    {
+        try {
+            $data = [
+                "path" => "message/text",
+                "params" => [
+                    "phone" => $phoneNumber,
+                    "message" => $message
+                ]
+            ];
+
+            return $this->makeRequest($data);
+
+        } catch (\Exception $e) {
+            \Log::error('WhatsApp Text Error:', [
+                'phone' => $phoneNumber,
+                'error' => $e->getMessage()
+            ]);
+
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
     public function sendOTP($phoneNumber, $code, $isEnglish = false)
     {
         try {
