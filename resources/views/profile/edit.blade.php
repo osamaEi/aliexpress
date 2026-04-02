@@ -70,17 +70,13 @@
                 @endphp
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <i class="ri-alert-line me-2"></i>
-                    <strong>{{ app()->getLocale() == 'ar' ? 'مطلوب إكمال البيانات التالية:' : 'Please complete the following required fields:' }}</strong>
+                    <strong>{{ __('messages.complete_required_data') }}</strong>
                     <ul class="mb-0 mt-2">
                         @foreach($missingFields as $field)
                             <li>{{ $fieldLabels[$field] ?? $field }}</li>
                         @endforeach
                     </ul>
-                    <small class="d-block mt-2">
-                        {{ app()->getLocale() == 'ar'
-                            ? 'لن تتمكن من الوصول إلى النظام حتى تكمل جميع الحقول المطلوبة.'
-                            : 'You will not be able to access the system until you complete all required fields.' }}
-                    </small>
+                    <small class="d-block mt-2">{{ __('messages.system_access_required') }}</small>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
@@ -141,10 +137,24 @@
 
                     <div class="col-md-6">
                         <label for="phone" class="form-label">{{ __('messages.phone') }}</label>
-                        <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                               id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
-                               placeholder="{{ app()->getLocale() == 'ar' ? '971501234567' : '971501234567' }}"
-                               dir="ltr" style="text-align: left;" readonly>
+                        <div class="input-group">
+                            <select class="form-select flex-grow-0" id="phone_code" name="phone_code" style="max-width: 120px; direction: ltr;">
+                                <option value="+971" {{ old('phone_code', $user->phone_code ?? '+971') == '+971' ? 'selected' : '' }}>🇦🇪 +971</option>
+                                <option value="+966" {{ old('phone_code', $user->phone_code ?? '+971') == '+966' ? 'selected' : '' }}>🇸🇦 +966</option>
+                                <option value="+20"  {{ old('phone_code', $user->phone_code ?? '+971') == '+20'  ? 'selected' : '' }}>🇪🇬 +20</option>
+                                <option value="+965" {{ old('phone_code', $user->phone_code ?? '+971') == '+965' ? 'selected' : '' }}>🇰🇼 +965</option>
+                                <option value="+974" {{ old('phone_code', $user->phone_code ?? '+971') == '+974' ? 'selected' : '' }}>🇶🇦 +974</option>
+                                <option value="+973" {{ old('phone_code', $user->phone_code ?? '+971') == '+973' ? 'selected' : '' }}>🇧🇭 +973</option>
+                                <option value="+968" {{ old('phone_code', $user->phone_code ?? '+971') == '+968' ? 'selected' : '' }}>🇴🇲 +968</option>
+                                <option value="+962" {{ old('phone_code', $user->phone_code ?? '+971') == '+962' ? 'selected' : '' }}>🇯🇴 +962</option>
+                                <option value="+961" {{ old('phone_code', $user->phone_code ?? '+971') == '+961' ? 'selected' : '' }}>🇱🇧 +961</option>
+                                <option value="+86"  {{ old('phone_code', $user->phone_code ?? '+971') == '+86'  ? 'selected' : '' }}>🇨🇳 +86</option>
+                            </select>
+                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                                   id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
+                                   placeholder="501234567"
+                                   dir="ltr" style="text-align: left;">
+                        </div>
                         @error('phone')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -626,23 +636,23 @@
                     <!-- Seller Store Information (Required) -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
-                            <i class="ri-store-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'معلومات المتجر' : 'Store Information' }}
+                            <i class="ri-store-2-line me-1"></i>{{ __('messages.store_information') }}
                             <span class="text-danger">*</span>
                         </h6>
-                        <p class="text-muted small mb-3">{{ app()->getLocale() == 'ar' ? 'يرجى إكمال جميع الحقول المطلوبة' : 'Please complete all required fields' }}</p>
+                        <p class="text-muted small mb-3">{{ __('messages.complete_required_fields') }}</p>
                     </div>
 
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="company_name" class="form-label">
-                                <i class="ri-building-line"></i> {{ app()->getLocale() == 'ar' ? 'اسم الشركة' : 'Company Name' }} <span class="text-danger">*</span>
+                                <i class="ri-building-line"></i> {{ __('messages.company_name') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text"
                                    class="form-control @error('company_name') is-invalid @enderror"
                                    id="company_name"
                                    name="company_name"
                                    value="{{ old('company_name', $user->company_name) }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسم شركتك' : 'Enter your company name' }}">
+                                   placeholder="{{ __('messages.enter_company_name') }}">
                             @error('company_name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -650,7 +660,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="website_url" class="form-label">{{ app()->getLocale() == 'ar' ? 'رابط الموقع' : 'Website URL' }}</label>
+                        <label for="website_url" class="form-label">{{ __('messages.website_url') }}</label>
                         <input type="url" class="form-control @error('website_url') is-invalid @enderror"
                                id="website_url" name="website_url" value="{{ old('website_url', $user->website_url) }}"
                                placeholder="https://example.com" dir="ltr" style="text-align: left;">
@@ -662,7 +672,7 @@
                     <!-- Social Media Accounts -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
-                            <i class="ri-share-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'حسابات التواصل الاجتماعي' : 'Social Media Accounts' }}
+                            <i class="ri-share-line me-1"></i>{{ __('messages.social_media_accounts') }}
                         </h6>
                     </div>
 
@@ -672,7 +682,7 @@
 
                     <div class="col-md-6">
                         <label for="instagram" class="form-label">
-                            <i class="ri-instagram-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'إنستجرام' : 'Instagram' }}
+                            <i class="ri-instagram-line me-1"></i>Instagram
                         </label>
                         <input type="url" class="form-control @error('social_media_accounts.instagram') is-invalid @enderror"
                                id="instagram" name="social_media_accounts[instagram]"
@@ -685,7 +695,7 @@
 
                     <div class="col-md-6">
                         <label for="facebook" class="form-label">
-                            <i class="ri-facebook-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'فيسبوك' : 'Facebook' }}
+                            <i class="ri-facebook-line me-1"></i>Facebook
                         </label>
                         <input type="url" class="form-control @error('social_media_accounts.facebook') is-invalid @enderror"
                                id="facebook" name="social_media_accounts[facebook]"
@@ -698,7 +708,7 @@
 
                     <div class="col-md-6">
                         <label for="twitter" class="form-label">
-                            <i class="ri-twitter-x-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تويتر / إكس' : 'Twitter / X' }}
+                            <i class="ri-twitter-x-line me-1"></i>Twitter / X
                         </label>
                         <input type="url" class="form-control @error('social_media_accounts.twitter') is-invalid @enderror"
                                id="twitter" name="social_media_accounts[twitter]"
@@ -711,7 +721,7 @@
 
                     <div class="col-md-6">
                         <label for="tiktok" class="form-label">
-                            <i class="ri-tiktok-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تيك توك' : 'TikTok' }}
+                            <i class="ri-tiktok-line me-1"></i>TikTok
                         </label>
                         <input type="url" class="form-control @error('social_media_accounts.tiktok') is-invalid @enderror"
                                id="tiktok" name="social_media_accounts[tiktok]"
@@ -724,7 +734,7 @@
 
                     <div class="col-md-6">
                         <label for="snapchat" class="form-label">
-                            <i class="ri-snapchat-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'سناب شات' : 'Snapchat' }}
+                            <i class="ri-snapchat-line me-1"></i>Snapchat
                         </label>
                         <input type="url" class="form-control @error('social_media_accounts.snapchat') is-invalid @enderror"
                                id="snapchat" name="social_media_accounts[snapchat]"
@@ -737,7 +747,7 @@
 
                     <div class="col-md-6">
                         <label for="whatsapp" class="form-label">
-                            <i class="ri-whatsapp-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'واتساب' : 'WhatsApp' }}
+                            <i class="ri-whatsapp-line me-1"></i>WhatsApp
                         </label>
                         <input type="text" class="form-control @error('social_media_accounts.whatsapp') is-invalid @enderror"
                                id="whatsapp" name="social_media_accounts[whatsapp]"
@@ -749,13 +759,13 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="default_currency" class="form-label">{{ app()->getLocale() == 'ar' ? 'العملة الافتراضية' : 'Default Currency' }} <span class="text-danger">*</span></label>
+                        <label for="default_currency" class="form-label">{{ __('messages.default_currency_label') }} <span class="text-danger">*</span></label>
                         @php
                             $currencies = \App\Models\Currency::active();
                             $currentCurrency = old('default_currency', $user->default_currency) ?? session('currency_code', 'AED');
                         @endphp
                         <select class="form-select @error('default_currency') is-invalid @enderror" id="default_currency" name="default_currency">
-                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر العملة' : 'Select Currency' }}</option>
+                            <option value="">{{ __('messages.select_currency') }}</option>
                             @foreach($currencies as $currency)
                                 <option value="{{ $currency->code }}" {{ $currentCurrency == $currency->code ? 'selected' : '' }}>
                                   {{ $currency->localizedName }} ({{ $currency->code }})
@@ -770,28 +780,28 @@
                     <!-- Business Documents Section -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
-                            <i class="ri-file-text-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'مستندات النشاط التجاري' : 'Business Documents' }}
+                            <i class="ri-file-text-line me-1"></i>{{ __('messages.business_documents') }}
                         </h6>
                     </div>
 
                     <div class="col-md-6">
                         <label for="commercial_register" class="form-label">
-                            {{ app()->getLocale() == 'ar' ? 'السجل التجاري' : 'Commercial Register' }}
+                            {{ __('messages.commercial_register') }}
                             <span class="text-danger">*</span>
                         </label>
                         @if($user->commercial_register)
                             <div class="mb-2">
                                 <a href="{{ asset('storage/' . $user->commercial_register) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="ri-file-text-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'عرض المستند الحالي' : 'View Current Document' }}
+                                    <i class="ri-file-text-line me-1"></i>{{ __('messages.view_current_document') }}
                                 </a>
                                 <span class="badge bg-success ms-2">
-                                    <i class="ri-checkbox-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تم الرفع' : 'Uploaded' }}
+                                    <i class="ri-checkbox-circle-line me-1"></i>{{ __('messages.uploaded') }}
                                 </span>
                             </div>
                         @endif
                         <input type="file" class="form-control @error('commercial_register') is-invalid @enderror"
                                id="commercial_register" name="commercial_register" accept=".pdf,.jpg,.jpeg,.png">
-                        <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'PDF أو صورة (حد أقصى 5 ميجابايت)' : 'PDF or image (max 5MB)' }}</small>
+                        <small class="text-muted">{{ __('messages.pdf_or_image_max_5mb') }}</small>
                         @error('commercial_register')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -799,22 +809,22 @@
 
                     <div class="col-md-6">
                         <label for="freelance_document" class="form-label">
-                            {{ app()->getLocale() == 'ar' ? 'وثيقة العمل الحر' : 'Freelance Document' }}
-                            <span class="text-muted small">({{ app()->getLocale() == 'ar' ? 'اختياري' : 'Optional' }})</span>
+                            {{ __('messages.freelance_document') }}
+                            <span class="text-muted small">({{ __('messages.optional') }})</span>
                         </label>
                         @if($user->freelance_document)
                             <div class="mb-2">
                                 <a href="{{ asset('storage/' . $user->freelance_document) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="ri-file-text-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'عرض المستند الحالي' : 'View Current Document' }}
+                                    <i class="ri-file-text-line me-1"></i>{{ __('messages.view_current_document') }}
                                 </a>
                                 <span class="badge bg-success ms-2">
-                                    <i class="ri-checkbox-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تم الرفع' : 'Uploaded' }}
+                                    <i class="ri-checkbox-circle-line me-1"></i>{{ __('messages.uploaded') }}
                                 </span>
                             </div>
                         @endif
                         <input type="file" class="form-control @error('freelance_document') is-invalid @enderror"
                                id="freelance_document" name="freelance_document" accept=".pdf,.jpg,.jpeg,.png">
-                        <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'PDF أو صورة (حد أقصى 5 ميجابايت)' : 'PDF or image (max 5MB)' }}</small>
+                        <small class="text-muted">{{ __('messages.pdf_or_image_max_5mb') }}</small>
                         @error('freelance_document')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -825,13 +835,13 @@
                     <!-- Distributor Registration Information (Read Only) -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">
-                            <i class="ri-store-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'معلومات المتجر' : 'Store Information' }}
+                            <i class="ri-store-2-line me-1"></i>{{ __('messages.store_information') }}
                         </h6>
                     </div>
 
                     @if($user->company_name)
                     <div class="col-md-6">
-                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'اسم الشركة' : 'Company Name' }}</label>
+                        <label class="form-label">{{ __('messages.company_name') }}</label>
                         <input type="text" class="form-control" value="{{ $user->company_name }}" readonly disabled>
                     </div>
                     @endif
@@ -839,20 +849,20 @@
 
                     @if($user->default_currency)
                     <div class="col-md-6">
-                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'العملة الافتراضية' : 'Default Currency' }}</label>
+                        <label class="form-label">{{ __('messages.default_currency_label') }}</label>
                         <input type="text" class="form-control" value="{{ $user->default_currency }}" readonly disabled>
                     </div>
                     @endif
 
                     @if($user->commercial_register)
                     <div class="col-md-6">
-                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'السجل التجاري' : 'Commercial Register' }}</label>
+                        <label class="form-label">{{ __('messages.commercial_register') }}</label>
                         <div class="d-flex align-items-center">
                             <a href="{{ asset('storage/' . $user->commercial_register) }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                <i class="ri-file-text-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'عرض المستند' : 'View Document' }}
+                                <i class="ri-file-text-line me-1"></i>{{ __('messages.view_document') }}
                             </a>
                             <span class="badge bg-success ms-2">
-                                <i class="ri-checkbox-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تم الرفع' : 'Uploaded' }}
+                                <i class="ri-checkbox-circle-line me-1"></i>{{ __('messages.uploaded') }}
                             </span>
                         </div>
                     </div>
@@ -860,13 +870,13 @@
 
                     @if($user->freelance_document)
                     <div class="col-md-6">
-                        <label class="form-label">{{ app()->getLocale() == 'ar' ? 'وثيقة العمل الحر' : 'Freelance Document' }}</label>
+                        <label class="form-label">{{ __('messages.freelance_document') }}</label>
                         <div class="d-flex align-items-center">
                             <a href="{{ asset('storage/' . $user->freelance_document) }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                <i class="ri-file-user-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'عرض المستند' : 'View Document' }}
+                                <i class="ri-file-user-line me-1"></i>{{ __('messages.view_document') }}
                             </a>
                             <span class="badge bg-success ms-2">
-                                <i class="ri-checkbox-circle-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تم الرفع' : 'Uploaded' }}
+                                <i class="ri-checkbox-circle-line me-1"></i>{{ __('messages.uploaded') }}
                             </span>
                         </div>
                     </div>
@@ -928,7 +938,7 @@
                     </div>
 
                     <div class="col-md-6 withdrawal-fields bank-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? '' : 'display: none;' }}">
-                        <label for="bank_account_number" class="form-label">{{ __('messages.account_number') }}</label>
+                        <label for="bank_account_number" class="form-label">{{ __('messages.account_number') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('bank_account_number') is-invalid @enderror"
                                id="bank_account_number" name="bank_account_number" value="{{ old('bank_account_number', $user->bank_account_number) }}"
                                dir="ltr" style="text-align: left;">
@@ -949,7 +959,7 @@
                     </div>
 
                     <div class="col-md-6 withdrawal-fields bank-fields" style="{{ old('withdrawal_method', $user->withdrawal_method) == 'bank_transfer' ? '' : 'display: none;' }}">
-                        <label for="bank_swift_code" class="form-label">{{ __('messages.swift_code') }}</label>
+                        <label for="bank_swift_code" class="form-label">{{ __('messages.swift_code') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('bank_swift_code') is-invalid @enderror"
                                id="bank_swift_code" name="bank_swift_code" value="{{ old('bank_swift_code', $user->bank_swift_code) }}">
                         @error('bank_swift_code')

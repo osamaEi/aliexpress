@@ -151,7 +151,7 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('products.show', $order->product) }}" class="text-decoration-none">
-                                            {{ $order->product->name }}
+                                            {{ app()->getLocale() == 'ar' && $order->product->name_ar ? $order->product->name_ar : $order->product->name }}
                                         </a>
                                     </td>
                                     <td>{{ $order->quantity }}</td>

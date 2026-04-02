@@ -1578,6 +1578,27 @@ return [
     'withdrawal_request_submitted' => 'تم تقديم طلب السحب بنجاح',
     'other' => 'أخرى',
 
+    // Profile Page - Inline Translations
+    'phone_country_code' => 'رمز الدولة',
+    'complete_required_data' => 'مطلوب إكمال البيانات التالية:',
+    'system_access_required' => 'لن تتمكن من الوصول إلى النظام حتى تكمل جميع الحقول المطلوبة.',
+    'complete_required_fields' => 'يرجى إكمال جميع الحقول المطلوبة',
+    'enter_company_name' => 'أدخل اسم شركتك',
+    'website_url' => 'رابط الموقع',
+    'social_media_accounts' => 'حسابات التواصل الاجتماعي',
+    'default_currency_label' => 'العملة الافتراضية',
+    'select_currency' => 'اختر العملة',
+    'business_documents' => 'مستندات النشاط التجاري',
+    'commercial_register' => 'السجل التجاري',
+    'view_current_document' => 'عرض المستند الحالي',
+    'view_document' => 'عرض المستند',
+    'uploaded' => 'تم الرفع',
+    'pdf_or_image_max_5mb' => 'PDF أو صورة (حد أقصى 5 ميجابايت)',
+    'freelance_document' => 'وثيقة العمل الحر',
+    'validation_errors' => 'أخطاء في البيانات',
+    'products_subtotal' => 'سعر المنتج',
+    'free' => 'مجاني',
+
     // Seller Setup Flow
     'please_complete_profile_settings' => 'يرجى إكمال إعدادات الملف الشخصي أولاً',
     'please_complete_profit_settings' => 'يرجى إكمال إعدادات الأرباح للمتابعة',

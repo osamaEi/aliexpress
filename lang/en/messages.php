@@ -1268,6 +1268,27 @@ return [
     'withdrawal_request_submitted' => 'Withdrawal request submitted successfully',
     'other' => 'Other',
 
+    // Profile Page - Inline Translations
+    'phone_country_code' => 'Country Code',
+    'complete_required_data' => 'Please complete the following required fields:',
+    'system_access_required' => 'You will not be able to access the system until you complete all required fields.',
+    'complete_required_fields' => 'Please complete all required fields',
+    'enter_company_name' => 'Enter your company name',
+    'website_url' => 'Website URL',
+    'social_media_accounts' => 'Social Media Accounts',
+    'default_currency_label' => 'Default Currency',
+    'select_currency' => 'Select Currency',
+    'business_documents' => 'Business Documents',
+    'commercial_register' => 'Commercial Register',
+    'view_current_document' => 'View Current Document',
+    'view_document' => 'View Document',
+    'uploaded' => 'Uploaded',
+    'pdf_or_image_max_5mb' => 'PDF or image (max 5MB)',
+    'freelance_document' => 'Freelance Document',
+    'validation_errors' => 'Validation Errors',
+    'products_subtotal' => 'Products Subtotal',
+    'free' => 'Free',
+
     // Seller Setup Flow
     'please_complete_profile_settings' => 'Please complete your profile settings first',
     'please_complete_profit_settings' => 'Please complete your profit settings to continue',

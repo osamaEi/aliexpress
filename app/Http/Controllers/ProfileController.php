@@ -36,6 +36,7 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'phone' => [$isSeller ? 'required' : 'nullable', 'string', 'max:20'],
+            'phone_code' => ['nullable', 'string', 'max:10'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:100'],
             // Withdrawal method fields
@@ -45,9 +46,9 @@ class ProfileController extends Controller
             // Bank transfer fields
             'bank_name' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:255'],
             'bank_account_name' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:255'],
-            'bank_account_number' => ['nullable', 'string', 'max:50'],
+            'bank_account_number' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:50'],
             'bank_iban' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:50'],
-            'bank_swift_code' => ['nullable', 'string', 'max:20'],
+            'bank_swift_code' => ['nullable', 'required_if:withdrawal_method,bank_transfer', 'string', 'max:20'],
             // Mobile wallet fields
             'wallet_provider' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:50'],
             'wallet_phone_number' => ['nullable', 'required_if:withdrawal_method,mobile_wallet', 'string', 'max:20'],

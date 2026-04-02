@@ -91,21 +91,23 @@
                                     <td class="py-1">× {{ $order->quantity }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="text-muted py-1">{{ $isAr ? 'سعر المنتج' : 'Products Subtotal' }}</td>
+                                    <td class="text-muted py-1">{{ __('messages.products_subtotal') }}</td>
                                     <td class="py-1" style="direction:ltr;">
                                         <x-session-currency-icon width="13" height="13" />
                                         {{ number_format($subtotal, 2) }}
                                     </td>
                                 </tr>
-                                @if($freight > 0)
                                 <tr>
                                     <td class="text-muted py-1">{{ __('messages.shipping_cost') }}</td>
-                                    <td class="py-1 text-info" style="direction:ltr;">
-                                        + <x-session-currency-icon width="13" height="13" />
-                                        {{ number_format($freight, 2) }}
+                                    <td class="py-1 {{ $freight > 0 ? 'text-info' : 'text-muted' }}" style="direction:ltr;">
+                                        @if($freight > 0)
+                                            + <x-session-currency-icon width="13" height="13" />
+                                            {{ number_format($freight, 2) }}
+                                        @else
+                                            {{ __('messages.free') }}
+                                        @endif
                                     </td>
                                 </tr>
-                                @endif
                                 <tr class="border-top">
                                     <td class="py-1 fw-bold">{{ __('messages.total_amount') }}</td>
                                     <td class="py-1 fw-bold fs-5" style="direction:ltr; color:#561C04;">
@@ -175,19 +177,21 @@
                                     <span>× {{ $order->quantity }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">{{ $isAr ? 'سعر المنتج' : 'Products Subtotal' }}</span>
+                                    <span class="text-muted">{{ __('messages.products_subtotal') }}</span>
                                     <span style="direction:ltr;" class="d-inline-flex align-items-center gap-1">
                                         <x-session-currency-icon width="13" height="13" />{{ number_format($subtotal, 2) }}
                                     </span>
                                 </div>
-                                @if($freight > 0)
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted">{{ __('messages.shipping_cost') }}</span>
-                                    <span class="text-info" style="direction:ltr;" class="d-inline-flex align-items-center gap-1">
-                                        + <x-session-currency-icon width="13" height="13" />{{ number_format($freight, 2) }}
+                                    <span class="{{ $freight > 0 ? 'text-info' : 'text-muted' }}" style="direction:ltr;" class="d-inline-flex align-items-center gap-1">
+                                        @if($freight > 0)
+                                            + <x-session-currency-icon width="13" height="13" />{{ number_format($freight, 2) }}
+                                        @else
+                                            {{ __('messages.free') }}
+                                        @endif
                                     </span>
                                 </div>
-                                @endif
                                 <div class="d-flex justify-content-between pt-2 border-top">
                                     <span class="fw-bold">{{ __('messages.total_amount') }}</span>
                                     <span class="fw-bold fs-5 d-inline-flex align-items-center gap-1" style="direction:ltr; color:#561C04;">
