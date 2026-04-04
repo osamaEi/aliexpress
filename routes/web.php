@@ -24,6 +24,43 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Setup: Create first admin (only works when no admin exists)
+Route::get('/setup/create-admin', function () {
+    $adminExists = \App\Models\User::where('user_type', 'admin')->exists();
+    if ($adminExists) {
+        abort(403, 'Admin already exists.');
+    }
+    return view('setup.create-admin');
+})->name('setup.create-admin');
+
+Route::post('/setup/create-admin', function (\Illuminate\Http\Request $request) {
+    $adminExists = \App\Models\User::where('user_type', 'admin')->exists();
+    if ($adminExists) {
+        abort(403, 'Admin already exists.');
+    }
+
+    $validated = $request->validate([
+        'name'                  => 'required|string|max:255',
+        'email'                 => 'required|email|unique:users,email',
+        'password'              => 'required|min:8|confirmed',
+    ]);
+
+    $user = \App\Models\User::create([
+        'name'              => $validated['name'],
+        'email'             => $validated['email'],
+        'password'          => \Illuminate\Support\Facades\Hash::make($validated['password']),
+        'user_type'         => 'admin',
+        'email_verified_at' => now(),
+    ]);
+
+    $adminRole = \App\Models\Role::where('slug', 'admin')->first();
+    if ($adminRole) {
+        $user->roles()->attach($adminRole->id);
+    }
+
+    return redirect('/admin/dashboard')->with('success', 'Admin account created successfully. Please log in.');
+})->name('setup.create-admin.store');
+
 // Language Routes
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
