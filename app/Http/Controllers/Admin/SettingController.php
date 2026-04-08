@@ -24,8 +24,28 @@ class SettingController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'settings' => 'required|array',
+            'settings' => 'nullable|array',
         ]);
+
+        // Handle .env-based settings (reCAPTCHA)
+        $envKeys = [
+            'recaptcha_site_key'    => 'RECAPTCHA_SITE_KEY',
+            'recaptcha_secret_key'  => 'RECAPTCHA_SECRET_KEY',
+            'recaptcha_enabled'     => 'RECAPTCHA_ENABLED',
+        ];
+
+        $envInputs = $request->input('env_settings', []);
+        // recaptcha_enabled is a checkbox — not present when unchecked
+        $envInputs['recaptcha_enabled'] = $request->has('env_settings.recaptcha_enabled') ? 'true' : 'false';
+
+        foreach ($envKeys as $inputKey => $envKey) {
+            if (isset($envInputs[$inputKey])) {
+                $this->updateEnvValue($envKey, $envInputs[$inputKey]);
+            }
+        }
+
+        // Refresh config cache after .env changes
+        \Artisan::call('config:clear');
 
         // Define settings that should be created if they don't exist
         $newSettings = [
@@ -48,15 +68,11 @@ class SettingController extends Controller
             'require_subscription_distributor' => ['type' => 'boolean', 'description' => 'Require subscription for distributors'],
             'lock_products_on_subscription_expiry' => ['type' => 'boolean', 'description' => 'Lock products when subscription expires'],
             'subscription_grace_period_days' => ['type' => 'number', 'description' => 'Grace period in days after subscription expiry'],
-            // reCAPTCHA
-            'recaptcha_site_key' => ['type' => 'text', 'description' => 'reCAPTCHA v3 Site Key'],
-            'recaptcha_secret_key' => ['type' => 'text', 'description' => 'reCAPTCHA v3 Secret Key'],
-            'recaptcha_enabled' => ['type' => 'boolean', 'description' => 'Enable reCAPTCHA verification'],
             // Commission profit type
             'admin_profit_commission' => ['type' => 'number', 'description' => 'Platform commission rate percentage per order'],
         ];
 
-        foreach ($request->settings as $key => $value) {
+        foreach ($request->input('settings', []) as $key => $value) {
             $setting = Setting::where('key', $key)->first();
 
             // If setting doesn't exist, check if it's a known new setting and create it
@@ -135,5 +151,25 @@ class SettingController extends Controller
         }
 
         return response()->json(['success' => false, 'message' => 'Image not found'], 404);
+    }
+
+    /**
+     * Update a single key in the .env file.
+     */
+    protected function updateEnvValue(string $key, string $value): void
+    {
+        $path = base_path('.env');
+        $content = file_get_contents($path);
+
+        // Wrap value in quotes if it contains spaces
+        $escaped = str_contains($value, ' ') ? "\"{$value}\"" : $value;
+
+        if (preg_match("/^{$key}=.*/m", $content)) {
+            $content = preg_replace("/^{$key}=.*/m", "{$key}={$escaped}", $content);
+        } else {
+            $content .= "\n{$key}={$escaped}\n";
+        }
+
+        file_put_contents($path, $content);
     }
 }

@@ -515,12 +515,6 @@
                                 </div>
                             </div>
 
-                            @php
-                                $recaptchaSiteKey = $settings->get('text', collect())->firstWhere('key', 'recaptcha_site_key');
-                                $recaptchaSecretKey = $settings->get('text', collect())->firstWhere('key', 'recaptcha_secret_key');
-                                $recaptchaEnabled = $settings->get('boolean', collect())->firstWhere('key', 'recaptcha_enabled');
-                            @endphp
-
                             <div class="col-12 mt-3 mb-2">
                                 <hr>
                                 <h6 class="text-muted">
@@ -533,10 +527,10 @@
                             <div class="col-md-12 mb-3">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox"
-                                        name="settings[recaptcha_enabled]"
+                                        name="env_settings[recaptcha_enabled]"
                                         id="recaptcha_enabled"
-                                        value="1"
-                                        {{ old('settings.recaptcha_enabled', $recaptchaEnabled?->value) == '1' ? 'checked' : '' }}>
+                                        value="true"
+                                        {{ config('services.recaptcha.enabled') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="recaptcha_enabled">
                                         {{ app()->getLocale() == 'ar' ? 'تفعيل التحقق reCAPTCHA' : 'Enable reCAPTCHA Verification' }}
                                     </label>
@@ -551,10 +545,10 @@
                                 </label>
                                 <input
                                     type="password"
-                                    name="settings[recaptcha_site_key]"
+                                    name="env_settings[recaptcha_site_key]"
                                     id="recaptcha_site_key"
                                     class="form-control"
-                                    value="{{ old('settings.recaptcha_site_key', $recaptchaSiteKey?->value ?? '') }}"
+                                    value="{{ old('env_settings.recaptcha_site_key', config('services.recaptcha.site_key') ?? '') }}"
                                     placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل مفتاح الموقع' : 'Enter reCAPTCHA site key' }}">
                                 <div class="form-check form-switch mt-2">
                                     <input class="form-check-input" type="checkbox" id="show_recaptcha_site" onclick="togglePasswordVisibility('recaptcha_site_key')">
@@ -572,10 +566,10 @@
                                 </label>
                                 <input
                                     type="password"
-                                    name="settings[recaptcha_secret_key]"
+                                    name="env_settings[recaptcha_secret_key]"
                                     id="recaptcha_secret_key"
                                     class="form-control"
-                                    value="{{ old('settings.recaptcha_secret_key', $recaptchaSecretKey?->value ?? '') }}"
+                                    value="{{ old('env_settings.recaptcha_secret_key', config('services.recaptcha.secret_key') ?? '') }}"
                                     placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل المفتاح السري' : 'Enter reCAPTCHA secret key' }}">
                                 <div class="form-check form-switch mt-2">
                                     <input class="form-check-input" type="checkbox" id="show_recaptcha_secret" onclick="togglePasswordVisibility('recaptcha_secret_key')">

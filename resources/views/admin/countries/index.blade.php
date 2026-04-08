@@ -137,7 +137,11 @@
                         @forelse($countries as $country)
                         <tr>
                             <td>
-                                <span style="font-size: 1.5rem;">{{ $country->flag_display }}</span>
+                                <img src="https://flagcdn.com/w40/{{ strtolower($country->code) }}.png"
+                                     alt="{{ $country->code }}"
+                                     style="width:32px;height:22px;object-fit:cover;border-radius:3px;"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+                                <span style="display:none;font-size:1.2rem;">{{ $country->flag_display }}</span>
                             </td>
                             <td><strong>{{ $country->code }}</strong></td>
                             <td>
@@ -148,7 +152,7 @@
                                 <small class="text-muted d-block">{{ $country->name }}</small>
                                 @endif
                             </td>
-                            <td>{{ $country->phone_code ?? '-' }}</td>
+                            <td dir="ltr" style="text-align:start;">{{ $country->phone_code ?? '-' }}</td>
                             <td>{{ $country->currency_code ?? '-' }}</td>
                             <td>
                                 @if($country->is_source)
