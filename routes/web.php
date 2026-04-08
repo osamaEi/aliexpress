@@ -159,6 +159,9 @@ Route::get('/aliexpress/product/{productId}', [AliExpressController::class, 'det
 Route::get('/aliexpress/check-enrollment', [AliExpressController::class, 'checkEnrollment'])->name('aliexpress.enrollment');
 
 Route::middleware('auth')->group(function () {
+    // Training Videos (all authenticated users)
+    Route::get('/training-videos', [App\Http\Controllers\TrainingVideoController::class, 'index'])->name('training-videos.index');
+
     // Seller Profit Setup Routes (must complete before accessing system)
     Route::get('/seller/profit-setup', [SellerProfileCompletionController::class, 'showProfitForm'])->name('seller.profit.setup');
     Route::post('/seller/profit-setup', [SellerProfileCompletionController::class, 'storeProfitSettings'])->name('seller.profit.store');
@@ -398,6 +401,10 @@ Route::middleware('auth')->group(function () {
 
         // Order Profit Management
         Route::get('/order-profits', [App\Http\Controllers\Admin\OrderProfitController::class, 'index'])->name('order-profits.index');
+
+        // Training Videos Management
+        Route::resource('training-videos', App\Http\Controllers\Admin\TrainingVideoController::class);
+        Route::post('/training-videos/{trainingVideo}/toggle', [App\Http\Controllers\Admin\TrainingVideoController::class, 'toggleActive'])->name('training-videos.toggle');
 
         // Shipping Tracking Management
         Route::prefix('shipping')->name('shipping.')->group(function () {

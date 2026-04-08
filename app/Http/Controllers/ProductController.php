@@ -37,13 +37,14 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with(['category', 'assignedUsers']);
 
-        // Search functionality
+        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('name_ar', 'like', "%{$search}%")
                   ->orWhere('sku', 'like', "%{$search}%")
                   ->orWhere('aliexpress_id', 'like', "%{$search}%");
             });
@@ -58,9 +59,17 @@ class ProductController extends Controller
         if ($request->filled('source')) {
             if ($request->source === 'aliexpress') {
                 $query->whereNotNull('aliexpress_id');
-            } else {
+            } elseif ($request->source === 'local') {
                 $query->whereNull('aliexpress_id');
             }
+        }
+
+        // Filter by seller / distributor
+        if ($request->filled('seller')) {
+            $sellerId = $request->seller;
+            $query->whereHas('assignedUsers', function ($q) use ($sellerId) {
+                $q->where('users.id', $sellerId);
+            });
         }
 
         // Filter by status
@@ -68,12 +77,21 @@ class ProductController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $products = $query->latest()->paginate(20);
+        $products = $query->latest()->paginate(20)->withQueryString();
 
-        // Filter categories for sellers based on their selected categories
         $categories = $this->getFilteredCategoriesForUser();
 
-        return view('products.index', compact('products', 'categories'));
+        // All sellers/distributors who have assigned products (for filter dropdown)
+        $sellers = \App\Models\User::whereIn('user_type', ['seller', 'distributor'])
+            ->whereHas('assignedProducts')
+            ->orderBy('name')
+            ->get(['id', 'name', 'store_name', 'user_type', 'logo']);
+
+        // AED exchange rate for price conversion
+        $aedCurrency = \App\Models\Currency::where('code', 'AED')->first();
+        $usdToAed = $aedCurrency ? (float) $aedCurrency->exchange_rate : 3.67;
+
+        return view('products.index', compact('products', 'categories', 'sellers', 'usdToAed'));
     }
 
     /**

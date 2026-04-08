@@ -233,6 +233,14 @@
             </a>
         </li>
 
+        <!-- Training Videos -->
+        <li class="menu-item {{ request()->routeIs('admin.training-videos.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.training-videos.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-play-circle-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'الفيديوهات التدريبية' : 'Training Videos' }}</div>
+            </a>
+        </li>
+
         <!-- Support Tickets -->
         <li class="menu-item {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
             <a href="{{ route('admin.tickets.index') }}" class="menu-link">

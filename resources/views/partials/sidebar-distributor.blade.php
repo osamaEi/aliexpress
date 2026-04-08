@@ -100,6 +100,14 @@
             </a>
         </li>
 
+        <!-- Training Videos -->
+        <li class="menu-item {{ request()->routeIs('training-videos.index') ? 'active' : '' }}">
+            <a href="{{ route('training-videos.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-play-circle-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'الفيديوهات التدريبية' : 'Training Videos' }}</div>
+            </a>
+        </li>
+
         <!-- Support Tickets -->
         <li class="menu-item {{ request()->routeIs('distributor.tickets.*') ? 'active' : '' }}">
             <a href="{{ route('distributor.tickets.index') }}" class="menu-link">
