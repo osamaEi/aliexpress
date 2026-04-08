@@ -12,6 +12,9 @@
     @php
         $activeSubscription = auth()->user()->activeSubscription;
         $isTrial = $activeSubscription && $activeSubscription->payment_method === 'trial';
+        $subPlan = $activeSubscription?->subscription;
+        $maxPlanProducts = ($subPlan && $subPlan->max_products > 0) ? $subPlan->max_products : null;
+        $usedProducts = auth()->user()->assignedProducts()->count();
     @endphp
 
     @if($activeSubscription && $activeSubscription->end_date)
@@ -43,6 +46,15 @@
                                     @if($isTrial)
                                     <p class="mb-0 mt-1" style="font-size:13px;opacity:.8;">
                                         {{ app()->getLocale() == 'ar' ? 'يرجى الاشتراك في إحدى الباقات قبل انتهاء الفترة التجريبية.' : 'Please subscribe to a plan before your trial ends.' }}
+                                    </p>
+                                    @endif
+                                    @if($maxPlanProducts)
+                                    <p class="mb-0 mt-2" style="font-size:13px;opacity:.85;">
+                                        <i class="ri-shopping-bag-line me-1"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'المنتجات:' : 'Products:' }}
+                                        <strong>{{ $usedProducts }} / {{ $maxPlanProducts }}</strong>
+                                        @php $pct = min(100, round($usedProducts / $maxPlanProducts * 100)); @endphp
+                                        <span class="ms-2 badge bg-{{ $pct >= 90 ? 'danger' : ($pct >= 70 ? 'warning text-dark' : 'success') }}">{{ $pct }}%</span>
                                     </p>
                                     @endif
                                 </div>

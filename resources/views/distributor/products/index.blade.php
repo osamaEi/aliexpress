@@ -2,13 +2,75 @@
 
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+
+    {{-- Subscription plan usage banner --}}
+    @php $isAr = app()->getLocale() == 'ar'; @endphp
+    @if($subscriptionPlan)
+        @php
+            $pct = $maxProducts ? min(100, round($productCount / $maxProducts * 100)) : 0;
+            $barColor = $pct >= 90 ? 'danger' : ($pct >= 70 ? 'warning' : 'success');
+            $atLimit = $maxProducts && $productCount >= $maxProducts;
+        @endphp
+        <div class="alert alert-{{ $atLimit ? 'danger' : 'info' }} d-flex align-items-center justify-content-between gap-3 mb-3" style="border-radius:12px;">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="ri-vip-crown-line"></i>
+                    <strong>{{ $isAr ? ($subscriptionPlan->name_ar ?: $subscriptionPlan->name) : $subscriptionPlan->name }}</strong>
+                    @if(auth()->user()->activeSubscription?->payment_method === 'trial')
+                        <span class="badge bg-warning text-dark">{{ $isAr ? 'تجريبي' : 'Trial' }}</span>
+                    @endif
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:13px;">
+                        {{ $isAr ? 'المنتجات المستخدمة:' : 'Products used:' }}
+                        <strong>{{ $productCount }}</strong> /
+                        {{ $maxProducts ?? ($isAr ? 'غير محدود' : 'Unlimited') }}
+                    </span>
+                    @if($maxProducts)
+                    <div class="flex-grow-1" style="max-width:200px;">
+                        <div class="progress" style="height:8px;border-radius:4px;">
+                            <div class="progress-bar bg-{{ $barColor }}" style="width:{{ $pct }}%;"></div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+                @if($atLimit)
+                    <p class="mb-0 mt-1 text-danger" style="font-size:13px;">
+                        <i class="ri-error-warning-line me-1"></i>
+                        {{ $isAr ? 'وصلت إلى الحد الأقصى للمنتجات. يرجى الترقية إلى باقة أعلى.' : 'You have reached your product limit. Please upgrade your plan.' }}
+                    </p>
+                @endif
+            </div>
+            <a href="{{ route('subscriptions.index') }}" class="btn btn-sm btn-outline-{{ $atLimit ? 'danger' : 'primary' }} text-nowrap">
+                <i class="ri-arrow-up-circle-line me-1"></i>
+                {{ $isAr ? 'ترقية الباقة' : 'Upgrade Plan' }}
+            </a>
+        </div>
+    @elseif(!$subscriptionPlan)
+        <div class="alert alert-warning mb-3" style="border-radius:12px;">
+            <i class="ri-information-line me-1"></i>
+            {{ $isAr ? 'لا توجد باقة اشتراك نشطة. المنتجات غير محدودة حالياً.' : 'No subscription plan linked. Products are currently unlimited.' }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger mb-3">{{ session('error') }}</div>
+    @endif
+
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'منتجاتي' : 'My Products' }}</h5>
+            <h5 class="mb-0">{{ $isAr ? 'منتجاتي' : 'My Products' }}</h5>
+            @if(!($maxProducts && $productCount >= $maxProducts))
             <a href="{{ route('distributor.products.create') }}" class="btn btn-primary">
                 <i class="ri-add-line me-1"></i>
-                {{ app()->getLocale() == 'ar' ? 'إضافة منتج جديد' : 'Create New Product' }}
+                {{ $isAr ? 'إضافة منتج جديد' : 'Create New Product' }}
             </a>
+            @else
+            <a href="{{ route('subscriptions.index') }}" class="btn btn-warning">
+                <i class="ri-arrow-up-circle-line me-1"></i>
+                {{ $isAr ? 'ترقية الباقة لإضافة منتجات' : 'Upgrade Plan to Add Products' }}
+            </a>
+            @endif
         </div>
         <div class="card-body">
             <div class="table-responsive">

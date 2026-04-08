@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Setting;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -76,7 +77,12 @@ class DistributorAccessControl
             return $next($request);
         }
 
-        // Check if trial has expired and no paid subscription
+        // Only enforce if the admin has enabled subscription requirement for distributors
+        if (!Setting::get('require_subscription_distributor', '0')) {
+            return $next($request);
+        }
+
+        // Check if distributor has an active subscription
         $hasActive = $user->subscriptions()
             ->where('status', 'active')
             ->where('end_date', '>=', now()->toDateString())
@@ -86,8 +92,8 @@ class DistributorAccessControl
             $isAr = app()->getLocale() == 'ar';
             return redirect()->route('subscriptions.index')
                 ->with('error', $isAr
-                    ? 'انتهت فترة التجربة. يرجى الاشتراك في إحدى الباقات للمتابعة.'
-                    : 'Your trial has expired. Please subscribe to a plan to continue.');
+                    ? 'انتهت فترة التجربة أو الاشتراك. يرجى الاشتراك في إحدى الباقات للمتابعة.'
+                    : 'Your trial or subscription has expired. Please subscribe to a plan to continue.');
         }
 
         return $next($request);

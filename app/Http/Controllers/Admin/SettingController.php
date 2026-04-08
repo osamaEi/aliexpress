@@ -48,6 +48,12 @@ class SettingController extends Controller
             'require_subscription_distributor' => ['type' => 'boolean', 'description' => 'Require subscription for distributors'],
             'lock_products_on_subscription_expiry' => ['type' => 'boolean', 'description' => 'Lock products when subscription expires'],
             'subscription_grace_period_days' => ['type' => 'number', 'description' => 'Grace period in days after subscription expiry'],
+            // reCAPTCHA
+            'recaptcha_site_key' => ['type' => 'text', 'description' => 'reCAPTCHA v3 Site Key'],
+            'recaptcha_secret_key' => ['type' => 'text', 'description' => 'reCAPTCHA v3 Secret Key'],
+            'recaptcha_enabled' => ['type' => 'boolean', 'description' => 'Enable reCAPTCHA verification'],
+            // Commission profit type
+            'admin_profit_commission' => ['type' => 'number', 'description' => 'Platform commission rate percentage per order'],
         ];
 
         foreach ($request->settings as $key => $value) {

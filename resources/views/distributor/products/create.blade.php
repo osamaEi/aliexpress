@@ -2,6 +2,30 @@
 
 @section('content')
 <div class="col-12" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+
+    {{-- Subscription plan usage badge --}}
+    @if($subscriptionPlan)
+    @php
+        $isAr = app()->getLocale() == 'ar';
+        $remaining = $maxProducts ? ($maxProducts - $productCount) : null;
+    @endphp
+    <div class="alert alert-info d-flex align-items-center gap-2 mb-3" style="border-radius:12px;">
+        <i class="ri-vip-crown-line fs-5"></i>
+        <span>
+            <strong>{{ $isAr ? ($subscriptionPlan->name_ar ?: $subscriptionPlan->name) : $subscriptionPlan->name }}</strong>
+            &mdash;
+            {{ $isAr ? 'المنتجات المستخدمة:' : 'Products used:' }}
+            <strong>{{ $productCount }}</strong> /
+            {{ $maxProducts ?? ($isAr ? 'غير محدود' : 'Unlimited') }}
+            @if($remaining !== null)
+                &mdash; <span class="text-{{ $remaining <= 2 ? 'danger' : 'success' }}">
+                    {{ $remaining }} {{ $isAr ? 'متبقية' : 'remaining' }}
+                </span>
+            @endif
+        </span>
+    </div>
+    @endif
+
     <div class="card">
         <div class="card-header">
             <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'إضافة منتج جديد' : 'Create New Product' }}</h5>

@@ -79,7 +79,9 @@ class DistributorController extends Controller
         $user = Auth::user();
         $products = $user->assignedProducts()->with('category')->paginate(20);
 
-        return view('distributor.products.index', compact('products'));
+        [$productCount, $maxProducts, $subscriptionPlan] = $this->getSubscriptionLimits($user);
+
+        return view('distributor.products.index', compact('products', 'productCount', 'maxProducts', 'subscriptionPlan'));
     }
 
     /**
@@ -87,12 +89,25 @@ class DistributorController extends Controller
      */
     public function createProduct()
     {
+        $user = Auth::user();
+
+        [$productCount, $maxProducts, $subscriptionPlan] = $this->getSubscriptionLimits($user);
+
+        // Block access if product limit reached
+        if ($maxProducts !== null && $productCount >= $maxProducts) {
+            $isAr = app()->getLocale() == 'ar';
+            return redirect()->route('distributor.products')
+                ->with('error', $isAr
+                    ? "لقد وصلت إلى الحد الأقصى ({$maxProducts}) منتجات لباقتك الحالية. يرجى الترقية إلى باقة أعلى."
+                    : "You have reached the maximum ({$maxProducts}) products for your current plan. Please upgrade to a higher plan.");
+        }
+
         // Get only parent categories (main categories)
         $categories = Category::whereNull('parent_id')
             ->where('is_active', true)
             ->orderBy('name', 'asc')
             ->get();
-        return view('distributor.products.create', compact('categories'));
+        return view('distributor.products.create', compact('categories', 'productCount', 'maxProducts', 'subscriptionPlan'));
     }
 
     /**
@@ -113,6 +128,18 @@ class DistributorController extends Controller
      */
     public function storeProduct(Request $request)
     {
+        $user = Auth::user();
+
+        // Enforce subscription product limit
+        [$productCount, $maxProducts] = $this->getSubscriptionLimits($user);
+        if ($maxProducts !== null && $productCount >= $maxProducts) {
+            $isAr = app()->getLocale() == 'ar';
+            return redirect()->route('distributor.products')
+                ->with('error', $isAr
+                    ? "لقد وصلت إلى الحد الأقصى ({$maxProducts}) منتجات لباقتك الحالية."
+                    : "You have reached the maximum ({$maxProducts}) products for your current plan.");
+        }
+
         // Base validation rules
         $rules = [
             'name' => ['required', 'string', 'max:255'],
@@ -235,7 +262,7 @@ class DistributorController extends Controller
         }
 
         // Assign product to the distributor
-        Auth::user()->assignedProducts()->attach($product->id, [
+        $user->assignedProducts()->attach($product->id, [
             'status' => 'published'
         ]);
 
@@ -446,5 +473,32 @@ class DistributorController extends Controller
 
         return redirect()->back()
             ->with('success', app()->getLocale() == 'ar' ? 'تم تحديث حالة الطلب بنجاح' : 'Order status updated successfully');
+    }
+
+    /**
+     * Get subscription limits for the given user.
+     * Returns [currentProductCount, maxProducts|null, subscriptionPlan|null]
+     * maxProducts = null means unlimited.
+     */
+    private function getSubscriptionLimits($user): array
+    {
+        $productCount = $user->assignedProducts()->count();
+
+        $activeUserSub = $user->subscriptions()
+            ->where('status', 'active')
+            ->where('end_date', '>=', now()->toDateString())
+            ->with('subscription')
+            ->latest()
+            ->first();
+
+        if (!$activeUserSub || !$activeUserSub->subscription) {
+            return [$productCount, null, null];
+        }
+
+        $plan = $activeUserSub->subscription;
+        // max_products = 0 or null means unlimited
+        $maxProducts = ($plan->max_products && $plan->max_products > 0) ? $plan->max_products : null;
+
+        return [$productCount, $maxProducts, $plan];
     }
 }

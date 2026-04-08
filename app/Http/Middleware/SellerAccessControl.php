@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Setting;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -135,8 +136,8 @@ class SellerAccessControl
             }
         }
 
-        // Check if trial expired and no active subscription
-        if ($user->hasTrialExpired()) {
+        // Check if trial expired and no active subscription (only if setting is enabled)
+        if (Setting::get('require_subscription_seller', '0') && $user->hasTrialExpired()) {
             return redirect()->route('subscriptions.index')
                 ->with('error', __('messages.trial_expired_please_subscribe'));
         }

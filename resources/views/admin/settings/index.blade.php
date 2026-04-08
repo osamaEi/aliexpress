@@ -368,9 +368,12 @@
                             $requireSubscriptionDistributor = $settings->get('boolean', collect())->firstWhere('key', 'require_subscription_distributor');
                             $lockProductsOnExpiry = $settings->get('boolean', collect())->firstWhere('key', 'lock_products_on_subscription_expiry');
                             $gracePeriodDays = $settings->get('number', collect())->firstWhere('key', 'subscription_grace_period_days');
+                            $allPlans = \App\Models\Subscription::orderBy('sort_order')->get();
                         @endphp
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+
+                        {{-- Enable/disable toggles --}}
+                        <div class="row mb-3">
+                            <div class="col-md-4 mb-3">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="require_subscription_seller" name="settings[require_subscription_seller]" value="1"
                                         {{ old('settings.require_subscription_seller', $requireSubscriptionSeller?->value) ? 'checked' : '' }}>
@@ -378,11 +381,9 @@
                                         {{ app()->getLocale() == 'ar' ? 'مطلوب اشتراك للبائعين' : 'Require Subscription for Sellers' }}
                                     </label>
                                 </div>
-                                <small class="text-muted d-block">
-                                    {{ app()->getLocale() == 'ar' ? 'يجب على البائعين الاشتراك لإضافة منتجات' : 'Sellers must subscribe to add products' }}
-                                </small>
+                                <small class="text-muted d-block">{{ app()->getLocale() == 'ar' ? 'يجب على البائعين الاشتراك لإضافة منتجات' : 'Sellers must subscribe to add products' }}</small>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="require_subscription_distributor" name="settings[require_subscription_distributor]" value="1"
                                         {{ old('settings.require_subscription_distributor', $requireSubscriptionDistributor?->value) ? 'checked' : '' }}>
@@ -390,33 +391,87 @@
                                         {{ app()->getLocale() == 'ar' ? 'مطلوب اشتراك للتجار' : 'Require Subscription for Distributors' }}
                                     </label>
                                 </div>
-                                <small class="text-muted d-block">
-                                    {{ app()->getLocale() == 'ar' ? 'يجب على التجار الاشتراك للوصول للمنتجات' : 'Distributors must subscribe to access products' }}
-                                </small>
+                                <small class="text-muted d-block">{{ app()->getLocale() == 'ar' ? 'يجب على التجار الاشتراك للوصول' : 'Distributors must subscribe to access products' }}</small>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="lock_products_on_subscription_expiry" name="settings[lock_products_on_subscription_expiry]" value="1"
                                         {{ old('settings.lock_products_on_subscription_expiry', $lockProductsOnExpiry?->value) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="lock_products_on_subscription_expiry">
-                                        {{ app()->getLocale() == 'ar' ? 'قفل المنتجات عند انتهاء الاشتراك' : 'Lock Products on Subscription Expiry' }}
+                                        {{ app()->getLocale() == 'ar' ? 'قفل المنتجات عند انتهاء الاشتراك' : 'Lock Products on Expiry' }}
                                     </label>
                                 </div>
-                                <small class="text-muted d-block">
-                                    {{ app()->getLocale() == 'ar' ? 'إخفاء منتجات المستخدم عند انتهاء اشتراكه' : 'Hide user products when their subscription expires' }}
-                                </small>
+                                <small class="text-muted d-block">{{ app()->getLocale() == 'ar' ? 'إخفاء المنتجات عند انتهاء الاشتراك' : 'Hide products when subscription expires' }}</small>
                             </div>
-                            <div class="col-md-6 mb-3">
+                        </div>
+
+                        {{-- Grace period --}}
+                        <div class="row mb-4">
+                            <div class="col-md-4">
                                 <label for="subscription_grace_period_days" class="form-label">
                                     {{ app()->getLocale() == 'ar' ? 'فترة السماح (أيام)' : 'Grace Period (Days)' }}
                                 </label>
                                 <input type="number" name="settings[subscription_grace_period_days]" id="subscription_grace_period_days" class="form-control"
-                                    value="{{ old('settings.subscription_grace_period_days', $gracePeriodDays?->value ?? 3) }}" min="0" max="30">
-                                <small class="text-muted">
-                                    {{ app()->getLocale() == 'ar' ? 'عدد الأيام المسموحة بعد انتهاء الاشتراك' : 'Number of days allowed after subscription expiry' }}
-                                </small>
+                                    value="{{ old('settings.subscription_grace_period_days', $gracePeriodDays?->value ?? 0) }}" min="0" max="30">
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'عدد الأيام المسموحة بعد انتهاء الاشتراك' : 'Days allowed after subscription expiry' }}</small>
                             </div>
                         </div>
+
+                        {{-- All subscription plans --}}
+                        @if($allPlans->count() > 0)
+                        <hr>
+                        <p class="fw-600 mb-3">
+                            <i class="ri-vip-crown-line me-1"></i>
+                            {{ app()->getLocale() == 'ar' ? 'باقات الاشتراك المتاحة' : 'Available Subscription Plans' }}
+                        </p>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'الباقة' : 'Plan' }}</th>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'السعر' : 'Price' }}</th>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'المدة' : 'Duration' }}</th>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'أقصى منتجات' : 'Max Products' }}</th>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'نسبة العمولة' : 'Commission %' }}</th>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'مفعّل' : 'Active' }}</th>
+                                        <th>{{ app()->getLocale() == 'ar' ? 'إجراء' : 'Action' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($allPlans as $plan)
+                                    <tr>
+                                        <td>
+                                            <strong>{{ app()->getLocale() == 'ar' ? ($plan->name_ar ?: $plan->name) : $plan->name }}</strong>
+                                        </td>
+                                        <td>{{ number_format($plan->price, 2) }} AED</td>
+                                        <td>{{ $plan->duration_days }} {{ app()->getLocale() == 'ar' ? 'يوم' : 'days' }}</td>
+                                        <td>{{ $plan->max_products ?? ($app()->getLocale() == 'ar' ? 'غير محدود' : 'Unlimited') }}</td>
+                                        <td>{{ $plan->commission_rate }}%</td>
+                                        <td>
+                                            <span class="badge bg-{{ $plan->is_active ? 'success' : 'secondary' }}">
+                                                {{ $plan->is_active ? (app()->getLocale() == 'ar' ? 'مفعّل' : 'Active') : (app()->getLocale() == 'ar' ? 'معطّل' : 'Inactive') }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('admin.subscriptions.edit', $plan) }}" class="btn btn-xs btn-outline-primary">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ route('admin.subscriptions.create') }}" class="btn btn-sm btn-success">
+                                <i class="ri-add-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'إضافة باقة جديدة' : 'Add New Plan' }}
+                            </a>
+                            <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-sm btn-outline-primary ms-2">
+                                {{ app()->getLocale() == 'ar' ? 'إدارة الباقات' : 'Manage Plans' }}
+                            </a>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -459,6 +514,76 @@
                                     </label>
                                 </div>
                             </div>
+
+                            @php
+                                $recaptchaSiteKey = $settings->get('text', collect())->firstWhere('key', 'recaptcha_site_key');
+                                $recaptchaSecretKey = $settings->get('text', collect())->firstWhere('key', 'recaptcha_secret_key');
+                                $recaptchaEnabled = $settings->get('boolean', collect())->firstWhere('key', 'recaptcha_enabled');
+                            @endphp
+
+                            <div class="col-12 mt-3 mb-2">
+                                <hr>
+                                <h6 class="text-muted">
+                                    <i class="ri-robot-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'إعدادات reCAPTCHA' : 'reCAPTCHA Settings' }}
+                                </h6>
+                            </div>
+
+                            <!-- reCAPTCHA Enable Toggle -->
+                            <div class="col-md-12 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox"
+                                        name="settings[recaptcha_enabled]"
+                                        id="recaptcha_enabled"
+                                        value="1"
+                                        {{ old('settings.recaptcha_enabled', $recaptchaEnabled?->value) == '1' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="recaptcha_enabled">
+                                        {{ app()->getLocale() == 'ar' ? 'تفعيل التحقق reCAPTCHA' : 'Enable reCAPTCHA Verification' }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- reCAPTCHA Site Key -->
+                            <div class="col-md-6 mb-3">
+                                <label for="recaptcha_site_key" class="form-label">
+                                    <i class="ri-key-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'مفتاح الموقع (Site Key)' : 'reCAPTCHA Site Key' }}
+                                </label>
+                                <input
+                                    type="password"
+                                    name="settings[recaptcha_site_key]"
+                                    id="recaptcha_site_key"
+                                    class="form-control"
+                                    value="{{ old('settings.recaptcha_site_key', $recaptchaSiteKey?->value ?? '') }}"
+                                    placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل مفتاح الموقع' : 'Enter reCAPTCHA site key' }}">
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="show_recaptcha_site" onclick="togglePasswordVisibility('recaptcha_site_key')">
+                                    <label class="form-check-label" for="show_recaptcha_site">
+                                        {{ app()->getLocale() == 'ar' ? 'إظهار المفتاح' : 'Show Key' }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- reCAPTCHA Secret Key -->
+                            <div class="col-md-6 mb-3">
+                                <label for="recaptcha_secret_key" class="form-label">
+                                    <i class="ri-shield-keyhole-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'المفتاح السري (Secret Key)' : 'reCAPTCHA Secret Key' }}
+                                </label>
+                                <input
+                                    type="password"
+                                    name="settings[recaptcha_secret_key]"
+                                    id="recaptcha_secret_key"
+                                    class="form-control"
+                                    value="{{ old('settings.recaptcha_secret_key', $recaptchaSecretKey?->value ?? '') }}"
+                                    placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل المفتاح السري' : 'Enter reCAPTCHA secret key' }}">
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="show_recaptcha_secret" onclick="togglePasswordVisibility('recaptcha_secret_key')">
+                                    <label class="form-check-label" for="show_recaptcha_secret">
+                                        {{ app()->getLocale() == 'ar' ? 'إظهار المفتاح' : 'Show Key' }}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -473,7 +598,7 @@
                     <div class="card-body">
                         <div class="row">
                             @php
-                                $excludeKeys = ['admin_profit_type', 'site_name', 'site_name_ar', 'site_description', 'site_description_ar', 'ziina_api_key'];
+                                $excludeKeys = ['admin_profit_type', 'site_name', 'site_name_ar', 'site_description', 'site_description_ar', 'ziina_api_key', 'recaptcha_site_key', 'recaptcha_secret_key'];
                             @endphp
                             @foreach($settings->get('text', collect())->merge($settings->get('textarea', collect())) as $setting)
                             @if(!in_array($setting->key, $excludeKeys))
@@ -536,6 +661,14 @@
             </div>
 
             <!-- Image Settings -->
+            @php
+                $excludedImageKeys = [
+                    'seller_dashboard_banner', 'distributor_dashboard_banner', 'buyer_dashboard_banner',
+                    'seller_promo_banner', 'distributor_promo_banner',
+                ];
+                $otherImageSettings = $settings->get('image', collect())->filter(fn($s) => !in_array($s->key, $excludedImageKeys));
+            @endphp
+            @if($otherImageSettings->count() > 0)
             <div class="col-12 mb-4">
                 <div class="card">
                     <div class="card-header">
@@ -543,7 +676,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            @foreach($settings->get('image', collect()) as $setting)
+                            @foreach($otherImageSettings as $setting)
                             <div class="col-md-6 mb-3">
                                 <label for="{{ $setting->key }}" class="form-label">
                                     {{ ucwords(str_replace('_', ' ', $setting->key)) }}
@@ -579,6 +712,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Admin Profit Settings -->
             <div class="col-12 mb-4">
@@ -592,6 +726,7 @@
                                 $profitType = $settings->get('text', collect())->firstWhere('key', 'admin_profit_type');
                                 $profitPercentage = $settings->get('number', collect())->firstWhere('key', 'admin_profit_percentage');
                                 $profitFixed = $settings->get('number', collect())->firstWhere('key', 'admin_profit_fixed');
+                                $profitCommission = $settings->get('number', collect())->firstWhere('key', 'admin_profit_commission');
                             @endphp
 
                             <div class="col-md-12 mb-3">
@@ -604,6 +739,9 @@
                                     </option>
                                     <option value="fixed" {{ old('settings.admin_profit_type', $profitType?->value) === 'fixed' ? 'selected' : '' }}>
                                         {{ __('messages.fixed_amount') }}
+                                    </option>
+                                    <option value="commission" {{ old('settings.admin_profit_type', $profitType?->value) === 'commission' ? 'selected' : '' }}>
+                                        {{ app()->getLocale() == 'ar' ? 'عمولة (المتاجرة بالعمولة)' : 'Commission' }}
                                     </option>
                                 </select>
                             </div>
@@ -648,15 +786,43 @@
                                     <span class="input-group-text">{{ $settings->get('text', collect())->firstWhere('key', 'currency')?->value ?? 'AED' }}</span>
                                 </div>
                             </div>
+
+                            <div class="col-md-6 mb-3" id="commission_field">
+                                <label for="admin_profit_commission" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'نسبة العمولة' : 'Commission Rate' }}
+                                    <i class="ri-question-line" data-bs-toggle="tooltip"
+                                        title="{{ app()->getLocale() == 'ar' ? 'نسبة العمولة التي تحصل عليها المنصة من كل عملية بيع (المتاجرة بالعمولة)' : 'Commission percentage the platform earns from each sale' }}"></i>
+                                </label>
+                                <div class="input-group">
+                                    <input
+                                        type="number"
+                                        name="settings[admin_profit_commission]"
+                                        id="admin_profit_commission"
+                                        class="form-control"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        value="{{ old('settings.admin_profit_commission', $profitCommission?->value) }}">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    {{ app()->getLocale() == 'ar' ? 'نسبة مئوية تُخصم من قيمة كل طلب كعمولة للمنصة' : 'Percentage deducted from each order value as platform commission' }}
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Numeric Settings (excluding profit settings) -->
+            <!-- Numeric Settings (excluding profit, wallet, and subscription settings shown above) -->
             @php
-                $numericSettings = $settings->get('number', collect())->filter(function($setting) {
-                    return !in_array($setting->key, ['admin_profit_percentage', 'admin_profit_fixed']);
+                $numericExcludeKeys = [
+                    'admin_profit_percentage', 'admin_profit_fixed', 'admin_profit_commission',
+                    'min_withdrawal_amount', 'max_withdrawal_amount', 'min_deposit_amount', 'withdrawal_fee_percentage',
+                    'subscription_grace_period_days',
+                ];
+                $numericSettings = $settings->get('number', collect())->filter(function($setting) use ($numericExcludeKeys) {
+                    return !in_array($setting->key, $numericExcludeKeys);
                 });
             @endphp
 
@@ -1020,15 +1186,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const profitTypeSelect = document.getElementById('admin_profit_type');
     const percentageField = document.getElementById('percentage_field');
     const fixedField = document.getElementById('fixed_field');
+    const commissionField = document.getElementById('commission_field');
 
     function toggleProfitFields() {
-        if (profitTypeSelect.value === 'percentage') {
-            percentageField.style.display = 'block';
-            fixedField.style.display = 'none';
-        } else {
-            percentageField.style.display = 'none';
-            fixedField.style.display = 'block';
-        }
+        const val = profitTypeSelect.value;
+        percentageField.style.display = val === 'percentage' ? 'block' : 'none';
+        fixedField.style.display = val === 'fixed' ? 'block' : 'none';
+        commissionField.style.display = val === 'commission' ? 'block' : 'none';
     }
 
     profitTypeSelect.addEventListener('change', toggleProfitFields);
