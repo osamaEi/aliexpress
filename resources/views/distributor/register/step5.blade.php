@@ -123,7 +123,7 @@
         .progress-step::before {
             content: '';
             position: absolute;
-            {{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 22px;
+            inset-inline-start: 22px;
             top: 50px;
             width: 2px;
             height: calc(100% + 30px);
@@ -145,7 +145,7 @@
             font-weight: 700;
             font-size: 18px;
             flex-shrink: 0;
-            {{ app()->getLocale() == 'ar' ? 'margin-left' : 'margin-right' }}: 15px;
+            margin-inline-end: 15px;
             transition: all 0.3s;
         }
 
@@ -388,7 +388,7 @@
         .language-switcher {
             position: absolute;
             top: 20px;
-            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
+            inset-inline-end: 20px;
             z-index: 1000;
             display: flex;
             gap: 10px;

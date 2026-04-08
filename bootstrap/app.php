@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\SetCurrency::class,
             \App\Http\Middleware\SellerAccessControl::class,
+            \App\Http\Middleware\DistributorAccessControl::class,
         ]);
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,

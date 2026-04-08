@@ -122,7 +122,7 @@
         .progress-step::before {
             content: '';
             position: absolute;
-            {{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 22px;
+            inset-inline-start: 22px;
             top: 50px;
             width: 2px;
             height: calc(100% + 30px);
@@ -144,7 +144,7 @@
             font-weight: 700;
             font-size: 18px;
             flex-shrink: 0;
-            {{ app()->getLocale() == 'ar' ? 'margin-left' : 'margin-right' }}: 15px;
+            margin-inline-end: 15px;
             transition: all 0.3s;
         }
 
@@ -214,13 +214,13 @@
         }
 
         .form-label i {
-            {{ app()->getLocale() == 'ar' ? 'margin-left' : 'margin-right' }}: 6px;
+            margin-inline-end: 6px;
             color: var(--distributor-color);
         }
 
         .form-label .required {
             color: #ef4444;
-            margin-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 4px;
+            margin-inline-start: 4px;
         }
 
         .form-control,
@@ -351,7 +351,7 @@
         .language-switcher {
             position: absolute;
             top: 20px;
-            {{ app()->getLocale() == 'ar' ? 'left' : 'right' }}: 20px;
+            inset-inline-end: 20px;
             z-index: 1000;
             display: flex;
             gap: 10px;
@@ -657,7 +657,7 @@
                 <div class="alert alert-danger">
                     <i class="ri-error-warning-line me-2"></i>
                     <strong>{{ app()->getLocale() == 'ar' ? 'يرجى تصحيح الأخطاء التالية:' : 'Please correct the following errors:' }}</strong>
-                    <ul class="mb-0 mt-2" style="padding-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }}: 20px;">
+                    <ul class="mb-0 mt-2" style="padding-inline-start: 20px;">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Currency;
+use App\Models\Subscription;
+use App\Models\UserSubscription;
 use App\Services\WhatsAppOTPService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,31 +29,43 @@ class DistributorRegistrationController extends Controller
      */
     public function processStep1(Request $request)
     {
+        $isAr = app()->getLocale() == 'ar';
+
         $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone_code' => 'required|string|max:5',
-            'phone' => 'required|string|max:20',
-            'store_name' => 'required|string|max:255',
-            'store_slug' => 'required|string|max:255|unique:users,store_slug|regex:/^[a-z0-9-]+$/',
-            'country' => 'required|string|max:100',
+            'full_name'            => 'required|string|max:255',
+            'email'                => 'required|email|unique:users,email',
+            'phone_code'           => 'required|string|max:5',
+            'phone'                => 'required|string|max:20',
+            'store_name'           => 'required|string|max:255',
+            'store_slug'           => 'required|string|max:255|unique:users,store_slug|regex:/^[a-z0-9-]+$/',
+            'password'             => 'required|string|min:8|confirmed',
+            'store_type'           => 'required|in:online,physical,both',
+            'country'              => 'required_if:store_type,physical|required_if:store_type,both|nullable|string|max:100',
+            'store_region'         => 'required_if:store_type,physical|required_if:store_type,both|nullable|string|max:255',
+            'store_address'        => 'required_if:store_type,physical|required_if:store_type,both|nullable|string|max:500',
+            'store_map_url'        => 'required_if:store_type,physical|required_if:store_type,both|nullable|url|max:1000',
+            'support_phone'        => 'required|string|max:30',
+            'support_email'        => 'required|email|max:255',
+            'working_hours'        => 'nullable|array',
+            'working_hours.*.day'  => 'nullable|string',
+            'working_hours.*.open' => 'nullable|string',
+            'working_hours.*.close'=> 'nullable|string',
             'g-recaptcha-response' => config('services.recaptcha.enabled') ? 'required' : 'nullable',
         ], [
-            'g-recaptcha-response.required' => app()->getLocale() == 'ar'
-                ? 'يرجى التحقق من أنك لست روبوت'
-                : 'Please verify that you are not a robot',
-            'store_slug.regex' => app()->getLocale() == 'ar'
-                ? 'رابط المتجر يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطات فقط'
-                : 'Store URL must contain only lowercase letters, numbers and dashes',
-            'store_slug.unique' => app()->getLocale() == 'ar'
-                ? 'رابط المتجر مستخدم بالفعل'
-                : 'Store URL is already taken',
-            'phone_code.required' => app()->getLocale() == 'ar'
-                ? 'رمز الدولة مطلوب'
-                : 'Country code is required',
-            'phone.required' => app()->getLocale() == 'ar'
-                ? 'رقم الهاتف مطلوب'
-                : 'Phone number is required',
+            'g-recaptcha-response.required' => $isAr ? 'يرجى التحقق من أنك لست روبوت' : 'Please verify that you are not a robot',
+            'store_slug.regex'     => $isAr ? 'رابط المتجر يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطات فقط' : 'Store URL must contain only lowercase letters, numbers and dashes',
+            'store_slug.unique'    => $isAr ? 'رابط المتجر مستخدم بالفعل' : 'Store URL is already taken',
+            'store_type.required'  => $isAr ? 'نوع المتجر مطلوب' : 'Store type is required',
+            'store_type.in'        => $isAr ? 'نوع المتجر غير صالح' : 'Invalid store type',
+            'country.required_if'  => $isAr ? 'الدولة مطلوبة للمتجر الفعلي' : 'Country is required for physical store',
+            'store_region.required_if' => $isAr ? 'المنطقة مطلوبة للمتجر الفعلي' : 'Region is required for physical store',
+            'store_address.required_if'=> $isAr ? 'العنوان مطلوب للمتجر الفعلي' : 'Address is required for physical store',
+            'store_map_url.required_if'=> $isAr ? 'رابط خرائط قوقل مطلوب للمتجر الفعلي' : 'Google Maps URL is required for physical store',
+            'store_map_url.url'    => $isAr ? 'رابط خرائط قوقل غير صالح' : 'Invalid Google Maps URL',
+            'support_phone.required'=> $isAr ? 'رقم هاتف الدعم مطلوب' : 'Support phone is required',
+            'support_email.required'=> $isAr ? 'بريد الدعم الإلكتروني مطلوب' : 'Support email is required',
+            'phone_code.required'  => $isAr ? 'رمز الدولة مطلوب' : 'Country code is required',
+            'phone.required'       => $isAr ? 'رقم الهاتف مطلوب' : 'Phone number is required',
         ]);
 
         // Verify reCAPTCHA v3
@@ -80,6 +94,21 @@ class DistributorRegistrationController extends Controller
         // Combine phone_code + phone for DB storage (e.g. 971501234567)
         $validated['phone'] = $validated['phone_code'] . $validated['phone'];
         $validated['phone_code'] = '+' . $validated['phone_code'];
+
+        // Build working_hours: only include days that are enabled
+        $workingHours = [];
+        if (!empty($request->working_hours)) {
+            foreach ($request->working_hours as $entry) {
+                if (!empty($entry['enabled'])) {
+                    $workingHours[] = [
+                        'day'   => $entry['day'],
+                        'open'  => $entry['open'] ?? '09:00',
+                        'close' => $entry['close'] ?? '18:00',
+                    ];
+                }
+            }
+        }
+        $validated['working_hours'] = $workingHours;
 
         // Store data in session
         Session::put('distributor_registration', $validated);
@@ -335,24 +364,34 @@ class DistributorRegistrationController extends Controller
 
         // Create user
         $user = User::create([
-            'name' => $data['full_name'],
-            'full_name' => $data['full_name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'phone_code' => $data['phone_code'] ?? '+971',
-            'country' => $data['country'],
-            'password' => Hash::make(Str::random(16)),
-            'user_type' => 'distributor',
-            'store_name' => $data['store_name'],
-            'store_slug' => $data['store_slug'],
-            'logo' => $data['logo_path'] ?? null,
-            'commercial_register' => $data['commercial_register_path'] ?? null,
-            'freelance_document' => $data['freelance_document_path'] ?? null,
-            'default_currency' => $data['default_currency'],
+            'name'                  => $data['full_name'],
+            'full_name'             => $data['full_name'],
+            'email'                 => $data['email'],
+            'phone'                 => $data['phone'],
+            'phone_code'            => $data['phone_code'] ?? '+971',
+            'country'               => $data['country'] ?? null,
+            'password'              => Hash::make($data['password'] ?? Str::random(16)),
+            'user_type'             => 'distributor',
+            'store_name'            => $data['store_name'],
+            'store_slug'            => $data['store_slug'],
+            'store_type'            => $data['store_type'] ?? 'online',
+            'store_region'          => $data['store_region'] ?? null,
+            'store_address'         => $data['store_address'] ?? null,
+            'store_map_url'         => $data['store_map_url'] ?? null,
+            'support_phone'         => $data['support_phone'] ?? null,
+            'support_email'         => $data['support_email'] ?? null,
+            'working_hours'         => $data['working_hours'] ?? [],
+            'logo'                  => $data['logo_path'] ?? null,
+            'commercial_register'   => $data['commercial_register_path'] ?? null,
+            'freelance_document'    => $data['freelance_document_path'] ?? null,
+            'default_currency'      => $data['default_currency'],
             'social_media_accounts' => $data['social_media_accounts'] ?? [],
-            'is_verified' => false, // Admin needs to verify distributor
-            'email_verified_at' => now(),
+            'is_verified'           => false,
+            'email_verified_at'     => now(),
         ]);
+
+        // Create 24-hour free trial subscription
+        $this->createTrialSubscription($user);
 
         // Clear session data
         Session::forget('distributor_registration');
@@ -443,6 +482,25 @@ class DistributorRegistrationController extends Controller
         $isEnglish = app()->getLocale() !== 'ar';
         $whatsappService = new WhatsAppOTPService();
         $whatsappService->sendOTP($phone, $otp, $isEnglish);
+    }
+
+    /**
+     * Create a 24-hour free trial subscription for new distributor
+     */
+    private function createTrialSubscription(User $user): void
+    {
+        $subscription = Subscription::where('is_active', true)->orderBy('sort_order')->first();
+
+        UserSubscription::create([
+            'user_id'         => $user->id,
+            'subscription_id' => $subscription?->id,
+            'start_date'      => now()->toDateString(),
+            'end_date'        => now()->addDay()->toDateString(),
+            'status'          => 'active',
+            'amount_paid'     => 0.00,
+            'payment_method'  => 'trial',
+            'transaction_id'  => 'TRIAL-' . strtoupper(Str::random(10)),
+        ]);
     }
 
     /**

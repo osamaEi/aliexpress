@@ -8,6 +8,118 @@
         <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'مرحباً بك في لوحة التحكم الخاصة بك' : 'Welcome to your distributor panel' }}</p>
     </div>
 
+    <!-- Subscription Countdown Timer -->
+    @php
+        $activeSubscription = auth()->user()->activeSubscription;
+        $isTrial = $activeSubscription && $activeSubscription->payment_method === 'trial';
+    @endphp
+
+    @if($activeSubscription && $activeSubscription->end_date)
+        @php
+            $endDate = \Carbon\Carbon::parse($activeSubscription->end_date);
+            $daysRemaining = now()->diffInDays($endDate, false);
+        @endphp
+
+        @if($daysRemaining >= 0)
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card" style="background: {{ $isTrial ? '#1a5276' : 'black' }};">
+                        <div class="card-body text-white">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h4 class="text-white mb-2">
+                                        <i class="ri-time-line me-2"></i>
+                                        @if($isTrial)
+                                            {{ app()->getLocale() == 'ar' ? 'الفترة التجريبية المجانية (24 ساعة)' : 'Free Trial Period (24 Hours)' }}
+                                            <span class="badge bg-warning text-dark ms-2" style="font-size:12px;">{{ app()->getLocale() == 'ar' ? 'تجريبي' : 'Trial' }}</span>
+                                        @else
+                                            {{ app()->getLocale() == 'ar' ? 'انتهاء الاشتراك' : 'Subscription Expiry' }}
+                                        @endif
+                                    </h4>
+                                    <p class="mb-0 opacity-75">
+                                        {{ app()->getLocale() == 'ar' ? 'ينتهي اشتراكك في:' : 'Your subscription expires on:' }}
+                                        <strong>{{ $endDate->format('Y-m-d H:i:s') }}</strong>
+                                    </p>
+                                    @if($isTrial)
+                                    <p class="mb-0 mt-1" style="font-size:13px;opacity:.8;">
+                                        {{ app()->getLocale() == 'ar' ? 'يرجى الاشتراك في إحدى الباقات قبل انتهاء الفترة التجريبية.' : 'Please subscribe to a plan before your trial ends.' }}
+                                    </p>
+                                    @endif
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <a href="{{ route('subscriptions.index') }}" class="btn btn-light btn-lg">
+                                        <i class="ri-refresh-line me-1"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'تجديد الاشتراك' : 'Renew Subscription' }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Countdown Timer -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-center gap-3" id="countdown-timer">
+                                        <div class="text-center">
+                                            <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
+                                                <h2 class="text-dark mb-0 fw-bold" id="days">--</h2>
+                                                <small class="text-dark opacity-75">{{ app()->getLocale() == 'ar' ? 'يوم' : 'Days' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
+                                                <h2 class="text-dark mb-0 fw-bold" id="hours">--</h2>
+                                                <small class="text-dark opacity-75">{{ app()->getLocale() == 'ar' ? 'ساعة' : 'Hours' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
+                                                <h2 class="text-dark mb-0 fw-bold" id="minutes">--</h2>
+                                                <small class="text-dark opacity-75">{{ app()->getLocale() == 'ar' ? 'دقيقة' : 'Minutes' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="bg-white bg-opacity-25 rounded p-3" style="min-width: 80px;">
+                                                <h2 class="text-dark mb-0 fw-bold" id="seconds">--</h2>
+                                                <small class="text-dark opacity-75">{{ app()->getLocale() == 'ar' ? 'ثانية' : 'Seconds' }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                const endDate = new Date("{{ $endDate->format('Y-m-d H:i:s') }}").getTime();
+
+                function updateCountdown() {
+                    const now = new Date().getTime();
+                    const distance = endDate - now;
+
+                    if (distance < 0) {
+                        document.getElementById('countdown-timer').innerHTML = '<div class="alert alert-danger w-100 text-center mb-0"><strong>{{ app()->getLocale() == 'ar' ? 'انتهى الاشتراك!' : 'Subscription Expired!' }}</strong></div>';
+                        return;
+                    }
+
+                    const days    = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours   = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    document.getElementById('days').innerText    = days.toString().padStart(2, '0');
+                    document.getElementById('hours').innerText   = hours.toString().padStart(2, '0');
+                    document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+                    document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+                }
+
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            </script>
+        @endif
+    @endif
+    <!-- /Subscription Countdown Timer -->
+
     <!-- Dashboard Banner -->
     @if(setting_image('distributor_dashboard_banner'))
         <div class="row mb-4">

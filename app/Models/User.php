@@ -64,6 +64,14 @@ class User extends Authenticatable
         // Seller setup fields
         'setup_completed_at',
         'profit_settings_completed',
+        // Distributor extra fields
+        'store_type',
+        'store_region',
+        'store_address',
+        'store_map_url',
+        'support_phone',
+        'support_email',
+        'working_hours',
     ];
 
     /**
@@ -93,6 +101,7 @@ class User extends Authenticatable
             'profit_settings_completed' => 'boolean',
             'is_blocked' => 'boolean',
             'social_media_accounts' => 'array',
+            'working_hours' => 'array',
         ];
     }
 
