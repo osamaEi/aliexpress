@@ -223,23 +223,56 @@
         .phone-code-option { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; transition: background .2s; font-size: 13px; }
         .phone-code-option:hover { background: #f3f4f6; }
 
-        /* Country dropdown */
-        .country-select-trigger {
+        /* Custom country dropdown */
+        .country-trigger {
             display: flex; align-items: center; gap: 10px;
-            padding: 12px 16px; border: 2px solid #e5e7eb;
+            padding: 11px 16px; border: 2px solid #e5e7eb;
             border-radius: 10px; cursor: pointer;
-            background: white; transition: all .3s; font-size: 14px;
+            background: white; transition: border-color .25s, box-shadow .25s;
+            font-size: 14px; font-family: 'Cairo', sans-serif;
+            min-height: 48px; user-select: none;
         }
-        .country-dropdown {
-            position: absolute;
-            top: 100%; left: 0; right: 0;
-            background: white; border: 2px solid #e5e7eb;
-            border-radius: 10px; margin-top: 4px;
-            max-height: 240px; overflow-y: auto;
-            z-index: 200; box-shadow: 0 10px 25px rgba(0,0,0,.15);
+        .country-trigger:focus-within, .country-trigger.open {
+            border-color: var(--distributor-color);
+            box-shadow: 0 0 0 4px rgba(86,28,4,.08);
+            outline: none;
         }
-        .country-option { display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer; transition: background .2s; font-size: 13px; }
-        .country-option:hover { background: #f3f4f6; }
+        .country-trigger.is-invalid { border-color: #ef4444; }
+        .country-trigger .arrow {
+            margin-inline-start: auto; color: #999; font-size: 16px;
+            transition: transform .2s;
+        }
+        .country-trigger.open .arrow { transform: rotate(180deg); }
+
+        .country-panel {
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: white; border: 2px solid #e0d6d1;
+            border-radius: 12px; z-index: 400;
+            box-shadow: 0 12px 32px rgba(86,28,4,.13);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .country-search-wrap { padding: 8px 10px; border-bottom: 1px solid #f0e8e4; }
+        .country-search-wrap input {
+            width: 100%; padding: 8px 12px;
+            border: 1.5px solid #e5e7eb; border-radius: 8px;
+            font-size: 13px; font-family: 'Cairo', sans-serif;
+            outline: none; background: #fafafa;
+        }
+        .country-search-wrap input:focus { border-color: var(--distributor-color); background: white; }
+        .country-list { max-height: 220px; overflow-y: auto; }
+        .country-list::-webkit-scrollbar { width: 4px; }
+        .country-list::-webkit-scrollbar-track { background: transparent; }
+        .country-list::-webkit-scrollbar-thumb { background: #e0d6d1; border-radius: 4px; }
+        .country-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 14px; cursor: pointer;
+            font-size: 13px; font-family: 'Cairo', sans-serif;
+            transition: background .15s;
+        }
+        .country-item:hover { background: #fdf5f3; }
+        .country-item.active { background: #f5ede9; color: var(--distributor-color); font-weight: 600; }
+        .country-item img { width: 26px; height: 19px; object-fit: cover; border-radius: 3px; flex-shrink: 0; border: 1px solid #eee; }
+        .country-item .no-flag { width: 26px; height: 19px; background: #f3f4f6; border-radius: 3px; flex-shrink: 0; }
 
         /* Working hours table */
         .working-hours-table { width: 100%; border-collapse: collapse; }
@@ -537,19 +570,41 @@
                                 {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }}
                                 <span class="required">*</span>
                             </label>
-                            <select name="country" id="country"
-                                    class="form-select @error('country') is-invalid @enderror"
-                                    required>
-                                <option value="">
-                                    {{ app()->getLocale() == 'ar' ? '— اختر الدولة —' : '— Select Country —' }}
-                                </option>
-                                @foreach($countries as $c)
-                                <option value="{{ $c->code }}"
-                                    {{ old('country') === $c->code ? 'selected' : '' }}>
-                                    {{ app()->getLocale() == 'ar' ? ($c->name_ar ?: $c->name) : $c->name }}
-                                </option>
-                                @endforeach
-                            </select>
+                            <div style="position:relative;">
+                                {{-- Trigger button --}}
+                                <div class="country-trigger @error('country') is-invalid @enderror" id="countryTrigger" tabindex="0">
+                                    <img id="ctrFlag" src="" alt="" style="width:26px;height:19px;object-fit:cover;border-radius:3px;border:1px solid #eee;display:none;flex-shrink:0;">
+                                    <span id="ctrName" style="color:#aaa;font-family:'Cairo',sans-serif;">
+                                        {{ app()->getLocale() == 'ar' ? '— اختر الدولة —' : '— Select Country —' }}
+                                    </span>
+                                    <i class="ri-arrow-down-s-line arrow"></i>
+                                </div>
+                                {{-- Hidden input submitted with the form --}}
+                                <input type="hidden" name="country" id="countryVal" value="{{ old('country') }}">
+
+                                {{-- Dropdown panel --}}
+                                <div class="country-panel" id="countryPanel" style="display:none;">
+                                    <div class="country-search-wrap">
+                                        <input type="text" id="countrySearch"
+                                               placeholder="{{ app()->getLocale() == 'ar' ? 'ابحث عن دولة...' : 'Search country...' }}"
+                                               autocomplete="off">
+                                    </div>
+                                    <div class="country-list" id="countryList">
+                                        @foreach($countries as $c)
+                                        @php $flagCode = strtolower($c->code); $label = app()->getLocale() == 'ar' ? ($c->name_ar ?: $c->name) : $c->name; @endphp
+                                        <div class="country-item"
+                                             data-value="{{ $c->code }}"
+                                             data-label="{{ $label }}"
+                                             data-flag="{{ $flagCode }}">
+                                            <img src="https://flagcdn.com/{{ $flagCode }}.svg"
+                                                 alt="{{ $c->code }}"
+                                                 onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'no-flag'}))">
+                                            <span>{{ $label }}</span>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
                             @error('country')<span class="text-danger">{{ $message }}</span>@enderror
                         </div>
                     </div>
@@ -917,6 +972,7 @@
     phoneCodeSelected.addEventListener('click', e => {
         e.stopPropagation();
         phoneCodeDropdown.style.display = phoneCodeDropdown.style.display === 'none' ? 'block' : 'none';
+        if (typeof closeCountryPanel === 'function') closeCountryPanel();
     });
     document.querySelectorAll('.phone-code-option').forEach(opt => {
         opt.addEventListener('click', function () {
@@ -927,8 +983,67 @@
         });
     });
 
+    // ── Country custom dropdown ──
+    const countryTrigger = document.getElementById('countryTrigger');
+    const countryPanel   = document.getElementById('countryPanel');
+    const countryVal     = document.getElementById('countryVal');
+    const countrySearch  = document.getElementById('countrySearch');
+    const ctrFlag        = document.getElementById('ctrFlag');
+    const ctrName        = document.getElementById('ctrName');
+    const countryItems   = document.querySelectorAll('.country-item');
+
+    function openCountryPanel() {
+        countryPanel.style.display = 'flex';
+        countryTrigger.classList.add('open');
+        phoneCodeDropdown.style.display = 'none';
+        countrySearch.value = '';
+        filterCountry('');
+        setTimeout(() => countrySearch.focus(), 30);
+    }
+    function closeCountryPanel() {
+        countryPanel.style.display = 'none';
+        countryTrigger.classList.remove('open');
+    }
+    function filterCountry(q) {
+        countryItems.forEach(item => {
+            item.style.display = item.dataset.label.toLowerCase().includes(q) ? 'flex' : 'none';
+        });
+    }
+    function selectCountry(item) {
+        const val   = item.dataset.value;
+        const label = item.dataset.label;
+        const flag  = item.dataset.flag;
+        countryVal.value   = val;
+        ctrName.textContent = label;
+        ctrName.style.color = '#222';
+        ctrFlag.src         = `https://flagcdn.com/${flag}.svg`;
+        ctrFlag.style.display = 'block';
+        countryTrigger.classList.remove('is-invalid');
+        countryItems.forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+        closeCountryPanel();
+    }
+
+    countryTrigger.addEventListener('click', e => {
+        e.stopPropagation();
+        countryPanel.style.display === 'none' ? openCountryPanel() : closeCountryPanel();
+    });
+    countrySearch.addEventListener('input', function() { filterCountry(this.value.toLowerCase()); });
+    countryPanel.addEventListener('click', e => e.stopPropagation());
+    countryItems.forEach(item => item.addEventListener('click', () => selectCountry(item)));
+
+    // Restore selection on page load (validation redisplay)
+    (function() {
+        const oldVal = '{{ old("country") }}';
+        if (oldVal) {
+            const match = document.querySelector(`.country-item[data-value="${oldVal}"]`);
+            if (match) selectCountry(match);
+        }
+    })();
+
     document.addEventListener('click', () => {
         phoneCodeDropdown.style.display = 'none';
+        closeCountryPanel();
     });
 
     // ── Working hours row toggle ──

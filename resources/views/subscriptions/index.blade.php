@@ -29,6 +29,31 @@
     </div>
     @endif
 
+    @php $isDistributor = ($userType === 'distributor'); @endphp
+    <style>
+        .plan-role-banner { background: <?php echo $isDistributor ? 'linear-gradient(135deg,#e8f5e9,#f1f8e9)' : 'linear-gradient(135deg,#e3f2fd,#f3e5f5)'; ?>; }
+        .plan-role-circle { width:44px; height:44px; background: <?php echo $isDistributor ? '#4caf50' : '#1976d2'; ?>; }
+    </style>
+
+    <!-- Role banner -->
+    <div class="alert border-0 mb-4 d-flex align-items-center gap-3 py-3 plan-role-banner">
+        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 plan-role-circle">
+            <i class="{{ $isDistributor ? 'ri-truck-line' : 'ri-store-line' }} text-white" style="font-size:1.3rem;"></i>
+        </div>
+        <div>
+            <div class="fw-semibold" style="font-size:.95rem;">
+                @if($isDistributor)
+                    {{ app()->getLocale() == 'ar' ? 'خطط الاشتراك للموزعين' : 'Distributor Subscription Plans' }}
+                @else
+                    {{ app()->getLocale() == 'ar' ? 'خطط الاشتراك للتجار' : 'Seller Subscription Plans' }}
+                @endif
+            </div>
+            <div class="text-muted" style="font-size:.83rem;">
+                {{ app()->getLocale() == 'ar' ? 'الخطط المعروضة مخصصة لحسابك' : 'Plans shown are tailored to your account type' }}
+            </div>
+        </div>
+    </div>
+
     <!-- Subscription Plans -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -43,6 +68,12 @@
         </div>
 
         <div class="card-body">
+            @if($subscriptions->isEmpty())
+            <div class="text-center py-5 text-muted">
+                <i class="ri-inbox-line" style="font-size:3rem;"></i>
+                <p class="mt-2">{{ app()->getLocale() == 'ar' ? 'لا توجد خطط متاحة لحسابك حالياً' : 'No plans available for your account type yet.' }}</p>
+            </div>
+            @else
             <div class="row g-4">
                 @foreach($subscriptions as $subscription)
                 <div class="col-md-4">
@@ -53,6 +84,14 @@
                                 <span class="badge mb-2" style="background-color: {{ $subscription->color }}; font-size: 1.1rem;">
                                     {{ $subscription->localized_name }}
                                 </span>
+                                @if($subscription->role !== 'both')
+                                <div class="mb-1">
+                                    <span class="badge {{ $subscription->role === 'distributor' ? 'bg-label-success' : 'bg-label-primary' }}" style="font-size:.75rem;">
+                                        <i class="{{ $subscription->role === 'distributor' ? 'ri-truck-line' : 'ri-store-line' }} me-1"></i>
+                                        {{ $subscription->localized_role }}
+                                    </span>
+                                </div>
+                                @endif
                                 @if($currentSubscription && $currentSubscription->subscription_id == $subscription->id)
                                     <div class="badge bg-success mb-2">
                                         <i class="ri-checkbox-circle-line me-1"></i>

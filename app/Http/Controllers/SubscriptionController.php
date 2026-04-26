@@ -15,11 +15,11 @@ class SubscriptionController extends Controller
      */
     public function index()
     {
-        $subscriptions = Subscription::active()->visibleTo(Auth::user()->user_type)->get();
-
+        $userType = Auth::user()->user_type;
+        $subscriptions = Subscription::active()->visibleTo($userType)->get();
         $currentSubscription = Auth::user()->activeSubscription;
 
-        return view('subscriptions.index', compact('subscriptions', 'currentSubscription'));
+        return view('subscriptions.index', compact('subscriptions', 'currentSubscription', 'userType'));
     }
 
     /**
@@ -27,6 +27,16 @@ class SubscriptionController extends Controller
      */
     public function show(Subscription $subscription)
     {
+        $userType = Auth::user()->user_type;
+
+        // Redirect if this plan is not meant for the user's role
+        if ($subscription->role !== 'both' && $subscription->role !== $userType) {
+            return redirect()->route('subscriptions.index')
+                ->with('error', app()->getLocale() === 'ar'
+                    ? 'هذه الخطة غير متاحة لحسابك'
+                    : 'This plan is not available for your account type.');
+        }
+
         $currentSubscription = Auth::user()->activeSubscription;
 
         return view('subscriptions.show', compact('subscription', 'currentSubscription'));
@@ -38,6 +48,15 @@ class SubscriptionController extends Controller
     public function subscribe(Request $request, Subscription $subscription)
     {
         $user = Auth::user();
+
+        // Guard: plan must be accessible by this user's role
+        if ($subscription->role !== 'both' && $subscription->role !== $user->user_type) {
+            return redirect()->route('subscriptions.index')
+                ->with('error', app()->getLocale() === 'ar'
+                    ? 'هذه الخطة غير متاحة لحسابك'
+                    : 'This plan is not available for your account type.');
+        }
+
         $currentSubscription = $user->activeSubscription;
         $isUpgrade = false;
         $remainingDays = 0;
