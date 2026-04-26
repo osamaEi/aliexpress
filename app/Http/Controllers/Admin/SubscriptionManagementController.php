@@ -97,15 +97,68 @@ class SubscriptionManagementController extends Controller
     }
 
     /**
-     * View user subscriptions
+     * View seller subscriptions
      */
-    public function userSubscriptions()
+    public function sellerSubscriptions(Request $request)
     {
-        $userSubscriptions = UserSubscription::with(['user', 'subscription'])
-            ->latest()
-            ->paginate(20);
+        $query = UserSubscription::with(['user', 'subscription'])
+            ->whereHas('user', fn($q) => $q->where('user_type', 'seller'));
 
-        return view('admin.subscriptions.users', compact('userSubscriptions'));
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $query->whereHas('user', fn($q) => $q->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('email', 'like', '%'.$request->search.'%'));
+        }
+
+        $userSubscriptions = $query->latest()->paginate(20)->withQueryString();
+        $role = 'seller';
+
+        return view('admin.subscriptions.users', compact('userSubscriptions', 'role'));
+    }
+
+    /**
+     * View distributor subscriptions
+     */
+    public function distributorSubscriptions(Request $request)
+    {
+        $query = UserSubscription::with(['user', 'subscription'])
+            ->whereHas('user', fn($q) => $q->where('user_type', 'distributor'));
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $query->whereHas('user', fn($q) => $q->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('email', 'like', '%'.$request->search.'%'));
+        }
+
+        $userSubscriptions = $query->latest()->paginate(20)->withQueryString();
+        $role = 'distributor';
+
+        return view('admin.subscriptions.users', compact('userSubscriptions', 'role'));
+    }
+
+    /**
+     * View all user subscriptions (kept for backwards compat)
+     */
+    public function userSubscriptions(Request $request)
+    {
+        $query = UserSubscription::with(['user', 'subscription']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $query->whereHas('user', fn($q) => $q->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('email', 'like', '%'.$request->search.'%'));
+        }
+
+        $userSubscriptions = $query->latest()->paginate(20)->withQueryString();
+        $role = 'all';
+
+        return view('admin.subscriptions.users', compact('userSubscriptions', 'role'));
     }
 
     /**

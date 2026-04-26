@@ -102,12 +102,14 @@ class DistributorController extends Controller
                     : "You have reached the maximum ({$maxProducts}) products for your current plan. Please upgrade to a higher plan.");
         }
 
-        // Get only parent categories (main categories)
         $categories = Category::whereNull('parent_id')
             ->where('is_active', true)
             ->orderBy('name', 'asc')
             ->get();
-        return view('distributor.products.create', compact('categories', 'productCount', 'maxProducts', 'subscriptionPlan'));
+
+        $currencies = \App\Models\Currency::active();
+
+        return view('distributor.products.create', compact('categories', 'currencies', 'productCount', 'maxProducts', 'subscriptionPlan'));
     }
 
     /**
@@ -334,7 +336,9 @@ class DistributorController extends Controller
                 : $product->category;
         }
 
-        return view('distributor.products.edit', compact('product', 'categories', 'parentCategory'));
+        $currencies = \App\Models\Currency::active();
+
+        return view('distributor.products.edit', compact('product', 'categories', 'parentCategory', 'currencies'));
     }
 
     /**

@@ -389,6 +389,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/subscriptions/create', [SubscriptionManagementController::class, 'create'])->name('subscriptions.create');
         Route::post('/subscriptions', [SubscriptionManagementController::class, 'store'])->name('subscriptions.store');
         Route::get('/subscriptions/users', [SubscriptionManagementController::class, 'userSubscriptions'])->name('subscriptions.users');
+        Route::get('/subscriptions/sellers', [SubscriptionManagementController::class, 'sellerSubscriptions'])->name('subscriptions.sellers');
+        Route::get('/subscriptions/distributors', [SubscriptionManagementController::class, 'distributorSubscriptions'])->name('subscriptions.distributors');
         Route::get('/subscriptions/{subscription}/edit', [SubscriptionManagementController::class, 'edit'])->name('subscriptions.edit');
         Route::put('/subscriptions/{subscription}', [SubscriptionManagementController::class, 'update'])->name('subscriptions.update');
         Route::post('/subscriptions/{userSubscription}/close', [SubscriptionManagementController::class, 'closeSubscription'])->name('subscriptions.close');

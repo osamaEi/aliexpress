@@ -152,20 +152,17 @@
                             </td>
                             <td>{{ $store->name }}</td>
                             <td>
-                                @php
-                                    $countryFlags = [
-                                        'AE' => '🇦🇪',
-                                        'SA' => '🇸🇦',
-                                        'KW' => '🇰🇼',
-                                        'QA' => '🇶🇦',
-                                        'BH' => '🇧🇭',
-                                        'OM' => '🇴🇲',
-                                        'EG' => '🇪🇬',
-                                        'JO' => '🇯🇴',
-                                        'LB' => '🇱🇧',
-                                    ];
-                                @endphp
-                                <span>{{ $countryFlags[$store->country] ?? '' }} {{ $store->country }}</span>
+                                @if($store->country)
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="https://flagcdn.com/w40/{{ strtolower($store->country) }}.png"
+                                             alt="{{ $store->country }}"
+                                             style="width:28px; height:20px; object-fit:cover; border-radius:3px; border:1px solid #eee;"
+                                             onerror="this.style.display='none'">
+                                        <span>{{ $store->country }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
                             </td>
                             <td>
                                 @if(empty($store->password))

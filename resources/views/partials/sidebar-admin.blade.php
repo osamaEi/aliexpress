@@ -105,9 +105,22 @@
                         <div>{{ __('messages.subscription_plans') }}</div>
                     </a>
                 </li>
+                <li class="menu-item {{ request()->routeIs('admin.subscriptions.sellers') ? 'active' : '' }}">
+                    <a href="{{ route('admin.subscriptions.sellers') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-store-line"></i>
+                        <div>{{ app()->getLocale() == 'ar' ? 'اشتراكات التجار' : 'Sellers' }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.subscriptions.distributors') ? 'active' : '' }}">
+                    <a href="{{ route('admin.subscriptions.distributors') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-truck-line"></i>
+                        <div>{{ app()->getLocale() == 'ar' ? 'اشتراكات الموزعين' : 'Distributors' }}</div>
+                    </a>
+                </li>
                 <li class="menu-item {{ request()->routeIs('admin.subscriptions.users') ? 'active' : '' }}">
                     <a href="{{ route('admin.subscriptions.users') }}" class="menu-link">
-                        <div>{{ __('messages.user_subscriptions') }}</div>
+                        <i class="menu-icon tf-icons ri-group-line"></i>
+                        <div>{{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}</div>
                     </a>
                 </li>
             </ul>

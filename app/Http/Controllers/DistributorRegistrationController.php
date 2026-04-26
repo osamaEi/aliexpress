@@ -21,7 +21,11 @@ class DistributorRegistrationController extends Controller
      */
     public function showStep1()
     {
-        return view('distributor.register.step1');
+        $countries = \App\Models\Country::where('is_active', true)
+            ->orderBy('name')
+            ->get(['code', 'name', 'name_ar']);
+
+        return view('distributor.register.step1', compact('countries'));
     }
 
     /**

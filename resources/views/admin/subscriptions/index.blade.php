@@ -99,11 +99,19 @@
         @endforeach
     </div>
 
-    <!-- View User Subscriptions Link -->
-    <div class="text-center">
-        <a href="{{ route('admin.subscriptions.users') }}" class="btn btn-outline-primary">
-            <i class="ri-user-line me-1"></i>
-            {{ __('messages.user_subscriptions') }}
+    <!-- View User Subscriptions Links -->
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="{{ route('admin.subscriptions.sellers') }}" class="btn btn-outline-primary">
+            <i class="ri-store-line me-1"></i>
+            {{ app()->getLocale() == 'ar' ? 'اشتراكات التجار' : 'Seller Subscriptions' }}
+        </a>
+        <a href="{{ route('admin.subscriptions.distributors') }}" class="btn btn-outline-success">
+            <i class="ri-truck-line me-1"></i>
+            {{ app()->getLocale() == 'ar' ? 'اشتراكات الموزعين' : 'Distributor Subscriptions' }}
+        </a>
+        <a href="{{ route('admin.subscriptions.users') }}" class="btn btn-outline-secondary">
+            <i class="ri-group-line me-1"></i>
+            {{ app()->getLocale() == 'ar' ? 'جميع الاشتراكات' : 'All Subscriptions' }}
         </a>
     </div>
 </div>

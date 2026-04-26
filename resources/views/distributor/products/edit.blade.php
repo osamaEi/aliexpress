@@ -106,9 +106,11 @@
                     <div class="col-md-4">
                         <label for="currency" class="form-label">{{ app()->getLocale() == 'ar' ? 'العملة' : 'Currency' }} <span class="text-danger">*</span></label>
                         <select class="form-select @error('currency') is-invalid @enderror" id="currency" name="currency" required>
-                            <option value="USD" {{ old('currency', $product->currency) == 'USD' ? 'selected' : '' }}>USD</option>
-                            <option value="AED" {{ old('currency', $product->currency) == 'AED' ? 'selected' : '' }}>AED</option>
-                            <option value="SAR" {{ old('currency', $product->currency) == 'SAR' ? 'selected' : '' }}>SAR</option>
+                            @foreach($currencies as $cur)
+                            <option value="{{ $cur->code }}" {{ old('currency', $product->currency) === $cur->code ? 'selected' : '' }}>
+                                {{ $cur->code }} — {{ $cur->name }}
+                            </option>
+                            @endforeach
                         </select>
                         @error('currency')
                             <div class="invalid-feedback">{{ $message }}</div>

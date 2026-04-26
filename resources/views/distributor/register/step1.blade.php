@@ -629,44 +629,19 @@
                                             {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }}
                                             <span class="required">*</span>
                                         </label>
-                                        <div style="position:relative;">
-                                            <div class="country-select-trigger" id="countrySelectTrigger">
-                                                <img id="countryFlag" src="" style="width:22px;height:16px;border-radius:2px;object-fit:cover;display:none;">
-                                                <span id="countryName" style="flex:1;color:#999;">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</span>
-                                                <i class="ri-arrow-down-s-line" style="font-size:15px;color:#999;"></i>
-                                            </div>
-                                            @php
-                                                $countries = [
-                                                    ['value'=>'AE','flag'=>'ae','name_ar'=>'الإمارات','name_en'=>'UAE'],
-                                                    ['value'=>'SA','flag'=>'sa','name_ar'=>'السعودية','name_en'=>'Saudi Arabia'],
-                                                    ['value'=>'KW','flag'=>'kw','name_ar'=>'الكويت','name_en'=>'Kuwait'],
-                                                    ['value'=>'QA','flag'=>'qa','name_ar'=>'قطر','name_en'=>'Qatar'],
-                                                    ['value'=>'BH','flag'=>'bh','name_ar'=>'البحرين','name_en'=>'Bahrain'],
-                                                    ['value'=>'OM','flag'=>'om','name_ar'=>'عُمان','name_en'=>'Oman'],
-                                                    ['value'=>'JO','flag'=>'jo','name_ar'=>'الأردن','name_en'=>'Jordan'],
-                                                    ['value'=>'LB','flag'=>'lb','name_ar'=>'لبنان','name_en'=>'Lebanon'],
-                                                    ['value'=>'SY','flag'=>'sy','name_ar'=>'سوريا','name_en'=>'Syria'],
-                                                    ['value'=>'PS','flag'=>'ps','name_ar'=>'فلسطين','name_en'=>'Palestine'],
-                                                    ['value'=>'IQ','flag'=>'iq','name_ar'=>'العراق','name_en'=>'Iraq'],
-                                                    ['value'=>'EG','flag'=>'eg','name_ar'=>'مصر','name_en'=>'Egypt'],
-                                                    ['value'=>'LY','flag'=>'ly','name_ar'=>'ليبيا','name_en'=>'Libya'],
-                                                    ['value'=>'TN','flag'=>'tn','name_ar'=>'تونس','name_en'=>'Tunisia'],
-                                                    ['value'=>'DZ','flag'=>'dz','name_ar'=>'الجزائر','name_en'=>'Algeria'],
-                                                    ['value'=>'MA','flag'=>'ma','name_ar'=>'المغرب','name_en'=>'Morocco'],
-                                                    ['value'=>'SD','flag'=>'sd','name_ar'=>'السودان','name_en'=>'Sudan'],
-                                                    ['value'=>'YE','flag'=>'ye','name_ar'=>'اليمن','name_en'=>'Yemen'],
-                                                ];
-                                            @endphp
-                                            <div class="country-dropdown" id="countryDropdown" style="display:none;">
-                                                @foreach($countries as $c)
-                                                <div class="country-option" data-value="{{ $c['value'] }}" data-flag="{{ $c['flag'] }}" data-name="{{ app()->getLocale() == 'ar' ? $c['name_ar'] : $c['name_en'] }}">
-                                                    <img src="https://flagcdn.com/w20/{{ $c['flag'] }}.png" style="width:20px;height:15px;border-radius:2px;">
-                                                    <span>{{ app()->getLocale() == 'ar' ? $c['name_ar'] : $c['name_en'] }}</span>
-                                                </div>
-                                                @endforeach
-                                            </div>
-                                            <input type="hidden" name="country" id="country" value="{{ old('country') }}">
-                                        </div>
+                                        <select name="country" id="country"
+                                                class="form-select @error('country') is-invalid @enderror"
+                                                style="background-color:#fff;">
+                                            <option value="">
+                                                {{ app()->getLocale() == 'ar' ? '— اختر الدولة —' : '— Select Country —' }}
+                                            </option>
+                                            @foreach($countries as $c)
+                                            <option value="{{ $c->code }}"
+                                                {{ old('country') === $c->code ? 'selected' : '' }}>
+                                                {{ app()->getLocale() == 'ar' ? ($c->name_ar ?: $c->name) : $c->name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
                                         @error('country')<span class="text-danger">{{ $message }}</span>@enderror
                                     </div>
                                 </div>

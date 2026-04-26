@@ -247,9 +247,19 @@
                                 <div data-i18n="Subscription Plans">{{ __('messages.subscription_plans') }}</div>
                             </a>
                         </li>
+                        <li class="menu-item {{ request()->routeIs('admin.subscriptions.sellers') ? 'active' : '' }}">
+                            <a href="{{ route('admin.subscriptions.sellers') }}" class="menu-link">
+                                <div>{{ app()->getLocale() == 'ar' ? 'اشتراكات التجار' : 'Sellers' }}</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.subscriptions.distributors') ? 'active' : '' }}">
+                            <a href="{{ route('admin.subscriptions.distributors') }}" class="menu-link">
+                                <div>{{ app()->getLocale() == 'ar' ? 'اشتراكات الموزعين' : 'Distributors' }}</div>
+                            </a>
+                        </li>
                         <li class="menu-item {{ request()->routeIs('admin.subscriptions.users') ? 'active' : '' }}">
                             <a href="{{ route('admin.subscriptions.users') }}" class="menu-link">
-                                <div data-i18n="User Subscriptions">{{ __('messages.user_subscriptions') }}</div>
+                                <div>{{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}</div>
                             </a>
                         </li>
                     </ul>

@@ -202,39 +202,31 @@
                     <!-- Simple Price & Quantity (shown when no variations) -->
                     <div class="col-12" id="simplePriceSection">
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="price" class="form-label">
                                     {{ app()->getLocale() == 'ar' ? 'السعر' : 'Price' }} <span class="text-danger">*</span>
-                                    <span class="badge bg-primary ms-2">
-                                        @if(auth()->user()->default_currency === 'AED')
-                                            <x-dirham-icon width="14" height="14" /> AED
-                                        @elseif(auth()->user()->default_currency === 'SAR')
-                                            <x-riyal-icon width="14" height="14" /> SAR
-                                        @elseif(auth()->user()->default_currency === 'USD')
-                                            <x-dollar-icon width="14" height="14" /> USD
-                                        @else
-                                            {{ auth()->user()->default_currency ?? 'AED' }}
-                                        @endif
-                                    </span>
                                 </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        @if(auth()->user()->default_currency === 'AED')
-                                            <x-dirham-icon width="18" height="18" />
-                                        @elseif(auth()->user()->default_currency === 'SAR')
-                                            <x-riyal-icon width="18" height="18" />
-                                        @elseif(auth()->user()->default_currency === 'USD')
-                                            <x-dollar-icon width="18" height="18" />
-                                        @else
-                                            {{ auth()->user()->default_currency ?? 'د.إ' }}
-                                        @endif
-                                    </span>
-                                    <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price') }}">
-                                    @error('price')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <input type="hidden" name="currency" value="{{ auth()->user()->default_currency ?? 'AED' }}">
+                                <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price') }}">
+                                @error('price')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="currency" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'العملة' : 'Currency' }} <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select @error('currency') is-invalid @enderror" id="currency" name="currency">
+                                    @foreach($currencies as $cur)
+                                    <option value="{{ $cur->code }}"
+                                        {{ old('currency', auth()->user()->default_currency ?? 'AED') === $cur->code ? 'selected' : '' }}>
+                                        {{ $cur->code }} — {{ $cur->name }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                @error('currency')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6">
@@ -264,16 +256,6 @@
                                                 <th style="width: 40%;">{{ app()->getLocale() == 'ar' ? 'الاختلاف (مثال: أحمر - كبير)' : 'Variation (e.g. Red - Large)' }}</th>
                                                 <th style="width: 25%;">
                                                     {{ app()->getLocale() == 'ar' ? 'السعر' : 'Price' }}
-                                                    <span class="badge bg-secondary">
-                                                        @if(auth()->user()->default_currency === 'AED')
-                                                            <x-dirham-icon width="12" height="12" />
-                                                        @elseif(auth()->user()->default_currency === 'SAR')
-                                                            <x-riyal-icon width="12" height="12" />
-                                                        @elseif(auth()->user()->default_currency === 'USD')
-                                                            <x-dollar-icon width="12" height="12" />
-                                                        @endif
-                                                        {{ auth()->user()->default_currency ?? 'AED' }}
-                                                    </span>
                                                 </th>
                                                 <th style="width: 20%;">{{ app()->getLocale() == 'ar' ? 'الكمية' : 'Quantity' }}</th>
                                                 <th style="width: 15%;">{{ app()->getLocale() == 'ar' ? 'إجراء' : 'Action' }}</th>
