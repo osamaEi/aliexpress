@@ -25,6 +25,15 @@
                         <span class="badge mb-2" style="background-color: {{ $subscription->color }}; font-size: 1.1rem;">
                             {{ $subscription->localized_name }}
                         </span>
+                        <div class="mt-1">
+                            @if($subscription->role === 'seller')
+                                <span class="badge bg-label-primary"><i class="ri-store-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تجار' : 'Sellers' }}</span>
+                            @elseif($subscription->role === 'distributor')
+                                <span class="badge bg-label-success"><i class="ri-truck-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'موزعون' : 'Distributors' }}</span>
+                            @else
+                                <span class="badge bg-label-secondary"><i class="ri-group-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الجميع' : 'Both' }}</span>
+                            @endif
+                        </div>
                         <h2 class="mb-0 d-inline-flex align-items-center gap-2" style="direction: ltr;">
                             <x-session-currency-icon width="28" height="28" />
                             {{ number_format(convert_price($subscription->price), 2) }}

@@ -43,6 +43,7 @@ class SubscriptionManagementController extends Controller
             'duration_days' => 'required|integer|min:1',
             'sort_order' => 'nullable|integer',
             'color' => 'required|string',
+            'role' => 'required|in:seller,distributor,both',
             'max_products' => 'required|integer|min:1',
             'max_orders_per_month' => 'required|integer|min:1',
             'commission_rate' => 'required|numeric|min:0|max:100',
@@ -52,6 +53,12 @@ class SubscriptionManagementController extends Controller
             'api_access' => 'boolean',
             'is_active' => 'boolean',
         ]);
+
+        $validated['priority_support'] = $request->boolean('priority_support');
+        $validated['analytics_access'] = $request->boolean('analytics_access');
+        $validated['bulk_import'] = $request->boolean('bulk_import');
+        $validated['api_access'] = $request->boolean('api_access');
+        $validated['is_active'] = $request->boolean('is_active');
 
         Subscription::create($validated);
 
@@ -80,6 +87,7 @@ class SubscriptionManagementController extends Controller
             'price' => 'required|numeric|min:0',
             'duration_days' => 'required|integer|min:1',
             'color' => 'required|string',
+            'role' => 'required|in:seller,distributor,both',
             'max_products' => 'required|integer|min:1',
             'max_orders_per_month' => 'required|integer|min:1',
             'commission_rate' => 'required|numeric|min:0|max:100',
@@ -89,6 +97,12 @@ class SubscriptionManagementController extends Controller
             'api_access' => 'boolean',
             'is_active' => 'boolean',
         ]);
+
+        $validated['priority_support'] = $request->boolean('priority_support');
+        $validated['analytics_access'] = $request->boolean('analytics_access');
+        $validated['bulk_import'] = $request->boolean('bulk_import');
+        $validated['api_access'] = $request->boolean('api_access');
+        $validated['is_active'] = $request->boolean('is_active');
 
         $subscription->update($validated);
 

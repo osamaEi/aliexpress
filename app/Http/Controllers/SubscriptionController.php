@@ -15,7 +15,8 @@ class SubscriptionController extends Controller
      */
     public function index()
     {
-        $subscriptions = Subscription::active()->get();
+        $subscriptions = Subscription::active()->visibleTo(Auth::user()->user_type)->get();
+
         $currentSubscription = Auth::user()->activeSubscription;
 
         return view('subscriptions.index', compact('subscriptions', 'currentSubscription'));

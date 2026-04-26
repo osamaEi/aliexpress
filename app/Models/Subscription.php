@@ -24,6 +24,7 @@ class Subscription extends Model
         'commission_rate',
         'is_active',
         'sort_order',
+        'role',
     ];
 
     protected $casts = [
@@ -78,5 +79,38 @@ class Subscription extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true)->orderBy('sort_order');
+    }
+
+    /**
+     * Scope to subscriptions visible to a given user type
+     */
+    public function scopeVisibleTo($query, string $userType)
+    {
+        return $query->where(fn($q) => $q->where('role', $userType)->orWhere('role', 'both'));
+    }
+
+    /**
+     * Get role badge color class
+     */
+    public function getRoleBadgeClassAttribute(): string
+    {
+        return match($this->role) {
+            'seller'      => 'bg-label-primary',
+            'distributor' => 'bg-label-success',
+            default       => 'bg-label-secondary',
+        };
+    }
+
+    /**
+     * Get localized role label
+     */
+    public function getLocalizedRoleAttribute(): string
+    {
+        $locale = app()->getLocale();
+        return match($this->role) {
+            'seller'      => $locale === 'ar' ? 'تجار'    : 'Sellers',
+            'distributor' => $locale === 'ar' ? 'موزعون'  : 'Distributors',
+            default       => $locale === 'ar' ? 'الجميع'  : 'Both',
+        };
     }
 }

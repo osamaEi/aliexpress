@@ -529,6 +529,30 @@
                                    minlength="8" required>
                         </div>
                     </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="ri-global-line"></i>
+                                {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }}
+                                <span class="required">*</span>
+                            </label>
+                            <select name="country" id="country"
+                                    class="form-select @error('country') is-invalid @enderror"
+                                    required>
+                                <option value="">
+                                    {{ app()->getLocale() == 'ar' ? '— اختر الدولة —' : '— Select Country —' }}
+                                </option>
+                                @foreach($countries as $c)
+                                <option value="{{ $c->code }}"
+                                    {{ old('country') === $c->code ? 'selected' : '' }}>
+                                    {{ app()->getLocale() == 'ar' ? ($c->name_ar ?: $c->name) : $c->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('country')<span class="text-danger">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
                 </div>
 
                 {{-- ── Store info ── --}}
@@ -622,30 +646,6 @@
                                 {{ app()->getLocale() == 'ar' ? 'تفاصيل الموقع الفعلي' : 'Physical Location Details' }}
                             </p>
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <i class="ri-global-line"></i>
-                                            {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }}
-                                            <span class="required">*</span>
-                                        </label>
-                                        <select name="country" id="country"
-                                                class="form-select @error('country') is-invalid @enderror"
-                                                style="background-color:#fff;">
-                                            <option value="">
-                                                {{ app()->getLocale() == 'ar' ? '— اختر الدولة —' : '— Select Country —' }}
-                                            </option>
-                                            @foreach($countries as $c)
-                                            <option value="{{ $c->code }}"
-                                                {{ old('country') === $c->code ? 'selected' : '' }}>
-                                                {{ app()->getLocale() == 'ar' ? ($c->name_ar ?: $c->name) : $c->name }}
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                        @error('country')<span class="text-danger">{{ $message }}</span>@enderror
-                                    </div>
-                                </div>
-
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">
@@ -917,7 +917,6 @@
     phoneCodeSelected.addEventListener('click', e => {
         e.stopPropagation();
         phoneCodeDropdown.style.display = phoneCodeDropdown.style.display === 'none' ? 'block' : 'none';
-        countryDropdown.style.display = 'none';
     });
     document.querySelectorAll('.phone-code-option').forEach(opt => {
         opt.addEventListener('click', function () {
@@ -928,32 +927,8 @@
         });
     });
 
-    // ── Country dropdown ──
-    const countrySelectTrigger = document.getElementById('countrySelectTrigger');
-    const countryDropdown      = document.getElementById('countryDropdown');
-    const countryFlag          = document.getElementById('countryFlag');
-    const countryName          = document.getElementById('countryName');
-    const countryInput         = document.getElementById('country');
-
-    countrySelectTrigger.addEventListener('click', e => {
-        e.stopPropagation();
-        countryDropdown.style.display = countryDropdown.style.display === 'none' ? 'block' : 'none';
-        phoneCodeDropdown.style.display = 'none';
-    });
-    document.querySelectorAll('.country-option').forEach(opt => {
-        opt.addEventListener('click', function () {
-            countryFlag.src = `https://flagcdn.com/w20/${this.dataset.flag}.png`;
-            countryFlag.style.display = 'block';
-            countryName.textContent = this.dataset.name;
-            countryName.style.color = '#333';
-            countryInput.value = this.dataset.value;
-            countryDropdown.style.display = 'none';
-            countrySelectTrigger.style.borderColor = 'var(--distributor-color)';
-        });
-    });
     document.addEventListener('click', () => {
         phoneCodeDropdown.style.display = 'none';
-        countryDropdown.style.display = 'none';
     });
 
     // ── Working hours row toggle ──

@@ -135,7 +135,7 @@
                     </div>
 
                     <!-- Color -->
-                    <div class="col-md-12 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="color" class="form-label">{{ __('messages.plan_color') }} <span class="text-danger">*</span></label>
                         <input
                             type="color"
@@ -148,6 +148,32 @@
                         @error('color')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                    </div>
+
+                    <!-- Role -->
+                    <div class="col-md-6 mb-3">
+                        <label for="role" class="form-label">
+                            {{ app()->getLocale() == 'ar' ? 'الدور المرتبط' : 'Related Role' }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                            <option value="seller"   {{ old('role') === 'seller'      ? 'selected' : '' }}>
+                                <i class="ri-store-line"></i>
+                                {{ app()->getLocale() == 'ar' ? 'تجار فقط' : 'Sellers Only' }}
+                            </option>
+                            <option value="distributor" {{ old('role') === 'distributor' ? 'selected' : '' }}>
+                                {{ app()->getLocale() == 'ar' ? 'موزعون فقط' : 'Distributors Only' }}
+                            </option>
+                            <option value="both" {{ old('role', 'both') === 'both' ? 'selected' : '' }}>
+                                {{ app()->getLocale() == 'ar' ? 'الجميع' : 'Both (Sellers & Distributors)' }}
+                            </option>
+                        </select>
+                        @error('role')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">
+                            {{ app()->getLocale() == 'ar' ? 'تحديد من يمكنه الاشتراك في هذه الخطة' : 'Determines who can subscribe to this plan' }}
+                        </div>
                     </div>
                 </div>
 
