@@ -2107,8 +2107,8 @@ background: rgba(255, 255, 255, 0.85);
     }
 
     .source-card-mini.china {
-        background: #fff5f5;
-        border-color: #ffcdd2;
+        background: #f8f9fa;
+        border-color: #e9ecef;
     }
 
     .source-card-mini.china:hover {
