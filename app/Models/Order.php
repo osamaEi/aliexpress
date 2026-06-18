@@ -26,7 +26,6 @@ class Order extends Model
         'freight_amount',
         'total_amount',
         'aliexpress_profit',
-        'admin_category_profit',
         'seller_profit',
         'currency',
         'customer_name',
@@ -58,7 +57,6 @@ class Order extends Model
         'freight_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'aliexpress_profit' => 'decimal:2',
-        'admin_category_profit' => 'decimal:2',
         'seller_profit' => 'decimal:2',
         'quantity' => 'integer',
         'selected_variant_details' => 'array',
@@ -244,7 +242,7 @@ class Order extends Model
      */
     public function getTotalProfit(): float
     {
-        return $this->aliexpress_profit + $this->admin_category_profit + $this->seller_profit;
+        return $this->aliexpress_profit + $this->seller_profit;
     }
 
     /**
@@ -261,7 +259,6 @@ class Order extends Model
         if (!$product) {
             // No product found, set all profits to 0
             $this->aliexpress_profit = 0;
-            $this->admin_category_profit = 0;
             $this->seller_profit = 0;
             return;
         }
@@ -274,10 +271,7 @@ class Order extends Model
             $aliexpressProfit = $aliexpressCost * ($product->supplier_profit_margin / 100);
         }
 
-        // 2. Calculate Admin Profit from global settings applied on base cost
-        $adminCategoryProfit = admin_profit($aliexpressCost);
-
-        // 3. Calculate Seller Profit
+        // 2. Calculate Seller Profit
         $sellerProfit = 0;
         if ($this->user_id && $product->category_id) {
             $sellerProfitSetting = SellerSubcategoryProfit::where('user_id', $this->user_id)
@@ -295,7 +289,6 @@ class Order extends Model
 
         // Update the profit fields
         $this->aliexpress_profit = round($aliexpressProfit, 2);
-        $this->admin_category_profit = round($adminCategoryProfit, 2);
         $this->seller_profit = round($sellerProfit, 2);
     }
 

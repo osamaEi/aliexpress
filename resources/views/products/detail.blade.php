@@ -1222,8 +1222,15 @@ const currentCurrency = {
 // Wallet balance (in AED - base currency)
 const walletBalanceAED = {{ $walletBalance ?? 0 }};
 
-// Product price from system. Prices are stored in AED (base currency); convert to display currency.
-const productPrice = {{ $currentCurrency->convertFrom($product->price, $product->currency ?? 'AED') }};
+// Product price from system. Use the seller's final price (base + seller profit + admin profit)
+// when the product is assigned to the seller, otherwise fall back to the base product price.
+// Prices are stored in AED (base currency); convert to display currency.
+@php
+    $orderUnitPrice = (isset($sellerPivotData) && $sellerPivotData['price'] > 0)
+        ? $sellerPivotData['price']
+        : $product->price;
+@endphp
+const productPrice = {{ $currentCurrency->convertFrom($orderUnitPrice, $product->currency ?? 'AED') }};
 const productCurrency = '{{ $currentCurrency->code }}';
 
 // Currency icon SVGs

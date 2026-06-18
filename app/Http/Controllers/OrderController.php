@@ -120,7 +120,17 @@ class OrderController extends Controller
 
             // Calculate pricing
             $quantity = $validated['quantity'];
-            $unitPrice = $product->price;
+
+            // Use the seller's final price (base + seller profit + admin profit) stored on the
+            // pivot when the product is assigned to this seller; fall back to the base price.
+            $pivotRecord = \DB::table('product_user')
+                ->where('user_id', $user->id)
+                ->where('product_id', $product->id)
+                ->first();
+            $unitPrice = ($pivotRecord && ($pivotRecord->price ?? 0) > 0)
+                ? (float) $pivotRecord->price
+                : $product->price;
+
             $productTotal = $unitPrice * $quantity;
 
             // Add freight/shipping cost if provided

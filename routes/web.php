@@ -17,7 +17,6 @@ use App\Http\Controllers\SellerRegistrationController;
 use App\Http\Controllers\SellerProfileCompletionController;
 use App\Http\Controllers\DistributorRegistrationController;
 use App\Http\Controllers\Admin\OrderManagementController;
-use App\Http\Controllers\Admin\AdminCategoryProfitController;
 use App\Http\Controllers\Admin\SubscriptionManagementController;
 
 Route::get('/', function () {
@@ -418,14 +417,6 @@ Route::middleware('auth')->group(function () {
 
         // Categories Management (use existing CategoryController)
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-
-        // Category Profit Management
-        Route::prefix('category-profits')->name('category-profits.')->group(function () {
-            Route::get('/', [AdminCategoryProfitController::class, 'index'])->name('index');
-            Route::post('/{category}', [AdminCategoryProfitController::class, 'update'])->name('update');
-            Route::delete('/{category}', [AdminCategoryProfitController::class, 'destroy'])->name('destroy');
-            Route::post('/{category}/toggle', [AdminCategoryProfitController::class, 'toggleActive'])->name('toggle');
-        });
 
         // User Management - General
         Route::get('/users', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
