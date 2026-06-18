@@ -57,7 +57,7 @@ class AdminCategoryProfit extends Model
 
         // Convert currency if needed
         $profitValue = $profit->profit_amount;
-        $savedCurrency = $profit->currency ?? 'USD';
+        $savedCurrency = $profit->currency ?? 'AED';
 
         if ($targetCurrency && $savedCurrency !== $targetCurrency) {
             $targetCurrencyModel = Currency::where('code', $targetCurrency)->first();
@@ -86,7 +86,7 @@ class AdminCategoryProfit extends Model
         }
 
         $profitValue = $this->profit_amount;
-        $savedCurrency = $this->currency ?? 'USD';
+        $savedCurrency = $this->currency ?? 'AED';
 
         if ($targetCurrency && $savedCurrency !== $targetCurrency) {
             $targetCurrencyModel = Currency::where('code', $targetCurrency)->first();

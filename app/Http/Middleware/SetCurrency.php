@@ -40,10 +40,11 @@ class SetCurrency
                         'currency_rate' => $defaultCurrency->exchange_rate,
                     ]);
                 } else {
+                    // AED is the system base currency — fall back to it when nothing else is set
                     session([
-                        'currency_code' => 'USD',
-                        'currency_symbol' => '$',
-                        'currency_rate' => 1.00,
+                        'currency_code' => 'AED',
+                        'currency_symbol' => 'د.إ',
+                        'currency_rate' => 3.6725,
                     ]);
                 }
             }
@@ -56,17 +57,19 @@ class SetCurrency
         if (!$currency) {
             $currency = Currency::default();
 
-            // If still no currency, create a default USD currency
+            // If still no currency, fall back to AED (system base currency)
             if (!$currency) {
-                $currency = Currency::where('code', 'USD')->first();
+                $currency = Currency::where('code', 'AED')->first();
 
-                // Last resort: create USD currency if it doesn't exist
+                // Last resort: create AED currency if it doesn't exist.
+                // Note: USD stays as the mathematical pivot (rate 1.0) used by convertFrom(),
+                // but AED is the system default currency.
                 if (!$currency) {
                     $currency = Currency::create([
-                        'code' => 'USD',
-                        'name' => 'US Dollar',
-                        'symbol' => '$',
-                        'exchange_rate' => 1.00,
+                        'code' => 'AED',
+                        'name' => 'UAE Dirham',
+                        'symbol' => 'د.إ',
+                        'exchange_rate' => 3.6725,
                         'is_active' => true,
                         'is_default' => true,
                         'sort_order' => 1

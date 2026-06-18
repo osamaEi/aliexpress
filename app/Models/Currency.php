@@ -50,7 +50,8 @@ class Currency extends Model
      */
     public static function default()
     {
-        return self::where('is_default', true)->first() ?? self::where('code', 'USD')->first();
+        // AED is the system base/default currency; fall back to it if no default flag is set
+        return self::where('is_default', true)->first() ?? self::where('code', 'AED')->first();
     }
 
     /**

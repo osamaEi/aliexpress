@@ -821,11 +821,13 @@ class OrderController extends Controller
             ]);
 
             // Prepare freight calculation parameters
+            // Currency is fixed to AED — all backend operations use AED as the base currency
             $freightParams = [
                 'product_id' => $product->aliexpress_id,
                 'product_num' => $validated['quantity'],
                 'country' => $validated['country'],
                 'sku_id' => $skuId, // Required parameter
+                'currency' => 'AED',
             ];
 
             // Add optional parameters if provided

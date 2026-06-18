@@ -151,8 +151,8 @@ class ProductController extends Controller
                 $result = $this->aliexpressService->getProductDetails(
                     $product->aliexpress_id,
                     [
-                        'country' => 'US',
-                        'currency' => 'USD',
+                        'country' => 'AE',
+                        'currency' => 'AED',
                         'language' => 'EN',
                     ]
                 );
@@ -211,7 +211,7 @@ class ProductController extends Controller
                     $product->aliexpress_id,
                     [
                         'country' => $country,
-                        'currency' => 'USD',
+                        'currency' => 'AED',
                         'language' => $apiLanguage,
                         'locale' => $apiLocale,
                     ]
@@ -308,8 +308,8 @@ class ProductController extends Controller
             $result = $this->aliexpressService->getProductDetails(
                 $product->aliexpress_id,
                 [
-                    'country' => 'US',
-                    'currency' => 'USD',
+                    'country' => 'AE',
+                    'currency' => 'AED',
                     'language' => 'EN',
                 ]
             );
@@ -453,8 +453,8 @@ class ProductController extends Controller
                 [
                     'limit' => $request->get('per_page', 20),
                     'category_id' => $request->get('category_id'),
-                    'country' => $request->get('country', 'US'),
-                    'currency' => $request->get('currency', 'USD'),
+                    'country' => $request->get('country', 'AE'),
+                    'currency' => $request->get('currency', 'AED'),
                     'language' => $request->get('language', 'EN'),
                 ]
             );
@@ -503,8 +503,8 @@ class ProductController extends Controller
             $result = $this->aliexpressService->getProductDetails(
                 $request->aliexpress_id,
                 [
-                    'country' => $request->get('country', 'US'),
-                    'currency' => $request->get('currency', 'USD'),
+                    'country' => $request->get('country', 'AE'),
+                    'currency' => $request->get('currency', 'AED'),
                     'language' => $request->get('language', 'EN'),
                 ]
             );
@@ -662,8 +662,8 @@ class ProductController extends Controller
             $result = $this->aliexpressService->getProductDetails(
                 $product->aliexpress_id,
                 [
-                    'country' => 'US',
-                    'currency' => 'USD',
+                    'country' => 'AE',
+                    'currency' => 'AED',
                     'language' => 'EN',
                 ]
             );
@@ -770,8 +770,8 @@ class ProductController extends Controller
                 $result = $this->aliexpressService->getProductDetails(
                     $product->aliexpress_id,
                     [
-                        'country' => 'US',
-                        'currency' => 'USD',
+                        'country' => 'AE',
+                        'currency' => 'AED',
                         'language' => 'EN',
                     ]
                 );
@@ -916,6 +916,10 @@ class ProductController extends Controller
             $requestedCategoryId = $request->get('category_id');
             $sortFilter = $request->get('sort_filter', 'orders');
 
+            // AED is the system base currency — always request AED from the API and store AED.
+            // Conversion to the user's display currency happens in the view.
+            $baseCurrency = 'AED';
+
             // Expand Arabic keyword synonyms so users can find products by alternative names
             $arabicSynonyms = [
                 'تلفون'    => 'هاتف',
@@ -1038,17 +1042,14 @@ class ProductController extends Controller
                 $appLocale = app()->getLocale();
                 $aliexpressLocale = $appLocale === 'ar' ? 'ar_MA' : 'en_US';
 
-                // Always use session currency so API returns prices in the user's currency
-                $sessionCurrency = session('currency_code', 'AED');
-
-                // Prepare API options
+                // Prepare API options ($baseCurrency = AED, defined at method top)
                 $apiOptions = [
                     'page' => $request->get('page', 1),
                     'limit' => $request->get('per_page', 50), // Get 50 products per page
                     'category_id' => $aliexpressCategoryId,
                     'sort_by' => $sortBy,
                     'country' => $request->get('country', 'AE'),
-                    'currency' => $sessionCurrency,
+                    'currency' => $baseCurrency,
                     'locale' => $request->get('locale', $aliexpressLocale),
                 ];
 
@@ -1114,16 +1115,13 @@ class ProductController extends Controller
                 $keywordIsArabic = preg_match('/[\x{0600}-\x{06FF}]/u', $keyword);
                 $aliexpressLocale = ($keywordIsArabic || app()->getLocale() === 'ar') ? 'ar_MA' : 'en_US';
 
-                // Always use session currency so API returns prices in the user's currency
-                $sessionCurrency = session('currency_code', 'AED');
-
-                // Prepare API options
+                // Prepare API options ($baseCurrency = AED, defined at method top)
                 $apiOptions = [
                     'page' => $request->get('page', 1),
                     'limit' => $request->get('per_page', 10),
                     'sort_by' => $sortBy,
                     'country' => $request->get('country', 'AE'),
-                    'currency' => $sessionCurrency,
+                    'currency' => $baseCurrency,
                     'locale' => $request->get('locale', $aliexpressLocale),
                 ];
 
@@ -1282,7 +1280,7 @@ class ProductController extends Controller
                             'page' => 1,
                             'limit' => min(count($result['products']), 50),
                             'country' => $request->get('country', 'AE'),
-                            'currency' => $request->get('currency', 'AED'),
+                            'currency' => $baseCurrency,
                         ];
                         if (!empty($aliexpressCategoryId)) {
                             $arabicApiOptions['category_id'] = $aliexpressCategoryId;
@@ -1343,29 +1341,18 @@ class ProductController extends Controller
                 }
             }
 
-            // Add admin profit to each product price
-            // Prices from API are already in $sessionCurrency — no conversion needed.
-            // For fixed-amount profit we must convert from the stored profit currency to $sessionCurrency.
+            // Add admin profit to each product price.
+            // Everything here is in AED (base currency): the API returned AED, admin_profit()
+            // returns AED, and we store AED. Conversion to the user's display currency happens
+            // in the view via convert_price().
             if (!empty($result['products'])) {
-                $profitType     = setting('admin_profit_type', 'percentage');
-                $sessionCurrObj = $profitType === 'fixed'
-                    ? \App\Models\Currency::where('code', $sessionCurrency)->first()
-                    : null;
+                $profitType = setting('admin_profit_type', 'percentage');
 
                 foreach ($result['products'] as &$product) {
                     $basePrice = (float)($product['sale_price'] ?? 0);
 
-                    if ($profitType === 'fixed') {
-                        // Fixed profit is stored in a specific currency — convert to session currency
-                        $fixedAmount  = (float) setting('admin_profit_fixed', 0);
-                        $profitCurrency = setting('admin_profit_currency', 'AED');
-                        $adminProfit  = $sessionCurrObj
-                            ? $sessionCurrObj->convertFrom($fixedAmount, $profitCurrency)
-                            : $fixedAmount;
-                    } else {
-                        // Percentage profit — apply directly on the already-converted base price
-                        $adminProfit = admin_profit($basePrice);
-                    }
+                    // Admin profit in AED (percentage of base price, or fixed AED amount)
+                    $adminProfit = admin_profit($basePrice);
 
                     $finalPrice = $basePrice + $adminProfit;
 
@@ -1375,7 +1362,7 @@ class ProductController extends Controller
 
                     if (isset($product['sale_price_format'])) {
                         $product['original_sale_price_format'] = $product['sale_price_format'];
-                        $product['sale_price_format'] = $sessionCurrency . ' ' . number_format($finalPrice, 2);
+                        $product['sale_price_format'] = $baseCurrency . ' ' . number_format($finalPrice, 2);
                     }
 
                     if (isset($product['original_price'])) {
@@ -1384,14 +1371,14 @@ class ProductController extends Controller
                         $product['original_price'] = $originalBasePrice + $adminProfit;
 
                         if (isset($product['original_price_format'])) {
-                            $product['original_price_format'] = $sessionCurrency . ' ' . number_format($product['original_price'], 2);
+                            $product['original_price_format'] = $baseCurrency . ' ' . number_format($product['original_price'], 2);
                         }
                     }
                 }
                 unset($product);
 
                 Log::info('Admin profit applied to search results', [
-                    'currency'            => $sessionCurrency,
+                    'currency'            => $baseCurrency,
                     'profit_type'         => $profitType,
                     'admin_profit_amount' => $adminProfit ?? 0,
                     'products_count'      => count($result['products']),

@@ -110,7 +110,7 @@ class Profit extends Model
             'total_cost' => $totalCost,
             'total_profit' => $totalProfit,
             'final_price' => $finalPrice,
-            'currency' => $order->currency ?? 'USD',
+            'currency' => $order->currency ?? 'AED',
             'quantity' => $quantity,
         ]);
     }

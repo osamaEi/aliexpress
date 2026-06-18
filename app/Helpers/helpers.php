@@ -42,10 +42,15 @@ if (!function_exists('setting_image')) {
 
 if (!function_exists('admin_profit')) {
     /**
-     * Calculate admin profit for a given amount
+     * Calculate admin profit for a given amount.
      *
-     * @param float $amount
-     * @return float
+     * IMPORTANT: AED is the system base currency. The input $amount is always in AED
+     * and the returned profit is always in AED. For a fixed profit, `admin_profit_fixed`
+     * is stored directly in AED. Conversion to the user's display currency happens only
+     * in the presentation layer (see convert_price()).
+     *
+     * @param float $amount Base amount in AED
+     * @return float Profit in AED
      */
     function admin_profit(float $amount): float
     {
@@ -55,6 +60,7 @@ if (!function_exists('admin_profit')) {
             $percentage = (float) setting('admin_profit_percentage', 10);
             return $amount * ($percentage / 100);
         } else {
+            // Fixed amount is stored directly in AED
             return (float) setting('admin_profit_fixed', 0);
         }
     }

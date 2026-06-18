@@ -501,9 +501,9 @@ class AliExpressService
     {
         $params = [
             'product_id' => $productId,
-            'target_currency' => $options['currency'] ?? 'USD',
+            'target_currency' => $options['currency'] ?? 'AED',
             'target_language' => $options['language'] ?? 'EN',
-            'ship_to_country' => $options['country'] ?? 'EG',
+            'ship_to_country' => $options['country'] ?? 'AE',
         ];
 
         // This API requires OAuth access token
@@ -526,9 +526,9 @@ class AliExpressService
             'feed_name' => 'DS_bestselling',  // Required parameter: DS_bestselling, DS_newarrival, etc.
             'page_no' => $options['page'] ?? 1,
             'page_size' => min($options['limit'] ?? 20, 50),
-            'target_currency' => $options['currency'] ?? 'USD',
+            'target_currency' => $options['currency'] ?? 'AED',
             'target_language' => $options['language'] ?? 'EN',
-            'ship_to_country' => $options['country'] ?? 'EG',
+            'ship_to_country' => $options['country'] ?? 'AE',
             'sort' => $options['sort'] ?? 'SALE_PRICE_ASC',
         ];
 
@@ -697,9 +697,9 @@ class AliExpressService
             'keywords' => $keywords,
             'page_no' => $options['page'] ?? 1,
             'page_size' => min($options['limit'] ?? 20, 50),
-            'target_currency' => $options['currency'] ?? 'USD',
+            'target_currency' => $options['currency'] ?? 'AED',
             'target_language' => $options['language'] ?? 'EN',
-            'ship_to_country' => $options['country'] ?? 'US',
+            'ship_to_country' => $options['country'] ?? 'AE',
             'sort' => 'SALE_PRICE_ASC',
             'tracking_id' => config('services.aliexpress.tracking_id') ?: 'default',
         ];
@@ -980,7 +980,7 @@ class AliExpressService
             'productId' => (string)$params['product_id'], // AliExpress product ID
             'language' => $params['language'] ?? 'en_US',
             'locale' => $params['locale'] ?? 'en_US',
-            'currency' => $params['currency'] ?? 'USD',
+            'currency' => $params['currency'] ?? 'AED',
             'selectedSkuId' => (string)$params['sku_id'], // SKU ID - REQUIRED
         ];
 
@@ -1130,7 +1130,7 @@ class AliExpressService
                             'success' => true,
                             'data' => [
                                 'freight_amount' => $firstOption['shipping_fee_cent'] ?? $firstOption['freight_amount'] ?? null,
-                                'freight_currency' => $firstOption['shipping_fee_currency'] ?? $firstOption['freight_currency'] ?? $params['currency'] ?? 'USD',
+                                'freight_currency' => $firstOption['shipping_fee_currency'] ?? $firstOption['freight_currency'] ?? $params['currency'] ?? 'AED',
                                 'delivery_time' => $firstOption['delivery_date_desc'] ?? $firstOption['estimated_delivery_time'] ?? null,
                                 'shipping_method' => $firstOption['code'] ?? null,
                                 'service_name' => $firstOption['company'] ?? $firstOption['service_name'] ?? null,

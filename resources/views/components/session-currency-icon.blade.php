@@ -1,7 +1,7 @@
 @props(['width' => '24', 'height' => '24', 'class' => ''])
 
 @php
-    $sessionCurrency = session('currency_code', 'USD');
+    $sessionCurrency = session('currency_code', 'AED');
 @endphp
 
 @if($sessionCurrency === 'SAR')

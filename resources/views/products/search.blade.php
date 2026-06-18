@@ -520,24 +520,17 @@
                                     </p>
 
                                     <!-- Price -->
+                                    {{-- Prices are stored in AED (base currency); convert to the user's display currency --}}
                                     <div class="mb-2">
                                         <h5 class="text-primary mb-0 d-flex align-items-center" style="direction: ltr; justify-content: flex-start;">
                                             <x-session-currency-icon width="18" height="18" class="me-1" />
-                                            @if($product['sale_price_format'])
-                                                {{ preg_replace('/[A-Z]{3}\s*/', '', $product['sale_price_format']) }}
-                                            @else
-                                                {{ number_format((float)$product['sale_price'], 2) }}
-                                            @endif
+                                            {{ number_format(convert_price((float)$product['sale_price']), 2) }}
                                         </h5>
                                         {{-- Admin profit included in price - not shown separately --}}
                                         @if($product['original_price'] > $product['sale_price'])
                                             <small class="text-muted text-decoration-line-through d-flex align-items-center" style="direction: ltr;">
                                                 <x-session-currency-icon width="12" height="12" class="me-1" />
-                                                @if($product['original_price_format'])
-                                                    {{ preg_replace('/[A-Z]{3}\s*/', '', $product['original_price_format']) }}
-                                                @else
-                                                    {{ number_format((float)$product['original_price'], 2) }}
-                                                @endif
+                                                {{ number_format(convert_price((float)$product['original_price']), 2) }}
                                             </small>
                                         @endif
                                     </div>

@@ -1222,8 +1222,8 @@ const currentCurrency = {
 // Wallet balance (in AED - base currency)
 const walletBalanceAED = {{ $walletBalance ?? 0 }};
 
-// Product price from system (already converted to current currency in blade)
-const productPrice = {{ $currentCurrency->convertFrom($product->price, $product->currency ?? 'USD') }};
+// Product price from system. Prices are stored in AED (base currency); convert to display currency.
+const productPrice = {{ $currentCurrency->convertFrom($product->price, $product->currency ?? 'AED') }};
 const productCurrency = '{{ $currentCurrency->code }}';
 
 // Currency icon SVGs
@@ -1233,8 +1233,9 @@ const currencyIcons = {
     'USD': ''
 };
 
-// Convert amount from USD to current currency
-function convertToCurrentCurrency(amount, fromCurrency = 'USD') {
+// Convert amount from a source currency to the current display currency.
+// Default source is AED (the system base currency).
+function convertToCurrentCurrency(amount, fromCurrency = 'AED') {
     if (fromCurrency === currentCurrency.code) {
         return amount;
     }
@@ -1356,10 +1357,10 @@ function populateOrderSummary() {
     const unitPriceConverted = productPrice;
     const productTotalConverted = productPrice * quantity;
 
-    // Get shipping cost (API returns in USD) and convert to current currency
-    const shippingCostUSD = parseFloat(calculatedShippingData.freight_amount || 0);
-    const freightCurrency = calculatedShippingData.freight_currency || 'USD';
-    const shippingCostConverted = convertToCurrentCurrency(shippingCostUSD, freightCurrency);
+    // Get shipping cost (API returns in AED) and convert to current display currency
+    const shippingCostBase = parseFloat(calculatedShippingData.freight_amount || 0);
+    const freightCurrency = calculatedShippingData.freight_currency || 'AED';
+    const shippingCostConverted = convertToCurrentCurrency(shippingCostBase, freightCurrency);
 
     // Calculate total in selected currency
     const totalAmountConverted = productTotalConverted + shippingCostConverted;
@@ -1562,10 +1563,10 @@ function displayShippingSuccess(data) {
     const container = document.getElementById('shipping-success');
     const isArabic = '{{ app()->getLocale() }}' === 'ar';
 
-    // Convert shipping cost to selected currency
-    const freightCurrency = data.freight_currency || 'USD';
-    const freightAmountUSD = parseFloat(data.freight_amount);
-    const freightAmountConverted = convertToCurrentCurrency(freightAmountUSD, freightCurrency);
+    // Convert shipping cost to selected currency (base is AED)
+    const freightCurrency = data.freight_currency || 'AED';
+    const freightAmountBase = parseFloat(data.freight_amount);
+    const freightAmountConverted = convertToCurrentCurrency(freightAmountBase, freightCurrency);
 
     let html = `
         <div class="text-center mb-4">
@@ -1712,8 +1713,8 @@ function displayOrderSuccess(data) {
     const order = data.order || data;
     const isArabic = '{{ app()->getLocale() }}' === 'ar';
 
-    // Convert total price to selected currency
-    const orderCurrency = order.currency || 'USD';
+    // Convert total price to selected currency (base is AED)
+    const orderCurrency = order.currency || 'AED';
     const totalPrice = parseFloat(order.total_price || 0);
     const totalPriceConverted = convertToCurrentCurrency(totalPrice, orderCurrency);
 
@@ -1861,8 +1862,8 @@ function displayDirectOrderSuccess(data) {
     const order = data.order || data;
     const isArabic = document.documentElement.lang === 'ar';
 
-    // Convert total price to selected currency
-    const orderCurrency = order.currency || 'USD';
+    // Convert total price to selected currency (base is AED)
+    const orderCurrency = order.currency || 'AED';
     const totalPrice = parseFloat(order.total_price || 0);
     const totalPriceConverted = convertToCurrentCurrency(totalPrice, orderCurrency);
 
