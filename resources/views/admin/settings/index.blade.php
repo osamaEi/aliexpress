@@ -226,71 +226,6 @@
                 </div>
             </div>
 
-            <!-- Promotional Banners (Under Subscription) -->
-            <div class="col-12 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="ri-advertisement-line me-2"></i>
-                            {{ app()->getLocale() == 'ar' ? 'بنرات ترويجية (أسفل عداد الاشتراك)' : 'Promotional Banners (Under Subscription Timer)' }}
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @php
-                            $sellerPromoBanner = $settings->get('image', collect())->firstWhere('key', 'seller_promo_banner');
-                            $distributorPromoBanner = $settings->get('image', collect())->firstWhere('key', 'distributor_promo_banner');
-                            $sellerPromoBannerLink = $settings->get('text', collect())->firstWhere('key', 'seller_promo_banner_link');
-                            $distributorPromoBannerLink = $settings->get('text', collect())->firstWhere('key', 'distributor_promo_banner_link');
-                        @endphp
-                        <div class="row">
-                            <!-- Seller Promo Banner -->
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">
-                                    {{ app()->getLocale() == 'ar' ? 'بنر ترويجي للبائع' : 'Seller Promo Banner' }}
-                                </label>
-                                @if($sellerPromoBanner?->value)
-                                <div class="mb-2">
-                                    <img src="{{ asset('storage/' . $sellerPromoBanner->value) }}" alt="Seller Promo Banner" class="img-thumbnail" style="max-width: 100%; max-height: 150px;">
-                                    <button type="button" class="btn btn-sm btn-danger mt-1 delete-image" data-key="seller_promo_banner">
-                                        <i class="ri-delete-bin-line"></i>
-                                    </button>
-                                </div>
-                                @endif
-                                <input type="file" name="settings[seller_promo_banner]" class="form-control" accept="image/*">
-                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحجم الموصى به: 1200x200 بكسل' : 'Recommended size: 1200x200px' }}</small>
-
-                                <label class="form-label mt-3">
-                                    {{ app()->getLocale() == 'ar' ? 'رابط البنر (اختياري)' : 'Banner Link (Optional)' }}
-                                </label>
-                                <input type="url" name="settings[seller_promo_banner_link]" class="form-control" value="{{ $sellerPromoBannerLink?->value }}" placeholder="https://example.com">
-                            </div>
-
-                            <!-- Distributor Promo Banner -->
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">
-                                    {{ app()->getLocale() == 'ar' ? 'بنر ترويجي للتاجر' : 'Distributor Promo Banner' }}
-                                </label>
-                                @if($distributorPromoBanner?->value)
-                                <div class="mb-2">
-                                    <img src="{{ asset('storage/' . $distributorPromoBanner->value) }}" alt="Distributor Promo Banner" class="img-thumbnail" style="max-width: 100%; max-height: 150px;">
-                                    <button type="button" class="btn btn-sm btn-danger mt-1 delete-image" data-key="distributor_promo_banner">
-                                        <i class="ri-delete-bin-line"></i>
-                                    </button>
-                                </div>
-                                @endif
-                                <input type="file" name="settings[distributor_promo_banner]" class="form-control" accept="image/*">
-                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحجم الموصى به: 1200x200 بكسل' : 'Recommended size: 1200x200px' }}</small>
-
-                                <label class="form-label mt-3">
-                                    {{ app()->getLocale() == 'ar' ? 'رابط البنر (اختياري)' : 'Banner Link (Optional)' }}
-                                </label>
-                                <input type="url" name="settings[distributor_promo_banner_link]" class="form-control" value="{{ $distributorPromoBannerLink?->value }}" placeholder="https://example.com">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Wallet Settings - Min Withdrawal/Deposit -->
             <div class="col-12 mb-4">
                 <div class="card">
@@ -368,7 +303,6 @@
                             $requireSubscriptionDistributor = $settings->get('boolean', collect())->firstWhere('key', 'require_subscription_distributor');
                             $lockProductsOnExpiry = $settings->get('boolean', collect())->firstWhere('key', 'lock_products_on_subscription_expiry');
                             $gracePeriodDays = $settings->get('number', collect())->firstWhere('key', 'subscription_grace_period_days');
-                            $allPlans = \App\Models\Subscription::orderBy('sort_order')->get();
                         @endphp
 
                         {{-- Enable/disable toggles --}}
@@ -417,61 +351,6 @@
                             </div>
                         </div>
 
-                        {{-- All subscription plans --}}
-                        @if($allPlans->count() > 0)
-                        <hr>
-                        <p class="fw-600 mb-3">
-                            <i class="ri-vip-crown-line me-1"></i>
-                            {{ app()->getLocale() == 'ar' ? 'باقات الاشتراك المتاحة' : 'Available Subscription Plans' }}
-                        </p>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-sm">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'الباقة' : 'Plan' }}</th>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'السعر' : 'Price' }}</th>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'المدة' : 'Duration' }}</th>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'أقصى منتجات' : 'Max Products' }}</th>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'نسبة العمولة' : 'Commission %' }}</th>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'مفعّل' : 'Active' }}</th>
-                                        <th>{{ app()->getLocale() == 'ar' ? 'إجراء' : 'Action' }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($allPlans as $plan)
-                                    <tr>
-                                        <td>
-                                            <strong>{{ app()->getLocale() == 'ar' ? ($plan->name_ar ?: $plan->name) : $plan->name }}</strong>
-                                        </td>
-                                        <td>{{ number_format($plan->price, 2) }} AED</td>
-                                        <td>{{ $plan->duration_days }} {{ app()->getLocale() == 'ar' ? 'يوم' : 'days' }}</td>
-                                        <td>{{ $plan->max_products ?? ($app()->getLocale() == 'ar' ? 'غير محدود' : 'Unlimited') }}</td>
-                                        <td>{{ $plan->commission_rate }}%</td>
-                                        <td>
-                                            <span class="badge bg-{{ $plan->is_active ? 'success' : 'secondary' }}">
-                                                {{ $plan->is_active ? (app()->getLocale() == 'ar' ? 'مفعّل' : 'Active') : (app()->getLocale() == 'ar' ? 'معطّل' : 'Inactive') }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('admin.subscriptions.edit', $plan) }}" class="btn btn-xs btn-outline-primary">
-                                                <i class="ri-edit-line"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="mt-2">
-                            <a href="{{ route('admin.subscriptions.create') }}" class="btn btn-sm btn-success">
-                                <i class="ri-add-line me-1"></i>
-                                {{ app()->getLocale() == 'ar' ? 'إضافة باقة جديدة' : 'Add New Plan' }}
-                            </a>
-                            <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-sm btn-outline-primary ms-2">
-                                {{ app()->getLocale() == 'ar' ? 'إدارة الباقات' : 'Manage Plans' }}
-                            </a>
-                        </div>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -578,48 +457,6 @@
                                     </label>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- General Settings -->
-            <div class="col-12 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">{{ __('messages.general_settings') }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            @php
-                                $excludeKeys = ['admin_profit_type', 'site_name', 'site_name_ar', 'site_description', 'site_description_ar', 'ziina_api_key', 'recaptcha_site_key', 'recaptcha_secret_key', 'seller_promo_banner_link', 'distributor_promo_banner_link'];
-                            @endphp
-                            @foreach($settings->get('text', collect())->merge($settings->get('textarea', collect())) as $setting)
-                            @if(!in_array($setting->key, $excludeKeys))
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ $setting->key }}" class="form-label">
-                                    {{ ucwords(str_replace('_', ' ', $setting->key)) }}
-                                    @if($setting->description)
-                                    <i class="ri-question-line" data-bs-toggle="tooltip" title="{{ $setting->description }}"></i>
-                                    @endif
-                                </label>
-                                @if($setting->type === 'textarea')
-                                <textarea
-                                    name="settings[{{ $setting->key }}]"
-                                    id="{{ $setting->key }}"
-                                    class="form-control"
-                                    rows="3">{{ old('settings.' . $setting->key, $setting->value) }}</textarea>
-                                @else
-                                <input
-                                    type="text"
-                                    name="settings[{{ $setting->key }}]"
-                                    id="{{ $setting->key }}"
-                                    class="form-control"
-                                    value="{{ old('settings.' . $setting->key, $setting->value) }}">
-                                @endif
-                            </div>
-                            @endif
-                            @endforeach
                         </div>
                     </div>
                 </div>

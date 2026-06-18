@@ -163,13 +163,6 @@
             </a>
         </li>
 
-        <!-- Category Profits -->
-        <li class="menu-item {{ request()->routeIs('admin.category-profits.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.category-profits.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ri-money-dollar-circle-line"></i>
-                <div>{{ __('messages.category_profits') }}</div>
-            </a>
-        </li>
 
         <!-- Product Management -->
         <li class="menu-item {{ request()->routeIs('products.*') && !request()->routeIs('admin.*') && !request()->routeIs('products.search-*') ? 'active' : '' }}">
