@@ -268,16 +268,14 @@ class Order extends Model
 
         // 1. Calculate AliExpress Profit (supplier profit margin)
         $aliexpressProfit = 0;
+        $aliexpressCost = ($product->aliexpress_price + ($product->shipping_cost ?? 0)) * $this->quantity;
         if ($product->aliexpress_price && $product->supplier_profit_margin) {
-            // AliExpress cost = (product price + shipping) * quantity
-            $aliexpressCost = ($product->aliexpress_price + ($product->shipping_cost ?? 0)) * $this->quantity;
-
             // Calculate profit based on margin percentage
             $aliexpressProfit = $aliexpressCost * ($product->supplier_profit_margin / 100);
         }
 
-        // 2. Calculate Admin Profit from global settings (per unit * quantity)
-        $adminCategoryProfit = admin_profit($aliexpressCost) * $this->quantity;
+        // 2. Calculate Admin Profit from global settings applied on base cost
+        $adminCategoryProfit = admin_profit($aliexpressCost);
 
         // 3. Calculate Seller Profit
         $sellerProfit = 0;
