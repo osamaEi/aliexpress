@@ -39,9 +39,10 @@
 
             <!-- Product Source Cards (Dynamic from Distributors + China) - FIRST STEP -->
             @php
-                $isChinaActive = request('ship_from') == 'CN';
                 $activeCountryCode = request('country_code') ?? (isset($source_country) ? $source_country : null);
-                $hasSelectedSource = $isChinaActive || !empty($activeCountryCode);
+                $hasSelectedSource = request('ship_from') == 'CN' || !empty($activeCountryCode);
+                // Default to China as the active source on the bare search page (no source selected yet)
+                $isChinaActive = request('ship_from') == 'CN' || !$hasSelectedSource;
 
                 // Country names mapping with SVG flags
                 $countryFlags = [
@@ -1153,11 +1154,14 @@
     // Current selected country for dropdown - initialize with current source country if viewing distributor products
     let selectedCountryCode = currentSourceCountry || null;
 
-    // Initialize selectedCountrySourceCode based on current page state
+    // Initialize selectedCountrySourceCode based on current page state.
+    // Default to China when no source is selected yet (bare search page).
     if (currentShipFrom === 'CN') {
         selectedCountrySourceCode = 'CN';
     } else if (currentSourceCountry) {
         selectedCountrySourceCode = currentSourceCountry;
+    } else {
+        selectedCountrySourceCode = 'CN';
     }
 
     // Toggle distributors dropdown
