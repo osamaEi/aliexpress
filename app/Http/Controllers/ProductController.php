@@ -1337,23 +1337,14 @@ class ProductController extends Controller
                 }
             }
 
-            // Add admin profit to each product price based on category
+            // Add admin profit to each product price
             if (!empty($result['products'])) {
-                // Get local category ID for admin profit calculation
-                $localCategory = null;
-                if (!empty($requestedCategoryId)) {
-                    $localCategory = \App\Models\Category::where('aliexpress_category_id', $requestedCategoryId)->first();
-                }
-
                 foreach ($result['products'] as &$product) {
                     // Get the base price (sale price)
                     $basePrice = (float)($product['sale_price'] ?? 0);
 
-                    // Calculate admin profit based on category (with parent inheritance)
-                    $adminProfit = 0;
-                    if ($localCategory) {
-                        $adminProfit = \App\Models\AdminCategoryProfit::getProfitForCategory($localCategory->id);
-                    }
+                    // Calculate admin profit from global settings
+                    $adminProfit = admin_profit($basePrice);
 
                     // Calculate final price (base price + admin profit)
                     $finalPrice = $basePrice + $adminProfit;
@@ -1387,8 +1378,6 @@ class ProductController extends Controller
                 unset($product); // Break reference
 
                 Log::info('Admin profit applied to search results', [
-                    'category_id' => $localCategory ? $localCategory->id : null,
-                    'category_name' => $localCategory ? $localCategory->name : 'N/A',
                     'admin_profit_amount' => $adminProfit ?? 0,
                     'products_count' => count($result['products'])
                 ]);
@@ -1552,13 +1541,12 @@ class ProductController extends Controller
                 ]);
             }
 
-            // Apply admin profit for category (with parent inheritance)
-            $adminAmount = \App\Models\AdminCategoryProfit::getProfitForCategory($request->category_id);
+            // Apply admin profit from global settings
+            $adminAmount = admin_profit($basePrice);
             if ($adminAmount > 0) {
                 $finalPrice += $adminAmount;
 
                 \Log::info('Admin Profit Applied', [
-                    'category_id' => $request->category_id,
                     'base_price' => $basePrice,
                     'seller_amount' => $sellerAmount,
                     'admin_amount' => $adminAmount,
@@ -1730,13 +1718,12 @@ class ProductController extends Controller
                         ]);
                     }
 
-                    // Apply admin profit for category (with parent inheritance)
-                    $adminAmount = \App\Models\AdminCategoryProfit::getProfitForCategory($categoryId);
+                    // Apply admin profit from global settings
+                    $adminAmount = admin_profit($basePrice);
                     if ($adminAmount > 0) {
                         $finalPrice += $adminAmount;
 
                         \Log::info('Admin Profit Applied (Bulk)', [
-                            'category_id' => $categoryId,
                             'base_price' => $basePrice,
                             'seller_amount' => $sellerAmount,
                             'admin_amount' => $adminAmount,

@@ -276,12 +276,8 @@ class Order extends Model
             $aliexpressProfit = $aliexpressCost * ($product->supplier_profit_margin / 100);
         }
 
-        // 2. Calculate Admin Category Profit (per unit * quantity)
-        $adminCategoryProfit = 0;
-        if ($product->category_id) {
-            $adminProfitPerUnit = AdminCategoryProfit::getProfitForCategory($product->category_id);
-            $adminCategoryProfit = $adminProfitPerUnit * $this->quantity;
-        }
+        // 2. Calculate Admin Profit from global settings (per unit * quantity)
+        $adminCategoryProfit = admin_profit($aliexpressCost) * $this->quantity;
 
         // 3. Calculate Seller Profit
         $sellerProfit = 0;
