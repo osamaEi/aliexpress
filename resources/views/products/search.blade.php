@@ -290,7 +290,7 @@
                 <input type="hidden" name="choice_only" id="choiceOnlyInput" value="{{ request('choice_only') }}">
                 <input type="hidden" name="category_id" id="categoryIdInput" value="{{ request('category_id') }}">
                 <input type="hidden" name="country" id="countryInput" value="{{ request('country', 'AE') }}">
-                <input type="hidden" name="currency" id="currencyInput" value="{{ request('currency', session('currency_code', 'USD')) }}">
+                <input type="hidden" name="currency" id="currencyInput" value="{{ session('currency_code', 'AED') }}">
                 <input type="hidden" name="country_code" id="countryCodeInput" value="{{ request('country_code') ?? ($source_country ?? '') }}">
                 <input type="hidden" name="distributor_id" id="distributorIdInput" value="{{ request('distributor_id', '') }}">
 

@@ -1038,6 +1038,9 @@ class ProductController extends Controller
                 $appLocale = app()->getLocale();
                 $aliexpressLocale = $appLocale === 'ar' ? 'ar_MA' : 'en_US';
 
+                // Always use session currency so API returns prices in the user's currency
+                $sessionCurrency = session('currency_code', 'AED');
+
                 // Prepare API options
                 $apiOptions = [
                     'page' => $request->get('page', 1),
@@ -1045,7 +1048,7 @@ class ProductController extends Controller
                     'category_id' => $aliexpressCategoryId,
                     'sort_by' => $sortBy,
                     'country' => $request->get('country', 'AE'),
-                    'currency' => $request->get('currency', 'AED'),
+                    'currency' => $sessionCurrency,
                     'locale' => $request->get('locale', $aliexpressLocale),
                 ];
 
@@ -1111,13 +1114,16 @@ class ProductController extends Controller
                 $keywordIsArabic = preg_match('/[\x{0600}-\x{06FF}]/u', $keyword);
                 $aliexpressLocale = ($keywordIsArabic || app()->getLocale() === 'ar') ? 'ar_MA' : 'en_US';
 
+                // Always use session currency so API returns prices in the user's currency
+                $sessionCurrency = session('currency_code', 'AED');
+
                 // Prepare API options
                 $apiOptions = [
                     'page' => $request->get('page', 1),
                     'limit' => $request->get('per_page', 10),
-                    'sort_by' => $sortBy, // Use mapped sort parameter
+                    'sort_by' => $sortBy,
                     'country' => $request->get('country', 'AE'),
-                    'currency' => $request->get('currency', 'AED'),
+                    'currency' => $sessionCurrency,
                     'locale' => $request->get('locale', $aliexpressLocale),
                 ];
 
@@ -1338,48 +1344,57 @@ class ProductController extends Controller
             }
 
             // Add admin profit to each product price
+            // Prices from API are already in $sessionCurrency — no conversion needed.
+            // For fixed-amount profit we must convert from the stored profit currency to $sessionCurrency.
             if (!empty($result['products'])) {
+                $profitType     = setting('admin_profit_type', 'percentage');
+                $sessionCurrObj = $profitType === 'fixed'
+                    ? \App\Models\Currency::where('code', $sessionCurrency)->first()
+                    : null;
+
                 foreach ($result['products'] as &$product) {
-                    // Get the base price (sale price)
                     $basePrice = (float)($product['sale_price'] ?? 0);
 
-                    // Calculate admin profit from global settings
-                    $adminProfit = admin_profit($basePrice);
-
-                    // Calculate final price (base price + admin profit)
-                    $finalPrice = $basePrice + $adminProfit;
-
-                    // Store original price for reference
-                    $product['original_sale_price'] = $basePrice;
-                    $product['admin_profit'] = $adminProfit;
-
-                    // Update sale price to include admin profit
-                    $product['sale_price'] = $finalPrice;
-
-                    // Update formatted price if it exists
-                    if (isset($product['sale_price_format'])) {
-                        $currency = $request->get('currency', 'AED');
-                        $product['original_sale_price_format'] = $product['sale_price_format'];
-                        $product['sale_price_format'] = $currency . ' ' . number_format($finalPrice, 2);
+                    if ($profitType === 'fixed') {
+                        // Fixed profit is stored in a specific currency — convert to session currency
+                        $fixedAmount  = (float) setting('admin_profit_fixed', 0);
+                        $profitCurrency = setting('admin_profit_currency', 'AED');
+                        $adminProfit  = $sessionCurrObj
+                            ? $sessionCurrObj->convertFrom($fixedAmount, $profitCurrency)
+                            : $fixedAmount;
+                    } else {
+                        // Percentage profit — apply directly on the already-converted base price
+                        $adminProfit = admin_profit($basePrice);
                     }
 
-                    // Also update original price if needed
+                    $finalPrice = $basePrice + $adminProfit;
+
+                    $product['original_sale_price'] = $basePrice;
+                    $product['admin_profit']        = $adminProfit;
+                    $product['sale_price']          = $finalPrice;
+
+                    if (isset($product['sale_price_format'])) {
+                        $product['original_sale_price_format'] = $product['sale_price_format'];
+                        $product['sale_price_format'] = $sessionCurrency . ' ' . number_format($finalPrice, 2);
+                    }
+
                     if (isset($product['original_price'])) {
                         $originalBasePrice = (float)$product['original_price'];
                         $product['original_aliexpress_price'] = $originalBasePrice;
                         $product['original_price'] = $originalBasePrice + $adminProfit;
 
                         if (isset($product['original_price_format'])) {
-                            $currency = $request->get('currency', 'AED');
-                            $product['original_price_format'] = $currency . ' ' . number_format($product['original_price'], 2);
+                            $product['original_price_format'] = $sessionCurrency . ' ' . number_format($product['original_price'], 2);
                         }
                     }
                 }
-                unset($product); // Break reference
+                unset($product);
 
                 Log::info('Admin profit applied to search results', [
+                    'currency'            => $sessionCurrency,
+                    'profit_type'         => $profitType,
                     'admin_profit_amount' => $adminProfit ?? 0,
-                    'products_count' => count($result['products'])
+                    'products_count'      => count($result['products']),
                 ]);
             }
 

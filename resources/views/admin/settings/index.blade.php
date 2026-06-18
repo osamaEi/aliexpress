@@ -557,6 +557,7 @@
                                 $profitType = $settings->get('text', collect())->firstWhere('key', 'admin_profit_type');
                                 $profitPercentage = $settings->get('number', collect())->firstWhere('key', 'admin_profit_percentage');
                                 $profitFixed = $settings->get('number', collect())->firstWhere('key', 'admin_profit_fixed');
+                                $profitFixedCurrency = $settings->get('select', collect())->firstWhere('key', 'admin_profit_currency');
                                 $profitCommission = $settings->get('number', collect())->firstWhere('key', 'admin_profit_commission');
                             @endphp
 
@@ -598,24 +599,34 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6 mb-3" id="fixed_field">
+                            <div class="col-md-4 mb-3" id="fixed_field">
                                 <label for="admin_profit_fixed" class="form-label">
                                     {{ __('messages.fixed_profit_amount') }}
                                     @if($profitFixed?->description)
                                     <i class="ri-question-line" data-bs-toggle="tooltip" title="{{ $profitFixed->description }}"></i>
                                     @endif
                                 </label>
-                                <div class="input-group">
-                                    <input
-                                        type="number"
-                                        name="settings[admin_profit_fixed]"
-                                        id="admin_profit_fixed"
-                                        class="form-control"
-                                        step="0.01"
-                                        min="0"
-                                        value="{{ old('settings.admin_profit_fixed', $profitFixed?->value) }}">
-                                    <span class="input-group-text">{{ $settings->get('text', collect())->firstWhere('key', 'currency')?->value ?? 'AED' }}</span>
-                                </div>
+                                <input
+                                    type="number"
+                                    name="settings[admin_profit_fixed]"
+                                    id="admin_profit_fixed"
+                                    class="form-control"
+                                    step="0.01"
+                                    min="0"
+                                    value="{{ old('settings.admin_profit_fixed', $profitFixed?->value) }}">
+                            </div>
+
+                            <div class="col-md-2 mb-3" id="fixed_currency_field">
+                                <label for="admin_profit_currency" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'عملة المبلغ الثابت' : 'Fixed Profit Currency' }}
+                                </label>
+                                <select name="settings[admin_profit_currency]" id="admin_profit_currency" class="form-select">
+                                    @foreach(['AED','USD','SAR','EGP','KWD','QAR','OMR','BHD','EUR'] as $cur)
+                                    <option value="{{ $cur }}" {{ old('settings.admin_profit_currency', $profitFixedCurrency?->value ?? 'AED') === $cur ? 'selected' : '' }}>
+                                        {{ $cur }}
+                                    </option>
+                                    @endforeach
+                                </select>
                             </div>
 
                             <div class="col-md-6 mb-3" id="commission_field">
@@ -711,12 +722,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const profitTypeSelect = document.getElementById('admin_profit_type');
     const percentageField = document.getElementById('percentage_field');
     const fixedField = document.getElementById('fixed_field');
+    const fixedCurrencyField = document.getElementById('fixed_currency_field');
     const commissionField = document.getElementById('commission_field');
 
     function toggleProfitFields() {
         const val = profitTypeSelect.value;
         percentageField.style.display = val === 'percentage' ? 'block' : 'none';
         fixedField.style.display = val === 'fixed' ? 'block' : 'none';
+        fixedCurrencyField.style.display = val === 'fixed' ? 'block' : 'none';
         commissionField.style.display = val === 'commission' ? 'block' : 'none';
     }
 
