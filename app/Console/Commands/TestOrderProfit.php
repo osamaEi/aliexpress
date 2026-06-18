@@ -168,17 +168,19 @@ class TestOrderProfit extends Command
     private function printBreakdown(Order $order, float $totalPaid): void
     {
         $aliexpress = (float) $order->aliexpress_profit;
+        $admin      = (float) $order->admin_profit;
         $seller     = (float) $order->seller_profit;
-        $totalProfit = $aliexpress + $seller;
+        $totalProfit = $aliexpress + $admin + $seller;
 
         $this->info('--- Profit Breakdown (calculateProfits) ---');
         $this->table(['Profit source', 'Amount (AED)'], [
             ['AliExpress (supplier margin)', number_format($aliexpress, 2)],
+            ['Admin (platform commission)', number_format($admin, 2)],
             ['Seller share', number_format($seller, 2)],
             ['── TOTAL PROFIT', number_format($totalProfit, 2)],
         ]);
 
         $this->line('Total paid by seller (product + shipping): ' . number_format($totalPaid, 2) . ' AED');
-        $this->line('Note: admin_category_profit was removed; admin profit lives inside product price only.');
+        $this->line('Note: admin profit is sourced from product_user.admin_amount (the settings-based profit baked into the price).');
     }
 }

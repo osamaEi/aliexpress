@@ -19,6 +19,7 @@ class OrderObserver
         Log::info('Order profits calculated on creation', [
             'order_number' => $order->order_number,
             'aliexpress_profit' => $order->aliexpress_profit,
+            'admin_profit' => $order->admin_profit,
             'seller_profit' => $order->seller_profit,
             'total_profit' => $order->getTotalProfit()
         ]);

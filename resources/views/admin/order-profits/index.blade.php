@@ -26,7 +26,7 @@
     <div class="alert border-0 mb-4 p-0" style="background:transparent;">
         <div class="row g-3">
 
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card border-start border-4 border-info h-100">
                     <div class="card-body py-3">
                         <div class="d-flex gap-3 align-items-start">
@@ -50,7 +50,31 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <div class="card border-start border-4 border-success h-100">
+                    <div class="card-body py-3">
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="avatar avatar-sm flex-shrink-0">
+                                <span class="avatar-initial rounded bg-label-success">
+                                    <i class="ri-shield-star-line"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <p class="fw-semibold mb-1">
+                                    {{ $isAr ? 'عمولة المنصة (الإدارة)' : 'Platform Commission (Admin)' }}
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    {{ $isAr
+                                        ? 'ربح الإدارة المحدد في الإعدادات والمُضاف إلى سعر المنتج'
+                                        : 'Admin profit from settings, baked into the product price' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
                 <div class="card border-start border-4 border-warning h-100">
                     <div class="card-body py-3">
                         <div class="d-flex gap-3 align-items-start">
@@ -84,6 +108,7 @@
                 ['label_ar' => 'إجمالي الإيرادات',  'label_en' => 'Total Revenue',    'value' => $totals->total_revenue ?? 0,            'icon' => 'ri-money-dollar-circle-line', 'color' => 'primary'],
                 ['label_ar' => 'تكلفة الشحن',        'label_en' => 'Shipping Cost',     'value' => $totals->total_shipping ?? 0,           'icon' => 'ri-truck-line',              'color' => 'secondary'],
                 ['label_ar' => 'ربح المورد',          'label_en' => 'Supplier Margin',   'value' => $totals->total_aliexpress_profit ?? 0,  'icon' => 'ri-global-line',             'color' => 'info'],
+                ['label_ar' => 'عمولة المنصة',       'label_en' => 'Platform Comm.',    'value' => $totals->total_admin_profit ?? 0,       'icon' => 'ri-shield-star-line',        'color' => 'success'],
                 ['label_ar' => 'حصة البائعين',       'label_en' => 'Sellers\' Share',   'value' => $totals->total_seller_profit ?? 0,      'icon' => 'ri-store-line',              'color' => 'warning'],
                 ['label_ar' => 'صافي الربح الكلي',   'label_en' => 'Total Net Profit',  'value' => $totals->total_profit ?? 0,             'icon' => 'ri-wallet-3-line',           'color' => 'danger'],
             ];
@@ -202,6 +227,10 @@
                             <i class="ri-global-line me-1"></i>
                             {{ $isAr ? 'ربح المورد' : 'Supplier' }}
                         </th>
+                        <th class="text-end" style="background:#dcfce7;color:#15803d;border-top:3px solid #4ade80;">
+                            <i class="ri-shield-star-line me-1"></i>
+                            {{ $isAr ? 'عمولة المنصة' : 'Platform' }}
+                        </th>
                         <th class="text-end" style="background:#fef9c3;color:#a16207;border-top:3px solid #facc15;">
                             <i class="ri-store-line me-1"></i>
                             {{ $isAr ? 'حصة البائع' : 'Seller' }}
@@ -216,6 +245,7 @@
                     @forelse($orders as $order)
                     @php
                         $net = ($order->aliexpress_profit ?? 0)
+                             + ($order->admin_profit ?? 0)
                              + ($order->seller_profit ?? 0);
                         $tracking = $order->shipping?->tracking_number ?? $order->tracking_number;
                     @endphp
@@ -307,6 +337,18 @@
                             @endif
                         </td>
 
+                        {{-- Platform Commission (Admin) --}}
+                        <td class="text-end" style="background:#f0fdf4;">
+                            @if(($order->admin_profit ?? 0) > 0)
+                                <span class="fw-semibold text-success">
+                                    +{{ number_format($order->admin_profit, 2) }}
+                                </span>
+                                <div class="text-muted" style="font-size:.72rem;">AED</div>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+
                         {{-- Seller Share --}}
                         <td class="text-end" style="background:#fefce8;">
                             @if(($order->seller_profit ?? 0) > 0)
@@ -330,7 +372,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5">
+                        <td colspan="9" class="text-center py-5">
                             <i class="ri-file-chart-line text-muted" style="font-size:3rem;opacity:.3;"></i>
                             <p class="text-muted mt-2 mb-3">{{ $isAr ? 'لا توجد طلبات مطابقة' : 'No orders found' }}</p>
                             <a href="{{ route('admin.order-profits.index') }}" class="btn btn-outline-primary btn-sm">
@@ -351,12 +393,16 @@
                         <td class="text-end text-info" style="background:#f0f9ff;">
                             +{{ number_format($orders->sum('aliexpress_profit'), 2) }}
                         </td>
+                        <td class="text-end text-success" style="background:#f0fdf4;">
+                            +{{ number_format($orders->sum('admin_profit'), 2) }}
+                        </td>
                         <td class="text-end text-warning" style="background:#fefce8;">
                             +{{ number_format($orders->sum('seller_profit'), 2) }}
                         </td>
                         <td class="text-end pe-3 text-danger" style="background:#fff5f5;">
                             +{{ number_format(
                                 $orders->sum('aliexpress_profit') +
+                                $orders->sum('admin_profit') +
                                 $orders->sum('seller_profit'), 2) }}
                         </td>
                     </tr>

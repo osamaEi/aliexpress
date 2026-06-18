@@ -45,8 +45,9 @@ class OrderProfitController extends Controller
             SUM(total_amount)           as total_revenue,
             SUM(freight_amount)         as total_shipping,
             SUM(aliexpress_profit)      as total_aliexpress_profit,
+            SUM(admin_profit)           as total_admin_profit,
             SUM(seller_profit)          as total_seller_profit,
-            SUM(COALESCE(aliexpress_profit,0) + COALESCE(seller_profit,0)) as total_profit
+            SUM(COALESCE(aliexpress_profit,0) + COALESCE(admin_profit,0) + COALESCE(seller_profit,0)) as total_profit
         ')->first();
 
         $orders = (clone $query)->latest()->paginate(20)->withQueryString();
