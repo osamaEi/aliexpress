@@ -1232,7 +1232,6 @@
     // Hide distributors dropdown
     function hideDistributors() {
         document.getElementById('distributorsDropdown').style.display = 'none';
-        document.querySelectorAll('.source-card-mini').forEach(card => card.classList.remove('active'));
         selectedCountryCode = null;
     }
 
@@ -1423,10 +1422,6 @@
         const dropdown = document.getElementById('chinaStoresDropdown');
         if (dropdown) {
             dropdown.style.display = 'none';
-        }
-        // Only remove active if not on china store products page
-        if (!window.location.search.includes('store_id=')) {
-            document.querySelector('[data-source="china"]')?.classList.remove('active');
         }
     }
 
