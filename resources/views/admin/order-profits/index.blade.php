@@ -235,18 +235,15 @@
                             <i class="ri-store-line me-1"></i>
                             {{ $isAr ? 'حصة البائع' : 'Seller' }}
                         </th>
-                        <th class="text-end pe-3" style="background:#fee2e2;color:#b91c1c;border-top:3px solid #f87171;">
-                            <i class="ri-wallet-3-line me-1"></i>
-                            {{ $isAr ? 'الصافي' : 'Net' }}
+                        <th class="text-end pe-3" style="background:#ede9fe;color:#6d28d9;border-top:3px solid #a78bfa;">
+                            <i class="ri-truck-line me-1"></i>
+                            {{ $isAr ? 'سعر الشحن' : 'Shipping' }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($orders as $order)
                     @php
-                        $net = ($order->aliexpress_profit ?? 0)
-                             + ($order->admin_profit ?? 0)
-                             + ($order->seller_profit ?? 0);
                         $tracking = $order->shipping?->tracking_number ?? $order->tracking_number;
                     @endphp
                     <tr>
@@ -361,12 +358,16 @@
                             @endif
                         </td>
 
-                        {{-- Net Total --}}
-                        <td class="text-end pe-3" style="background:#fff5f5;">
-                            <span class="fw-bold {{ $net > 0 ? 'text-danger' : 'text-muted' }}" style="font-size:1rem;">
-                                {{ $net > 0 ? '+' : '' }}{{ number_format($net, 2) }}
-                            </span>
-                            <div class="text-muted" style="font-size:.72rem;">AED</div>
+                        {{-- Shipping Cost --}}
+                        <td class="text-end pe-3" style="background:#f5f3ff;">
+                            @if(($order->freight_amount ?? 0) > 0)
+                                <span class="fw-bold" style="font-size:1rem;color:#6d28d9;">
+                                    {{ number_format($order->freight_amount, 2) }}
+                                </span>
+                                <div class="text-muted" style="font-size:.72rem;">AED</div>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
                         </td>
 
                     </tr>
@@ -399,11 +400,8 @@
                         <td class="text-end text-warning" style="background:#fefce8;">
                             +{{ number_format($orders->sum('seller_profit'), 2) }}
                         </td>
-                        <td class="text-end pe-3 text-danger" style="background:#fff5f5;">
-                            +{{ number_format(
-                                $orders->sum('aliexpress_profit') +
-                                $orders->sum('admin_profit') +
-                                $orders->sum('seller_profit'), 2) }}
+                        <td class="text-end pe-3" style="background:#f5f3ff;color:#6d28d9;">
+                            {{ number_format($orders->sum('freight_amount'), 2) }}
                         </td>
                     </tr>
                 </tfoot>
