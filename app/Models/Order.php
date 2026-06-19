@@ -274,18 +274,11 @@ class Order extends Model
             $aliexpressProfit = $aliexpressCost * ($product->supplier_profit_margin / 100);
         }
 
-        // 2. Admin Profit — the global `admin_profit` setting amount baked into the product
-        // price at assignment time. Pull the actual per-unit amount from the seller's pivot
-        // so the report matches what the customer was charged.
-        $adminProfit = 0;
-        if ($this->user_id) {
-            $adminAmount = \DB::table('product_user')
-                ->where('user_id', $this->user_id)
-                ->where('product_id', $product->id)
-                ->value('admin_amount');
-
-            $adminProfit = (float) ($adminAmount ?? 0) * $this->quantity;
-        }
+        // 2. Admin Profit — the global `admin_profit` setting applied to every product in the
+        // system, regardless of assignment. Same formula used on the search-china page:
+        // admin_profit(product base price) × quantity.
+        $adminBasePrice = (float) ($product->aliexpress_price ?? $product->price ?? 0);
+        $adminProfit = admin_profit($adminBasePrice) * $this->quantity;
 
         // 3. Calculate Seller Profit
         $sellerProfit = 0;
