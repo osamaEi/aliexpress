@@ -25,6 +25,26 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="ri-error-warning-line me-2"></i>
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="ri-error-warning-line me-2"></i>
+                    <ul class="mb-0 {{ app()->getLocale()=='ar' ? 'pe-3' : 'ps-3' }}">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
             @if(session('status') === 'profile-updated')
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="ri-checkbox-circle-line me-2"></i>
@@ -1029,7 +1049,7 @@
             <div class="modal-content">
                 <form method="POST" id="withdrawalMethodForm" action="{{ route('withdrawal-methods.store') }}">
                     @csrf
-                    <input type="hidden" name="_method" id="wmFormMethod" value="POST">
+                    <input type="hidden" name="_method" id="wmFormMethod" value="">
                     <div class="modal-header">
                         <h5 class="modal-title">{{ app()->getLocale()=='ar' ? 'طريقة سحب' : 'Withdrawal Method' }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -1603,7 +1623,7 @@ function toggleWmFields() {
 function resetWithdrawalMethodForm() {
     const form = document.getElementById('withdrawalMethodForm');
     form.action = "{{ route('withdrawal-methods.store') }}";
-    document.getElementById('wmFormMethod').value = 'POST';
+    document.getElementById('wmFormMethod').value = '';
     form.reset();
     document.getElementById('wmType').value = 'bank_transfer';
     toggleWmFields();
@@ -1632,5 +1652,26 @@ function editWithdrawalMethod(method) {
 }
 
 document.addEventListener('DOMContentLoaded', toggleWmFields);
+
+@if($errors->hasAny(['type','bank_name','account_holder_name','iban','swift_code','paypal_email','wallet_provider','wallet_mobile_number','wallet_holder_name','label']))
+// Re-open the modal and restore input so the user sees the validation errors
+document.addEventListener('DOMContentLoaded', function () {
+    @if(old('type'))
+        document.getElementById('wmType').value = @json(old('type'));
+    @endif
+    document.getElementById('wmLabel').value = @json(old('label'));
+    document.getElementById('wmBankName').value = @json(old('bank_name'));
+    document.getElementById('wmAccountHolder').value = @json(old('account_holder_name'));
+    document.getElementById('wmAccountNumber').value = @json(old('account_number'));
+    document.getElementById('wmIban').value = @json(old('iban'));
+    document.getElementById('wmSwift').value = @json(old('swift_code'));
+    document.getElementById('wmPaypalEmail').value = @json(old('paypal_email'));
+    document.getElementById('wmWalletProvider').value = @json(old('wallet_provider'));
+    document.getElementById('wmWalletMobile').value = @json(old('wallet_mobile_number'));
+    document.getElementById('wmWalletHolder').value = @json(old('wallet_holder_name'));
+    toggleWmFields();
+    new bootstrap.Modal(document.getElementById('withdrawalMethodModal')).show();
+});
+@endif
 </script>
 @endsection
