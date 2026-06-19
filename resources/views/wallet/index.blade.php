@@ -74,6 +74,23 @@
         </div>
     </div>
 
+    @php $hasWithdrawalMethod = auth()->user()->withdrawalMethods()->exists(); @endphp
+
+    {{-- Warn if the user has no saved withdrawal method --}}
+    @unless($hasWithdrawalMethod)
+    <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <span>
+            <i class="ri-error-warning-line me-2"></i>
+            {{ app()->getLocale()=='ar'
+                ? 'لم تقم بإضافة أي طريقة سحب بعد. أضف طريقة سحب لتتمكن من سحب رصيدك.'
+                : 'You have not added any withdrawal method yet. Add one to be able to withdraw your balance.' }}
+        </span>
+        <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-warning">
+            <i class="ri-add-line me-1"></i>{{ app()->getLocale()=='ar' ? 'إضافة طريقة سحب' : 'Add withdrawal method' }}
+        </a>
+    </div>
+    @endunless
+
     <!-- Quick Actions -->
     <div class="card mb-4">
         <div class="card-header">
@@ -91,10 +108,18 @@
 
                 <!-- Withdraw -->
                 <div class="col-md-3">
-                    <a href="https://i.selaa.ae/wallet/withdrawal/create" class="btn btn-primary w-100">
+                    @if($hasWithdrawalMethod)
+                    <a href="{{ route('wallet.withdrawal.create') }}" class="btn btn-primary w-100">
                         <i class="ri-money-dollar-circle-line me-1"></i>
                         {{ __('messages.withdraw') }}
                     </a>
+                    @else
+                    <a href="{{ route('profile.edit') }}" class="btn btn-primary w-100"
+                       title="{{ app()->getLocale()=='ar' ? 'أضف طريقة سحب أولاً' : 'Add a withdrawal method first' }}">
+                        <i class="ri-money-dollar-circle-line me-1"></i>
+                        {{ __('messages.withdraw') }}
+                    </a>
+                    @endif
                 </div>
 
                 <!-- Transaction History -->
