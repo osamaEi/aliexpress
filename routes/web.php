@@ -170,6 +170,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/logo', [ProfileController::class, 'updateLogo'])->name('profile.logo.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Withdrawal methods (saved bank / paypal / mobile wallet)
+    Route::post('/profile/withdrawal-methods', [App\Http\Controllers\WithdrawalMethodController::class, 'store'])->name('withdrawal-methods.store');
+    Route::patch('/profile/withdrawal-methods/{withdrawalMethod}', [App\Http\Controllers\WithdrawalMethodController::class, 'update'])->name('withdrawal-methods.update');
+    Route::delete('/profile/withdrawal-methods/{withdrawalMethod}', [App\Http\Controllers\WithdrawalMethodController::class, 'destroy'])->name('withdrawal-methods.destroy');
+    Route::post('/profile/withdrawal-methods/{withdrawalMethod}/default', [App\Http\Controllers\WithdrawalMethodController::class, 'setDefault'])->name('withdrawal-methods.default');
+
     // Subscription routes
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');

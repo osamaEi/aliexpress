@@ -39,14 +39,7 @@ class ProfileController extends Controller
             'phone_code' => ['nullable', 'string', 'max:10'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:100'],
-            // Withdrawal method - bank transfer only
-            'withdrawal_method' => ['nullable', 'string', 'in:bank_transfer'],
-            // Bank transfer fields
-            'bank_name' => [$isSeller ? 'required' : 'nullable', 'string', 'max:255'],
-            'bank_account_name' => [$isSeller ? 'required' : 'nullable', 'string', 'max:255'],
-            'bank_account_number' => [$isSeller ? 'required' : 'nullable', 'string', 'max:50'],
-            'bank_iban' => [$isSeller ? 'required' : 'nullable', 'string', 'max:50'],
-            'bank_swift_code' => [$isSeller ? 'required' : 'nullable', 'string', 'max:20'],
+            // Withdrawal methods are now managed separately (withdrawal_methods table).
             'website_url' => ['nullable', 'url', 'max:255'],
             // Social media accounts
             'social_media_accounts' => ['nullable', 'array'],

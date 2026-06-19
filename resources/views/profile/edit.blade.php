@@ -902,67 +902,7 @@
 
                     @endif
 
-                    <!-- Withdrawal Method Section -->
-                    @if($user->user_type == 'seller' || $user->user_type == 'distributor')
-                    <div class="col-12 mt-4">
-                        <h6 class="text-primary mb-3">
-                            <i class="ri-bank-card-line me-1"></i>{{ __('messages.withdrawal_method_settings') }}
-                        </h6>
-                        <p class="text-muted small mb-3">{{ __('messages.withdrawal_method_description') }}</p>
-                    </div>
-
-                    <input type="hidden" name="withdrawal_method" value="bank_transfer">
-
-                    <!-- Bank Transfer Fields -->
-                    <div class="col-md-6">
-                        <label for="bank_name" class="form-label">{{ __('messages.bank_name') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('bank_name') is-invalid @enderror"
-                               id="bank_name" name="bank_name" value="{{ old('bank_name', $user->bank_name) }}">
-                        @error('bank_name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="bank_account_name" class="form-label">{{ __('messages.account_holder_name') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('bank_account_name') is-invalid @enderror"
-                               id="bank_account_name" name="bank_account_name" value="{{ old('bank_account_name', $user->bank_account_name) }}">
-                        @error('bank_account_name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="bank_account_number" class="form-label">{{ __('messages.account_number') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('bank_account_number') is-invalid @enderror"
-                               id="bank_account_number" name="bank_account_number" value="{{ old('bank_account_number', $user->bank_account_number) }}"
-                               dir="ltr" style="text-align: left;">
-                        @error('bank_account_number')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="bank_iban" class="form-label">{{ __('messages.iban') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('bank_iban') is-invalid @enderror"
-                               id="bank_iban" name="bank_iban" value="{{ old('bank_iban', $user->bank_iban) }}"
-                               dir="ltr" style="text-align: left;"
-                               placeholder="AE000000000000000000000">
-                        @error('bank_iban')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="bank_swift_code" class="form-label">{{ __('messages.swift_code') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('bank_swift_code') is-invalid @enderror"
-                               id="bank_swift_code" name="bank_swift_code" value="{{ old('bank_swift_code', $user->bank_swift_code) }}">
-                        @error('bank_swift_code')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    @endif
+                    {{-- Withdrawal methods are managed in their own section below (outside this form). --}}
 
                     <!-- Financial Information -->
                     <div class="col-12 mt-4">
@@ -1012,6 +952,167 @@
             </form>
         </div>
     </div>
+
+    @if($user->user_type == 'seller' || $user->user_type == 'distributor')
+    @php $withdrawalMethods = $user->withdrawalMethods()->orderByDesc('is_default')->get(); @endphp
+    <!-- Withdrawal Methods Card -->
+    <div class="card mb-6">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="ri-bank-card-line me-2"></i>{{ __('messages.withdrawal_method_settings') }}
+            </h5>
+            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#withdrawalMethodModal"
+                    onclick="resetWithdrawalMethodForm()">
+                <i class="ri-add-line me-1"></i>{{ app()->getLocale()=='ar' ? 'إضافة طريقة' : 'Add Method' }}
+            </button>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">{{ __('messages.withdrawal_method_description') }}</p>
+
+            @if($withdrawalMethods->isEmpty())
+                <div class="alert alert-warning mb-0">
+                    <i class="ri-error-warning-line me-2"></i>
+                    {{ app()->getLocale()=='ar' ? 'لم تقم بإضافة أي طريقة سحب بعد.' : 'You have not added any withdrawal method yet.' }}
+                </div>
+            @else
+                <div class="row g-3">
+                    @foreach($withdrawalMethods as $method)
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100 {{ $method->is_default ? 'border-primary' : '' }}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="fw-semibold">
+                                    <i class="ri-{{ $method->type === 'paypal' ? 'paypal-line' : ($method->type === 'mobile_wallet' ? 'smartphone-line' : 'bank-line') }} me-1"></i>
+                                    {{ $method->getTypeName() }}
+                                </span>
+                                @if($method->is_default)
+                                    <span class="badge bg-primary">{{ app()->getLocale()=='ar' ? 'افتراضية' : 'Default' }}</span>
+                                @endif
+                            </div>
+                            @if($method->label)
+                                <div class="small fw-medium">{{ $method->label }}</div>
+                            @endif
+                            <div class="small text-muted" dir="ltr" style="word-break:break-all;">{{ $method->getSummary() }}</div>
+
+                            <div class="d-flex gap-1 mt-3 flex-wrap">
+                                @unless($method->is_default)
+                                <form method="POST" action="{{ route('withdrawal-methods.default', $method) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                        <i class="ri-star-line me-1"></i>{{ app()->getLocale()=='ar' ? 'تعيين كافتراضية' : 'Set default' }}
+                                    </button>
+                                </form>
+                                @endunless
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        onclick='editWithdrawalMethod(@json($method))'>
+                                    <i class="ri-edit-line me-1"></i>{{ app()->getLocale()=='ar' ? 'تعديل' : 'Edit' }}
+                                </button>
+                                <form method="POST" action="{{ route('withdrawal-methods.destroy', $method) }}"
+                                      onsubmit="return confirm('{{ app()->getLocale()=='ar' ? 'هل أنت متأكد من حذف هذه الطريقة؟' : 'Delete this method?' }}');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="ri-delete-bin-line me-1"></i>{{ app()->getLocale()=='ar' ? 'حذف' : 'Delete' }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Withdrawal Method Modal (Add / Edit) -->
+    <div class="modal fade" id="withdrawalMethodModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" id="withdrawalMethodForm" action="{{ route('withdrawal-methods.store') }}">
+                    @csrf
+                    <input type="hidden" name="_method" id="wmFormMethod" value="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ app()->getLocale()=='ar' ? 'طريقة سحب' : 'Withdrawal Method' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">{{ app()->getLocale()=='ar' ? 'النوع' : 'Type' }} <span class="text-danger">*</span></label>
+                            <select class="form-select" name="type" id="wmType" onchange="toggleWmFields()" required>
+                                <option value="bank_transfer">{{ app()->getLocale()=='ar' ? 'تحويل بنكي' : 'Bank Transfer' }}</option>
+                                <option value="paypal">PayPal</option>
+                                <option value="mobile_wallet">{{ app()->getLocale()=='ar' ? 'محفظة إلكترونية' : 'Mobile Wallet' }}</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ app()->getLocale()=='ar' ? 'اسم الطريقة (اختياري)' : 'Label (optional)' }}</label>
+                            <input type="text" class="form-control" name="label" id="wmLabel" maxlength="255">
+                        </div>
+
+                        {{-- Bank fields --}}
+                        <div class="wm-fields wm-bank_transfer">
+                            <div class="mb-3">
+                                <label class="form-label">{{ __('messages.bank_name') }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="bank_name" id="wmBankName">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ __('messages.account_holder_name') }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="account_holder_name" id="wmAccountHolder">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ __('messages.account_number') }}</label>
+                                <input type="text" class="form-control" name="account_number" id="wmAccountNumber" dir="ltr">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ __('messages.iban') }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="iban" id="wmIban" dir="ltr" placeholder="AE000000000000000000000">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ __('messages.swift_code') }}</label>
+                                <input type="text" class="form-control" name="swift_code" id="wmSwift" dir="ltr">
+                            </div>
+                        </div>
+
+                        {{-- PayPal fields --}}
+                        <div class="wm-fields wm-paypal" style="display:none;">
+                            <div class="mb-3">
+                                <label class="form-label">{{ __('messages.paypal_email') }} <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" name="paypal_email" id="wmPaypalEmail" dir="ltr">
+                            </div>
+                        </div>
+
+                        {{-- Mobile wallet fields --}}
+                        <div class="wm-fields wm-mobile_wallet" style="display:none;">
+                            <div class="mb-3">
+                                <label class="form-label">{{ app()->getLocale()=='ar' ? 'مزود المحفظة' : 'Wallet Provider' }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="wallet_provider" id="wmWalletProvider">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ app()->getLocale()=='ar' ? 'رقم الجوال' : 'Mobile Number' }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="wallet_mobile_number" id="wmWalletMobile" dir="ltr">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{{ app()->getLocale()=='ar' ? 'اسم صاحب المحفظة' : 'Wallet Holder Name' }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="wallet_holder_name" id="wmWalletHolder">
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_default" id="wmIsDefault" value="1">
+                            <label class="form-check-label" for="wmIsDefault">
+                                {{ app()->getLocale()=='ar' ? 'تعيين كطريقة افتراضية' : 'Set as default method' }}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('messages.cancel') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('messages.save_changes') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Change Password Card -->
     <div class="card mb-6">
@@ -1488,5 +1589,48 @@
         }
     });
 })();
+</script>
+
+<script>
+// ===== Withdrawal methods modal =====
+function toggleWmFields() {
+    const type = document.getElementById('wmType').value;
+    document.querySelectorAll('.wm-fields').forEach(el => el.style.display = 'none');
+    const target = document.querySelector('.wm-' + type);
+    if (target) target.style.display = '';
+}
+
+function resetWithdrawalMethodForm() {
+    const form = document.getElementById('withdrawalMethodForm');
+    form.action = "{{ route('withdrawal-methods.store') }}";
+    document.getElementById('wmFormMethod').value = 'POST';
+    form.reset();
+    document.getElementById('wmType').value = 'bank_transfer';
+    toggleWmFields();
+}
+
+function editWithdrawalMethod(method) {
+    const form = document.getElementById('withdrawalMethodForm');
+    form.action = "{{ url('profile/withdrawal-methods') }}/" + method.id;
+    document.getElementById('wmFormMethod').value = 'PATCH';
+
+    document.getElementById('wmType').value = method.type;
+    document.getElementById('wmLabel').value = method.label || '';
+    document.getElementById('wmBankName').value = method.bank_name || '';
+    document.getElementById('wmAccountHolder').value = method.account_holder_name || '';
+    document.getElementById('wmAccountNumber').value = method.account_number || '';
+    document.getElementById('wmIban').value = method.iban || '';
+    document.getElementById('wmSwift').value = method.swift_code || '';
+    document.getElementById('wmPaypalEmail').value = method.paypal_email || '';
+    document.getElementById('wmWalletProvider').value = method.wallet_provider || '';
+    document.getElementById('wmWalletMobile').value = method.wallet_mobile_number || '';
+    document.getElementById('wmWalletHolder').value = method.wallet_holder_name || '';
+    document.getElementById('wmIsDefault').checked = !!method.is_default;
+
+    toggleWmFields();
+    new bootstrap.Modal(document.getElementById('withdrawalMethodModal')).show();
+}
+
+document.addEventListener('DOMContentLoaded', toggleWmFields);
 </script>
 @endsection

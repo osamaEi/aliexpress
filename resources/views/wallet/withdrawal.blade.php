@@ -70,51 +70,39 @@
                             {{ __('messages.minimum_withdrawal_amount', ['amount' => 10]) }}
                         </div>
                     @else
-                        <form action="{{ route('wallet.withdrawal.store') }}" method="POST" id="withdrawalForm">
-                            @csrf
-
-                            <input type="hidden" name="withdrawal_method" value="bank_transfer">
-
-                            @php $user = auth()->user(); @endphp
-
-                            {{-- Bank details summary from profile --}}
-                            @if($user->bank_iban || $user->bank_name)
-                            <div class="alert mb-4" style="background-color: rgba(86,28,4,0.06); border: 1px solid rgba(86,28,4,0.2);">
-                                <h6 class="mb-2" style="color:#561C04;">
-                                    <i class="ri-bank-line {{ app()->getLocale()=='ar'?'ms-1':'me-1' }}"></i>
-                                    {{ __('messages.bank_transfer') }}
-                                </h6>
-                                <div class="row g-2 small">
-                                    @if($user->bank_name)
-                                    <div class="col-md-6"><span class="text-muted">{{ __('messages.bank_name') }}:</span> <strong>{{ $user->bank_name }}</strong></div>
-                                    @endif
-                                    @if($user->bank_account_name)
-                                    <div class="col-md-6"><span class="text-muted">{{ __('messages.account_holder_name') }}:</span> <strong>{{ $user->bank_account_name }}</strong></div>
-                                    @endif
-                                    @if($user->bank_iban)
-                                    <div class="col-md-6"><span class="text-muted">{{ __('messages.iban') }}:</span> <strong dir="ltr">{{ $user->bank_iban }}</strong></div>
-                                    @endif
-                                    @if($user->bank_swift_code)
-                                    <div class="col-md-6"><span class="text-muted">{{ __('messages.swift_code') }}:</span> <strong dir="ltr">{{ $user->bank_swift_code }}</strong></div>
-                                    @endif
-                                    @if($user->bank_account_number)
-                                    <div class="col-md-6"><span class="text-muted">{{ __('messages.account_number') }}:</span> <strong dir="ltr">{{ $user->bank_account_number }}</strong></div>
-                                    @endif
-                                </div>
-                                <div class="mt-2">
-                                    <a href="{{ route('profile.edit') }}" class="small" style="color:#561C04;">
-                                        <i class="ri-edit-line me-1"></i>{{ app()->getLocale()=='ar' ? 'تعديل البيانات البنكية' : 'Edit bank details' }}
-                                    </a>
-                                </div>
-                            </div>
-                            @else
+                        @if($withdrawalMethods->isEmpty())
                             <div class="alert alert-warning mb-4">
                                 <i class="ri-error-warning-line me-2"></i>
-                                {{ app()->getLocale()=='ar' ? 'يرجى إكمال بيانات التحويل البنكي في' : 'Please complete your bank details in' }}
+                                {{ app()->getLocale()=='ar' ? 'يرجى إضافة طريقة سحب واحدة على الأقل في' : 'Please add at least one withdrawal method in' }}
                                 <a href="{{ route('profile.edit') }}">{{ app()->getLocale()=='ar' ? 'الملف الشخصي' : 'your profile' }}</a>
                                 {{ app()->getLocale()=='ar' ? 'أولاً.' : 'first.' }}
                             </div>
-                            @endif
+                        @else
+                        <form action="{{ route('wallet.withdrawal.store') }}" method="POST" id="withdrawalForm">
+                            @csrf
+
+                            {{-- Pick one of the saved withdrawal methods --}}
+                            <div class="mb-4">
+                                <label for="withdrawal_method_id" class="form-label">
+                                    {{ __('messages.withdrawal_method') }} <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select @error('withdrawal_method_id') is-invalid @enderror"
+                                        id="withdrawal_method_id" name="withdrawal_method_id" required>
+                                    @foreach($withdrawalMethods as $method)
+                                        <option value="{{ $method->id }}" {{ (old('withdrawal_method_id', $withdrawalMethods->firstWhere('is_default', true)?->id) == $method->id) ? 'selected' : '' }}>
+                                            {{ $method->getDisplayLabel() }}{{ $method->is_default ? (app()->getLocale()=='ar' ? ' (افتراضية)' : ' (Default)') : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('withdrawal_method_id')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">
+                                    <a href="{{ route('profile.edit') }}" style="color:#561C04;">
+                                        <i class="ri-add-line me-1"></i>{{ app()->getLocale()=='ar' ? 'إدارة طرق السحب' : 'Manage withdrawal methods' }}
+                                    </a>
+                                </small>
+                            </div>
 
                             <!-- Amount -->
                             <div class="mb-3">
@@ -189,6 +177,7 @@
                                 </a>
                             </div>
                         </form>
+                        @endif
                     @endif
                 </div>
             </div>

@@ -137,6 +137,25 @@ class User extends Authenticatable
     }
 
     /**
+     * Get user's saved withdrawal methods (bank / paypal / mobile wallet)
+     */
+    public function withdrawalMethods(): HasMany
+    {
+        return $this->hasMany(WithdrawalMethod::class);
+    }
+
+    /**
+     * Get the user's default withdrawal method (falls back to the most recent)
+     */
+    public function defaultWithdrawalMethod(): ?WithdrawalMethod
+    {
+        return $this->withdrawalMethods()
+            ->orderByDesc('is_default')
+            ->orderByDesc('id')
+            ->first();
+    }
+
+    /**
      * Get or create user's wallet
      */
     public function getOrCreateWallet(): Wallet
@@ -251,7 +270,7 @@ class User extends Authenticatable
             && !empty($this->logo)
             && !empty($this->company_name)
             && !empty($this->default_currency)
-            && !empty($this->withdrawal_method);
+            && $this->withdrawalMethods()->exists();
     }
 
     /**
@@ -293,7 +312,7 @@ class User extends Authenticatable
         if (empty($this->default_currency)) {
             $missing[] = 'default_currency';
         }
-        if (empty($this->withdrawal_method)) {
+        if (!$this->withdrawalMethods()->exists()) {
             $missing[] = 'withdrawal_method';
         }
 
