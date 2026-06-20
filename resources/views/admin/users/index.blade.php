@@ -11,18 +11,18 @@
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item" role="presentation">
-            <a class="nav-link {{ !request('user_type') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
-                <i class="ri-user-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link {{ request('user_type') === 'seller' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'seller']) }}">
+            <a class="nav-link {{ request('user_type') === 'seller' || !request('user_type') ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'seller']) }}">
                 <i class="ri-store-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'البائعين' : 'Sellers' }}
             </a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link {{ request('user_type') === 'customer' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'customer']) }}">
-                <i class="ri-shopping-bag-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'العملاء' : 'Customers' }}
+            <a class="nav-link {{ request('user_type') === 'distributor' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'distributor']) }}">
+                <i class="ri-truck-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الموزعين' : 'Distributors' }}
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{ request('user_type') === 'buyer' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'buyer']) }}">
+                <i class="ri-shopping-bag-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المشترين' : 'Buyers' }}
             </a>
         </li>
         <li class="nav-item" role="presentation">
@@ -51,10 +51,10 @@
                     <div class="col-md-3">
                         <label for="user_type" class="form-label">{{ __('messages.user_type') }}</label>
                         <select class="form-select" id="user_type" name="user_type">
-                            <option value="">{{ __('messages.all') }}</option>
-                            <option value="admin" {{ request('user_type') === 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="seller" {{ request('user_type') === 'seller' ? 'selected' : '' }}>Seller</option>
-                            <option value="customer" {{ request('user_type') === 'customer' ? 'selected' : '' }}>Customer</option>
+                            <option value="seller" {{ request('user_type') === 'seller' || !request('user_type') ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'البائعين' : 'Sellers' }}</option>
+                            <option value="distributor" {{ request('user_type') === 'distributor' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الموزعين' : 'Distributors' }}</option>
+                            <option value="buyer" {{ request('user_type') === 'buyer' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المشترين' : 'Buyers' }}</option>
+                            <option value="admin" {{ request('user_type') === 'admin' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المسؤولين' : 'Admins' }}</option>
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">

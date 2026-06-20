@@ -185,14 +185,6 @@
             <span class="menu-header-text">{{ app()->getLocale() == 'ar' ? 'التسويق بالعمولة' : 'Affiliate Marketing' }}</span>
         </li>
 
-        <!-- Stores -->
-        <li class="menu-item {{ request()->routeIs('admin.affiliate.stores*') ? 'active' : '' }}">
-            <a href="{{ route('admin.affiliate.stores') }}" class="menu-link">
-                <i class="menu-icon tf-icons ri-store-2-line"></i>
-                <div>{{ app()->getLocale() == 'ar' ? 'المتاجر' : 'Stores' }}</div>
-            </a>
-        </li>
-
         <!-- Coupons Management -->
         <li class="menu-item {{ request()->routeIs('admin.affiliate.coupons.*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
