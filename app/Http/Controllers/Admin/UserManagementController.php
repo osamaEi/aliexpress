@@ -21,8 +21,8 @@ class UserManagementController extends Controller
     {
         $query = User::query();
 
-        // Filter by user type — default to sellers
-        $userType = $request->filled('user_type') ? $request->user_type : 'seller';
+        $allowedTypes = ['seller', 'distributor', 'admin'];
+        $userType = in_array($request->user_type, $allowedTypes) ? $request->user_type : 'seller';
         $query->where('user_type', $userType);
 
         // Search

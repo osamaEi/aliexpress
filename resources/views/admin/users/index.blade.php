@@ -21,11 +21,6 @@
             </a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link {{ request('user_type') === 'buyer' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'buyer']) }}">
-                <i class="ri-shopping-bag-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المشترين' : 'Buyers' }}
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
             <a class="nav-link {{ request('user_type') === 'admin' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'admin']) }}">
                 <i class="ri-admin-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المسؤولين' : 'Admins' }}
             </a>
@@ -53,7 +48,6 @@
                         <select class="form-select" id="user_type" name="user_type">
                             <option value="seller" {{ request('user_type') === 'seller' || !request('user_type') ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'البائعين' : 'Sellers' }}</option>
                             <option value="distributor" {{ request('user_type') === 'distributor' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الموزعين' : 'Distributors' }}</option>
-                            <option value="buyer" {{ request('user_type') === 'buyer' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المشترين' : 'Buyers' }}</option>
                             <option value="admin" {{ request('user_type') === 'admin' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المسؤولين' : 'Admins' }}</option>
                         </select>
                     </div>
@@ -108,11 +102,13 @@
                             <td>{{ $user->email }}</td>
                             <td>
                                 @if($user->user_type === 'admin')
-                                    <span class="badge bg-danger">Admin</span>
+                                    <span class="badge bg-danger">{{ app()->getLocale() == 'ar' ? 'مسؤول' : 'Admin' }}</span>
                                 @elseif($user->user_type === 'seller')
-                                    <span class="badge bg-primary">Seller</span>
+                                    <span class="badge bg-primary">{{ app()->getLocale() == 'ar' ? 'بائع' : 'Seller' }}</span>
+                                @elseif($user->user_type === 'distributor')
+                                    <span class="badge bg-success">{{ app()->getLocale() == 'ar' ? 'موزع' : 'Distributor' }}</span>
                                 @else
-                                    <span class="badge bg-secondary">Customer</span>
+                                    <span class="badge bg-secondary">{{ $user->user_type }}</span>
                                 @endif
                             </td>
                             <td>
