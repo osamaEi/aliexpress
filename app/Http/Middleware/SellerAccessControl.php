@@ -38,6 +38,11 @@ class SellerAccessControl
         'profile.update',
         'profile.logo.update',
         'profile.destroy',
+        // Withdrawal method routes
+        'withdrawal-methods.store',
+        'withdrawal-methods.update',
+        'withdrawal-methods.destroy',
+        'withdrawal-methods.default',
         // Initial Profit Setup routes (must complete after registration)
         'seller.profit.setup',
         'seller.profit.store',
