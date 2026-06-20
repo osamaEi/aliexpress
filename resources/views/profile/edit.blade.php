@@ -1055,6 +1055,19 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
+                        @if($errors->hasAny(['type','bank_name','account_holder_name','account_number','iban','swift_code','paypal_email','wallet_provider','wallet_mobile_number','wallet_holder_name','label','is_default']))
+                            <div class="alert alert-danger">
+                                <i class="ri-error-warning-line me-2"></i>
+                                {{ app()->getLocale()=='ar' ? 'تعذّر حفظ طريقة السحب. يرجى تصحيح الأخطاء التالية:' : 'Could not save the withdrawal method. Please fix the following:' }}
+                                <ul class="mb-0 mt-2">
+                                    @foreach(['type','bank_name','account_holder_name','account_number','iban','swift_code','paypal_email','wallet_provider','wallet_mobile_number','wallet_holder_name','label','is_default'] as $wmField)
+                                        @error($wmField)
+                                            <li>{{ $message }}</li>
+                                        @enderror
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <div class="mb-3">
                             <label class="form-label">{{ app()->getLocale()=='ar' ? 'النوع' : 'Type' }} <span class="text-danger">*</span></label>
                             <select class="form-select" name="type" id="wmType" onchange="toggleWmFields()" required>
