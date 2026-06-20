@@ -231,6 +231,14 @@
             </a>
         </li>
 
+        <!-- Distributors (Store) -->
+        <li class="menu-item {{ request()->routeIs('admin.users.*') && request('user_type') === 'distributor' ? 'active' : '' }}">
+            <a href="{{ route('admin.users.index', ['user_type' => 'distributor']) }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-store-3-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'متجر' : 'Store' }}</div>
+            </a>
+        </li>
+
         <!-- Training Videos -->
         <li class="menu-item {{ request()->routeIs('admin.training-videos.*') ? 'active' : '' }}">
             <a href="{{ route('admin.training-videos.index') }}" class="menu-link">

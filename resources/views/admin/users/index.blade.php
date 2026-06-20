@@ -17,7 +17,7 @@
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link {{ request('user_type') === 'distributor' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'distributor']) }}">
-                <i class="ri-truck-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الموزعين' : 'Distributors' }}
+                <i class="ri-store-3-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'متجر' : 'Store' }}
             </a>
         </li>
         <li class="nav-item" role="presentation">
@@ -47,7 +47,7 @@
                         <label for="user_type" class="form-label">{{ __('messages.user_type') }}</label>
                         <select class="form-select" id="user_type" name="user_type">
                             <option value="seller" {{ request('user_type') === 'seller' || !request('user_type') ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'البائعين' : 'Sellers' }}</option>
-                            <option value="distributor" {{ request('user_type') === 'distributor' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'الموزعين' : 'Distributors' }}</option>
+                            <option value="distributor" {{ request('user_type') === 'distributor' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'متجر' : 'Store' }}</option>
                             <option value="admin" {{ request('user_type') === 'admin' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المسؤولين' : 'Admins' }}</option>
                         </select>
                     </div>
