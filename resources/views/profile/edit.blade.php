@@ -797,21 +797,41 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="default_currency" class="form-label">{{ __('messages.default_currency_label') }} <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('messages.default_currency_label') }} <span class="text-danger">*</span></label>
                         @php
                             $currencies = \App\Models\Currency::active();
                             $currentCurrency = old('default_currency', $user->default_currency) ?? session('currency_code', 'AED');
+                            $selectedCurrency = $currencies->firstWhere('code', $currentCurrency);
                         @endphp
-                        <select class="form-select @error('default_currency') is-invalid @enderror" id="default_currency" name="default_currency">
-                            <option value="">{{ __('messages.select_currency') }}</option>
-                            @foreach($currencies as $currency)
-                                <option value="{{ $currency->code }}" {{ $currentCurrency == $currency->code ? 'selected' : '' }}>
-                                  {{ $currency->symbol }} {{ $currency->localizedName }} ({{ $currency->code }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <input type="hidden" name="default_currency" id="default_currency" value="{{ $currentCurrency }}">
+                        <div class="dropdown currency-picker-dropdown @error('default_currency') is-invalid @enderror">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle w-100 d-flex align-items-center gap-2 @error('default_currency') border-danger @enderror"
+                                    id="currencyPickerBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span id="currencyPickerIcon">
+                                    @if($selectedCurrency)
+                                        <x-currency-icon :currency="$selectedCurrency->code" width="18" height="18" />
+                                    @endif
+                                </span>
+                                <span id="currencyPickerLabel">
+                                    {{ $selectedCurrency ? $selectedCurrency->localizedName . ' (' . $selectedCurrency->code . ')' : __('messages.select_currency') }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu w-100" style="max-height:260px;overflow-y:auto;">
+                                @foreach($currencies as $currency)
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 currency-picker-item {{ $currentCurrency == $currency->code ? 'active' : '' }}"
+                                       href="#"
+                                       data-code="{{ $currency->code }}"
+                                       data-label="{{ $currency->localizedName }} ({{ $currency->code }})">
+                                        <x-currency-icon :currency="$currency->code" width="18" height="18" />
+                                        {{ $currency->localizedName }} <small class="text-muted">({{ $currency->code }})</small>
+                                    </a>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
                         @error('default_currency')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="text-danger small mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -1686,5 +1706,23 @@ document.addEventListener('DOMContentLoaded', function () {
     new bootstrap.Modal(document.getElementById('withdrawalMethodModal')).show();
 });
 @endif
+</script>
+
+<script>
+// ===== Currency picker =====
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.currency-picker-item').forEach(function (item) {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            const code = this.dataset.code;
+            const label = this.dataset.label;
+            document.getElementById('default_currency').value = code;
+            document.getElementById('currencyPickerLabel').textContent = label;
+            document.getElementById('currencyPickerIcon').innerHTML = this.querySelector('svg') ? this.querySelector('svg').outerHTML : '';
+            document.querySelectorAll('.currency-picker-item').forEach(el => el.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+});
 </script>
 @endsection
