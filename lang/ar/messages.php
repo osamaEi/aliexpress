@@ -554,6 +554,9 @@ return [
     'processing_payment' => 'جاري معالجة الدفع',
 
     // Withdrawal Method Settings
+    'withdrawal_method_saved' => 'تم حفظ طريقة السحب بنجاح.',
+    'withdrawal_method_deleted' => 'تم حذف طريقة السحب بنجاح.',
+    'withdrawal_method_default_set' => 'تم تعيين طريقة السحب الافتراضية بنجاح.',
     'withdrawal_method_settings' => 'إعدادات طريقة السحب',
     'withdrawal_method_description' => 'حدد طريقة السحب المفضلة لديك وأدخل بياناتها. سيتم استخدام هذه البيانات عند طلب سحب الأرباح.',
     'withdrawal_method' => 'طريقة السحب',

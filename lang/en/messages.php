@@ -570,6 +570,9 @@ return [
     'processing_payment' => 'Processing payment',
 
     // Withdrawal Method Settings
+    'withdrawal_method_saved' => 'Withdrawal method saved successfully.',
+    'withdrawal_method_deleted' => 'Withdrawal method deleted successfully.',
+    'withdrawal_method_default_set' => 'Default withdrawal method updated successfully.',
     'withdrawal_method_settings' => 'Withdrawal Method Settings',
     'withdrawal_method_description' => 'Select your preferred withdrawal method and enter the details. This information will be used when requesting profit withdrawals.',
     'withdrawal_method' => 'Withdrawal Method',
