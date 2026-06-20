@@ -806,7 +806,7 @@
                             <option value="">{{ __('messages.select_currency') }}</option>
                             @foreach($currencies as $currency)
                                 <option value="{{ $currency->code }}" {{ $currentCurrency == $currency->code ? 'selected' : '' }}>
-                                  {{ $currency->localizedName }} ({{ $currency->code }})
+                                  {{ $currency->symbol }} {{ $currency->localizedName }} ({{ $currency->code }})
                                 </option>
                             @endforeach
                         </select>
