@@ -2117,6 +2117,10 @@ class ProductController extends Controller
             })
             ->toArray();
 
+        $canAssignProducts = auth()->check() && auth()->user()->user_type === 'seller'
+            ? auth()->user()->canAccessFullSystem()
+            : false;
+
         return view('products.search', [
             'products' => $transformedProducts->toArray(),
             'total_count' => $products->total(),
@@ -2127,6 +2131,7 @@ class ProductController extends Controller
             'source_country' => $countryCode,
             'distributorCountries' => $distributorCountries,
             'distributorsByCountry' => $distributorsByCountry,
+            'canAssignProducts' => $canAssignProducts,
         ]);
     }
 
@@ -2299,6 +2304,10 @@ class ProductController extends Controller
                 ->get()
                 ->groupBy('country');
 
+            $canAssignProducts = auth()->check() && auth()->user()->user_type === 'seller'
+                ? auth()->user()->canAccessFullSystem()
+                : false;
+
             return view('products.search', [
                 'products' => $products,
                 'total_count' => $totalCount,
@@ -2311,6 +2320,7 @@ class ProductController extends Controller
                 'distributorCountries' => $distributorCountries,
                 'distributorsByCountry' => $distributorsByCountry,
                 'source_type' => 'china_store',
+                'canAssignProducts' => $canAssignProducts,
             ]);
 
         } catch (\Exception $e) {
