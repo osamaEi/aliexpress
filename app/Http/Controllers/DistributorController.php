@@ -107,9 +107,7 @@ class DistributorController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        $currencies = \App\Models\Currency::active();
-
-        return view('distributor.products.create', compact('categories', 'currencies', 'productCount', 'maxProducts', 'subscriptionPlan'));
+        return view('distributor.products.create', compact('categories', 'productCount', 'maxProducts', 'subscriptionPlan'));
     }
 
     /**
@@ -174,6 +172,13 @@ class DistributorController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        // Distributor products are always priced in AED (enforced on the backend)
+        $validated['currency'] = 'AED';
+
+        // Tag the product with the distributor's own country so it shows under the
+        // correct country tab (e.g. an Egyptian distributor's products => EG).
+        $validated['country_code'] = $user->country ?: 'AE';
 
         // Handle main photo upload
         if ($request->hasFile('photo')) {

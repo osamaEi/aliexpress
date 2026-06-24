@@ -166,26 +166,31 @@ a:focus:not(.btn) {
 }
 
 /* ── Sidebar active menu item ── */
-/* The active menu link gets a brown background from the theme, so its
-   text/icon must be white to stay readable. */
-.menu-light .menu-inner > .menu-item.active > .menu-link,
+/* The active menu link (top-level items AND dropdown/submenu items) gets a brown
+   background, so its text + icon + bullet must be white to stay readable. */
 .menu-light .menu-inner .menu-item.active > .menu-link:not(.menu-toggle),
 .menu-vertical .menu-inner .menu-item.active > .menu-link:not(.menu-toggle),
-.menu-item.active > .menu-link:not(.menu-toggle),
-.menu-item.active > .menu-link:not(.menu-toggle) > div,
-.menu-item.active > .menu-link:not(.menu-toggle) .menu-icon {
+.menu-vertical .menu-sub .menu-item.active > .menu-link,
+.menu-item.active > .menu-link:not(.menu-toggle) {
   background-color: #561C04 !important;
   color: #fff !important;
 }
 
-/* Active link should not turn dark on hover/focus */
+/* Force white text/icon on the inner elements and on hover/focus, overriding the
+   theme's brown primary text colour that makes submenu links unreadable. */
+.menu-item.active > .menu-link:not(.menu-toggle),
+.menu-item.active > .menu-link:not(.menu-toggle) > div,
+.menu-item.active > .menu-link:not(.menu-toggle) .menu-icon,
 .menu-item.active > .menu-link:not(.menu-toggle):hover,
-.menu-item.active > .menu-link:not(.menu-toggle):focus {
+.menu-item.active > .menu-link:not(.menu-toggle):hover > div,
+.menu-item.active > .menu-link:not(.menu-toggle):focus,
+.menu-item.active > .menu-link:not(.menu-toggle):focus > div {
   color: #fff !important;
 }
 
-/* Submenu active item bullet marker */
-.menu-light .menu-inner > .menu-item.open .menu-item.active > .menu-link::before {
+/* Active submenu item bullet marker -> white so it shows on the brown background */
+.menu-light .menu-inner > .menu-item.open .menu-item.active > .menu-link::before,
+.menu-vertical .menu-sub .menu-item.active > .menu-link::before {
   background-color: #fff !important;
 }
 

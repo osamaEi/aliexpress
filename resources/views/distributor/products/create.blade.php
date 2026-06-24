@@ -212,24 +212,10 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-2">
-                                <label for="currency" class="form-label">
-                                    {{ app()->getLocale() == 'ar' ? 'العملة' : 'Currency' }} <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-select @error('currency') is-invalid @enderror" id="currency" name="currency">
-                                    @foreach($currencies as $cur)
-                                    <option value="{{ $cur->code }}"
-                                        {{ old('currency', auth()->user()->default_currency ?? 'AED') === $cur->code ? 'selected' : '' }}>
-                                        {{ $cur->code }} — {{ $cur->name }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @error('currency')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            {{-- Currency is fixed to AED on the backend; not selectable by the distributor --}}
+                            <input type="hidden" name="currency" value="AED">
 
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <label for="stock_quantity" class="form-label">{{ app()->getLocale() == 'ar' ? 'الكمية المتوفرة' : 'Stock Quantity' }} <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control @error('stock_quantity') is-invalid @enderror" id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', 0) }}">
                                 @error('stock_quantity')
