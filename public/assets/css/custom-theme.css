@@ -166,34 +166,33 @@ a:focus:not(.btn) {
 }
 
 /* ── Sidebar active menu item ── */
-/* The active menu link (top-level items AND dropdown/submenu items) gets a brown
-   background, so its text + icon + bullet must be white to stay readable. */
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle),
-.menu-light .menu-inner .menu-item.active > .menu-link:not(.menu-toggle),
-.menu-vertical .menu-inner .menu-item.active > .menu-link:not(.menu-toggle),
-.menu-vertical .menu-sub .menu-item.active > .menu-link,
-.menu-item.active > .menu-link:not(.menu-toggle) {
+
+/* Top-level active items that are NOT open dropdowns */
+.bg-menu-theme .menu-item.active:not(.open) > .menu-link,
+.menu-vertical .menu-inner .menu-item.active:not(.open) > .menu-link {
   background-color: #561C04 !important;
   color: #fff !important;
 }
 
-/* Force white text/icon on the inner elements and on hover/focus, overriding the
-   theme's brown primary text colour that makes submenu links unreadable.
-   Selectors are scoped with .bg-menu-theme to win specificity over the theme. */
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle),
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle) > div,
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle) .menu-icon,
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle) i,
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle)::before,
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle):hover,
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle):hover > div,
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle):focus,
-.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle):focus > div {
+/* Sub-menu (dropdown) active items — no :not(.menu-toggle) needed, these never have it */
+.bg-menu-theme .menu-sub .menu-item.active > .menu-link,
+.menu-vertical .menu-sub .menu-item.active > .menu-link {
+  background-color: #561C04 !important;
   color: #fff !important;
 }
 
-/* Active submenu item bullet marker -> white so it shows on the brown background */
-.menu-light .menu-inner > .menu-item.open .menu-item.active > .menu-link::before,
+/* Force white text on inner div/icon elements */
+.bg-menu-theme .menu-item.active:not(.open) > .menu-link > div,
+.bg-menu-theme .menu-item.active:not(.open) > .menu-link .menu-icon,
+.bg-menu-theme .menu-item.active:not(.open) > .menu-link i,
+.bg-menu-theme .menu-sub .menu-item.active > .menu-link > div,
+.bg-menu-theme .menu-sub .menu-item.active > .menu-link span,
+.bg-menu-theme .menu-sub .menu-item.active > .menu-link {
+  color: #fff !important;
+}
+
+/* White bullet dot for active submenu items */
+.bg-menu-theme .menu-sub .menu-item.active > .menu-link::before,
 .menu-vertical .menu-sub .menu-item.active > .menu-link::before {
   background-color: #fff !important;
 }
