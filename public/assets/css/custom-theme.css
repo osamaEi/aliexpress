@@ -168,6 +168,7 @@ a:focus:not(.btn) {
 /* ── Sidebar active menu item ── */
 /* The active menu link (top-level items AND dropdown/submenu items) gets a brown
    background, so its text + icon + bullet must be white to stay readable. */
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle),
 .menu-light .menu-inner .menu-item.active > .menu-link:not(.menu-toggle),
 .menu-vertical .menu-inner .menu-item.active > .menu-link:not(.menu-toggle),
 .menu-vertical .menu-sub .menu-item.active > .menu-link,
