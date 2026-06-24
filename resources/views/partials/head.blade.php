@@ -42,7 +42,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
 
     <!-- Custom Theme CSS - Must be loaded last -->
-    <link rel="stylesheet" href="{{ asset('assets/css/custom-theme.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-theme.css') }}?v={{ @filemtime(public_path('assets/css/custom-theme.css')) ?: time() }}" />
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
