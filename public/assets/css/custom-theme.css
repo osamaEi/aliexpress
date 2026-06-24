@@ -174,6 +174,15 @@ a:focus:not(.btn) {
   color: #fff !important;
 }
 
+/* Open dropdown parent that is also active — show text, no brown background */
+.bg-menu-theme .menu-item.open.active > .menu-link.menu-toggle,
+.bg-menu-theme .menu-item.open.active > .menu-link.menu-toggle > div,
+.bg-menu-theme .menu-item.open.active > .menu-link.menu-toggle i,
+.bg-menu-theme .menu-item.open.active > .menu-link.menu-toggle .menu-icon {
+  color: inherit !important;
+  background-color: transparent !important;
+}
+
 /* Sub-menu (dropdown) active items — no :not(.menu-toggle) needed, these never have it */
 .bg-menu-theme .menu-sub .menu-item.active > .menu-link,
 .menu-vertical .menu-sub .menu-item.active > .menu-link {
