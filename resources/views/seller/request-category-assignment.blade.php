@@ -44,10 +44,29 @@
         }
         .section-header {
             background: linear-gradient(135deg, #561C04 0%, #7a2805 100%);
-            color: white;
+            color: #fff;
             padding: 1rem 1.5rem;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 1.5rem;
+            box-shadow: 0 4px 14px rgba(86, 28, 4, 0.22);
+        }
+        .section-header h5, .section-header i, .section-header p { color: #fff !important; }
+        /* Clear, readable "optional" pill on the brown header */
+        .section-header .badge-optional {
+            background: #ffffff;
+            color: #561C04;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .section-header .badge-required {
+            background: #ffc107;
+            color: #4a2600;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
         }
         .subcategory-group {
             background: #f9fafb;
@@ -103,12 +122,12 @@
                 {{-- Main Categories --}}
                 <div class="mb-5">
                     <div class="section-header">
-                        <h5 class="mb-0 text-white">
-                            <i class="ri-checkbox-multiple-line me-2"></i>
-                            {{ __('messages.main_categories') }}
-                            <span class="text-warning ms-2">*</span>
+                        <h5 class="mb-0 d-flex align-items-center flex-wrap gap-2">
+                            <i class="ri-checkbox-multiple-line"></i>
+                            <span>{{ __('messages.main_categories') }}</span>
+                            <span class="badge badge-required">{{ __('messages.required') ?? ($isAr ? 'مطلوب' : 'Required') }}</span>
                         </h5>
-                        <p class="mb-0 small opacity-75 mt-1">{{ __('messages.select_one_or_more_main') }}</p>
+                        <p class="mb-0 small mt-1" style="opacity:.85;">{{ __('messages.select_one_or_more_main') }}</p>
                     </div>
 
                     <div class="row g-3">
@@ -151,12 +170,12 @@
                 {{-- Subcategories --}}
                 <div class="mb-5">
                     <div class="section-header">
-                        <h5 class="mb-0">
-                            <i class="ri-git-branch-line me-2"></i>
-                            {{ __('messages.subcategories') }}
-                            <span class="badge bg-white bg-opacity-25 ms-2 small">{{ __('messages.optional') }}</span>
+                        <h5 class="mb-0 d-flex align-items-center flex-wrap gap-2">
+                            <i class="ri-git-branch-line"></i>
+                            <span>{{ __('messages.subcategories') }}</span>
+                            <span class="badge badge-optional">{{ __('messages.optional') }}</span>
                         </h5>
-                        <p class="mb-0 small opacity-75 mt-1">{{ __('messages.select_subcategories_subtitle') }}</p>
+                        <p class="mb-0 small mt-1" style="opacity:.85;">{{ __('messages.select_subcategories_subtitle') }}</p>
                     </div>
 
                     @foreach($mainCategories as $mainCategory)

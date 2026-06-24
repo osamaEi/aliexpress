@@ -860,15 +860,17 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 .summary-total .total-amount { color: #561C04; font-size: 24px; }
 
-/* Uniform currency icons across all summary rows + total */
-.summary-row strong svg,
-.summary-total .total-amount svg {
-    width: 18px !important; height: 18px !important;
-    vertical-align: -3px; flex-shrink: 0;
+/* Uniform currency icons everywhere in the review summary + product banner */
+.review-summary svg,
+.product-banner svg,
+.wallet-inline svg {
+    width: 17px !important; height: 17px !important;
+    vertical-align: -2px !important; flex-shrink: 0;
 }
 .summary-row strong, .summary-total .total-amount {
     display: inline-flex; align-items: center; gap: 4px;
 }
+.summary-total .total-amount svg { width: 20px !important; height: 20px !important; }
 
 .wallet-inline {
     display: flex; align-items: center; gap: 12px;

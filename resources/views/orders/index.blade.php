@@ -109,6 +109,8 @@
                                 @endif
                                 <th>{{ __('messages.customer') }}</th>
                                 <th>{{ __('messages.product') }}</th>
+                                <th>{{ app()->getLocale() == 'ar' ? 'الموزع' : 'Distributor' }}</th>
+                                <th>{{ app()->getLocale() == 'ar' ? 'وجهة الشحن' : 'Ship To' }}</th>
                                 <th>{{ __('messages.quantity') }}</th>
                                 <th>{{ __('messages.total') }}</th>
                                 <th>{{ __('messages.status') }}</th>
@@ -153,6 +155,39 @@
                                         <a href="{{ route('products.show', $order->product) }}" class="text-decoration-none">
                                             {{ app()->getLocale() == 'ar' && $order->product->name_ar ? $order->product->name_ar : $order->product->name }}
                                         </a>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $dist = $order->product
+                                                ? $order->product->assignedUsers->firstWhere('user_type', 'distributor')
+                                                : null;
+                                        @endphp
+                                        @if($dist)
+                                            <div class="d-flex align-items-center">
+                                                <i class="ri-store-2-line me-1" style="color:#561C04;"></i>
+                                                <div>
+                                                    <div class="fw-semibold">{{ $dist->company_name ?: $dist->store_name ?: $dist->name }}</div>
+                                                    @if($order->product->country_code)
+                                                        <small class="text-muted">{{ $order->product->country_code }}</small>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @else
+                                            <span class="badge bg-label-secondary">{{ app()->getLocale() == 'ar' ? 'علي إكسبريس' : 'AliExpress' }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($order->shipping_city || $order->shippingCity)
+                                            <div>{{ optional($order->shippingCity)->localized_name ?: $order->shipping_city }}</div>
+                                            @if($order->shippingDistrict)
+                                                <small class="text-muted">{{ $order->shippingDistrict->localized_name }}</small>
+                                            @endif
+                                            @if($order->freight_amount > 0)
+                                                <small class="d-block text-success"><i class="ri-truck-line me-1"></i>{{ number_format($order->freight_amount, 2) }}</small>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
                                     </td>
                                     <td>{{ $order->quantity }}</td>
                                     <td style="direction: ltr; text-align: left;">

@@ -29,7 +29,14 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = Order::with(['user', 'product'])->latest();
+        // Eager-load the product's assigned distributor so the list can show it cheaply.
+        $query = Order::with([
+            'user',
+            'product',
+            'product.assignedUsers' => fn($q) => $q->where('user_type', 'distributor'),
+            'shippingCity',
+            'shippingDistrict',
+        ])->latest();
 
         // Filter orders based on user role
         // Admin sees all orders, Sellers/Distributors see only their own orders

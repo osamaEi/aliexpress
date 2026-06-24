@@ -7,11 +7,51 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h4 class="mb-2">{{ __('messages.order') }} {{ $order->order_number }}</h4>
-                    <span class="badge bg-{{ $order->getStatusBadgeColor() }} fs-6">{{ $order->getStatusName() }}</span>
-                    @if($order->aliexpress_order_id)
-                        <p class="text-muted mt-2 mb-0">{{ __('messages.supplier_order_id') }}: <strong>{{ $order->aliexpress_order_id }}</strong></p>
+                @php
+                    // The distributor who owns this product may change the order status here.
+                    $authUser = auth()->user();
+                    $canManageStatus = $authUser
+                        && $authUser->user_type === 'distributor'
+                        && $order->product
+                        && $order->product->assignedUsers()
+                            ->where('users.id', $authUser->id)
+                            ->where('user_type', 'distributor')
+                            ->exists();
+                    $statusOptions = [
+                        'pending'    => ['warning', $isAr ? 'قيد الانتظار' : 'Pending'],
+                        'processing' => ['info',    $isAr ? 'قيد المعالجة' : 'Processing'],
+                        'shipped'    => ['primary', $isAr ? 'تم الشحن' : 'Shipped'],
+                        'delivered'  => ['success', $isAr ? 'تم التوصيل' : 'Delivered'],
+                        'cancelled'  => ['danger',  $isAr ? 'إلغاء' : 'Cancel'],
+                    ];
+                @endphp
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div>
+                        <h4 class="mb-2">{{ __('messages.order') }} {{ $order->order_number }}</h4>
+                        <span class="badge bg-{{ $order->getStatusBadgeColor() }} fs-6">{{ $order->getStatusName() }}</span>
+                        @if($order->aliexpress_order_id)
+                            <p class="text-muted mt-2 mb-0">{{ __('messages.supplier_order_id') }}: <strong>{{ $order->aliexpress_order_id }}</strong></p>
+                        @endif
+                    </div>
+                    @if($canManageStatus)
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-refresh-line me-1"></i>{{ $isAr ? 'تغيير الحالة' : 'Change Status' }}
+                            </button>
+                            <ul class="dropdown-menu">
+                                @foreach($statusOptions as $value => [$color, $label])
+                                    @if($order->status !== $value)
+                                        @if($value === 'cancelled')<li><hr class="dropdown-divider"></li>@endif
+                                        <li>
+                                            <a class="dropdown-item {{ $value === 'cancelled' ? 'text-danger' : '' }}" href="#"
+                                               onclick="updateOrderStatus({{ $order->id }}, '{{ $value }}'); return false;">
+                                                <span class="badge bg-{{ $color }} me-2">●</span>{{ $label }}
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </div>
                     @endif
                 </div>
                 <div class="btn-group">
@@ -561,4 +601,32 @@
     flex-shrink: 0;
 }
 </style>
+
+@push('scripts')
+<script>
+async function updateOrderStatus(orderId, newStatus) {
+    const isAr = '{{ app()->getLocale() }}' === 'ar';
+    const ok = await confirmAction(
+        isAr ? 'هل أنت متأكد من تغيير حالة الطلب؟' : 'Are you sure you want to change the order status?',
+        { icon: 'question' }
+    );
+    if (!ok) return;
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/distributor/orders/${orderId}/update-status`;
+
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
+    form.appendChild(csrf);
+
+    const status = document.createElement('input');
+    status.type = 'hidden'; status.name = 'status'; status.value = newStatus;
+    form.appendChild(status);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+@endpush
 @endsection

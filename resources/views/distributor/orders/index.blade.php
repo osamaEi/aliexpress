@@ -286,15 +286,14 @@
 
 @push('scripts')
 <script>
-function updateStatus(orderId, newStatus) {
+async function updateStatus(orderId, newStatus) {
     const locale = '{{ app()->getLocale() }}';
     const confirmMsg = locale === 'ar'
         ? 'هل أنت متأكد من تغيير حالة الطلب؟'
         : 'Are you sure you want to change the order status?';
 
-    if (!confirm(confirmMsg)) {
-        return;
-    }
+    const ok = await confirmAction(confirmMsg, { icon: 'question' });
+    if (!ok) return;
 
     // Create form and submit
     const form = document.createElement('form');
