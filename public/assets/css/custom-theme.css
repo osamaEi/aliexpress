@@ -177,14 +177,17 @@ a:focus:not(.btn) {
 }
 
 /* Force white text/icon on the inner elements and on hover/focus, overriding the
-   theme's brown primary text colour that makes submenu links unreadable. */
-.menu-item.active > .menu-link:not(.menu-toggle),
-.menu-item.active > .menu-link:not(.menu-toggle) > div,
-.menu-item.active > .menu-link:not(.menu-toggle) .menu-icon,
-.menu-item.active > .menu-link:not(.menu-toggle):hover,
-.menu-item.active > .menu-link:not(.menu-toggle):hover > div,
-.menu-item.active > .menu-link:not(.menu-toggle):focus,
-.menu-item.active > .menu-link:not(.menu-toggle):focus > div {
+   theme's brown primary text colour that makes submenu links unreadable.
+   Selectors are scoped with .bg-menu-theme to win specificity over the theme. */
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle),
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle) > div,
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle) .menu-icon,
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle) i,
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle)::before,
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle):hover,
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle):hover > div,
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle):focus,
+.bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle):focus > div {
   color: #fff !important;
 }
 
