@@ -860,6 +860,16 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 .summary-total .total-amount { color: #561C04; font-size: 24px; }
 
+/* Uniform currency icons across all summary rows + total */
+.summary-row strong svg,
+.summary-total .total-amount svg {
+    width: 18px !important; height: 18px !important;
+    vertical-align: -3px; flex-shrink: 0;
+}
+.summary-row strong, .summary-total .total-amount {
+    display: inline-flex; align-items: center; gap: 4px;
+}
+
 .wallet-inline {
     display: flex; align-items: center; gap: 12px;
     background: rgba(40,167,69,.06); border: 1px solid rgba(40,167,69,.2);
