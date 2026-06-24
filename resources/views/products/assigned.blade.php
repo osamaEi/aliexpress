@@ -33,35 +33,29 @@
             @endif
 
             @php
-                $totalCount = ($chinaCount ?? 0) + ($uaeCount ?? 0) + ($saudiCount ?? 0);
+                $localTabs = $localTabs ?? collect();
+                $localTotal = $localTabs->sum('count');
+                $totalCount = ($chinaCount ?? 0) + $localTotal;
                 $currentTab = $tab ?? 'china';
+                $isAr = app()->getLocale() == 'ar';
 
-                // SVG flags for better display
-                $flagSvg = [
-                    'cn' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width: 20px; height: 15px;"><path fill="#de2910" d="M0 0h640v480H0z"/><path fill="#ffde00" d="M140 60l20 60h63l-51 37 20 60-52-38-52 38 20-60-51-37h63z"/></svg>',
-                    'ae' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width: 20px; height: 15px;"><path fill="#00732f" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="red" d="M0 0h220v480H0z"/></svg>',
-                    'sa' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width: 20px; height: 15px;"><path fill="#006c35" d="M0 0h640v480H0z"/><path fill="#fff" d="M170 195h300v90H170z"/></svg>',
-                ];
+                // China flag stays as an inline SVG; local countries use their emoji flag.
+                $chinaFlagSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width: 20px; height: 15px;"><path fill="#de2910" d="M0 0h640v480H0z"/><path fill="#ffde00" d="M140 60l20 60h63l-51 37 20 60-52-38-52 38 20-60-51-37h63z"/></svg>';
+
+                // Number of stat cards/tabs that have products (total card + china + each local country)
+                $activeTabs = ($chinaCount ?? 0 > 0 ? 1 : 0) + $localTabs->count();
+                $colCount = 1 + ($chinaCount ?? 0 > 0 ? 1 : 0) + $localTabs->count();
+                $colWidth = $colCount <= 2 ? 6 : ($colCount == 3 ? 4 : 3);
             @endphp
 
             @if($totalCount > 0)
-                @php
-                    // Count how many tabs have products
-                    $activeTabs = 0;
-                    if(($chinaCount ?? 0) > 0) $activeTabs++;
-                    if(($uaeCount ?? 0) > 0) $activeTabs++;
-                    if(($saudiCount ?? 0) > 0) $activeTabs++;
-
-                    // Calculate column width based on active tabs (total + active tabs)
-                    $colWidth = $activeTabs == 1 ? 6 : ($activeTabs == 2 ? 4 : 3);
-                @endphp
                 <!-- Stats Cards - Only show cards for tabs with products -->
                 <div class="row mb-4">
                     <div class="col-md-{{ $colWidth }}">
                         <div class="card text-white" style="background-color: #561C04;">
                             <div class="card-body">
                                 <h3 class="mb-0" style="color: white;">{{ $totalCount }}</h3>
-                                <small style="color: white;">{{ app()->getLocale() == 'ar' ? 'إجمالي المخصص' : 'Total Assigned' }}</small>
+                                <small style="color: white;">{{ $isAr ? 'إجمالي المخصص' : 'Total Assigned' }}</small>
                             </div>
                         </div>
                     </div>
@@ -71,36 +65,26 @@
                             <div class="card text-white" style="background-color: #de2910;">
                                 <div class="card-body">
                                     <h3 class="mb-0" style="color: white;">{{ $chinaCount }}</h3>
-                                    <small style="color: white;" class="d-flex align-items-center gap-1">{!! $flagSvg['cn'] !!} {{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</small>
+                                    <small style="color: white;" class="d-flex align-items-center gap-1">{!! $chinaFlagSvg !!} {{ $isAr ? 'الصين' : 'China' }}</small>
                                 </div>
                             </div>
                         </a>
                     </div>
                     @endif
-                    @if(($uaeCount ?? 0) > 0)
+                    @foreach($localTabs as $lt)
                     <div class="col-md-{{ $colWidth }}">
-                        <a href="{{ route('products.my-assigned', ['tab' => 'uae']) }}" class="text-decoration-none">
+                        <a href="{{ route('products.my-assigned', ['tab' => $lt['tab']]) }}" class="text-decoration-none">
                             <div class="card text-white" style="background-color: #00732f;">
                                 <div class="card-body">
-                                    <h3 class="mb-0" style="color: white;">{{ $uaeCount }}</h3>
-                                    <small style="color: white;" class="d-flex align-items-center gap-1">{!! $flagSvg['ae'] !!} {{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}</small>
+                                    <h3 class="mb-0" style="color: white;">{{ $lt['count'] }}</h3>
+                                    <small style="color: white;" class="d-flex align-items-center gap-1">
+                                        <span style="font-size: 1.1em;">{{ $lt['flag'] }}</span> {{ $isAr ? $lt['name_ar'] : $lt['name'] }}
+                                    </small>
                                 </div>
                             </div>
                         </a>
                     </div>
-                    @endif
-                    @if(($saudiCount ?? 0) > 0)
-                    <div class="col-md-{{ $colWidth }}">
-                        <a href="{{ route('products.my-assigned', ['tab' => 'saudi']) }}" class="text-decoration-none">
-                            <div class="card text-white" style="background-color: #006c35;">
-                                <div class="card-body">
-                                    <h3 class="mb-0" style="color: white;">{{ $saudiCount }}</h3>
-                                    <small style="color: white;" class="d-flex align-items-center gap-1">{!! $flagSvg['sa'] !!} {{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi' }}</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    @endif
+                    @endforeach
                 </div>
 
                 <!-- Tabs Navigation - Only show tabs that have products -->
@@ -109,35 +93,24 @@
                     <li class="nav-item" role="presentation">
                         <a class="nav-link {{ $currentTab === 'china' ? 'active' : '' }}" href="{{ route('products.my-assigned', ['tab' => 'china']) }}">
                             <span class="d-flex align-items-center gap-2">
-                                {!! $flagSvg['cn'] !!}
-                                {{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}
+                                {!! $chinaFlagSvg !!}
+                                {{ $isAr ? 'الصين' : 'China' }}
                                 <span class="badge bg-danger">{{ $chinaCount }}</span>
                             </span>
                         </a>
                     </li>
                     @endif
-                    @if(($uaeCount ?? 0) > 0)
+                    @foreach($localTabs as $lt)
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $currentTab === 'uae' ? 'active' : '' }}" href="{{ route('products.my-assigned', ['tab' => 'uae']) }}">
+                        <a class="nav-link {{ $currentTab === $lt['tab'] ? 'active' : '' }}" href="{{ route('products.my-assigned', ['tab' => $lt['tab']]) }}">
                             <span class="d-flex align-items-center gap-2">
-                                {!! $flagSvg['ae'] !!}
-                                {{ app()->getLocale() == 'ar' ? 'الإمارات' : 'UAE' }}
-                                <span class="badge bg-success">{{ $uaeCount }}</span>
+                                <span style="font-size: 1.1em;">{{ $lt['flag'] }}</span>
+                                {{ $isAr ? $lt['name_ar'] : $lt['name'] }}
+                                <span class="badge bg-success">{{ $lt['count'] }}</span>
                             </span>
                         </a>
                     </li>
-                    @endif
-                    @if(($saudiCount ?? 0) > 0)
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $currentTab === 'saudi' ? 'active' : '' }}" href="{{ route('products.my-assigned', ['tab' => 'saudi']) }}">
-                            <span class="d-flex align-items-center gap-2">
-                                {!! $flagSvg['sa'] !!}
-                                {{ app()->getLocale() == 'ar' ? 'السعودية' : 'Saudi' }}
-                                <span class="badge bg-success">{{ $saudiCount }}</span>
-                            </span>
-                        </a>
-                    </li>
-                    @endif
+                    @endforeach
                 </ul>
 
                 <!-- Products Table -->
@@ -187,19 +160,17 @@
                                             <br>
                                             @if($currentTab === 'china')
                                                 <small class="text-success d-inline-flex align-items-center gap-1">
-                                                    {!! $flagSvg['cn'] !!}
-                                                    {{ app()->getLocale() == 'ar' ? 'منتج الصين' : 'China Product' }}
+                                                    {!! $chinaFlagSvg !!}
+                                                    {{ $isAr ? 'منتج الصين' : 'China Product' }}
                                                 </small>
-                                            @elseif($currentTab === 'uae')
+                                            @else
+                                                @php $rowLocal = $localTabs->firstWhere('tab', $currentTab); @endphp
+                                                @if($rowLocal)
                                                 <small class="text-success d-inline-flex align-items-center gap-1">
-                                                    {!! $flagSvg['ae'] !!}
-                                                    {{ app()->getLocale() == 'ar' ? 'منتج الإمارات' : 'UAE Product' }}
+                                                    <span>{{ $rowLocal['flag'] }}</span>
+                                                    {{ $isAr ? 'منتج ' . $rowLocal['name_ar'] : $rowLocal['name'] . ' Product' }}
                                                 </small>
-                                            @elseif($currentTab === 'saudi')
-                                                <small class="text-success d-inline-flex align-items-center gap-1">
-                                                    {!! $flagSvg['sa'] !!}
-                                                    {{ app()->getLocale() == 'ar' ? 'منتج السعودية' : 'Saudi Product' }}
-                                                </small>
+                                                @endif
                                             @endif
                                         </td>
                                         <td style="direction: ltr; text-align: left;">
@@ -259,36 +230,26 @@
                 @else
                     <!-- Empty State for current tab -->
                     @php
-                        // Large SVG flags for empty states
-                        $largeFlagSvg = [
-                            'cn' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width: 80px; height: 60px; opacity: 0.5;"><path fill="#de2910" d="M0 0h640v480H0z"/><path fill="#ffde00" d="M140 60l20 60h63l-51 37 20 60-52-38-52 38 20-60-51-37h63z"/></svg>',
-                            'ae' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width: 80px; height: 60px; opacity: 0.5;"><path fill="#00732f" d="M0 0h640v160H0z"/><path fill="#fff" d="M0 160h640v160H0z"/><path d="M0 320h640v160H0z"/><path fill="red" d="M0 0h220v480H0z"/></svg>',
-                            'sa' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width: 80px; height: 60px; opacity: 0.5;"><path fill="#006c35" d="M0 0h640v480H0z"/><path fill="#fff" d="M170 195h300v90H170z"/></svg>',
-                        ];
+                        $chinaLargeFlag = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width: 80px; height: 60px; opacity: 0.5;"><path fill="#de2910" d="M0 0h640v480H0z"/><path fill="#ffde00" d="M140 60l20 60h63l-51 37 20 60-52-38-52 38 20-60-51-37h63z"/></svg>';
+                        $emptyLocal = str_starts_with($currentTab, 'local_') ? $localTabs->firstWhere('tab', $currentTab) : null;
+                        $emptyCode = $emptyLocal['code'] ?? substr($currentTab, strlen('local_'));
                     @endphp
                     <div class="text-center py-5">
                         @if($currentTab === 'china')
-                            <div class="mb-3">{!! $largeFlagSvg['cn'] !!}</div>
-                            <h5 class="text-muted">{{ app()->getLocale() == 'ar' ? 'لا توجد منتجات من الصين' : 'No China Products Yet' }}</h5>
-                            <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'ابحث عن منتجات من الصين وقم بتخصيصها' : 'Search for China products and assign them' }}</p>
+                            <div class="mb-3">{!! $chinaLargeFlag !!}</div>
+                            <h5 class="text-muted">{{ $isAr ? 'لا توجد منتجات من الصين' : 'No China Products Yet' }}</h5>
+                            <p class="text-muted">{{ $isAr ? 'ابحث عن منتجات من الصين وقم بتخصيصها' : 'Search for China products and assign them' }}</p>
                             <a href="{{ route('products.search-page') }}?ship_from=CN" class="btn btn-danger">
-                                <i class="ri-search-line me-1"></i> {{ app()->getLocale() == 'ar' ? 'البحث في منتجات الصين' : 'Search China Products' }}
+                                <i class="ri-search-line me-1"></i> {{ $isAr ? 'البحث في منتجات الصين' : 'Search China Products' }}
                             </a>
-                        @elseif($currentTab === 'uae')
-                            <div class="mb-3">{!! $largeFlagSvg['ae'] !!}</div>
-                            <h5 class="text-muted">{{ app()->getLocale() == 'ar' ? 'لا توجد منتجات من الإمارات' : 'No UAE Products Yet' }}</h5>
-                            <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'ابحث عن منتجات من الإمارات وقم بتخصيصها' : 'Search for UAE products and assign them' }}</p>
-                            <a href="{{ route('products.search-distributor') }}?country_code=AE" class="btn btn-success d-inline-flex align-items-center gap-2">
-                                {!! $flagSvg['ae'] !!}
-                                {{ app()->getLocale() == 'ar' ? 'البحث في منتجات الإمارات' : 'Search UAE Products' }}
-                            </a>
-                        @elseif($currentTab === 'saudi')
-                            <div class="mb-3">{!! $largeFlagSvg['sa'] !!}</div>
-                            <h5 class="text-muted">{{ app()->getLocale() == 'ar' ? 'لا توجد منتجات من السعودية' : 'No Saudi Products Yet' }}</h5>
-                            <p class="text-muted">{{ app()->getLocale() == 'ar' ? 'ابحث عن منتجات من السعودية وقم بتخصيصها' : 'Search for Saudi products and assign them' }}</p>
-                            <a href="{{ route('products.search-distributor') }}?country_code=SA" class="btn btn-success d-inline-flex align-items-center gap-2">
-                                {!! $flagSvg['sa'] !!}
-                                {{ app()->getLocale() == 'ar' ? 'البحث في منتجات السعودية' : 'Search Saudi Products' }}
+                        @else
+                            @php $emptyName = $emptyLocal ? ($isAr ? $emptyLocal['name_ar'] : $emptyLocal['name']) : $emptyCode; @endphp
+                            <div class="mb-3" style="font-size: 60px; opacity: 0.5;">{{ $emptyLocal['flag'] ?? '🏳️' }}</div>
+                            <h5 class="text-muted">{{ $isAr ? 'لا توجد منتجات من ' . $emptyName : 'No ' . $emptyName . ' Products Yet' }}</h5>
+                            <p class="text-muted">{{ $isAr ? 'ابحث عن منتجات وقم بتخصيصها' : 'Search for products and assign them' }}</p>
+                            <a href="{{ route('products.search-distributor') }}?country_code={{ $emptyCode }}" class="btn btn-success d-inline-flex align-items-center gap-2">
+                                <span style="font-size: 1.1em;">{{ $emptyLocal['flag'] ?? '🏳️' }}</span>
+                                {{ $isAr ? 'البحث في منتجات ' . $emptyName : 'Search ' . $emptyName . ' Products' }}
                             </a>
                         @endif
                     </div>

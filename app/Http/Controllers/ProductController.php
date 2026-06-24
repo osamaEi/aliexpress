@@ -1864,43 +1864,56 @@ class ProductController extends Controller
             ->withPivot('aliexpress_product_id', 'status', 'seller_amount', 'admin_amount', 'price')
             ->get();
 
-        // Count products by type
-        $chinaCount = $allAssignedProducts->filter(function($product) {
-            return !empty($product->aliexpress_id) && strlen((string)$product->aliexpress_id) >= 10;
-        })->count();
+        // China = products sourced from AliExpress (long numeric aliexpress_id)
+        $isChina = function ($product) {
+            return !empty($product->aliexpress_id) && strlen((string) $product->aliexpress_id) >= 10;
+        };
 
-        $uaeCount = $allAssignedProducts->filter(function($product) {
-            $isLocal = empty($product->aliexpress_id) || strlen((string)$product->aliexpress_id) < 10;
-            return $isLocal && ($product->country_code ?? 'AE') === 'AE';
-        })->count();
+        $chinaCount = $allAssignedProducts->filter($isChina)->count();
 
-        $saudiCount = $allAssignedProducts->filter(function($product) {
-            $isLocal = empty($product->aliexpress_id) || strlen((string)$product->aliexpress_id) < 10;
-            return $isLocal && ($product->country_code ?? '') === 'SA';
-        })->count();
+        // Local products (from distributors) grouped dynamically by their country_code.
+        // Missing country_code defaults to AE for backward compatibility.
+        $localCountsByCode = $allAssignedProducts
+            ->reject($isChina)
+            ->groupBy(fn($product) => $product->country_code ?: 'AE')
+            ->map->count();
+
+        // Resolve display info (name + flag) for each local country from the countries table.
+        $countryMeta = \App\Models\Country::whereIn('code', $localCountsByCode->keys())
+            ->get()
+            ->keyBy('code');
+
+        $localTabs = $localCountsByCode->map(function ($count, $code) use ($countryMeta) {
+            $country = $countryMeta->get($code);
+            return [
+                'code'    => $code,
+                'tab'     => 'local_' . $code,
+                'count'   => $count,
+                'name'    => $country->name ?? $code,
+                'name_ar' => $country->name_ar ?? ($country->name ?? $code),
+                'flag'    => $country->flag ?? null,
+            ];
+        })->values();
+
+        // Build the ordered list of available tab keys (china first, then each local country).
+        $availableTabs = collect();
+        if ($chinaCount > 0) {
+            $availableTabs->push('china');
+        }
+        $availableTabs = $availableTabs->merge($localTabs->pluck('tab'));
 
         // Get current tab filter
         $tab = $request->get('tab', 'china');
 
-        // Auto-redirect to first available tab if current tab is empty
-        if ($tab === 'china' && $chinaCount === 0) {
-            if ($uaeCount > 0) {
-                return redirect()->route('products.my-assigned', ['tab' => 'uae']);
-            } elseif ($saudiCount > 0) {
-                return redirect()->route('products.my-assigned', ['tab' => 'saudi']);
-            }
-        } elseif ($tab === 'uae' && $uaeCount === 0) {
-            if ($chinaCount > 0) {
-                return redirect()->route('products.my-assigned', ['tab' => 'china']);
-            } elseif ($saudiCount > 0) {
-                return redirect()->route('products.my-assigned', ['tab' => 'saudi']);
-            }
-        } elseif ($tab === 'saudi' && $saudiCount === 0) {
-            if ($chinaCount > 0) {
-                return redirect()->route('products.my-assigned', ['tab' => 'china']);
-            } elseif ($uaeCount > 0) {
-                return redirect()->route('products.my-assigned', ['tab' => 'uae']);
-            }
+        // Backward compatibility: map the old hard-coded tab names to the new scheme.
+        $legacyMap = ['uae' => 'local_AE', 'saudi' => 'local_SA'];
+        if (isset($legacyMap[$tab])) {
+            $tab = $legacyMap[$tab];
+        }
+
+        // If the requested tab has no products, fall back to the first available tab.
+        if (!$availableTabs->contains($tab) && $availableTabs->isNotEmpty()) {
+            return redirect()->route('products.my-assigned', ['tab' => $availableTabs->first()]);
         }
 
         // Build query based on tab
@@ -1912,22 +1925,23 @@ class ProductController extends Controller
                 $q->whereNotNull('aliexpress_id')
                   ->whereRaw('LENGTH(aliexpress_id) >= 10');
             });
-        } elseif ($tab === 'uae') {
-            $query->where(function($q) {
+        } elseif (str_starts_with($tab, 'local_')) {
+            $countryCode = substr($tab, strlen('local_'));
+            $query->where(function($q) use ($countryCode) {
+                // Local (non-AliExpress) products
                 $q->where(function($inner) {
                     $inner->whereNull('aliexpress_id')
                           ->orWhereRaw('LENGTH(aliexpress_id) < 10');
-                })->where(function($inner) {
-                    $inner->where('country_code', 'AE')
-                          ->orWhereNull('country_code');
                 });
-            });
-        } elseif ($tab === 'saudi') {
-            $query->where(function($q) {
-                $q->where(function($inner) {
-                    $inner->whereNull('aliexpress_id')
-                          ->orWhereRaw('LENGTH(aliexpress_id) < 10');
-                })->where('country_code', 'SA');
+                // Match the country; AE also captures legacy rows with null country_code
+                if ($countryCode === 'AE') {
+                    $q->where(function($inner) {
+                        $inner->where('country_code', 'AE')
+                              ->orWhereNull('country_code');
+                    });
+                } else {
+                    $q->where('country_code', $countryCode);
+                }
             });
         }
 
@@ -1938,8 +1952,7 @@ class ProductController extends Controller
         return view('products.assigned', compact(
             'assignedProducts',
             'chinaCount',
-            'uaeCount',
-            'saudiCount',
+            'localTabs',
             'tab'
         ));
     }
