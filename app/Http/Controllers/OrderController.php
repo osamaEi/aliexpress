@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Events\OrderCreated;
+use App\Models\City;
 use App\Models\Coupon;
+use App\Models\DistributorShippingRate;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\AliExpressService;
@@ -963,7 +965,23 @@ class OrderController extends Controller
             'customer_notes' => $request->get('customer_notes'),
         ];
 
-        return view('orders.create-distributor', compact('product', 'queryParams'));
+        // Countries the product's distributor ships to (for the shipping selector).
+        // Falls back to all active countries if the distributor has no rates yet.
+        $shippingCountries = collect();
+        if ($product) {
+            $distributor = $product->distributorOwner();
+            if ($distributor) {
+                $codes = $distributor->shippingRates()->where('is_active', true)
+                    ->distinct()->pluck('country_code');
+                $shippingCountries = \App\Models\Country::whereIn('code', $codes)
+                    ->orderBy('sort_order')->get();
+            }
+        }
+        if ($shippingCountries->isEmpty()) {
+            $shippingCountries = \App\Models\Country::active()->orderBy('sort_order')->get();
+        }
+
+        return view('orders.create-distributor', compact('product', 'queryParams', 'shippingCountries'));
     }
 
     /**
@@ -989,6 +1007,8 @@ class OrderController extends Controller
             'shipping_address' => 'required|string',
             'shipping_address2' => 'nullable|string|max:255',
             'shipping_city' => 'required|string|max:100',
+            'shipping_city_id' => 'nullable|exists:cities,id',
+            'shipping_district_id' => 'nullable|exists:districts,id',
             'shipping_province' => 'nullable|string|max:100',
             'shipping_country' => 'required|string|max:2',
             'shipping_zip' => 'required|string|max:20',
@@ -1022,10 +1042,29 @@ class OrderController extends Controller
 
             $user = Auth::user();
 
-            // Calculate pricing (no shipping cost for distributor orders)
+            // Calculate pricing
             $quantity = $validated['quantity'];
             $unitPrice = $product->price;
             $subtotal = $unitPrice * $quantity;
+
+            // Resolve shipping cost from the owning distributor's rates, based on the
+            // customer's chosen country / city / district. Computed server-side so the
+            // amount can't be tampered with by the client.
+            $shippingCost = 0;
+            $shippingRateId = null;
+            $distributor = $product->distributorOwner();
+            if ($distributor) {
+                $rate = DistributorShippingRate::resolveFor(
+                    $distributor->id,
+                    $validated['shipping_country'],
+                    $validated['shipping_city_id'] ?? null,
+                    $validated['shipping_district_id'] ?? null
+                );
+                if ($rate) {
+                    $shippingCost = (float) $rate->shipping_cost;
+                    $shippingRateId = $rate->id;
+                }
+            }
 
             // Apply coupon discount if provided
             $discountAmount = 0;
@@ -1053,8 +1092,12 @@ class OrderController extends Controller
                 }
             }
 
+            // Product subtotal after discount (used for product cost / wallet of goods)
             $totalPrice = $subtotal - $discountAmount;
             if ($totalPrice < 0) $totalPrice = 0;
+
+            // Grand total the seller pays = goods + shipping
+            $grandTotal = $totalPrice + $shippingCost;
 
             Log::info('Checking wallet balance', [
                 'user_id' => $user->id,
@@ -1080,12 +1123,12 @@ class OrderController extends Controller
                     ->with('error', 'Please increase your balance to create orders.');
             }
 
-            if ($user->wallet->balance < $totalPrice) {
-                $errorMsg = 'Insufficient balance. Please increase your balance to create this order. Required: ' . number_format($totalPrice, 2) . ' ' . ($product->currency ?? 'AED') . ', Available: ' . number_format($user->wallet->balance, 2) . ' AED';
+            if ($user->wallet->balance < $grandTotal) {
+                $errorMsg = 'Insufficient balance. Please increase your balance to create this order. Required: ' . number_format($grandTotal, 2) . ' ' . ($product->currency ?? 'AED') . ', Available: ' . number_format($user->wallet->balance, 2) . ' AED';
 
                 Log::warning('Insufficient wallet balance', [
                     'user_id' => $user->id,
-                    'required' => $totalPrice,
+                    'required' => $grandTotal,
                     'available' => $user->wallet->balance
                 ]);
 
@@ -1112,7 +1155,8 @@ class OrderController extends Controller
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
                 'total_price' => $totalPrice,
-                'total_amount' => $totalPrice,
+                'freight_amount' => $shippingCost,
+                'total_amount' => $grandTotal,
                 'discount_amount' => $discountAmount,
                 'currency' => $product->currency ?? 'AED',
                 'customer_name' => $validated['customer_name'],
@@ -1122,6 +1166,9 @@ class OrderController extends Controller
                 'shipping_address' => $validated['shipping_address'],
                 'shipping_address2' => $validated['shipping_address2'],
                 'shipping_city' => $validated['shipping_city'],
+                'shipping_city_id' => $validated['shipping_city_id'] ?? null,
+                'shipping_district_id' => $validated['shipping_district_id'] ?? null,
+                'distributor_shipping_rate_id' => $shippingRateId,
                 'shipping_province' => $validated['shipping_province'] ?? null,
                 'shipping_country' => $validated['shipping_country'],
                 'shipping_zip' => $validated['shipping_zip'],
@@ -1131,7 +1178,7 @@ class OrderController extends Controller
             ]);
 
             // Deduct amount from seller's wallet
-            $user->wallet->debit($totalPrice, 'Order payment for order #' . $order->order_number);
+            $user->wallet->debit($grandTotal, 'Order payment for order #' . $order->order_number);
 
             // Update product stock if tracking inventory
             if ($product->track_inventory) {
@@ -1187,6 +1234,84 @@ class OrderController extends Controller
                 ->withInput()
                 ->with('error', 'Failed to create order: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * AJAX: list active cities for a country (distributor order page).
+     */
+    public function shippingCities(string $countryCode)
+    {
+        $cities = City::forCountry($countryCode)->active()
+            ->orderBy('sort_order')->orderBy('name')
+            ->get(['id', 'name', 'name_ar']);
+
+        return response()->json(['success' => true, 'cities' => $cities]);
+    }
+
+    /**
+     * AJAX: list active districts for a city (distributor order page).
+     */
+    public function shippingDistricts(City $city)
+    {
+        $districts = $city->districts()->active()
+            ->orderBy('sort_order')->orderBy('name')
+            ->get(['id', 'name', 'name_ar']);
+
+        return response()->json(['success' => true, 'districts' => $districts]);
+    }
+
+    /**
+     * AJAX: calculate the shipping cost for a product given the chosen
+     * country / city / district, using the owning distributor's rates.
+     */
+    public function calculateShipping(Request $request)
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'country_code' => 'required|string|max:3',
+            'city_id' => 'nullable|exists:cities,id',
+            'district_id' => 'nullable|exists:districts,id',
+        ]);
+
+        $product = Product::findOrFail($validated['product_id']);
+        $distributor = $product->distributorOwner();
+
+        $ar = app()->getLocale() === 'ar';
+
+        if (!$distributor) {
+            return response()->json([
+                'success' => false,
+                'shipping_cost' => null,
+                'message' => $ar ? 'لا يوجد موزع لهذا المنتج' : 'No distributor for this product',
+            ]);
+        }
+
+        $rate = DistributorShippingRate::resolveFor(
+            $distributor->id,
+            $validated['country_code'],
+            $validated['city_id'] ?? null,
+            $validated['district_id'] ?? null
+        );
+
+        if (!$rate) {
+            return response()->json([
+                'success' => false,
+                'shipping_cost' => null,
+                'message' => $ar
+                    ? 'لا يوجد سعر شحن متاح لهذا العنوان. تواصل مع الموزع.'
+                    : 'No shipping rate available for this address.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'rate_id' => $rate->id,
+            'shipping_cost' => (float) $rate->shipping_cost,
+            'currency' => $rate->currency,
+            'scope' => $rate->scope_label,
+            'delivery_days_min' => $rate->delivery_days_min,
+            'delivery_days_max' => $rate->delivery_days_max,
+        ]);
     }
 
     /**

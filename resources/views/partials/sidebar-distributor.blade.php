@@ -79,6 +79,14 @@
             </a>
         </li>
 
+        <!-- Shipping Rates -->
+        <li class="menu-item {{ request()->routeIs('distributor.shipping.*') ? 'active' : '' }}">
+            <a href="{{ route('distributor.shipping.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-truck-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'أسعار الشحن' : 'Shipping Rates' }}</div>
+            </a>
+        </li>
+
         <!-- Account Section -->
         <li class="menu-header mt-5">
             <span class="menu-header-text">{{ __('messages.account') }}</span>

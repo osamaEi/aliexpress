@@ -268,18 +268,49 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="shipping_city" class="form-label">
-                                            {{ app()->getLocale() == 'ar' ? 'المدينة' : 'City' }} *
+                                        <label for="shipping_country" class="form-label">
+                                            {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }} *
                                         </label>
-                                        <input type="text"
-                                               class="form-control @error('shipping_city') is-invalid @enderror"
-                                               id="shipping_city"
-                                               name="shipping_city"
-                                               value="{{ old('shipping_city') }}"
-                                               required>
-                                        @error('shipping_city')
+                                        <select class="form-select @error('shipping_country') is-invalid @enderror"
+                                                id="shipping_country"
+                                                name="shipping_country"
+                                                required>
+                                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</option>
+                                            @foreach($shippingCountries as $sc)
+                                                <option value="{{ $sc->code }}" {{ old('shipping_country') == $sc->code ? 'selected' : '' }}>
+                                                    {{ $sc->flag }} {{ app()->getLocale() == 'ar' ? ($sc->name_ar ?: $sc->name) : $sc->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('shipping_country')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="shipping_city_select" class="form-label">
+                                            {{ app()->getLocale() == 'ar' ? 'المدينة' : 'City' }} *
+                                        </label>
+                                        <select class="form-select @error('shipping_city') is-invalid @enderror"
+                                                id="shipping_city_select" disabled>
+                                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر الدولة أولاً' : 'Select country first' }}</option>
+                                        </select>
+                                        {{-- hidden fields submitted with the form --}}
+                                        <input type="hidden" name="shipping_city" id="shipping_city" value="{{ old('shipping_city') }}">
+                                        <input type="hidden" name="shipping_city_id" id="shipping_city_id" value="{{ old('shipping_city_id') }}">
+                                        @error('shipping_city')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="shipping_district_select" class="form-label">
+                                            {{ app()->getLocale() == 'ar' ? 'الحي' : 'District' }}
+                                        </label>
+                                        <select class="form-select" id="shipping_district_select" disabled>
+                                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر المدينة أولاً' : 'Select city first' }}</option>
+                                        </select>
+                                        <input type="hidden" name="shipping_district_id" id="shipping_district_id" value="{{ old('shipping_district_id') }}">
                                     </div>
 
                                     <div class="col-md-6">
@@ -292,25 +323,6 @@
                                                name="shipping_province"
                                                value="{{ old('shipping_province') }}">
                                         @error('shipping_province')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="shipping_country" class="form-label">
-                                            {{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }} *
-                                        </label>
-                                        <select class="form-select @error('shipping_country') is-invalid @enderror"
-                                                id="shipping_country"
-                                                name="shipping_country"
-                                                required>
-                                            <option value="">{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</option>
-                                            <option value="AE" {{ old('shipping_country') == 'AE' ? 'selected' : '' }}>🇦🇪 UAE</option>
-                                            <option value="SA" {{ old('shipping_country') == 'SA' ? 'selected' : '' }}>🇸🇦 Saudi Arabia</option>
-                                            <option value="EG" {{ old('shipping_country') == 'EG' ? 'selected' : '' }}>🇪🇬 Egypt</option>
-                                            <option value="US" {{ old('shipping_country') == 'US' ? 'selected' : '' }}>🇺🇸 USA</option>
-                                        </select>
-                                        @error('shipping_country')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -376,6 +388,12 @@
                                         <span class="text-success">{{ app()->getLocale() == 'ar' ? 'الخصم:' : 'Discount:' }}</span>
                                         <strong class="text-success" id="discount_display">- {{ $currentCurrency->symbol }} 0.00</strong>
                                     </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'الشحن:' : 'Shipping:' }}</span>
+                                        <strong id="shipping_display">
+                                            <span class="text-muted small">{{ app()->getLocale() == 'ar' ? 'اختر العنوان' : 'Select address' }}</span>
+                                        </strong>
+                                    </div>
                                     <hr>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'الإجمالي:' : 'Total:' }}</h5>
@@ -430,6 +448,8 @@
 <script>
 let appliedCoupon = null;
 let discountAmount = 0;
+let shippingCost = 0;        // resolved shipping cost (in product currency / AED)
+let shippingResolved = false; // whether a valid rate was found for the address
 
 // Currency data
 const currentCurrency = {
@@ -466,8 +486,9 @@ function calculateTotal() {
     const locale = '{{ app()->getLocale() }}';
 
     const subtotal = unitPrice * quantity;
-    let grandTotal = subtotal - discountAmount;
-    if (grandTotal < 0) grandTotal = 0;
+    let afterDiscount = subtotal - discountAmount;
+    if (afterDiscount < 0) afterDiscount = 0;
+    let grandTotal = afterDiscount + shippingCost;
 
     // Update display
     document.getElementById('quantity_display').textContent = quantity;
@@ -620,6 +641,117 @@ function removeCoupon() {
 
     // Recalculate total
     calculateTotal();
+}
+
+// ───────── Shipping location selectors + cost calculation ─────────
+const productId = {{ $product->id }};
+const isAr = '{{ app()->getLocale() }}' === 'ar';
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+
+const countrySel = document.getElementById('shipping_country');
+const citySel = document.getElementById('shipping_city_select');
+const districtSel = document.getElementById('shipping_district_select');
+const cityHidden = document.getElementById('shipping_city');
+const cityIdHidden = document.getElementById('shipping_city_id');
+const districtIdHidden = document.getElementById('shipping_district_id');
+const shippingDisplay = document.getElementById('shipping_display');
+
+function setShippingMsg(text, muted = true) {
+    shippingDisplay.innerHTML = `<span class="${muted ? 'text-muted' : 'text-danger'} small">${text}</span>`;
+}
+
+function resetCities() {
+    citySel.innerHTML = `<option value="">${isAr ? 'اختر المدينة' : 'Select city'}</option>`;
+    citySel.disabled = true;
+    cityHidden.value = '';
+    cityIdHidden.value = '';
+    resetDistricts();
+}
+function resetDistricts() {
+    districtSel.innerHTML = `<option value="">${isAr ? 'كل المدينة' : 'All districts'}</option>`;
+    districtSel.disabled = true;
+    districtIdHidden.value = '';
+}
+
+if (countrySel) {
+    countrySel.addEventListener('change', function () {
+        resetCities();
+        shippingCost = 0; shippingResolved = false;
+        setShippingMsg(isAr ? 'اختر المدينة' : 'Select city');
+        calculateTotal();
+        if (!this.value) return;
+        fetch(`{{ url('orders/shipping/cities') }}/${this.value}`)
+            .then(r => r.json())
+            .then(d => {
+                d.cities.forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = c.id;
+                    o.dataset.name = isAr ? (c.name_ar || c.name) : c.name;
+                    o.textContent = o.dataset.name;
+                    citySel.appendChild(o);
+                });
+                citySel.disabled = false;
+            });
+    });
+
+    citySel.addEventListener('change', function () {
+        resetDistricts();
+        const opt = this.options[this.selectedIndex];
+        cityIdHidden.value = this.value;
+        cityHidden.value = opt ? (opt.dataset.name || opt.textContent) : '';
+        if (!this.value) { shippingCost = 0; shippingResolved = false; setShippingMsg(isAr ? 'اختر المدينة' : 'Select city'); calculateTotal(); return; }
+        // load districts
+        fetch(`{{ url('orders/shipping/districts') }}/${this.value}`)
+            .then(r => r.json())
+            .then(d => {
+                d.districts.forEach(dist => {
+                    const o = document.createElement('option');
+                    o.value = dist.id;
+                    o.textContent = isAr ? (dist.name_ar || dist.name) : dist.name;
+                    districtSel.appendChild(o);
+                });
+                districtSel.disabled = false;
+            });
+        fetchShipping();
+    });
+
+    districtSel.addEventListener('change', function () {
+        districtIdHidden.value = this.value;
+        fetchShipping();
+    });
+}
+
+function fetchShipping() {
+    if (!countrySel.value) return;
+    setShippingMsg(isAr ? 'جاري الحساب...' : 'Calculating...');
+    fetch(`{{ route('orders.shipping.calculate') }}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify({
+            product_id: productId,
+            country_code: countrySel.value,
+            city_id: cityIdHidden.value || null,
+            district_id: districtIdHidden.value || null
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            shippingCost = parseFloat(d.shipping_cost) || 0;
+            shippingResolved = true;
+            let html = formatCurrency(shippingCost);
+            if (d.delivery_days_min || d.delivery_days_max) {
+                html += ` <small class="text-muted">(${d.delivery_days_min}–${d.delivery_days_max} ${isAr ? 'يوم' : 'days'})</small>`;
+            }
+            shippingDisplay.innerHTML = html;
+        } else {
+            shippingCost = 0;
+            shippingResolved = false;
+            setShippingMsg(d.message || (isAr ? 'لا يوجد سعر شحن' : 'No shipping rate'), false);
+        }
+        calculateTotal();
+    })
+    .catch(() => { setShippingMsg(isAr ? 'تعذّر حساب الشحن' : 'Could not calculate shipping', false); });
 }
 
 // Calculate on page load

@@ -130,6 +130,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the distributor's shipping rates.
+     */
+    public function shippingRates(): HasMany
+    {
+        return $this->hasMany(DistributorShippingRate::class, 'distributor_id');
+    }
+
+    /**
      * Get user's wallet
      */
     public function wallet(): HasOne

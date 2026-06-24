@@ -69,6 +69,14 @@
             </a>
         </li>
 
+        <!-- Cities & Districts -->
+        <li class="menu-item {{ request()->routeIs('admin.locations.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.locations.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-map-pin-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'المدن والأحياء' : 'Cities & Districts' }}</div>
+            </a>
+        </li>
+
         <!-- Distributor Products Moderation -->
         <li class="menu-item {{ request()->routeIs('admin.distributor-products.*') ? 'active' : '' }}">
             <a href="{{ route('admin.distributor-products.index') }}" class="menu-link">

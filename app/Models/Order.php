@@ -36,6 +36,9 @@ class Order extends Model
         'shipping_address',
         'shipping_address2',
         'shipping_city',
+        'shipping_city_id',
+        'shipping_district_id',
+        'distributor_shipping_rate_id',
         'shipping_province',
         'shipping_country',
         'shipping_zip',
@@ -111,6 +114,30 @@ class Order extends Model
     public function shipping(): HasOne
     {
         return $this->hasOne(Shipping::class);
+    }
+
+    /**
+     * Get the city selected for shipping.
+     */
+    public function shippingCity(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'shipping_city_id');
+    }
+
+    /**
+     * Get the district selected for shipping.
+     */
+    public function shippingDistrict(): BelongsTo
+    {
+        return $this->belongsTo(District::class, 'shipping_district_id');
+    }
+
+    /**
+     * Get the distributor shipping rate used for this order.
+     */
+    public function shippingRate(): BelongsTo
+    {
+        return $this->belongsTo(DistributorShippingRate::class, 'distributor_shipping_rate_id');
     }
 
     /**

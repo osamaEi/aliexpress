@@ -217,4 +217,16 @@ class Product extends Model
               ->where('user_type', 'distributor');
         });
     }
+
+    /**
+     * Get the distributor that owns this product (first assigned distributor user).
+     * Returns null for AliExpress/China products with no distributor.
+     */
+    public function distributorOwner(): ?User
+    {
+        return $this->assignedUsers()
+            ->where('user_type', 'distributor')
+            ->orderBy('product_user.created_at')
+            ->first();
+    }
 }

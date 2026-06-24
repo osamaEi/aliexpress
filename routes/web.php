@@ -255,6 +255,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/distributor', [OrderController::class, 'storeDistributorOrder'])->name('orders.distributor.store');
     Route::post('/orders/distributor/validate-coupon', [OrderController::class, 'validateCoupon'])->name('orders.distributor.validate-coupon');
 
+    // Shipping location + cost lookup for the distributor order page
+    Route::get('/orders/shipping/cities/{countryCode}', [OrderController::class, 'shippingCities'])->name('orders.shipping.cities');
+    Route::get('/orders/shipping/districts/{city}', [OrderController::class, 'shippingDistricts'])->name('orders.shipping.districts');
+    Route::post('/orders/shipping/calculate', [OrderController::class, 'calculateShipping'])->name('orders.shipping.calculate');
+
     Route::get('/orders/product/{product}/info', [OrderController::class, 'getProductInfo'])->name('orders.product-info');
     Route::post('/orders/calculate-freight', [OrderController::class, 'calculateFreight'])->name('orders.calculate-freight');
     Route::post('/orders/{order}/place-on-aliexpress', [OrderController::class, 'placeOnAliexpress'])->name('orders.place-on-aliexpress');
@@ -376,6 +381,17 @@ Route::middleware('auth')->group(function () {
             Route::get('/{ticket}', [App\Http\Controllers\Distributor\TicketController::class, 'show'])->name('show');
             Route::post('/{ticket}/reply', [App\Http\Controllers\Distributor\TicketController::class, 'reply'])->name('reply');
         });
+
+        // Shipping Rates Management
+        Route::prefix('shipping')->name('shipping.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Distributor\ShippingRateController::class, 'index'])->name('index');
+            Route::get('/cities/{countryCode}', [App\Http\Controllers\Distributor\ShippingRateController::class, 'cities'])->name('cities');
+            Route::get('/districts/{city}', [App\Http\Controllers\Distributor\ShippingRateController::class, 'districts'])->name('districts');
+            Route::post('/', [App\Http\Controllers\Distributor\ShippingRateController::class, 'store'])->name('store');
+            Route::put('/{rate}', [App\Http\Controllers\Distributor\ShippingRateController::class, 'update'])->name('update');
+            Route::post('/{rate}/toggle', [App\Http\Controllers\Distributor\ShippingRateController::class, 'toggle'])->name('toggle');
+            Route::delete('/{rate}', [App\Http\Controllers\Distributor\ShippingRateController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // Admin Routes
@@ -480,6 +496,22 @@ Route::middleware('auth')->group(function () {
         // Countries Management
         Route::resource('countries', App\Http\Controllers\Admin\CountryController::class)->except(['show']);
         Route::post('/countries/{country}/toggle-status', [App\Http\Controllers\Admin\CountryController::class, 'toggleStatus'])->name('countries.toggle-status');
+
+        // Cities & Districts Management (locations)
+        Route::prefix('locations')->name('locations.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\LocationController::class, 'index'])->name('index');
+            Route::get('/cities/{city}/districts', [App\Http\Controllers\Admin\LocationController::class, 'districts'])->name('cities.districts');
+            // Cities
+            Route::post('/cities', [App\Http\Controllers\Admin\LocationController::class, 'storeCity'])->name('cities.store');
+            Route::put('/cities/{city}', [App\Http\Controllers\Admin\LocationController::class, 'updateCity'])->name('cities.update');
+            Route::post('/cities/{city}/toggle', [App\Http\Controllers\Admin\LocationController::class, 'toggleCity'])->name('cities.toggle');
+            Route::delete('/cities/{city}', [App\Http\Controllers\Admin\LocationController::class, 'destroyCity'])->name('cities.destroy');
+            // Districts
+            Route::post('/districts', [App\Http\Controllers\Admin\LocationController::class, 'storeDistrict'])->name('districts.store');
+            Route::put('/districts/{district}', [App\Http\Controllers\Admin\LocationController::class, 'updateDistrict'])->name('districts.update');
+            Route::post('/districts/{district}/toggle', [App\Http\Controllers\Admin\LocationController::class, 'toggleDistrict'])->name('districts.toggle');
+            Route::delete('/districts/{district}', [App\Http\Controllers\Admin\LocationController::class, 'destroyDistrict'])->name('districts.destroy');
+        });
 
         // Distributor Products Moderation
         Route::prefix('distributor-products')->name('distributor-products.')->group(function () {

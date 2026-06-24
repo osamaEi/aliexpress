@@ -110,11 +110,30 @@
                             <td>{{ $product->category->name ?? 'N/A' }}</td>
                             <td>
                                 @php
-                                    $currencySymbols = ['AED'=>'د.إ','SAR'=>'ر.س','EGP'=>'ج.م','USD'=>'$','EUR'=>'€','GBP'=>'£','KWD'=>'د.ك','QAR'=>'ر.ق','BHD'=>'د.ب','OMR'=>'ر.ع'];
-                                    $sym = $currencySymbols[$product->currency] ?? $product->currency;
+                                    $currencyFlags = [
+                                        'AED' => ['flag'=>'ae','sym'=>'د.إ'],
+                                        'SAR' => ['flag'=>'sa','sym'=>'ر.س'],
+                                        'EGP' => ['flag'=>'eg','sym'=>'ج.م'],
+                                        'USD' => ['flag'=>'us','sym'=>'$'],
+                                        'EUR' => ['flag'=>'eu','sym'=>'€'],
+                                        'GBP' => ['flag'=>'gb','sym'=>'£'],
+                                        'KWD' => ['flag'=>'kw','sym'=>'د.ك'],
+                                        'QAR' => ['flag'=>'qa','sym'=>'ر.ق'],
+                                        'BHD' => ['flag'=>'bh','sym'=>'د.ب'],
+                                        'OMR' => ['flag'=>'om','sym'=>'ر.ع'],
+                                    ];
+                                    $cf = $currencyFlags[$product->currency] ?? null;
                                 @endphp
-                                <span class="fw-semibold">{{ number_format($product->price, 2) }}</span>
-                                <small class="text-muted ms-1">{{ $sym }}</small>
+                                @if($cf)
+                                    <img src="{{ asset('assets/vendor/fonts/flags/1x1/' . $cf['flag'] . '.svg') }}"
+                                         alt="{{ $product->currency }}"
+                                         style="width:18px;height:18px;border-radius:50%;object-fit:cover;vertical-align:middle;">
+                                    <span class="fw-semibold ms-1">{{ number_format($product->price, 2) }}</span>
+                                    <small class="text-muted ms-1">{{ $cf['sym'] }}</small>
+                                @else
+                                    <span class="fw-semibold">{{ number_format($product->price, 2) }}</span>
+                                    <small class="text-muted ms-1">{{ $product->currency }}</small>
+                                @endif
                             </td>
                             <td>
                                 @if($product->track_inventory)
