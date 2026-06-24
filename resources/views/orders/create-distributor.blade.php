@@ -1,5 +1,7 @@
 @extends('dashboard')
 
+@php $ar = app()->getLocale() == 'ar'; @endphp
+
 @section('content')
 @php
     // Convert product price to selected currency
@@ -8,23 +10,21 @@
     $walletBalanceAED = auth()->user()->wallet ? auth()->user()->wallet->balance : 0;
     $walletBalanceConverted = $currentCurrency->convertFrom($walletBalanceAED, 'AED');
 @endphp
-<div class="container-fluid" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+<div class="container-fluid order-create-page" dir="{{ $ar ? 'rtl' : 'ltr' }}">
     <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-8">
+        <div class="col-lg-11 col-xl-10">
             {{-- Page Header --}}
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3 class="mb-1">
-                        <i class="ri-shopping-bag-line me-2 text-primary"></i>
-                        {{ app()->getLocale() == 'ar' ? 'إنشاء طلب جديد' : 'Create New Order' }}
-                    </h3>
-                    <p class="text-muted mb-0">
-                        {{ app()->getLocale() == 'ar' ? 'طلب من متجر محلي' : 'Order from Local Distributor' }}
-                    </p>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="header-badge"><i class="ri-shopping-bag-3-line"></i></span>
+                    <div>
+                        <h4 class="mb-0 fw-bold">{{ $ar ? 'إنشاء طلب جديد' : 'Create New Order' }}</h4>
+                        <span class="text-muted small">{{ $ar ? 'طلب من متجر محلي' : 'Order from a local distributor' }}</span>
+                    </div>
                 </div>
-                <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
-                    <i class="ri-arrow-left-line me-1"></i>
-                    {{ app()->getLocale() == 'ar' ? 'رجوع' : 'Back' }}
+                <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="ri-arrow-{{ $ar ? 'right' : 'left' }}-line me-1"></i>
+                    {{ $ar ? 'رجوع' : 'Back' }}
                 </a>
             </div>
 
@@ -68,102 +68,79 @@
                     {{-- Left Column: Product & Order Info --}}
                     <div class="col-lg-8">
                         {{-- Product Card --}}
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-3 text-muted">
-                                    <i class="ri-product-hunt-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'تفاصيل المنتج' : 'Product Details' }}
-                                </h6>
-                                <div class="row align-items-center">
-                                    @if($product->photo)
-                                        <div class="col-auto">
-                                            <img src="{{ asset('storage/' . $product->photo) }}"
-                                                 alt="{{ $product->name }}"
-                                                 class="rounded border"
-                                                 style="width: 80px; height: 80px; object-fit: cover;">
-                                        </div>
-                                    @elseif($product->images && count($product->images) > 0)
-                                        <div class="col-auto">
-                                            <img src="{{ $product->images[0] }}"
-                                                 alt="{{ $product->name }}"
-                                                 class="rounded border"
-                                                 style="width: 80px; height: 80px; object-fit: cover;">
-                                        </div>
-                                    @endif
-                                    <div class="col">
-                                        <h5 class="mb-1">{{ $product->name }}</h5>
-                                        @if($product->name_ar && app()->getLocale() == 'ar')
-                                            <p class="text-muted small mb-2">{{ $product->name_ar }}</p>
-                                        @endif
-                                        <div class="d-flex align-items-center gap-3">
-                                            <h4 class="text-primary mb-0">{!! $currentCurrency->format($priceConverted) !!}</h4>
-                                            <span class="badge bg-success">
-                                                <i class="ri-store-line me-1"></i>
-                                                {{ app()->getLocale() == 'ar' ? 'محلي' : 'Local' }}
-                                            </span>
-                                        </div>
+                        <div class="card shadow-sm mb-4 product-hero-card">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                @php
+                                    $heroImg = $product->photo
+                                        ? asset('storage/' . $product->photo)
+                                        : (($product->images && count($product->images) > 0) ? $product->images[0] : null);
+                                @endphp
+                                @if($heroImg)
+                                    <img src="{{ $heroImg }}" alt="{{ $product->name }}" class="product-hero-img">
+                                @else
+                                    <div class="product-hero-img d-flex align-items-center justify-content-center bg-light">
+                                        <i class="ri-image-line text-muted fs-3"></i>
+                                    </div>
+                                @endif
+                                <div class="flex-grow-1">
+                                    <span class="badge bg-label-success mb-1">
+                                        <i class="ri-store-2-line me-1"></i>{{ $ar ? 'منتج محلي' : 'Local product' }}
+                                    </span>
+                                    <h5 class="mb-1 fw-semibold">{{ $ar && $product->name_ar ? $product->name_ar : $product->name }}</h5>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="fs-4 fw-bold text-primary">{!! $currentCurrency->format($priceConverted) !!}</span>
+                                        <span class="text-muted small">/ {{ $ar ? 'الوحدة' : 'unit' }}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Quantity --}}
+                        {{-- Quantity + Coupon --}}
                         <div class="card shadow-sm mb-4">
                             <div class="card-body">
-                                <h6 class="card-subtitle mb-3 text-muted">
-                                    <i class="ri-shopping-cart-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'الكمية' : 'Quantity' }}
-                                </h6>
-                                <input type="number"
-                                       class="form-control form-control-lg @error('quantity') is-invalid @enderror"
-                                       id="quantity"
-                                       name="quantity"
-                                       value="{{ old('quantity', $queryParams['quantity'] ?? 1) }}"
-                                       min="1"
-                                       required
-                                       onchange="calculateTotal()"
-                                       placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل الكمية' : 'Enter quantity' }}">
-                                @error('quantity')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        {{-- Coupon Code --}}
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-3 text-muted">
-                                    <i class="ri-coupon-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'كود الخصم' : 'Coupon Code' }}
-                                </h6>
-                                <div class="input-group">
-                                    <input type="text"
-                                           class="form-control @error('coupon_code') is-invalid @enderror"
-                                           id="coupon_code"
-                                           name="coupon_code"
-                                           value="{{ old('coupon_code') }}"
-                                           placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل كود الخصم' : 'Enter coupon code' }}">
-                                    <button type="button" class="btn btn-outline-primary" id="applyCouponBtn" onclick="applyCoupon()">
-                                        <i class="ri-check-line me-1"></i>
-                                        {{ app()->getLocale() == 'ar' ? 'تطبيق' : 'Apply' }}
-                                    </button>
+                                <div class="section-title">
+                                    <i class="ri-shopping-cart-2-line"></i>
+                                    <span>{{ $ar ? 'الكمية وكود الخصم' : 'Quantity & Coupon' }}</span>
                                 </div>
-                                <input type="hidden" id="coupon_id" name="coupon_id" value="">
-                                <input type="hidden" id="discount_amount" name="discount_amount" value="0">
-                                @error('coupon_code')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                                <div id="coupon-message" class="mt-2"></div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">{{ $ar ? 'الكمية' : 'Quantity' }} *</label>
+                                        <input type="number"
+                                               class="form-control @error('quantity') is-invalid @enderror"
+                                               id="quantity" name="quantity"
+                                               value="{{ old('quantity', $queryParams['quantity'] ?? 1) }}"
+                                               min="1" required onchange="calculateTotal()">
+                                        @error('quantity')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label">{{ $ar ? 'كود الخصم' : 'Coupon Code' }}</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ri-coupon-3-line"></i></span>
+                                            <input type="text"
+                                                   class="form-control @error('coupon_code') is-invalid @enderror"
+                                                   id="coupon_code" name="coupon_code"
+                                                   value="{{ old('coupon_code') }}"
+                                                   placeholder="{{ $ar ? 'أدخل كود الخصم' : 'Enter coupon code' }}">
+                                            <button type="button" class="btn btn-outline-primary" id="applyCouponBtn" onclick="applyCoupon()">
+                                                {{ $ar ? 'تطبيق' : 'Apply' }}
+                                            </button>
+                                        </div>
+                                        <input type="hidden" id="coupon_id" name="coupon_id" value="">
+                                        <input type="hidden" id="discount_amount" name="discount_amount" value="0">
+                                        @error('coupon_code')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                        <div id="coupon-message" class="mt-2"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         {{-- Customer Information --}}
                         <div class="card shadow-sm mb-4">
                             <div class="card-body">
-                                <h6 class="card-subtitle mb-3 text-muted">
-                                    <i class="ri-user-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'معلومات العميل' : 'Customer Information' }}
-                                </h6>
+                                <div class="section-title">
+                                    <i class="ri-user-3-line"></i>
+                                    <span>{{ $ar ? 'معلومات العميل' : 'Customer Information' }}</span>
+                                </div>
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="customer_name" class="form-label">
@@ -233,10 +210,10 @@
                         {{-- Shipping Information --}}
                         <div class="card shadow-sm mb-4">
                             <div class="card-body">
-                                <h6 class="card-subtitle mb-3 text-muted">
-                                    <i class="ri-map-pin-line me-1"></i>
-                                    {{ app()->getLocale() == 'ar' ? 'عنوان التوصيل' : 'Shipping Address' }}
-                                </h6>
+                                <div class="section-title">
+                                    <i class="ri-map-pin-2-line"></i>
+                                    <span>{{ $ar ? 'عنوان التوصيل' : 'Shipping Address' }}</span>
+                                </div>
                                 <div class="row g-3">
                                     <div class="col-12">
                                         <label for="shipping_address" class="form-label">
@@ -364,63 +341,56 @@
                     <div class="col-lg-4">
                         <div class="sticky-top" style="top: 20px;">
                             {{-- Order Summary --}}
-                            <div class="card shadow-sm mb-3">
-                                <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0" style="color :#fff;">
-                                        <i class="ri-file-list-line me-1"></i>
-                                        {{ app()->getLocale() == 'ar' ? 'ملخص الطلب' : 'Order Summary' }}
-                                    </h6>
+                            <div class="card shadow-sm mb-3 summary-card">
+                                <div class="card-header summary-header">
+                                    <i class="ri-file-list-3-line me-2"></i>
+                                    {{ $ar ? 'ملخص الطلب' : 'Order Summary' }}
                                 </div>
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'سعر الوحدة:' : 'Unit Price:' }}</span>
+                                    <div class="summary-row">
+                                        <span>{{ $ar ? 'سعر الوحدة' : 'Unit Price' }}</span>
                                         <strong id="unit_price_display">{!! $currentCurrency->format($priceConverted) !!}</strong>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'الكمية:' : 'Quantity:' }}</span>
+                                    <div class="summary-row">
+                                        <span>{{ $ar ? 'الكمية' : 'Quantity' }}</span>
                                         <strong id="quantity_display">1</strong>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'المجموع الفرعي:' : 'Subtotal:' }}</span>
+                                    <div class="summary-row">
+                                        <span>{{ $ar ? 'المجموع الفرعي' : 'Subtotal' }}</span>
                                         <strong id="subtotal_display">{!! $currentCurrency->format($priceConverted) !!}</strong>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-2" id="discount_row" style="display: none !important;">
-                                        <span class="text-success">{{ app()->getLocale() == 'ar' ? 'الخصم:' : 'Discount:' }}</span>
-                                        <strong class="text-success" id="discount_display">- {{ $currentCurrency->symbol }} 0.00</strong>
+                                    <div class="summary-row text-success" id="discount_row" style="display: none !important;">
+                                        <span>{{ $ar ? 'الخصم' : 'Discount' }}</span>
+                                        <strong id="discount_display">- {{ $currentCurrency->symbol }} 0.00</strong>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">{{ app()->getLocale() == 'ar' ? 'الشحن:' : 'Shipping:' }}</span>
+                                    <div class="summary-row">
+                                        <span><i class="ri-truck-line me-1 text-muted"></i>{{ $ar ? 'الشحن' : 'Shipping' }}</span>
                                         <strong id="shipping_display">
-                                            <span class="text-muted small">{{ app()->getLocale() == 'ar' ? 'اختر العنوان' : 'Select address' }}</span>
+                                            <span class="text-muted small">{{ $ar ? 'اختر العنوان' : 'Select address' }}</span>
                                         </strong>
                                     </div>
-                                    <hr>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'الإجمالي:' : 'Total:' }}</h5>
-                                        <h4 class="mb-0 text-primary" id="grand_total">{!! $currentCurrency->format($priceConverted) !!}</h4>
+                                    <div class="summary-total">
+                                        <span>{{ $ar ? 'الإجمالي' : 'Total' }}</span>
+                                        <span class="total-amount" id="grand_total">{!! $currentCurrency->format($priceConverted) !!}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- Wallet Balance --}}
                             @if(auth()->user()->wallet)
-                                <div class="card shadow-sm mb-3">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <small class="text-muted d-block">{{ app()->getLocale() == 'ar' ? 'رصيدك الحالي' : 'Your Balance' }}</small>
-                                                <h5 class="mb-0 text-success">
-                                                    <i class="ri-wallet-3-line me-1"></i>
-                                                    {!! $currentCurrency->format($walletBalanceConverted) !!}
-                                                </h5>
-                                            </div>
+                                <div class="card shadow-sm mb-3 wallet-card">
+                                    <div class="card-body d-flex align-items-center gap-3">
+                                        <span class="wallet-icon"><i class="ri-wallet-3-line"></i></span>
+                                        <div>
+                                            <small class="text-muted d-block">{{ $ar ? 'رصيدك الحالي' : 'Your Balance' }}</small>
+                                            <h5 class="mb-0 text-success">{!! $currentCurrency->format($walletBalanceConverted) !!}</h5>
                                         </div>
                                     </div>
                                 </div>
                             @else
                                 <div class="alert alert-warning">
                                     <i class="ri-error-warning-line me-2"></i>
-                                    <small>{{ app()->getLocale() == 'ar' ? 'ليس لديك محفظة' : 'No wallet available' }}</small>
+                                    <small>{{ $ar ? 'ليس لديك محفظة' : 'No wallet available' }}</small>
                                 </div>
                             @endif
 
@@ -429,12 +399,12 @@
 
                             {{-- Submit Button --}}
                             <button type="submit" class="btn btn-primary btn-lg w-100 mb-2" id="submitBtn">
-                                <i class="ri-check-line me-1"></i>
-                                {{ app()->getLocale() == 'ar' ? 'إنشاء الطلب' : 'Create Order' }}
+                                <i class="ri-check-double-line me-1"></i>
+                                {{ $ar ? 'تأكيد الطلب' : 'Confirm Order' }}
                             </button>
 
                             <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary w-100">
-                                {{ app()->getLocale() == 'ar' ? 'إلغاء' : 'Cancel' }}
+                                {{ $ar ? 'إلغاء' : 'Cancel' }}
                             </a>
                         </div>
                     </div>
@@ -841,5 +811,61 @@ document.addEventListener('DOMContentLoaded', function() {
     border-color: #561C04;
     box-shadow: 0 0 0 0.2rem rgba(86, 28, 4, 0.25);
 }
+
+/* ── Redesigned order page ── */
+.order-create-page .header-badge {
+    width: 46px; height: 46px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
+    color: #fff; font-size: 22px;
+    box-shadow: 0 4px 12px rgba(86, 28, 4, 0.25);
+}
+
+/* Section header inside cards */
+.order-create-page .section-title {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 600; font-size: 15px; color: #561C04;
+    padding-bottom: 12px; margin-bottom: 16px;
+    border-bottom: 1px solid #f0eae6;
+}
+.order-create-page .section-title i { font-size: 18px; }
+
+/* Product hero */
+.order-create-page .product-hero-card { border-{{ $ar ? 'right' : 'left' }}: 4px solid #561C04; }
+.order-create-page .product-hero-img {
+    width: 88px; height: 88px; object-fit: cover;
+    border-radius: 12px; border: 1px solid #eee; flex-shrink: 0;
+}
+
+/* Summary card */
+.order-create-page .summary-header {
+    background: linear-gradient(135deg, #561C04 0%, #7A3206 100%);
+    color: #fff !important; font-weight: 600; border: none;
+    display: flex; align-items: center;
+}
+.order-create-page .summary-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; font-size: 14px;
+}
+.order-create-page .summary-row span { color: #6c757d; }
+.order-create-page .summary-total {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px; padding-top: 14px;
+    border-top: 2px dashed #e8ded7;
+    font-size: 16px; font-weight: 700; color: #2c2c2c;
+}
+.order-create-page .summary-total .total-amount { color: #561C04; font-size: 22px; }
+
+/* Wallet card */
+.order-create-page .wallet-card { border-{{ $ar ? 'right' : 'left' }}: 4px solid #28a745; }
+.order-create-page .wallet-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 10px; font-size: 20px;
+    background: rgba(40, 167, 69, 0.12); color: #28a745;
+}
+
+.order-create-page .input-group-text { background: #faf7f5; color: #561C04; }
 </style>
 @endsection

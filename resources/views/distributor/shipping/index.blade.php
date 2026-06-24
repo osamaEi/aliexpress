@@ -59,8 +59,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">{{ $ar ? 'سعر الشحن (د.إ)' : 'Shipping Cost (AED)' }} <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0" name="shipping_cost" class="form-control" required>
+                            <label class="form-label">{{ $ar ? 'سعر الشحن' : 'Shipping Cost' }} <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><x-currency-icon currency="AED" width="18" height="18" /></span>
+                                <input type="number" step="0.01" min="0" name="shipping_cost" class="form-control" required>
+                            </div>
                         </div>
 
                         <div class="row g-2 mb-3">
@@ -104,7 +107,7 @@
                                 <tr>
                                     <td>{{ optional($rate->country)->flag }} {{ $rate->country_code }}</td>
                                     <td>{{ $rate->scope_label }}</td>
-                                    <td><strong>{{ number_format($rate->shipping_cost, 2) }}</strong> <small class="text-muted">د.إ</small></td>
+                                    <td><strong>{{ number_format($rate->shipping_cost, 2) }}</strong> <x-currency-icon currency="AED" width="16" height="16" class="text-muted" /></td>
                                     <td>
                                         @if($rate->delivery_days_min || $rate->delivery_days_max)
                                             {{ $rate->delivery_days_min }}–{{ $rate->delivery_days_max }} {{ $ar ? 'يوم' : 'days' }}
@@ -150,8 +153,11 @@
             <div class="modal-header"><h5 class="modal-title">{{ $ar ? 'تعديل سعر الشحن' : 'Edit Shipping Rate' }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <div class="mb-3"><label class="form-label">{{ $ar ? 'سعر الشحن (د.إ)' : 'Shipping Cost (AED)' }}</label>
-                    <input type="number" step="0.01" min="0" name="shipping_cost" id="editCost" class="form-control" required></div>
+                <div class="mb-3"><label class="form-label">{{ $ar ? 'سعر الشحن' : 'Shipping Cost' }}</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><x-currency-icon currency="AED" width="18" height="18" /></span>
+                        <input type="number" step="0.01" min="0" name="shipping_cost" id="editCost" class="form-control" required>
+                    </div></div>
                 <div class="row g-2">
                     <div class="col-6"><label class="form-label">{{ $ar ? 'أيام (من)' : 'Min days' }}</label>
                         <input type="number" min="0" name="delivery_days_min" id="editMin" class="form-control"></div>

@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             SubscriptionSeeder::class,
             SettingsSeeder::class,
             DistributorUserSeeder::class,
+            CitiesDistrictsSeeder::class,
         ]);
     }
 }
