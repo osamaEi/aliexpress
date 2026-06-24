@@ -1588,6 +1588,8 @@ return [
     'complete_required_fields' => 'يرجى إكمال جميع الحقول المطلوبة',
     'enter_company_name' => 'أدخل اسم شركتك',
     'website_url' => 'رابط الموقع',
+    'bio' => 'نبذة تعريفية',
+    'bio_placeholder' => 'اكتب وصفاً مختصراً عنك أو عن متجرك',
     'social_media_accounts' => 'حسابات التواصل الاجتماعي',
     'default_currency_label' => 'العملة الافتراضية',
     'select_currency' => 'اختر العملة',

@@ -40,7 +40,7 @@ class DistributorRegistrationController extends Controller
             'email'                => 'required|email|unique:users,email',
             'phone_code'           => 'required|string|max:5',
             'phone'                => 'required|string|max:20',
-            'store_name'           => 'required|string|max:255',
+            'company_name'         => 'required|string|max:255',
             'store_slug'           => 'required|string|max:255|unique:users,store_slug|regex:/^[a-z0-9-]+$/',
             'password'             => 'required|string|min:8|confirmed',
             'store_type'           => 'required|in:online,physical,both',
@@ -59,6 +59,8 @@ class DistributorRegistrationController extends Controller
             'g-recaptcha-response.required' => $isAr ? 'يرجى التحقق من أنك لست روبوت' : 'Please verify that you are not a robot',
             'store_slug.regex'     => $isAr ? 'رابط المتجر يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطات فقط' : 'Store URL must contain only lowercase letters, numbers and dashes',
             'store_slug.unique'    => $isAr ? 'رابط المتجر مستخدم بالفعل' : 'Store URL is already taken',
+            'company_name.required'=> $isAr ? 'اسم الشركة مطلوب' : 'Company name is required',
+            'company_name.max'     => $isAr ? 'اسم الشركة يجب ألا يزيد عن 255 حرف' : 'Company name must not exceed 255 characters',
             'store_type.required'  => $isAr ? 'نوع المتجر مطلوب' : 'Store type is required',
             'store_type.in'        => $isAr ? 'نوع المتجر غير صالح' : 'Invalid store type',
             'country.required'     => $isAr ? 'الدولة مطلوبة' : 'Country is required',
@@ -94,6 +96,9 @@ class DistributorRegistrationController extends Controller
 
         // Remove reCAPTCHA from validated data
         unset($validated['g-recaptcha-response']);
+
+        // Company name doubles as the store name across the distributor system
+        $validated['store_name'] = $validated['company_name'];
 
         // Combine phone_code + phone for DB storage (e.g. 971501234567)
         $validated['phone'] = $validated['phone_code'] . $validated['phone'];
@@ -376,6 +381,7 @@ class DistributorRegistrationController extends Controller
             'country'               => $data['country'] ?? null,
             'password'              => Hash::make($data['password'] ?? Str::random(16)),
             'user_type'             => 'distributor',
+            'company_name'          => $data['company_name'] ?? $data['store_name'],
             'store_name'            => $data['store_name'],
             'store_slug'            => $data['store_slug'],
             'store_type'            => $data['store_type'] ?? 'online',

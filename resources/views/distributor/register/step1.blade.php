@@ -620,18 +620,18 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label">
-                                <i class="ri-store-2-line"></i>
-                                {{ app()->getLocale() == 'ar' ? 'اسم المتجر' : 'Store Name' }}
+                                <i class="ri-building-line"></i>
+                                {{ app()->getLocale() == 'ar' ? 'اسم الشركة' : 'Company Name' }}
                                 <span class="required">*</span>
                             </label>
                             <input type="text"
-                                   class="form-control @error('store_name') is-invalid @enderror"
-                                   id="store_name"
-                                   name="store_name"
-                                   value="{{ old('store_name') }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسم متجرك' : 'Enter your store name' }}"
+                                   class="form-control @error('company_name') is-invalid @enderror"
+                                   id="company_name"
+                                   name="company_name"
+                                   value="{{ old('company_name') }}"
+                                   placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسم شركتك' : 'Enter your company name' }}"
                                    required>
-                            @error('store_name')<span class="text-danger">{{ $message }}</span>@enderror
+                            @error('company_name')<span class="text-danger">{{ $message }}</span>@enderror
                         </div>
                     </div>
 
@@ -902,8 +902,8 @@
     </div>
 
     <script>
-    // ── Store slug: auto-generate from store name, readonly ──
-    const storeNameInput = document.getElementById('store_name');
+    // ── Store slug: auto-generate from company name, readonly ──
+    const storeNameInput = document.getElementById('company_name');
     const storeSlugInput = document.getElementById('store_slug');
     const slugStatus     = document.getElementById('slugStatus');
 

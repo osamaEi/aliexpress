@@ -41,6 +41,7 @@ class ProfileController extends Controller
             'country' => ['nullable', 'string', 'max:100'],
             // Withdrawal methods are now managed separately (withdrawal_methods table).
             'website_url' => ['nullable', 'url', 'max:255'],
+            'bio' => ['nullable', 'string', 'max:1000'],
             // Social media accounts
             'social_media_accounts' => ['nullable', 'array'],
             'social_media_accounts.instagram' => ['nullable', 'url', 'max:255'],

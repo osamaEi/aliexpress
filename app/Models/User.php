@@ -61,6 +61,7 @@ class User extends Authenticatable
         'freelance_document',
         'social_media_accounts',
         'website_url',
+        'bio',
         // Seller setup fields
         'setup_completed_at',
         'profit_settings_completed',

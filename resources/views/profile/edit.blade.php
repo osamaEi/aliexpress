@@ -707,6 +707,16 @@
                         @enderror
                     </div>
 
+                    <div class="col-12">
+                        <label for="bio" class="form-label">{{ __('messages.bio') }}</label>
+                        <textarea class="form-control @error('bio') is-invalid @enderror"
+                                  id="bio" name="bio" rows="4" maxlength="1000"
+                                  placeholder="{{ __('messages.bio_placeholder') }}">{{ old('bio', $user->bio) }}</textarea>
+                        @error('bio')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <!-- Social Media Accounts -->
                     <div class="col-12 mt-4">
                         <h6 class="text-primary mb-3">

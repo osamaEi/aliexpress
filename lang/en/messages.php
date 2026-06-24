@@ -1278,6 +1278,8 @@ return [
     'complete_required_fields' => 'Please complete all required fields',
     'enter_company_name' => 'Enter your company name',
     'website_url' => 'Website URL',
+    'bio' => 'Bio',
+    'bio_placeholder' => 'Write a short description about yourself or your store',
     'social_media_accounts' => 'Social Media Accounts',
     'default_currency_label' => 'Default Currency',
     'select_currency' => 'Select Currency',
