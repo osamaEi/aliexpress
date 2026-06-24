@@ -108,7 +108,14 @@
                                 </div>
                             </td>
                             <td>{{ $product->category->name ?? 'N/A' }}</td>
-                            <td>{{ $product->currency }} {{ number_format($product->price, 2) }}</td>
+                            <td>
+                                @php
+                                    $currencySymbols = ['AED'=>'د.إ','SAR'=>'ر.س','EGP'=>'ج.م','USD'=>'$','EUR'=>'€','GBP'=>'£','KWD'=>'د.ك','QAR'=>'ر.ق','BHD'=>'د.ب','OMR'=>'ر.ع'];
+                                    $sym = $currencySymbols[$product->currency] ?? $product->currency;
+                                @endphp
+                                <span class="fw-semibold">{{ number_format($product->price, 2) }}</span>
+                                <small class="text-muted ms-1">{{ $sym }}</small>
+                            </td>
                             <td>
                                 @if($product->track_inventory)
                                     <span class="badge bg-{{ $product->stock_quantity > 10 ? 'success' : ($product->stock_quantity > 0 ? 'warning' : 'danger') }}">

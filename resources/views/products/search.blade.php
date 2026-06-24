@@ -598,7 +598,7 @@
                                                     <button
                                                         type="button"
                                                         class="btn btn-sm btn-warning w-100 mb-2 assign-product-btn"
-                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title_en'] ?? $product['title']) }}', '{{ addslashes($product['title_ar'] ?? $product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', session('currency_code', 'USD')) }}', '{{ $localCategoryId ?? '' }}', this)"
+                                                        onclick="assignProduct('{{ $product['item_id'] }}', '{{ addslashes($product['title_en'] ?? $product['title']) }}', '{{ addslashes($product['title_ar'] ?? $product['title']) }}', '{{ $product['item_main_pic'] }}', {{ $product['original_sale_price'] ?? $product['sale_price'] }}, '{{ request('currency', session('currency_code', 'USD')) }}', '{{ $localCategoryId ?? '' }}', this, '{{ $product['distributor_product_id'] ?? '' }}', '{{ $product['country_code'] ?? '' }}')"
                                                         data-product-id="{{ $product['item_id'] }}"
                                                         data-title-en="{{ addslashes($product['title_en'] ?? $product['title']) }}"
                                                         data-title-ar="{{ addslashes($product['title_ar'] ?? $product['title']) }}"
@@ -1465,7 +1465,7 @@
     });
 
     // Assign product function
-    function assignProduct(productId, productTitle, productTitleAr, productImage, productPrice, currency, categoryId, buttonElement) {
+    function assignProduct(productId, productTitle, productTitleAr, productImage, productPrice, currency, categoryId, buttonElement, distributorProductId, countryCode) {
         const originalHtml = buttonElement.innerHTML;
         buttonElement.disabled = true;
         buttonElement.innerHTML = '<i class="ri-loader-4-line me-1"></i> ' + (isArabic ? 'جاري...' : 'Assigning...');
@@ -1481,6 +1481,13 @@
             currency: currency,
             is_choice: document.getElementById('choiceOnlyInput')?.value === '1'
         };
+
+        if (distributorProductId && distributorProductId !== '') {
+            requestData.distributor_product_id = distributorProductId;
+        }
+        if (countryCode && countryCode !== '') {
+            requestData.country_code = countryCode;
+        }
 
         if (categoryId && categoryId.trim() !== '') {
             requestData.category_id = categoryId;

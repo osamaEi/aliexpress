@@ -1513,7 +1513,14 @@ class ProductController extends Controller
         }
 
         // Check if product already exists in products table
-        $product = Product::where('aliexpress_id', $aliexpressProductId)->first();
+        // For distributor products, use the direct DB id sent from the search page
+        $product = null;
+        if ($request->filled('distributor_product_id')) {
+            $product = Product::find($request->distributor_product_id);
+        }
+        if (!$product) {
+            $product = Product::where('aliexpress_id', $aliexpressProductId)->first();
+        }
 
         $basePrice = $request->product_price ?? 0;
         $productCurrency = $request->currency ?? 'AED';
@@ -1610,7 +1617,8 @@ class ProductController extends Controller
                 'aliexpress_price' => $basePrice,
                 'category_id' => $request->category_id,
                 'stock_quantity' => 0,
-                'is_active' => false, // Set as inactive until seller publishes
+                'is_active' => false,
+                'country_code' => $request->country_code ?: null,
             ]);
         } else {
             // Update existing product with Arabic title and category if needed (no seller-specific profit)
@@ -2054,6 +2062,8 @@ class ProductController extends Controller
                 'item_url' => $product->aliexpress_url,
                 'admin_profit' => $product->admin_amount ?? 0,
                 'is_distributor_product' => true,
+                'country_code' => $product->country_code,
+                'distributor_product_id' => $product->id,
             ];
         });
 
