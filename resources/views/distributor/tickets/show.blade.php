@@ -56,6 +56,39 @@
                 </div>
             </div>
 
+            {{-- Coupon activation decision (only for the distributor the ticket is routed to) --}}
+            @php $arT = app()->getLocale() == 'ar'; @endphp
+            @if($ticket->coupon_id && $ticket->recipient_type === 'distributor' && $ticket->recipient_id === auth()->id())
+                <div class="card mb-3 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="ri-coupon-3-line text-primary fs-5"></i>
+                            <strong>{{ $arT ? 'طلب تفعيل كوبون' : 'Coupon Activation Request' }}</strong>
+                        </div>
+                        <p class="text-muted mb-3">
+                            {{ $arT ? 'المسوّق' : 'Marketer' }}: <strong>{{ $ticket->user->name ?? '—' }}</strong> ·
+                            {{ $arT ? 'الكوبون' : 'Coupon' }}: <strong>{{ optional($ticket->coupon)->title ?? '—' }}</strong>
+                        </p>
+                        @if($ticket->status !== 'closed')
+                            <div class="d-flex gap-2">
+                                <form method="POST" action="{{ route('distributor.tickets.coupon-decision', $ticket) }}"
+                                      data-confirm="{{ $arT ? 'تفعيل الكوبون لهذا المسوّق؟' : 'Activate the coupon for this marketer?' }}">
+                                    @csrf <input type="hidden" name="decision" value="approve">
+                                    <button class="btn btn-success"><i class="ri-check-line me-1"></i>{{ $arT ? 'موافقة وتفعيل' : 'Approve & Activate' }}</button>
+                                </form>
+                                <form method="POST" action="{{ route('distributor.tickets.coupon-decision', $ticket) }}"
+                                      data-confirm="{{ $arT ? 'رفض الطلب؟' : 'Reject the request?' }}">
+                                    @csrf <input type="hidden" name="decision" value="reject">
+                                    <button class="btn btn-outline-danger"><i class="ri-close-line me-1"></i>{{ $arT ? 'رفض' : 'Reject' }}</button>
+                                </form>
+                            </div>
+                        @else
+                            <span class="badge bg-label-secondary">{{ $arT ? 'تم اتخاذ القرار' : 'Decision made' }}</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <!-- Replies -->
             @if($ticket->replies->count() > 0)
                 <div class="card mb-3">

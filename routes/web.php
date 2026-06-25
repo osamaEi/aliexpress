@@ -114,6 +114,12 @@ Route::prefix('distributor/register')->name('distributor.register.')->group(func
     Route::get('check-slug', [DistributorRegistrationController::class, 'checkSlug'])->name('check-slug');
 });
 
+// Marketer registration (single step)
+Route::prefix('marketer/register')->name('marketer.register.')->group(function () {
+    Route::get('/', [App\Http\Controllers\MarketerRegistrationController::class, 'show'])->name('show');
+    Route::post('/', [App\Http\Controllers\MarketerRegistrationController::class, 'register'])->name('register');
+});
+
 // AliExpress API Test Routes (Public - No Auth Required)
 Route::get('/test-aliexpress', [AliExpressTestController::class, 'testConnection'])->name('aliexpress.test');
 Route::get('/test-aliexpress-token', [AliExpressTestController::class, 'testTokenCreation'])->name('aliexpress.test.token');
@@ -145,6 +151,11 @@ Route::get('/dashboard', function () {
     // Redirect distributors to distributor dashboard
     if ($user && $user->user_type === 'distributor') {
         return redirect()->route('distributor.dashboard');
+    }
+
+    // Redirect marketers to marketer dashboard
+    if ($user && $user->user_type === 'marketer') {
+        return redirect()->route('marketer.dashboard');
     }
 
     // Show customer/buyer dashboard
@@ -382,6 +393,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [App\Http\Controllers\Distributor\TicketController::class, 'store'])->name('store');
             Route::get('/{ticket}', [App\Http\Controllers\Distributor\TicketController::class, 'show'])->name('show');
             Route::post('/{ticket}/reply', [App\Http\Controllers\Distributor\TicketController::class, 'reply'])->name('reply');
+            Route::post('/{ticket}/coupon-decision', [App\Http\Controllers\Distributor\TicketController::class, 'couponDecision'])->name('coupon-decision');
         });
 
         // Shipping Rates Management
@@ -393,6 +405,28 @@ Route::middleware('auth')->group(function () {
             Route::put('/{rate}', [App\Http\Controllers\Distributor\ShippingRateController::class, 'update'])->name('update');
             Route::post('/{rate}/toggle', [App\Http\Controllers\Distributor\ShippingRateController::class, 'toggle'])->name('toggle');
             Route::delete('/{rate}', [App\Http\Controllers\Distributor\ShippingRateController::class, 'destroy'])->name('destroy');
+        });
+    });
+
+    // Marketer Routes (مسوق)
+    Route::middleware('marketer')->prefix('marketer')->name('marketer.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\MarketerController::class, 'dashboard'])->name('dashboard');
+
+        // Coupons (browse + request activation)
+        Route::get('/coupons', [App\Http\Controllers\MarketerController::class, 'coupons'])->name('coupons.index');
+        Route::post('/coupons/{coupon}/request-activation', [App\Http\Controllers\MarketerController::class, 'requestActivation'])->name('coupons.request-activation');
+
+        // Store products (view only) + reports
+        Route::get('/products', [App\Http\Controllers\MarketerController::class, 'products'])->name('products');
+        Route::get('/reports', [App\Http\Controllers\MarketerController::class, 'reports'])->name('reports');
+
+        // Support Tickets (reuses the marketer ticket controller)
+        Route::prefix('tickets')->name('tickets.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Marketer\TicketController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Marketer\TicketController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Marketer\TicketController::class, 'store'])->name('store');
+            Route::get('/{ticket}', [App\Http\Controllers\Marketer\TicketController::class, 'show'])->name('show');
+            Route::post('/{ticket}/reply', [App\Http\Controllers\Marketer\TicketController::class, 'reply'])->name('reply');
         });
     });
 
@@ -537,6 +571,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/{ticket}/reply', [App\Http\Controllers\Admin\TicketController::class, 'reply'])->name('reply');
             Route::post('/{ticket}/status', [App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('update-status');
             Route::post('/{ticket}/assign', [App\Http\Controllers\Admin\TicketController::class, 'assign'])->name('assign');
+            Route::post('/{ticket}/coupon-decision', [App\Http\Controllers\Admin\TicketController::class, 'couponDecision'])->name('coupon-decision');
         });
 
         // Affiliate Marketing Management

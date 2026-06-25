@@ -17,8 +17,15 @@ class TicketController extends Controller
      */
     public function index()
     {
-        $tickets = Ticket::where('user_id', Auth::id())
-            ->with('replies')
+        // Tickets the distributor opened, plus coupon-activation tickets routed to them.
+        $tickets = Ticket::where(function ($q) {
+                $q->where('user_id', Auth::id())
+                  ->orWhere(function ($q2) {
+                      $q2->where('recipient_type', 'distributor')
+                         ->where('recipient_id', Auth::id());
+                  });
+            })
+            ->with(['replies', 'coupon', 'user'])
             ->latest()
             ->paginate(15);
 
@@ -70,14 +77,39 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket)
     {
-        // Make sure user can only view their own tickets
-        if ($ticket->user_id !== Auth::id()) {
+        // Allow the ticket owner OR the distributor it was routed to (coupon activation)
+        $isOwner = $ticket->user_id === Auth::id();
+        $isRecipient = $ticket->recipient_type === 'distributor' && $ticket->recipient_id === Auth::id();
+        if (!$isOwner && !$isRecipient) {
             abort(403);
         }
 
-        $ticket->load(['replies.user', 'assignedAdmin']);
+        $ticket->load(['replies.user', 'assignedAdmin', 'coupon', 'user']);
 
         return view('distributor.tickets.show', compact('ticket'));
+    }
+
+    /**
+     * Approve (or reject) a coupon-activation request tied to this ticket.
+     * Activates the marketer's coupon_marketer row and generates a tracking code.
+     */
+    public function couponDecision(Request $request, Ticket $ticket)
+    {
+        // Only the distributor the ticket was routed to may decide
+        abort_unless(
+            $ticket->recipient_type === 'distributor' && $ticket->recipient_id === Auth::id(),
+            403
+        );
+        abort_if(empty($ticket->coupon_id), 404);
+
+        $decision = $request->validate(['decision' => 'required|in:approve,reject'])['decision'];
+
+        \App\Http\Controllers\MarketerController::applyCouponDecision($ticket, $decision);
+
+        $ar = app()->getLocale() === 'ar';
+        return redirect()->route('distributor.tickets.show', $ticket)->with('success', $decision === 'approve'
+            ? ($ar ? 'تم تفعيل الكوبون للمسوّق.' : 'Coupon activated for the marketer.')
+            : ($ar ? 'تم رفض طلب التفعيل.' : 'Activation request rejected.'));
     }
 
     /**

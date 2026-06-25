@@ -14,6 +14,13 @@
         <p class="text-muted">{{ __('messages.manage_wallet_balance') }}</p>
     </div>
 
+    @if(auth()->check() && auth()->user()->user_type === 'marketer')
+        <div class="alert alert-info d-flex align-items-center gap-2 mb-4" style="border-radius:12px;">
+            <i class="ri-hand-coin-line"></i>
+            <span>{{ app()->getLocale() == 'ar' ? 'رصيدك يمثّل أرباح كوبونات المتاجر العالمية. يمكنك طلب سحبها في أي وقت.' : 'Your balance represents Global Stores coupon earnings. You can request a withdrawal anytime.' }}</span>
+        </div>
+    @endif
+
     <!-- Wallet Balance Card -->
     <div class="row g-4 mb-4">
         <!-- Total Balance -->

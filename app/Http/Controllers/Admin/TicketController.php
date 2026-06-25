@@ -49,9 +49,26 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket)
     {
-        $ticket->load(['user', 'replies.user', 'assignedAdmin']);
+        $ticket->load(['user', 'replies.user', 'assignedAdmin', 'coupon']);
 
         return view('admin.tickets.show', compact('ticket'));
+    }
+
+    /**
+     * Approve/reject a coupon-activation request (global-store coupons routed to admin).
+     */
+    public function couponDecision(Request $request, Ticket $ticket)
+    {
+        abort_if(empty($ticket->coupon_id), 404);
+
+        $decision = $request->validate(['decision' => 'required|in:approve,reject'])['decision'];
+
+        \App\Http\Controllers\MarketerController::applyCouponDecision($ticket, $decision);
+
+        $ar = app()->getLocale() === 'ar';
+        return redirect()->route('admin.tickets.show', $ticket)->with('success', $decision === 'approve'
+            ? ($ar ? 'تم تفعيل الكوبون للمسوّق.' : 'Coupon activated for the marketer.')
+            : ($ar ? 'تم رفض طلب التفعيل.' : 'Activation request rejected.'));
     }
 
     /**

@@ -4,6 +4,8 @@
     @include('partials.sidebar-seller')
 @elseif(auth()->check() && auth()->user()->user_type === 'distributor')
     @include('partials.sidebar-distributor')
+@elseif(auth()->check() && auth()->user()->user_type === 'marketer')
+    @include('partials.sidebar-marketer')
 @else
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
             <div class="app-brand demo">

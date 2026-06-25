@@ -10,6 +10,9 @@ class Ticket extends Model
 {
     protected $fillable = [
         'user_id',
+        'coupon_id',
+        'recipient_type',
+        'recipient_id',
         'subject',
         'description',
         'status',
@@ -36,6 +39,22 @@ class Ticket extends Model
     public function assignedAdmin(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    /**
+     * The coupon this ticket is about (marketer activation request).
+     */
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
+    /**
+     * The recipient (distributor) when the ticket is routed to a specific store.
+     */
+    public function recipient(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recipient_id');
     }
 
     /**

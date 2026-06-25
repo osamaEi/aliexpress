@@ -140,6 +140,24 @@ class User extends Authenticatable
     }
 
     /**
+     * Whether this user is a marketer (مسوق).
+     */
+    public function isMarketer(): bool
+    {
+        return $this->user_type === 'marketer';
+    }
+
+    /**
+     * Coupons assigned to this marketer (with tracking code + status + earnings).
+     */
+    public function assignedCoupons(): BelongsToMany
+    {
+        return $this->belongsToMany(Coupon::class, 'coupon_marketer', 'user_id', 'coupon_id')
+            ->withPivot('tracking_code', 'status', 'earnings')
+            ->withTimestamps();
+    }
+
+    /**
      * Get user's wallet
      */
     public function wallet(): HasOne

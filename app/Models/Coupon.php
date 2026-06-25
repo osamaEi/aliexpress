@@ -93,6 +93,16 @@ class Coupon extends Model
     }
 
     /**
+     * Marketers who have activated this coupon.
+     */
+    public function marketers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'coupon_marketer', 'coupon_id', 'user_id')
+            ->withPivot('tracking_code', 'status', 'earnings')
+            ->withTimestamps();
+    }
+
+    /**
      * Main category this coupon targets.
      */
     public function category(): BelongsTo

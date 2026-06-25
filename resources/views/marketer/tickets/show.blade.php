@@ -22,7 +22,7 @@
                                 </span>
                             </div>
                         </div>
-                        <a href="{{ route('admin.tickets.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('marketer.tickets.index') }}" class="btn btn-secondary">
                             <i class="ri-arrow-left-line"></i>
                             {{ __('messages.back') }}
                         </a>
@@ -31,110 +31,36 @@
                     <hr>
 
                     <div class="row">
-                        <div class="col-md-4">
-                            <p class="mb-1">
-                                <i class="ri-user-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
-                                <strong>{{ __('messages.created_by') }}:</strong>
-                                {{ $ticket->user->name }}
-                            </p>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <p class="mb-1">
                                 <i class="ri-calendar-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
                                 <strong>{{ __('messages.created_at') }}:</strong>
                                 {{ $ticket->created_at->format('Y-m-d H:i') }}
                             </p>
                         </div>
-                        <div class="col-md-4">
-                            <p class="mb-1">
-                                <i class="ri-admin-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
-                                <strong>{{ __('messages.assigned_to') }}:</strong>
-                                @if($ticket->assignedAdmin)
+                        @if($ticket->assignedAdmin)
+                            <div class="col-md-6">
+                                <p class="mb-1">
+                                    <i class="ri-user-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
+                                    <strong>{{ __('messages.assigned_to') }}:</strong>
                                     {{ $ticket->assignedAdmin->name }}
-                                @else
-                                    <span class="text-muted">{{ __('messages.unassigned') }}</span>
-                                @endif
-                            </p>
-                        </div>
+                                </p>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mt-3">
                         <strong>{{ __('messages.description') }}:</strong>
                         <p class="mt-2">{{ $ticket->description }}</p>
                     </div>
-
-                    <!-- Actions -->
-                    <div class="d-flex gap-2 mt-3">
-                        <!-- Change Status -->
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="ri-arrow-down-circle-line"></i>
-                                {{ __('messages.change_status') }}
-                            </button>
-                            <ul class="dropdown-menu">
-                                @foreach(['open', 'in_progress', 'closed'] as $status)
-                                    @if($ticket->status !== $status)
-                                        <li>
-                                            <form action="{{ route('admin.tickets.update-status', $ticket) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <input type="hidden" name="status" value="{{ $status }}">
-                                                <button type="submit" class="dropdown-item">
-                                                    {{ __('messages.status_' . $status) }}
-                                                </button>
-                                            </form>
-                                        </li>
-                                    @endif
-                                @endforeach
-                            </ul>
-                        </div>
-
-                        <!-- Assign Ticket -->
-                        <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#assignModal">
-                            <i class="ri-user-add-line"></i>
-                            {{ __('messages.assign_ticket') }}
-                        </button>
-                    </div>
                 </div>
             </div>
-
-            {{-- Coupon activation decision (global-store coupons routed to admin) --}}
-            @php $arT = app()->getLocale() == 'ar'; @endphp
-            @if($ticket->coupon_id)
-                <div class="card mb-3 border-primary">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <i class="ri-coupon-3-line text-primary fs-5"></i>
-                            <strong>{{ $arT ? 'طلب تفعيل كوبون' : 'Coupon Activation Request' }}</strong>
-                        </div>
-                        <p class="text-muted mb-3">
-                            {{ $arT ? 'المسوّق' : 'Marketer' }}: <strong>{{ $ticket->user->name ?? '—' }}</strong> ·
-                            {{ $arT ? 'الكوبون' : 'Coupon' }}: <strong>{{ optional($ticket->coupon)->title ?? '—' }}</strong>
-                        </p>
-                        @if($ticket->status !== 'closed')
-                            <div class="d-flex gap-2">
-                                <form method="POST" action="{{ route('admin.tickets.coupon-decision', $ticket) }}"
-                                      data-confirm="{{ $arT ? 'تفعيل الكوبون لهذا المسوّق؟' : 'Activate the coupon for this marketer?' }}">
-                                    @csrf <input type="hidden" name="decision" value="approve">
-                                    <button class="btn btn-success"><i class="ri-check-line me-1"></i>{{ $arT ? 'موافقة وتفعيل' : 'Approve & Activate' }}</button>
-                                </form>
-                                <form method="POST" action="{{ route('admin.tickets.coupon-decision', $ticket) }}"
-                                      data-confirm="{{ $arT ? 'رفض الطلب؟' : 'Reject the request?' }}">
-                                    @csrf <input type="hidden" name="decision" value="reject">
-                                    <button class="btn btn-outline-danger"><i class="ri-close-line me-1"></i>{{ $arT ? 'رفض' : 'Reject' }}</button>
-                                </form>
-                            </div>
-                        @else
-                            <span class="badge bg-label-secondary">{{ $arT ? 'تم اتخاذ القرار' : 'Decision made' }}</span>
-                        @endif
-                    </div>
-                </div>
-            @endif
 
             <!-- Replies -->
             @if($ticket->replies->count() > 0)
                 <div class="card mb-3">
                     <div class="card-header">
-                        <h6 class="mb-0">{{ __('messages.replies') }} ({{ $ticket->replies->count() }})</h6>
+                        <h6 class="mb-0">{{ __('messages.replies') }}</h6>
                     </div>
                     <div class="card-body">
                         @foreach($ticket->replies as $reply)
@@ -159,10 +85,6 @@
                                             @if($reply->is_admin)
                                                 <span class="badge bg-danger" style="font-size: 0.7rem;">
                                                     {{ __('messages.admin') }}
-                                                </span>
-                                            @else
-                                                <span class="badge bg-info" style="font-size: 0.7rem;">
-                                                    {{ __('messages.user') }}
                                                 </span>
                                             @endif
                                         </div>
@@ -223,90 +145,61 @@
             @endif
 
             <!-- Reply Form -->
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">{{ __('messages.add_reply') }}</h6>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.tickets.reply', $ticket) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label">{{ __('messages.message') }}</label>
-                            <textarea class="form-control @error('message') is-invalid @enderror"
-                                      name="message"
-                                      rows="5"
-                                      placeholder="{{ __('messages.type_your_reply') }}"
-                                      required>{{ old('message') }}</textarea>
-                            @error('message')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+            @if($ticket->status !== 'closed')
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">{{ __('messages.add_reply') }}</h6>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('marketer.tickets.reply', $ticket) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label">{{ __('messages.message') }}</label>
+                                <textarea class="form-control @error('message') is-invalid @enderror"
+                                          name="message"
+                                          rows="5"
+                                          placeholder="{{ __('messages.type_your_reply') }}"
+                                          required>{{ old('message') }}</textarea>
+                                @error('message')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <i class="ri-image-line me-1"></i>
-                                {{ __('messages.attachments') }} ({{ __('messages.optional') }})
-                            </label>
-                            <input type="file"
-                                   class="form-control @error('attachments.*') is-invalid @enderror"
-                                   name="attachments[]"
-                                   accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
-                                   multiple
-                                   id="attachmentInput">
-                            <small class="text-muted d-block mt-1">
-                                {{ __('messages.upload_images_info') }} (Max: 5MB per image)
-                            </small>
-                            @error('attachments.*')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="ri-image-line me-1"></i>
+                                    {{ __('messages.attachments') }} ({{ __('messages.optional') }})
+                                </label>
+                                <input type="file"
+                                       class="form-control @error('attachments.*') is-invalid @enderror"
+                                       name="attachments[]"
+                                       accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                                       multiple
+                                       id="attachmentInput">
+                                <small class="text-muted d-block mt-1">
+                                    {{ __('messages.upload_images_info') }} (Max: 5MB per image)
+                                </small>
+                                @error('attachments.*')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
 
-                            <!-- Image Preview -->
-                            <div id="imagePreview" class="mt-3 d-flex flex-wrap gap-2"></div>
-                        </div>
+                                <!-- Image Preview -->
+                                <div id="imagePreview" class="mt-3 d-flex flex-wrap gap-2"></div>
+                            </div>
 
-                        <button type="submit" class="btn btn-primary">
-                            <i class="ri-send-plane-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
-                            {{ __('messages.send_reply') }}
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Assign Modal -->
-<div class="modal fade" id="assignModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ __('messages.assign_ticket') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ route('admin.tickets.assign', $ticket) }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="assigned_to" class="form-label">{{ __('messages.select_admin') }}</label>
-                        <select class="form-select" id="assigned_to" name="assigned_to">
-                            <option value="">{{ __('messages.unassign') }}</option>
-                            @foreach(\App\Models\User::where('user_type', 'admin')->get() as $admin)
-                                <option value="{{ $admin->id }}" {{ $ticket->assigned_to == $admin->id ? 'selected' : '' }}>
-                                    {{ $admin->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-send-plane-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
+                                {{ __('messages.send_reply') }}
+                            </button>
+                        </form>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        {{ __('messages.cancel') }}
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        {{ __('messages.assign') }}
-                    </button>
+            @else
+                <div class="alert alert-info">
+                    <i class="ri-information-line {{ app()->getLocale() == 'ar' ? 'ms-1' : 'me-1' }}"></i>
+                    {{ __('messages.ticket_closed_info') }}
                 </div>
-            </form>
+            @endif
         </div>
     </div>
 </div>
