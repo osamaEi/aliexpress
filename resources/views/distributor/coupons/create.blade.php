@@ -26,28 +26,19 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <!-- Code -->
+                            <!-- Coupon Image -->
                             <div class="col-md-6">
-                                <label for="code" class="form-label">
-                                    {{ app()->getLocale() == 'ar' ? 'كود الكوبون' : 'Coupon Code' }}
+                                <label for="image" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'صورة الكوبون' : 'Coupon Image' }}
                                 </label>
-                                <div class="input-group">
-                                    <input
-                                        type="text"
-                                        class="form-control @error('code') is-invalid @enderror"
-                                        id="code"
-                                        name="code"
-                                        value="{{ old('code') }}"
-                                        maxlength="10"
-                                        placeholder="{{ app()->getLocale() == 'ar' ? 'اتركه فارغاً للتوليد التلقائي' : 'Leave empty for auto-generate' }}"
-                                    >
-                                    <button type="button" class="btn btn-outline-primary" onclick="generateCode()">
-                                        <i class="ri-refresh-line"></i>
-                                    </button>
+                                <input type="file" class="form-control @error('image') is-invalid @enderror"
+                                       id="image" name="image" accept="image/*">
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحد الأقصى 2 ميجابايت' : 'Max 2MB' }}</small>
+                                @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <div class="alert alert-info mt-2 mb-0 py-2 px-3" style="font-size:13px;">
+                                    <i class="ri-information-line me-1"></i>
+                                    {{ app()->getLocale() == 'ar' ? 'كود الكوبون يُولَّد تلقائياً عند التفعيل للمسوق.' : 'The coupon code is generated automatically upon activation for a marketer.' }}
                                 </div>
-                                @error('code')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
                             </div>
 
                             <!-- Title Arabic -->

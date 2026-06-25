@@ -44,6 +44,7 @@ class Coupon extends Model
         'end_date',
         'promo_images',
         'promo_video',
+        'image',
         'is_active',
         'total_discount_given',
         'total_commission_earned',
