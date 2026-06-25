@@ -166,11 +166,6 @@
                                 @endif
                             </table>
                         </div>
-                        <div class="align-self-start">
-                            <a href="{{ route('products.detail', $order->product) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="ri-external-link-line me-1"></i>{{ __('messages.view_product') }}
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
