@@ -190,14 +190,22 @@
 
         <!-- Affiliate Marketing -->
         <li class="menu-header mt-5">
-            <span class="menu-header-text">{{ app()->getLocale() == 'ar' ? 'التسويق بالعمولة' : 'Affiliate Marketing' }}</span>
+            <span class="menu-header-text">{{ app()->getLocale() == 'ar' ? 'المتاجر العالمية' : 'Global Stores' }}</span>
         </li>
 
-        <!-- Coupons Management -->
+        <!-- Global Stores -->
+        <li class="menu-item {{ request()->routeIs('admin.affiliate.stores*') ? 'active' : '' }}">
+            <a href="{{ route('admin.affiliate.stores') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-store-3-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'المتاجر العالمية' : 'Global Stores' }}</div>
+            </a>
+        </li>
+
+        <!-- Global Stores Coupons -->
         <li class="menu-item {{ request()->routeIs('admin.affiliate.coupons.*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-coupon-2-line"></i>
-                <div>{{ app()->getLocale() == 'ar' ? 'الكوبونات' : 'Coupons' }}</div>
+                <div>{{ app()->getLocale() == 'ar' ? 'كوبونات المتاجر العالمية' : 'Global Stores Coupons' }}</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.affiliate.coupons.active') ? 'active' : '' }}">

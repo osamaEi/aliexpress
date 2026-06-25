@@ -21,6 +21,11 @@ class Coupon extends Model
         'description_ar',
         'description_en',
         'code',
+        'coupon_method',
+        'direct_link',
+        'is_global',
+        'category_id',
+        'sub_category_id',
         'valid_for',
         'discount_type',
         'discount_value',
@@ -54,6 +59,7 @@ class Coupon extends Model
         'free_shipping' => 'boolean',
         'exclude_discounted' => 'boolean',
         'is_active' => 'boolean',
+        'is_global' => 'boolean',
         'discount_value' => 'decimal:2',
         'commission_value' => 'decimal:2',
         'min_order_amount' => 'decimal:2',
@@ -83,6 +89,22 @@ class Coupon extends Model
     public function usages(): HasMany
     {
         return $this->hasMany(CouponUsage::class);
+    }
+
+    /**
+     * Main category this coupon targets.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    /**
+     * Sub category this coupon targets.
+     */
+    public function subCategory(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'sub_category_id');
     }
 
     /**

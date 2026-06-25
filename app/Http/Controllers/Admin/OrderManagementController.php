@@ -13,26 +13,92 @@ class OrderManagementController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Order::with(['user', 'product']);
+        $query = Order::with([
+            'user',
+            'product',
+            'product.assignedUsers' => fn($q) => $q->where('user_type', 'distributor'),
+            'shippingCity',
+            'shippingDistrict',
+        ]);
+
+        // Filter by country
+        if ($request->filled('country')) {
+            $query->where('shipping_country', $request->country);
+        }
 
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Search
+        // Filter by payment status
+        if ($request->filled('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // Filter by sync status (synced with AliExpress or not)
+        if ($request->filled('sync')) {
+            if ($request->sync === 'synced') {
+                $query->whereNotNull('aliexpress_order_id');
+            } elseif ($request->sync === 'not_synced') {
+                $query->whereNull('aliexpress_order_id');
+            }
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Search (order number, customer name/email, supplier order id)
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('order_number', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('user', function ($q) use ($request) {
-                      $q->where('name', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('aliexpress_order_id', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
                   });
             });
         }
 
-        $orders = $query->latest()->paginate(20);
+        // Sorting
+        $sort = $request->get('sort', 'latest');
+        match ($sort) {
+            'oldest'        => $query->oldest(),
+            'amount_high'   => $query->orderByDesc('total_amount'),
+            'amount_low'    => $query->orderBy('total_amount'),
+            default         => $query->latest(),
+        };
 
-        return view('admin.orders.index', compact('orders'));
+        $orders = $query->paginate(20)->withQueryString();
+
+        // Status summary cards (respecting nothing — global counts)
+        $stats = [
+            'total'     => Order::count(),
+            'pending'   => Order::where('status', 'pending')->count(),
+            'shipped'   => Order::where('status', 'shipped')->count(),
+            'delivered' => Order::where('status', 'delivered')->count(),
+            'cancelled' => Order::where('status', 'cancelled')->count(),
+        ];
+
+        $statuses = ['pending', 'processing', 'placed', 'paid', 'shipped', 'delivered', 'cancelled'];
+
+        // Distinct shipping countries present in orders, for the country filter
+        $countries = Order::query()
+            ->whereNotNull('shipping_country')
+            ->where('shipping_country', '!=', '')
+            ->distinct()
+            ->pluck('shipping_country')
+            ->sort()
+            ->values();
+
+        return view('admin.orders.index', compact('orders', 'stats', 'statuses', 'countries'));
     }
 
     /**

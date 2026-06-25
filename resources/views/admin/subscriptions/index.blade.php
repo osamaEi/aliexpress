@@ -27,9 +27,9 @@
                         </span>
                         <div class="mt-1">
                             @if($subscription->role === 'seller')
-                                <span class="badge bg-label-primary"><i class="ri-store-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'تجار' : 'Sellers' }}</span>
+                                <span class="badge bg-label-primary"><i class="ri-user-3-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'بائع' : 'Sellers' }}</span>
                             @elseif($subscription->role === 'distributor')
-                                <span class="badge bg-label-success"><i class="ri-truck-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'موزعون' : 'Distributors' }}</span>
+                                <span class="badge bg-label-success"><i class="ri-store-2-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'متجر' : 'Stores' }}</span>
                             @else
                                 <span class="badge bg-label-secondary"><i class="ri-group-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'الجميع' : 'Both' }}</span>
                             @endif
@@ -111,12 +111,12 @@
     <!-- View User Subscriptions Links -->
     <div class="d-flex justify-content-center gap-3 flex-wrap">
         <a href="{{ route('admin.subscriptions.sellers') }}" class="btn btn-outline-primary">
-            <i class="ri-store-line me-1"></i>
-            {{ app()->getLocale() == 'ar' ? 'اشتراكات التجار' : 'Seller Subscriptions' }}
+            <i class="ri-user-3-line me-1"></i>
+            {{ app()->getLocale() == 'ar' ? 'اشتراكات البائعين' : 'Seller Subscriptions' }}
         </a>
         <a href="{{ route('admin.subscriptions.distributors') }}" class="btn btn-outline-success">
-            <i class="ri-truck-line me-1"></i>
-            {{ app()->getLocale() == 'ar' ? 'اشتراكات الموزعين' : 'Distributor Subscriptions' }}
+            <i class="ri-store-2-line me-1"></i>
+            {{ app()->getLocale() == 'ar' ? 'اشتراكات المتاجر' : 'Store Subscriptions' }}
         </a>
         <a href="{{ route('admin.subscriptions.users') }}" class="btn btn-outline-secondary">
             <i class="ri-group-line me-1"></i>

@@ -29,11 +29,11 @@
                             <!-- Store -->
                             <div class="col-md-6">
                                 <label for="store_id" class="form-label">
-                                    {{ app()->getLocale() == 'ar' ? 'المتجر' : 'Store' }}
+                                    {{ app()->getLocale() == 'ar' ? 'المتجر العالمي' : 'Global Store' }}
                                     <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select @error('store_id') is-invalid @enderror" id="store_id" name="store_id" required>
-                                    <option value="">{{ app()->getLocale() == 'ar' ? 'اختر المتجر' : 'Select Store' }}</option>
+                                    <option value="">{{ app()->getLocale() == 'ar' ? 'اختر المتجر العالمي' : 'Select Global Store' }}</option>
                                     @foreach($stores as $store)
                                         <option value="{{ $store->id }}" {{ old('store_id', request('store_id')) == $store->id ? 'selected' : '' }}>
                                             {{ $store->store_name ?? $store->name }} ({{ $store->country }})
@@ -159,6 +159,61 @@
                                 @error('valid_for')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+
+                            <!-- Coupon Method: code or direct link -->
+                            <div class="col-md-6">
+                                <label for="coupon_method" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'نوع الكوبون' : 'Coupon Type' }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select @error('coupon_method') is-invalid @enderror" id="coupon_method" name="coupon_method" required onchange="toggleCouponMethod()">
+                                    <option value="code" {{ old('coupon_method', 'code') === 'code' ? 'selected' : '' }}>
+                                        {{ app()->getLocale() == 'ar' ? 'كوبون برمز' : 'Code Coupon' }}
+                                    </option>
+                                    <option value="link" {{ old('coupon_method') === 'link' ? 'selected' : '' }}>
+                                        {{ app()->getLocale() == 'ar' ? 'كوبون برابط مباشر' : 'Direct Link Coupon' }}
+                                    </option>
+                                </select>
+                                @error('coupon_method')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                            <!-- Direct Link (shown when method = link) -->
+                            <div class="col-md-6" id="direct_link_wrap" style="display:none;">
+                                <label for="direct_link" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'الرابط المباشر' : 'Direct Link' }}
+                                </label>
+                                <input type="url" class="form-control @error('direct_link') is-invalid @enderror"
+                                       id="direct_link" name="direct_link" value="{{ old('direct_link') }}"
+                                       placeholder="https://...">
+                                @error('direct_link')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                            <!-- Main Category -->
+                            <div class="col-md-6">
+                                <label for="category_id" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'التصنيف الرئيسي' : 'Main Category' }}
+                                </label>
+                                <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id" onchange="loadSubCategories(this.value)">
+                                    <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف' : 'Select Category' }}</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                                            {{ app()->getLocale() == 'ar' && $cat->name_ar ? $cat->name_ar : $cat->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                            <!-- Sub Category -->
+                            <div class="col-md-6">
+                                <label for="sub_category_id" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'التصنيف الفرعي' : 'Sub Category' }}
+                                </label>
+                                <select class="form-select @error('sub_category_id') is-invalid @enderror" id="sub_category_id" name="sub_category_id" disabled>
+                                    <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف الرئيسي أولاً' : 'Select main category first' }}</option>
+                                </select>
+                                @error('sub_category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         </div>
                     </div>
@@ -573,6 +628,40 @@ function addCommissionTerm() {
 function removeRow(button) {
     button.closest('.input-group').remove();
 }
+
+// Toggle direct-link field based on coupon method
+function toggleCouponMethod() {
+    const method = document.getElementById('coupon_method').value;
+    document.getElementById('direct_link_wrap').style.display = method === 'link' ? 'block' : 'none';
+    const codeInput = document.getElementById('code');
+    if (codeInput) codeInput.closest('.col-md-6')?.style.setProperty('display', method === 'link' ? 'none' : 'block');
+}
+
+// Cascade: load sub categories for the chosen main category
+function loadSubCategories(categoryId, selectedSub = null) {
+    const subSelect = document.getElementById('sub_category_id');
+    const isAr = '{{ app()->getLocale() }}' === 'ar';
+    subSelect.innerHTML = `<option value="">${isAr ? 'اختر التصنيف الفرعي' : 'Select sub category'}</option>`;
+    if (!categoryId) { subSelect.disabled = true; return; }
+    fetch(`{{ url('categories') }}/${categoryId}/children`)
+        .then(r => r.json())
+        .then(d => {
+            (d.children || []).forEach(c => {
+                const o = document.createElement('option');
+                o.value = c.id;
+                o.textContent = isAr && c.name_ar ? c.name_ar : c.name;
+                if (selectedSub && String(selectedSub) === String(c.id)) o.selected = true;
+                subSelect.appendChild(o);
+            });
+            subSelect.disabled = false;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    toggleCouponMethod();
+    const cat = document.getElementById('category_id');
+    if (cat && cat.value) loadSubCategories(cat.value, '{{ old('sub_category_id') }}');
+});
 </script>
 @endpush
 @endsection

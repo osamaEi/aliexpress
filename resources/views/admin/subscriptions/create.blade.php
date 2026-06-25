@@ -158,14 +158,13 @@
                         </label>
                         <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
                             <option value="seller"   {{ old('role') === 'seller'      ? 'selected' : '' }}>
-                                <i class="ri-store-line"></i>
-                                {{ app()->getLocale() == 'ar' ? 'تجار فقط' : 'Sellers Only' }}
+                                {{ app()->getLocale() == 'ar' ? 'بائع فقط' : 'Sellers Only' }}
                             </option>
                             <option value="distributor" {{ old('role') === 'distributor' ? 'selected' : '' }}>
-                                {{ app()->getLocale() == 'ar' ? 'موزعون فقط' : 'Distributors Only' }}
+                                {{ app()->getLocale() == 'ar' ? 'متجر فقط' : 'Stores Only' }}
                             </option>
                             <option value="both" {{ old('role', 'both') === 'both' ? 'selected' : '' }}>
-                                {{ app()->getLocale() == 'ar' ? 'الجميع' : 'Both (Sellers & Distributors)' }}
+                                {{ app()->getLocale() == 'ar' ? 'الجميع' : 'Both (Sellers & Stores)' }}
                             </option>
                         </select>
                         @error('role')

@@ -194,6 +194,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/paymob/initiate-subscription/{subscription}', [App\Http\Controllers\PaymobController::class, 'initiateSubscriptionPayment'])->name('paymob.initiate-subscription');
 
     // Category routes
+    // Lightweight DB-only children lookup (used by coupon category cascade for admin & distributor)
+    Route::get('/categories/{category}/children', [CategoryController::class, 'children'])->name('categories.children');
     Route::get('/categories/{category}/fetch-subcategories', [CategoryController::class, 'fetchSubcategories'])->name('categories.fetch-subcategories');
     Route::post('/categories/{category}/save-subcategories', [CategoryController::class, 'saveSubcategories'])->name('categories.save-subcategories');
     Route::get('/categories/fetch-tree', [CategoryController::class, 'fetchCategoryTree'])->name('categories.fetch-tree');

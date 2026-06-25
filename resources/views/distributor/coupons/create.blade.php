@@ -141,6 +141,29 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            <!-- Main Category -->
+                            <div class="col-md-6">
+                                <label for="category_id" class="form-label">{{ app()->getLocale() == 'ar' ? 'التصنيف الرئيسي' : 'Main Category' }}</label>
+                                <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id" onchange="loadSubCategories(this.value)">
+                                    <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف' : 'Select Category' }}</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                                            {{ app()->getLocale() == 'ar' && $cat->name_ar ? $cat->name_ar : $cat->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                            <!-- Sub Category -->
+                            <div class="col-md-6">
+                                <label for="sub_category_id" class="form-label">{{ app()->getLocale() == 'ar' ? 'التصنيف الفرعي' : 'Sub Category' }}</label>
+                                <select class="form-select @error('sub_category_id') is-invalid @enderror" id="sub_category_id" name="sub_category_id" disabled>
+                                    <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف الرئيسي أولاً' : 'Select main category first' }}</option>
+                                </select>
+                                @error('sub_category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -438,5 +461,30 @@ function generateCode() {
         })
         .catch(error => console.error('Error:', error));
 }
+
+// Cascade: load sub categories for the chosen main category
+function loadSubCategories(categoryId, selectedSub = null) {
+    const subSelect = document.getElementById('sub_category_id');
+    const isAr = '{{ app()->getLocale() }}' === 'ar';
+    subSelect.innerHTML = `<option value="">${isAr ? 'اختر التصنيف الفرعي' : 'Select sub category'}</option>`;
+    if (!categoryId) { subSelect.disabled = true; return; }
+    fetch(`{{ url('categories') }}/${categoryId}/children`)
+        .then(r => r.json())
+        .then(d => {
+            (d.children || []).forEach(c => {
+                const o = document.createElement('option');
+                o.value = c.id;
+                o.textContent = isAr && c.name_ar ? c.name_ar : c.name;
+                if (selectedSub && String(selectedSub) === String(c.id)) o.selected = true;
+                subSelect.appendChild(o);
+            });
+            subSelect.disabled = false;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const cat = document.getElementById('category_id');
+    if (cat && cat.value) loadSubCategories(cat.value, '{{ old('sub_category_id') }}');
+});
 </script>
 @endsection

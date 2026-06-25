@@ -49,7 +49,9 @@ class CouponController extends Controller
      */
     public function create()
     {
-        return view('distributor.coupons.create');
+        $categories = \App\Models\Category::whereNull('parent_id')->where('is_active', true)->orderBy('name')->get();
+
+        return view('distributor.coupons.create', compact('categories'));
     }
 
     /**
@@ -80,6 +82,8 @@ class CouponController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'code' => 'nullable|string|max:10|unique:coupons,code',
+            'category_id' => 'nullable|exists:categories,id',
+            'sub_category_id' => 'nullable|exists:categories,id',
             'promo_images' => 'nullable|array|max:5',
             'promo_images.*' => 'image|max:2048',
             'promo_video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',

@@ -17,8 +17,8 @@ class AffiliateController extends Controller
      */
     public function stores(Request $request)
     {
-        // Get all distributors (both with accounts and without)
-        $query = User::where('user_type', 'distributor');
+        // Global Stores = admin-created distributor accounts (is_global_store = true)
+        $query = User::where('user_type', 'distributor')->where('is_global_store', true);
 
         // Search
         if ($request->filled('search')) {
@@ -57,6 +57,7 @@ class AffiliateController extends Controller
 
         // Get countries for filter
         $countries = User::where('user_type', 'distributor')
+            ->where('is_global_store', true)
             ->whereNotNull('country')
             ->distinct()
             ->pluck('country');
@@ -104,6 +105,7 @@ class AffiliateController extends Controller
             'country' => $validated['country'],
             'phone' => $validated['phone'] ?? null,
             'user_type' => 'distributor',
+            'is_global_store' => true, // Admin-owned Global Store (no login)
             'email' => 'store_' . Str::random(10) . '@placeholder.local', // Placeholder email
             'password' => '', // Empty password - cannot login
             'is_verified' => true,
@@ -165,7 +167,7 @@ class AffiliateController extends Controller
         }
 
         $coupons = $query->latest()->paginate(20);
-        $stores = User::where('user_type', 'distributor')->get(['id', 'store_name', 'name']);
+        $stores = User::where('user_type', 'distributor')->where('is_global_store', true)->get(['id', 'store_name', 'name']);
 
         return view('admin.affiliate.coupons-active', compact('coupons', 'stores'));
     }
@@ -194,7 +196,7 @@ class AffiliateController extends Controller
         }
 
         $coupons = $query->latest()->paginate(20);
-        $stores = User::where('user_type', 'distributor')->get(['id', 'store_name', 'name']);
+        $stores = User::where('user_type', 'distributor')->where('is_global_store', true)->get(['id', 'store_name', 'name']);
 
         return view('admin.affiliate.coupons-expired', compact('coupons', 'stores'));
     }
@@ -204,9 +206,10 @@ class AffiliateController extends Controller
      */
     public function createCoupon()
     {
-        $stores = User::where('user_type', 'distributor')->get(['id', 'store_name', 'name', 'country']);
+        $stores = User::where('user_type', 'distributor')->where('is_global_store', true)->get(['id', 'store_name', 'name', 'country']);
+        $categories = \App\Models\Category::whereNull('parent_id')->where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.affiliate.create-coupon', compact('stores'));
+        return view('admin.affiliate.create-coupon', compact('stores', 'categories'));
     }
 
     /**
@@ -236,6 +239,10 @@ class AffiliateController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'code' => 'nullable|string|max:10|unique:coupons,code',
+            'coupon_method' => 'required|in:code,link',
+            'direct_link' => 'nullable|required_if:coupon_method,link|url|max:2000',
+            'category_id' => 'nullable|exists:categories,id',
+            'sub_category_id' => 'nullable|exists:categories,id',
             'promo_images' => 'nullable|array|max:5',
             'promo_images.*' => 'image|max:2048',
             'promo_video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',
@@ -264,6 +271,7 @@ class AffiliateController extends Controller
         $coupon = Coupon::create([
             ...$validated,
             'created_by' => auth()->id(),
+            'is_global' => true, // Admin coupons belong to Global Stores
             'promo_images' => $promoImages,
             'promo_video' => $promoVideo,
             'free_shipping' => $request->boolean('free_shipping'),
@@ -296,9 +304,13 @@ class AffiliateController extends Controller
      */
     public function editCoupon(Coupon $coupon)
     {
-        $stores = User::where('user_type', 'distributor')->get(['id', 'store_name', 'name', 'country']);
+        $stores = User::where('user_type', 'distributor')->where('is_global_store', true)->get(['id', 'store_name', 'name', 'country']);
+        $categories = \App\Models\Category::whereNull('parent_id')->where('is_active', true)->orderBy('name')->get();
+        $subCategories = $coupon->category_id
+            ? \App\Models\Category::where('parent_id', $coupon->category_id)->where('is_active', true)->orderBy('name')->get()
+            : collect();
 
-        return view('admin.affiliate.edit-coupon', compact('coupon', 'stores'));
+        return view('admin.affiliate.edit-coupon', compact('coupon', 'stores', 'categories', 'subCategories'));
     }
 
     /**
@@ -328,6 +340,10 @@ class AffiliateController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'is_active' => 'boolean',
+            'coupon_method' => 'required|in:code,link',
+            'direct_link' => 'nullable|required_if:coupon_method,link|url|max:2000',
+            'category_id' => 'nullable|exists:categories,id',
+            'sub_category_id' => 'nullable|exists:categories,id',
             'promo_images' => 'nullable|array|max:5',
             'promo_images.*' => 'image|max:2048',
             'promo_video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',

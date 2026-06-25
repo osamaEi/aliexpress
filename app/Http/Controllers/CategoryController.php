@@ -215,6 +215,20 @@ class CategoryController extends Controller
     }
 
     /**
+     * Return the active child categories of a category from the DB (JSON).
+     * Lightweight cascade for coupon category pickers (admin + distributor).
+     */
+    public function children(Category $category)
+    {
+        $children = $category->children()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'name_ar']);
+
+        return response()->json(['success' => true, 'children' => $children]);
+    }
+
+    /**
      * Fetch subcategories from AliExpress API
      */
     public function fetchSubcategories(Category $category)

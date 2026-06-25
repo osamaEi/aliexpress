@@ -152,6 +152,44 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            <!-- Coupon Method -->
+                            <div class="col-md-6">
+                                <label for="coupon_method" class="form-label">{{ app()->getLocale() == 'ar' ? 'نوع الكوبون' : 'Coupon Type' }} <span class="text-danger">*</span></label>
+                                <select class="form-select" id="coupon_method" name="coupon_method" required onchange="toggleCouponMethod()">
+                                    <option value="code" {{ old('coupon_method', $coupon->coupon_method) === 'code' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'كوبون برمز' : 'Code Coupon' }}</option>
+                                    <option value="link" {{ old('coupon_method', $coupon->coupon_method) === 'link' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'كوبون برابط مباشر' : 'Direct Link Coupon' }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="direct_link_wrap" style="display:none;">
+                                <label for="direct_link" class="form-label">{{ app()->getLocale() == 'ar' ? 'الرابط المباشر' : 'Direct Link' }}</label>
+                                <input type="url" class="form-control" id="direct_link" name="direct_link" value="{{ old('direct_link', $coupon->direct_link) }}" placeholder="https://...">
+                            </div>
+
+                            <!-- Main Category -->
+                            <div class="col-md-6">
+                                <label for="category_id" class="form-label">{{ app()->getLocale() == 'ar' ? 'التصنيف الرئيسي' : 'Main Category' }}</label>
+                                <select class="form-select" id="category_id" name="category_id" onchange="loadSubCategories(this.value)">
+                                    <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف' : 'Select Category' }}</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}" {{ old('category_id', $coupon->category_id) == $cat->id ? 'selected' : '' }}>
+                                            {{ app()->getLocale() == 'ar' && $cat->name_ar ? $cat->name_ar : $cat->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <!-- Sub Category -->
+                            <div class="col-md-6">
+                                <label for="sub_category_id" class="form-label">{{ app()->getLocale() == 'ar' ? 'التصنيف الفرعي' : 'Sub Category' }}</label>
+                                <select class="form-select" id="sub_category_id" name="sub_category_id">
+                                    <option value="">{{ app()->getLocale() == 'ar' ? 'اختر التصنيف الفرعي' : 'Select sub category' }}</option>
+                                    @foreach($subCategories as $sub)
+                                        <option value="{{ $sub->id }}" {{ old('sub_category_id', $coupon->sub_category_id) == $sub->id ? 'selected' : '' }}>
+                                            {{ app()->getLocale() == 'ar' && $sub->name_ar ? $sub->name_ar : $sub->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -513,4 +551,31 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script>
+function toggleCouponMethod() {
+    const method = document.getElementById('coupon_method').value;
+    document.getElementById('direct_link_wrap').style.display = method === 'link' ? 'block' : 'none';
+}
+function loadSubCategories(categoryId, selectedSub = null) {
+    const subSelect = document.getElementById('sub_category_id');
+    const isAr = '{{ app()->getLocale() }}' === 'ar';
+    subSelect.innerHTML = `<option value="">${isAr ? 'اختر التصنيف الفرعي' : 'Select sub category'}</option>`;
+    if (!categoryId) return;
+    fetch(`{{ url('categories') }}/${categoryId}/children`)
+        .then(r => r.json())
+        .then(d => {
+            (d.children || []).forEach(c => {
+                const o = document.createElement('option');
+                o.value = c.id;
+                o.textContent = isAr && c.name_ar ? c.name_ar : c.name;
+                if (selectedSub && String(selectedSub) === String(c.id)) o.selected = true;
+                subSelect.appendChild(o);
+            });
+        });
+}
+document.addEventListener('DOMContentLoaded', toggleCouponMethod);
+</script>
+@endpush
 @endsection
