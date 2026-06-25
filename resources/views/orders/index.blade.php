@@ -173,7 +173,7 @@
                                                 </div>
                                             </div>
                                         @else
-                                            <span class="badge bg-label-secondary">{{ app()->getLocale() == 'ar' ? 'علي إكسبريس' : 'AliExpress' }}</span>
+                                            <span class="badge bg-label-secondary">🇨🇳 {{ app()->getLocale() == 'ar' ? 'الصين' : 'China' }}</span>
                                         @endif
                                     </td>
                                     <td>

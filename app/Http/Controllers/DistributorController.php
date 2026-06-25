@@ -462,14 +462,45 @@ class DistributorController extends Controller
         ]);
 
         $oldStatus = $order->status;
-        $order->status = $validated['status'];
+        $newStatus = $validated['status'];
+        $order->status = $newStatus;
+
+        // Keep the timeline timestamps in sync with the chosen status so the
+        // order-timeline on the details page reflects the change. We set a date
+        // when reaching a stage, and clear later stages if the status moves back.
+        switch ($newStatus) {
+            case 'pending':
+                $order->placed_at = null;
+                $order->shipped_at = null;
+                $order->delivered_at = null;
+                break;
+            case 'processing':
+                $order->placed_at = $order->placed_at ?: now();
+                $order->shipped_at = null;
+                $order->delivered_at = null;
+                break;
+            case 'shipped':
+                $order->placed_at = $order->placed_at ?: now();
+                $order->shipped_at = $order->shipped_at ?: now();
+                $order->delivered_at = null;
+                break;
+            case 'delivered':
+                $order->placed_at = $order->placed_at ?: now();
+                $order->shipped_at = $order->shipped_at ?: now();
+                $order->delivered_at = $order->delivered_at ?: now();
+                break;
+            case 'cancelled':
+                // leave timestamps as-is; cancellation is reflected by status only
+                break;
+        }
+
         $order->save();
 
         \Log::info('Distributor updated order status', [
             'distributor_id' => $user->id,
             'order_id' => $order->id,
             'old_status' => $oldStatus,
-            'new_status' => $validated['status']
+            'new_status' => $newStatus
         ]);
 
         if ($request->expectsJson()) {
