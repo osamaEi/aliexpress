@@ -1006,6 +1006,7 @@ class OrderController extends Controller
             'quantity' => 'required|integer|min:1',
             'coupon_id' => 'nullable|exists:coupons,id',
             'coupon_code' => 'nullable|string|max:50',
+            'marketer_code' => 'nullable|string|max:50',
             'discount_amount' => 'nullable|numeric|min:0',
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'nullable|email|max:255',
@@ -1078,8 +1079,20 @@ class OrderController extends Controller
             $couponId = null;
             $couponCode = null;
 
-            if (!empty($validated['coupon_id'])) {
-                $coupon = Coupon::find($validated['coupon_id']);
+            // Resolve a marketer tracking code (if the order came through a marketer's link)
+            $marketerActivation = null;
+            $trackingCode = $validated['marketer_code'] ?? $request->input('marketer_code');
+            if (!empty($trackingCode)) {
+                $marketerActivation = \DB::table('coupon_marketer')
+                    ->where('tracking_code', $trackingCode)
+                    ->where('status', 'active')
+                    ->first();
+            }
+
+            if (!empty($validated['coupon_id']) || $marketerActivation) {
+                // A marketer tracking code implies its coupon; otherwise use the chosen coupon
+                $couponLookupId = $marketerActivation->coupon_id ?? $validated['coupon_id'];
+                $coupon = Coupon::find($couponLookupId);
                 if ($coupon && $coupon->isValid()) {
                     // Recalculate discount to ensure it's accurate
                     $discountAmount = $coupon->calculateDiscount($subtotal);
@@ -1090,10 +1103,45 @@ class OrderController extends Controller
                     $coupon->increment('used_count');
                     $coupon->increment('total_discount_given', $discountAmount);
 
+                    // Attribute commission to the marketer (if used via a tracking code)
+                    if ($marketerActivation) {
+                        $commission = $coupon->calculateCommission($subtotal);
+
+                        \App\Models\CouponUsage::create([
+                            'coupon_id' => $coupon->id,
+                            'user_id' => $user->id,
+                            'marketer_id' => $marketerActivation->user_id,
+                            'order_amount' => $subtotal,
+                            'discount_amount' => $discountAmount,
+                            'commission_amount' => $commission,
+                            'commission_status' => 'pending',
+                        ]);
+
+                        $coupon->increment('total_commission_earned', $commission);
+
+                        // Track earnings on the marketer's activation row + credit wallet
+                        \DB::table('coupon_marketer')
+                            ->where('id', $marketerActivation->id)
+                            ->increment('earnings', $commission);
+
+                        $marketer = \App\Models\User::find($marketerActivation->user_id);
+                        if ($marketer) {
+                            $wallet = $marketer->getOrCreateWallet();
+                            $wallet->credit(
+                                $commission,
+                                'coupon_commission',
+                                app()->getLocale() === 'ar'
+                                    ? 'أرباح كوبونات المتاجر العالمية'
+                                    : 'Global Stores coupon earnings'
+                            );
+                        }
+                    }
+
                     Log::info('Coupon applied to order', [
                         'coupon_id' => $coupon->id,
                         'coupon_code' => $coupon->code,
                         'discount_amount' => $discountAmount,
+                        'marketer_id' => $marketerActivation->user_id ?? null,
                         'subtotal' => $subtotal
                     ]);
                 }

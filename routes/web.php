@@ -114,10 +114,16 @@ Route::prefix('distributor/register')->name('distributor.register.')->group(func
     Route::get('check-slug', [DistributorRegistrationController::class, 'checkSlug'])->name('check-slug');
 });
 
-// Marketer registration (single step)
+// Marketer registration (multi-step, email + WhatsApp OTP — like seller, no categories)
 Route::prefix('marketer/register')->name('marketer.register.')->group(function () {
-    Route::get('/', [App\Http\Controllers\MarketerRegistrationController::class, 'show'])->name('show');
-    Route::post('/', [App\Http\Controllers\MarketerRegistrationController::class, 'register'])->name('register');
+    Route::get('step-1', [App\Http\Controllers\MarketerRegistrationController::class, 'showStep1'])->name('step1');
+    Route::post('step-1', [App\Http\Controllers\MarketerRegistrationController::class, 'processStep1'])->name('step1.process');
+    Route::get('step-2', [App\Http\Controllers\MarketerRegistrationController::class, 'showStep2'])->name('step2');
+    Route::post('verify-otp', [App\Http\Controllers\MarketerRegistrationController::class, 'verifyOTP'])->name('verify-otp');
+    Route::post('resend-otp', [App\Http\Controllers\MarketerRegistrationController::class, 'resendOTP'])->name('resend-otp');
+    Route::get('step-3', [App\Http\Controllers\MarketerRegistrationController::class, 'showStep3'])->name('step3');
+    Route::post('verify-whatsapp-otp', [App\Http\Controllers\MarketerRegistrationController::class, 'verifyWhatsAppOTP'])->name('verify-whatsapp-otp');
+    Route::post('resend-whatsapp-otp', [App\Http\Controllers\MarketerRegistrationController::class, 'resendWhatsAppOTP'])->name('resend-whatsapp-otp');
 });
 
 // AliExpress API Test Routes (Public - No Auth Required)

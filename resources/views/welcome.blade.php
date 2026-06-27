@@ -492,7 +492,7 @@
                 <i class="ri-store-2-line"></i>
                 <span>{{ app()->getLocale() == 'ar' ? 'سجل كمتجر' : 'Register as Distributor' }}</span>
             </a>
-            <a href="{{ route('marketer.register.show') }}" class="nav-btn marketer-btn">
+            <a href="{{ route('marketer.register.step1') }}" class="nav-btn marketer-btn">
                 <i class="ri-megaphone-line"></i>
                 <span>{{ app()->getLocale() == 'ar' ? 'سجل كمسوّق' : 'Register as Marketer' }}</span>
             </a>
