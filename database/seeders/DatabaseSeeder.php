@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             DistributorUserSeeder::class,
             MarketerUserSeeder::class,
             CitiesDistrictsSeeder::class,
+            CouponSeeder::class,
         ]);
     }
 }

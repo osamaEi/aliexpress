@@ -112,7 +112,13 @@ class MarketerRegistrationController extends Controller
         }
 
         $email = Session::get('marketer_registration.email');
-        $this->sendEmailOTP($email);
+
+        // Only send a fresh OTP if there isn't a still-valid one (prevents a new code
+        // on every page refresh, which would make earlier codes "wrong").
+        $existingExpiry = Session::get('otp_expiry_' . $email);
+        if (!Session::get('otp_' . $email) || !$existingExpiry || now()->gt($existingExpiry)) {
+            $this->sendEmailOTP($email);
+        }
 
         return view('marketer.register.step2', compact('email'));
     }
@@ -133,7 +139,7 @@ class MarketerRegistrationController extends Controller
         if (!$storedOTP || !$otpExpiry || now()->gt($otpExpiry)) {
             return back()->withErrors(['otp' => $isAr ? 'انتهت صلاحية الرمز. يرجى طلب رمز جديد.' : 'OTP expired. Please request a new one.']);
         }
-        if ($request->otp !== $storedOTP) {
+        if (trim((string) $request->otp) !== trim((string) $storedOTP)) {
             return back()->withErrors(['otp' => $isAr ? 'رمز التحقق غير صحيح.' : 'Invalid OTP code.']);
         }
 
@@ -164,7 +170,12 @@ class MarketerRegistrationController extends Controller
         }
 
         $phone = Session::get('marketer_registration.phone');
-        $this->sendWhatsAppOTP($phone);
+
+        // Only send a fresh WhatsApp OTP if there isn't a still-valid one.
+        $existingExpiry = Session::get('whatsapp_otp_expiry_' . $phone);
+        if (!Session::get('whatsapp_otp_' . $phone) || !$existingExpiry || now()->gt($existingExpiry)) {
+            $this->sendWhatsAppOTP($phone);
+        }
 
         return view('marketer.register.step3', compact('phone'));
     }
@@ -187,7 +198,7 @@ class MarketerRegistrationController extends Controller
         if (!$storedOTP || !$otpExpiry || now()->gt($otpExpiry)) {
             return back()->withErrors(['otp' => $isAr ? 'انتهت صلاحية الرمز. يرجى طلب رمز جديد.' : 'OTP expired. Please request a new one.']);
         }
-        if ($request->otp !== $storedOTP) {
+        if (trim((string) $request->otp) !== trim((string) $storedOTP)) {
             return back()->withErrors(['otp' => $isAr ? 'رمز التحقق غير صحيح.' : 'Invalid OTP code.']);
         }
 
