@@ -1267,8 +1267,13 @@ class OrderController extends Controller
                 ]);
             }
 
+            $ar = app()->getLocale() === 'ar';
+            $successMsg = $ar
+                ? 'تم إنشاء الطلب بنجاح! رقم الطلب: ' . $order->order_number . '. تم خصم المبلغ من محفظتك. سيقوم الموزع بمعالجة طلبك قريباً.'
+                : 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet. The distributor will process your order shortly.';
+
             return redirect()->route('orders.show', $order)
-                ->with('success', 'Order created successfully! Order Number: ' . $order->order_number . '. Amount deducted from your wallet. The distributor will process your order shortly.');
+                ->with('success', $successMsg);
 
         } catch (\Exception $e) {
             DB::rollBack();
