@@ -63,6 +63,14 @@
             <span class="menu-header-text">{{ __('messages.account') }}</span>
         </li>
 
+        <!-- Subscriptions -->
+        <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'active' : '' }}">
+            <a href="{{ route('subscriptions.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-vip-crown-line"></i>
+                <div>{{ $ar ? 'الاشتراكات' : 'Subscriptions' }}</div>
+            </a>
+        </li>
+
         <!-- Wallet -->
         <li class="menu-item {{ request()->routeIs('wallet.*') ? 'active' : '' }}">
             <a href="{{ route('wallet.index') }}" class="menu-link">

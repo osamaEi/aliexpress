@@ -43,7 +43,7 @@ class SubscriptionManagementController extends Controller
             'duration_days' => 'required|integer|min:1',
             'sort_order' => 'nullable|integer',
             'color' => 'required|string',
-            'role' => 'required|in:seller,distributor,both',
+            'role' => 'required|in:seller,distributor,marketer,both',
             'max_products' => 'required|integer|min:1',
             'max_orders_per_month' => 'required|integer|min:1',
             'commission_rate' => 'required|numeric|min:0|max:100',
@@ -87,7 +87,7 @@ class SubscriptionManagementController extends Controller
             'price' => 'required|numeric|min:0',
             'duration_days' => 'required|integer|min:1',
             'color' => 'required|string',
-            'role' => 'required|in:seller,distributor,both',
+            'role' => 'required|in:seller,distributor,marketer,both',
             'max_products' => 'required|integer|min:1',
             'max_orders_per_month' => 'required|integer|min:1',
             'commission_rate' => 'required|numeric|min:0|max:100',
@@ -150,6 +150,28 @@ class SubscriptionManagementController extends Controller
 
         $userSubscriptions = $query->latest()->paginate(20)->withQueryString();
         $role = 'distributor';
+
+        return view('admin.subscriptions.users', compact('userSubscriptions', 'role'));
+    }
+
+    /**
+     * View marketer subscriptions
+     */
+    public function marketerSubscriptions(Request $request)
+    {
+        $query = UserSubscription::with(['user', 'subscription'])
+            ->whereHas('user', fn($q) => $q->where('user_type', 'marketer'));
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $query->whereHas('user', fn($q) => $q->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('email', 'like', '%'.$request->search.'%'));
+        }
+
+        $userSubscriptions = $query->latest()->paginate(20)->withQueryString();
+        $role = 'marketer';
 
         return view('admin.subscriptions.users', compact('userSubscriptions', 'role'));
     }

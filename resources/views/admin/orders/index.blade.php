@@ -277,7 +277,7 @@
                                     {{-- Sync with AliExpress --}}
                                     @if(!$order->aliexpress_order_id && $order->status === 'pending')
                                         <form method="POST" action="{{ route('admin.orders.sync', $order) }}" class="d-inline"
-                                              data-confirm="{{ $ar ? 'مزامنة هذا الطلب مع علي إكسبريس؟' : 'Sync this order with AliExpress?' }}">
+                                              data-confirm="{{ $ar ? 'مزامنة هذا الطلب مع ؟' : 'Sync this order with AliExpress?' }}">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-icon btn-outline-primary" title="{{ __('messages.sync_with_aliexpress') }}">
                                                 <i class="ri-cloud-line"></i>

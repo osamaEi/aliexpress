@@ -57,8 +57,8 @@ return new class extends Migration
             ],
             [
                 'code' => 'CN',
-                'name' => 'China (AliExpress)',
-                'name_ar' => 'الصين (علي إكسبريس)',
+                'name' => 'China ',
+                'name_ar' => 'الصين ',
                 'flag' => '🇨🇳',
                 'phone_code' => '+86',
                 'currency_code' => 'USD',

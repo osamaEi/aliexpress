@@ -163,6 +163,9 @@
                             <option value="distributor" {{ old('role') === 'distributor' ? 'selected' : '' }}>
                                 {{ app()->getLocale() == 'ar' ? 'متجر فقط' : 'Stores Only' }}
                             </option>
+                            <option value="marketer" {{ old('role') === 'marketer' ? 'selected' : '' }}>
+                                {{ app()->getLocale() == 'ar' ? 'مسوّق فقط' : 'Marketers Only' }}
+                            </option>
                             <option value="both" {{ old('role', 'both') === 'both' ? 'selected' : '' }}>
                                 {{ app()->getLocale() == 'ar' ? 'الجميع' : 'Both (Sellers & Stores)' }}
                             </option>

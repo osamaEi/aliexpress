@@ -121,8 +121,14 @@
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.subscriptions.distributors') ? 'active' : '' }}">
                     <a href="{{ route('admin.subscriptions.distributors') }}" class="menu-link">
-                        <i class="menu-icon tf-icons ri-truck-line"></i>
-                        <div>{{ app()->getLocale() == 'ar' ? 'اشتراكات الموزعين' : 'Distributors' }}</div>
+                        <i class="menu-icon tf-icons ri-store-2-line"></i>
+                        <div>{{ app()->getLocale() == 'ar' ? 'اشتراكات المتاجر' : 'Stores' }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.subscriptions.marketers') ? 'active' : '' }}">
+                    <a href="{{ route('admin.subscriptions.marketers') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-megaphone-line"></i>
+                        <div>{{ app()->getLocale() == 'ar' ? 'اشتراكات المسوّقين' : 'Marketers' }}</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.subscriptions.users') ? 'active' : '' }}">

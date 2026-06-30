@@ -118,6 +118,10 @@
             <i class="ri-store-2-line me-1"></i>
             {{ app()->getLocale() == 'ar' ? 'اشتراكات المتاجر' : 'Store Subscriptions' }}
         </a>
+        <a href="{{ route('admin.subscriptions.marketers') }}" class="btn btn-outline-info">
+            <i class="ri-megaphone-line me-1"></i>
+            {{ app()->getLocale() == 'ar' ? 'اشتراكات المسوّقين' : 'Marketer Subscriptions' }}
+        </a>
         <a href="{{ route('admin.subscriptions.users') }}" class="btn btn-outline-secondary">
             <i class="ri-group-line me-1"></i>
             {{ app()->getLocale() == 'ar' ? 'جميع الاشتراكات' : 'All Subscriptions' }}

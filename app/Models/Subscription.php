@@ -97,6 +97,7 @@ class Subscription extends Model
         return match($this->role) {
             'seller'      => 'bg-label-primary',
             'distributor' => 'bg-label-success',
+            'marketer'    => 'bg-label-info',
             default       => 'bg-label-secondary',
         };
     }
@@ -108,8 +109,9 @@ class Subscription extends Model
     {
         $locale = app()->getLocale();
         return match($this->role) {
-            'seller'      => $locale === 'ar' ? 'تجار'    : 'Sellers',
-            'distributor' => $locale === 'ar' ? 'موزعون'  : 'Distributors',
+            'seller'      => $locale === 'ar' ? 'بائع'    : 'Sellers',
+            'distributor' => $locale === 'ar' ? 'متجر'    : 'Stores',
+            'marketer'    => $locale === 'ar' ? 'مسوّق'   : 'Marketers',
             default       => $locale === 'ar' ? 'الجميع'  : 'Both',
         };
     }

@@ -454,6 +454,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/subscriptions/users', [SubscriptionManagementController::class, 'userSubscriptions'])->name('subscriptions.users');
         Route::get('/subscriptions/sellers', [SubscriptionManagementController::class, 'sellerSubscriptions'])->name('subscriptions.sellers');
         Route::get('/subscriptions/distributors', [SubscriptionManagementController::class, 'distributorSubscriptions'])->name('subscriptions.distributors');
+        Route::get('/subscriptions/marketers', [SubscriptionManagementController::class, 'marketerSubscriptions'])->name('subscriptions.marketers');
         Route::get('/subscriptions/{subscription}/edit', [SubscriptionManagementController::class, 'edit'])->name('subscriptions.edit');
         Route::put('/subscriptions/{subscription}', [SubscriptionManagementController::class, 'update'])->name('subscriptions.update');
         Route::post('/subscriptions/{userSubscription}/close', [SubscriptionManagementController::class, 'closeSubscription'])->name('subscriptions.close');
