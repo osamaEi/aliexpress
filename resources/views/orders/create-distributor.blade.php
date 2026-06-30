@@ -4,11 +4,12 @@
 
 @section('content')
 @php
-    // Convert product price to selected currency
-    $priceConverted = $currentCurrency->convertFrom($product->price, $product->currency ?? 'AED');
-    // Wallet balance is always in AED
+    // Always use AED (product currency) for pricing — wallet is stored in AED,
+    // so displaying/deducting in AED avoids currency mismatch.
+    $aedCurrency = \App\Models\Currency::where('code', 'AED')->first() ?? $currentCurrency;
+    $priceConverted = $product->price;   // AED — no conversion needed
     $walletBalanceAED = auth()->user()->wallet ? auth()->user()->wallet->balance : 0;
-    $walletBalanceConverted = $currentCurrency->convertFrom($walletBalanceAED, 'AED');
+    $walletBalanceConverted = $walletBalanceAED;  // AED
 @endphp
 <div class="container-fluid order-create-page" dir="{{ $ar ? 'rtl' : 'ltr' }}">
     <div class="row justify-content-center">
@@ -101,7 +102,7 @@
                     </div>
                     <div class="text-{{ $ar ? 'start' : 'end' }}">
                         <div class="text-muted small">{{ $ar ? 'سعر الوحدة' : 'Unit price' }}</div>
-                        <div class="fs-5 fw-bold text-primary">{!! $currentCurrency->format($priceConverted) !!}</div>
+                        <div class="fs-5 fw-bold text-primary">{!! $aedCurrency->format($priceConverted) !!}</div>
                     </div>
                 </div>
 
@@ -283,7 +284,7 @@
                             <div class="review-summary mt-3">
                                 <div class="summary-row">
                                     <span>{{ $ar ? 'سعر الوحدة' : 'Unit Price' }}</span>
-                                    <strong id="unit_price_display">{!! $currentCurrency->format($priceConverted) !!}</strong>
+                                    <strong id="unit_price_display">{!! $aedCurrency->format($priceConverted) !!}</strong>
                                 </div>
                                 <div class="summary-row">
                                     <span>{{ $ar ? 'الكمية' : 'Quantity' }}</span>
@@ -291,11 +292,11 @@
                                 </div>
                                 <div class="summary-row">
                                     <span>{{ $ar ? 'المجموع الفرعي' : 'Subtotal' }}</span>
-                                    <strong id="subtotal_display">{!! $currentCurrency->format($priceConverted) !!}</strong>
+                                    <strong id="subtotal_display">{!! $aedCurrency->format($priceConverted) !!}</strong>
                                 </div>
                                 <div class="summary-row text-success" id="discount_row" style="display: none !important;">
                                     <span>{{ $ar ? 'الخصم' : 'Discount' }}</span>
-                                    <strong id="discount_display">- {{ $currentCurrency->symbol }} 0.00</strong>
+                                    <strong id="discount_display">- {{ $aedCurrency->symbol }} 0.00</strong>
                                 </div>
                                 <div class="summary-row">
                                     <span><i class="ri-truck-line me-1 text-muted"></i>{{ $ar ? 'الشحن' : 'Shipping' }}</span>
@@ -303,7 +304,7 @@
                                 </div>
                                 <div class="summary-total">
                                     <span>{{ $ar ? 'الإجمالي' : 'Total' }}</span>
-                                    <span class="total-amount" id="grand_total">{!! $currentCurrency->format($priceConverted) !!}</span>
+                                    <span class="total-amount" id="grand_total">{!! $aedCurrency->format($priceConverted) !!}</span>
                                 </div>
                             </div>
 
@@ -312,7 +313,7 @@
                                     <span class="wallet-icon"><i class="ri-wallet-3-line"></i></span>
                                     <div>
                                         <small class="text-muted d-block">{{ $ar ? 'رصيدك الحالي' : 'Your Balance' }}</small>
-                                        <strong class="text-success">{!! $currentCurrency->format($walletBalanceConverted) !!}</strong>
+                                        <strong class="text-success">{!! $aedCurrency->format($walletBalanceConverted) !!}</strong>
                                     </div>
                                 </div>
                             @else
@@ -352,11 +353,11 @@ let discountAmount = 0;
 let shippingCost = 0;        // resolved shipping cost (in product currency / AED)
 let shippingResolved = false; // whether a valid rate was found for the address
 
-// Currency data
+// Always show prices in AED (product & wallet currency) to match server-side deduction
 const currentCurrency = {
-    code: '{{ $currentCurrency->code }}',
-    symbol: '{{ $currentCurrency->symbol }}',
-    exchangeRate: {{ $currentCurrency->exchange_rate }}
+    code: '{{ $aedCurrency->code }}',
+    symbol: '{{ $aedCurrency->symbol }}',
+    exchangeRate: 1
 };
 
 // Currency icon SVGs
