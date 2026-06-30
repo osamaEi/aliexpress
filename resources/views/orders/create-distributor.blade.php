@@ -162,21 +162,21 @@
                                            id="customer_email" name="customer_email" value="{{ old('customer_email') }}">
                                     @error('customer_email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="phone_country" class="form-label">{{ $ar ? 'رمز الدولة' : 'Code' }} *</label>
-                                    <select class="form-select @error('phone_country') is-invalid @enderror" id="phone_country" name="phone_country" required>
-                                        <option value="+971" {{ old('phone_country') == '+971' ? 'selected' : '' }}>🇦🇪 +971</option>
-                                        <option value="+966" {{ old('phone_country') == '+966' ? 'selected' : '' }}>🇸🇦 +966</option>
-                                        <option value="+20" {{ old('phone_country') == '+20' ? 'selected' : '' }}>🇪🇬 +20</option>
-                                        <option value="+1" {{ old('phone_country') == '+1' ? 'selected' : '' }}>🇺🇸 +1</option>
-                                    </select>
-                                    @error('phone_country')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                </div>
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <label for="customer_phone" class="form-label">{{ $ar ? 'رقم الهاتف' : 'Phone Number' }} *</label>
-                                    <input type="tel" class="form-control @error('customer_phone') is-invalid @enderror"
-                                           id="customer_phone" name="customer_phone" value="{{ old('customer_phone') }}" required>
-                                    @error('customer_phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    <div class="input-group phone-group" dir="ltr">
+                                        <select class="form-select @error('phone_country') is-invalid @enderror" id="phone_country" name="phone_country" required style="max-width: 110px; flex: 0 0 auto;">
+                                            <option value="+971" {{ old('phone_country') == '+971' ? 'selected' : '' }}>🇦🇪 +971</option>
+                                            <option value="+966" {{ old('phone_country') == '+966' ? 'selected' : '' }}>🇸🇦 +966</option>
+                                            <option value="+20" {{ old('phone_country') == '+20' ? 'selected' : '' }}>🇪🇬 +20</option>
+                                            <option value="+1" {{ old('phone_country') == '+1' ? 'selected' : '' }}>🇺🇸 +1</option>
+                                        </select>
+                                        <input type="tel" class="form-control @error('customer_phone') is-invalid @enderror"
+                                               id="customer_phone" name="customer_phone" value="{{ old('customer_phone') }}" required
+                                               placeholder="{{ $ar ? 'رقم الهاتف' : 'Phone number' }}">
+                                    </div>
+                                    @error('phone_country')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                    @error('customer_phone')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                 </div>
                             </div>
                         </div>
@@ -773,13 +773,17 @@ document.addEventListener('DOMContentLoaded', function() {
 .order-create-page .card { border: none; border-radius: 14px; }
 .order-create-page .form-control, .order-create-page .form-select {
     border-radius: 8px;
-    padding: 0.4rem 0.65rem;
-    font-size: 0.875rem;
-    min-height: 38px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.825rem;
+    min-height: 34px;
+    height: 34px;
 }
-.order-create-page .form-label { font-size: 0.8rem; margin-bottom: 0.25rem; }
-.order-create-page .input-group-text { padding: 0.4rem 0.6rem; }
-.order-create-page textarea.form-control { min-height: auto; }
+.order-create-page .form-label { font-size: 0.775rem; margin-bottom: 0.2rem; }
+.order-create-page .input-group-text { padding: 0.3rem 0.55rem; font-size: 0.825rem; }
+.order-create-page textarea.form-control { min-height: auto; height: auto; }
+/* Phone group: country code on the left, number filling the rest */
+.order-create-page .phone-group .form-select { border-radius: 8px 0 0 8px; }
+.order-create-page .phone-group .form-control { border-radius: 0 8px 8px 0; }
 .order-create-page .btn { border-radius: 8px; }
 .order-create-page .btn-primary { background-color: #561C04 !important; border-color: #561C04 !important; }
 .order-create-page .btn-primary:hover { background-color: #7A3206 !important; border-color: #7A3206 !important; }
