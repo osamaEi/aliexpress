@@ -316,6 +316,17 @@
                                         $txLabel  = __('messages.admin_credit');
                                         $note     = $transaction->description && $transaction->description !== 'Admin credit' ? ' — ' . $transaction->description : '';
                                         $txDesc   = __('messages.admin_credit_desc') . $note;
+                                    } elseif ($txType === 'distributor_order_earning') {
+                                        $normType = 'distributor_order_earning';
+                                        $txLabel  = app()->getLocale() === 'ar' ? 'أرباح طلب' : 'Order Earning';
+                                        $num      = $meta['order_id'] ?? '';
+                                        $txDesc   = app()->getLocale() === 'ar'
+                                            ? 'أرباح بيع منتج عبر طلب' . ($num ? ' #' . $num : '')
+                                            : 'Earning from a product sold' . ($num ? ' (order #' . $num . ')' : '');
+                                    } elseif ($txType === 'coupon_commission') {
+                                        $normType = 'coupon_commission';
+                                        $txLabel  = app()->getLocale() === 'ar' ? 'أرباح كوبونات المتاجر العالمية' : 'Global Stores Coupon Earning';
+                                        $txDesc   = $transaction->description ?? '';
                                     } else {
                                         $normType = $txType;
                                         $txLabel  = ucfirst(str_replace('_', ' ', $txType));

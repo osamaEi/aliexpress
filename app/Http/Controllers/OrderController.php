@@ -1262,7 +1262,26 @@ class OrderController extends Controller
             ]);
 
             // Deduct amount from seller's wallet
-            $user->wallet->debit($grandTotal, 'Order payment for order #' . $order->order_number);
+            $user->wallet->debit($grandTotal, 'order_payment', 'Order payment for order #' . $order->order_number);
+
+            // Credit the owning distributor's wallet with their share: the product's base
+            // price (their own listed price) plus the shipping cost they fulfil. The extra
+            // markup (seller/admin profit) stays out of the distributor's payout.
+            $distributorOwner = $product->distributorOwner();
+            if ($distributorOwner) {
+                $distributorShare = round(((float) $product->price * $quantity) + $shippingCost, 2);
+                if ($distributorShare > 0) {
+                    $distributorWallet = $distributorOwner->getOrCreateWallet();
+                    $distributorWallet->credit(
+                        $distributorShare,
+                        'distributor_order_earning',
+                        app()->getLocale() === 'ar'
+                            ? 'أرباح طلب رقم ' . $order->order_number
+                            : 'Earning for order #' . $order->order_number,
+                        ['order_id' => $order->id]
+                    );
+                }
+            }
 
             // Update product stock if tracking inventory
             if ($product->track_inventory) {

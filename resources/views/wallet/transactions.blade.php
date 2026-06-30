@@ -99,6 +99,8 @@
                         <option value="withdrawal" {{ request('transaction_type') === 'withdrawal' ? 'selected' : '' }}>{{ __('messages.withdrawal') }}</option>
                         <option value="commission" {{ request('transaction_type') === 'commission' ? 'selected' : '' }}>{{ __('messages.commission') }}</option>
                         <option value="order_payment" {{ request('transaction_type') === 'order_payment' ? 'selected' : '' }}>{{ __('messages.order_payment') }}</option>
+                        <option value="distributor_order_earning" {{ request('transaction_type') === 'distributor_order_earning' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'أرباح الطلبات' : 'Order Earnings' }}</option>
+                        <option value="coupon_commission" {{ request('transaction_type') === 'coupon_commission' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'أرباح الكوبونات' : 'Coupon Earnings' }}</option>
                         <option value="subscription_payment" {{ request('transaction_type') === 'subscription_payment' ? 'selected' : '' }}>{{ __('messages.subscription_payment') }}</option>
                         <option value="refund" {{ request('transaction_type') === 'refund' ? 'selected' : '' }}>{{ __('messages.refund') }}</option>
                         <option value="transfer_in" {{ request('transaction_type') === 'transfer_in' ? 'selected' : '' }}>{{ __('messages.transfer_in') }}</option>
@@ -190,9 +192,14 @@
                                     } else {
                                         $badgeKey = $rawTxType;
                                     }
+                                    $badgeText = $badgeKey === 'distributor_order_earning'
+                                        ? (app()->getLocale() === 'ar' ? 'أرباح طلب' : 'Order Earning')
+                                        : ($badgeKey === 'coupon_commission'
+                                            ? (app()->getLocale() === 'ar' ? 'أرباح كوبونات' : 'Coupon Earning')
+                                            : (__('messages.' . $badgeKey, [], null) ?? ucfirst(str_replace('_', ' ', $badgeKey))));
                                 @endphp
                                 <span class="badge bg-info">
-                                    {{ __('messages.' . $badgeKey, [], null) ?? ucfirst(str_replace('_', ' ', $badgeKey)) }}
+                                    {{ $badgeText }}
                                 </span>
                             </td>
                             <td>
@@ -212,6 +219,11 @@
                                     } elseif ($txType === 'admin_credit' || str_starts_with($txType, 'Admin credit')) {
                                         $note   = $transaction->description && $transaction->description !== 'Admin credit' ? ' — ' . $transaction->description : '';
                                         $txDesc = __('messages.admin_credit_desc') . $note;
+                                    } elseif ($txType === 'distributor_order_earning') {
+                                        $num    = $meta['order_id'] ?? '';
+                                        $txDesc = app()->getLocale() === 'ar'
+                                            ? 'أرباح بيع منتج عبر طلب' . ($num ? ' #' . $num : '')
+                                            : 'Earning from a product sold' . ($num ? ' (order #' . $num . ')' : '');
                                     } else {
                                         $txDesc = $transaction->description ?? '';
                                     }
