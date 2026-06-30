@@ -771,7 +771,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <style>
 .order-create-page .card { border: none; border-radius: 14px; }
-.order-create-page .form-control, .order-create-page .form-select { border-radius: 8px; }
+.order-create-page .form-control, .order-create-page .form-select {
+    border-radius: 8px;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.875rem;
+    min-height: 38px;
+}
+.order-create-page .form-label { font-size: 0.8rem; margin-bottom: 0.25rem; }
+.order-create-page .input-group-text { padding: 0.4rem 0.6rem; }
+.order-create-page textarea.form-control { min-height: auto; }
 .order-create-page .btn { border-radius: 8px; }
 .order-create-page .btn-primary { background-color: #561C04 !important; border-color: #561C04 !important; }
 .order-create-page .btn-primary:hover { background-color: #7A3206 !important; border-color: #7A3206 !important; }

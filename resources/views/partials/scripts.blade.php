@@ -28,8 +28,13 @@
         window.swalBase = Swal.mixin({
             confirmButtonColor: '#561C04',
             cancelButtonColor: '#6c757d',
+            denyButtonColor: '#6c757d',
             buttonsStyling: true,
             reverseButtons: isAr,
+            // Default button texts (localized) so no untranslated "No"/"Yes" leaks through
+            confirmButtonText: isAr ? 'نعم، تأكيد' : 'Yes, confirm',
+            cancelButtonText: isAr ? 'إلغاء' : 'Cancel',
+            denyButtonText: isAr ? 'لا' : 'No',
         });
 
         // Toast for quick success/error notifications

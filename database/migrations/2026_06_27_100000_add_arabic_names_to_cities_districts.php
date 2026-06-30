@@ -1,92 +1,44 @@
 <?php
 
-namespace Database\Seeders;
-
 use App\Models\City;
 use App\Models\District;
-use Illuminate\Database\Seeder;
+use Illuminate\Database\Migrations\Migration;
 
-class CitiesDistrictsSeeder extends Seeder
+return new class extends Migration
 {
     /**
-     * Seed major cities and a starter set of districts for AE, SA, QA, BH.
-     * Idempotent: re-running won't create duplicates.
+     * Backfill Arabic names for the seeded cities and districts so they display
+     * in Arabic on the order page and in the store/distributor screens.
      */
-    public function run(): void
+    public function up(): void
     {
-        $data = [
-            'AE' => [
-                'Dubai'        => ['Deira', 'Bur Dubai', 'Jumeirah', 'Al Barsha', 'Business Bay', 'Dubai Marina', 'Al Qusais', 'International City', 'Downtown Dubai', 'Mirdif'],
-                'Abu Dhabi'    => ['Al Khalidiyah', 'Al Mushrif', 'Khalifa City', 'Al Reem Island', 'Mussafah', 'Al Bateen', 'Al Maryah Island'],
-                'Sharjah'      => ['Al Majaz', 'Al Nahda', 'Al Qasimia', 'Muweilah', 'Al Taawun', 'Al Khan'],
-                'Ajman'        => ['Al Nuaimiya', 'Al Rashidiya', 'Al Jurf', 'Al Mowaihat'],
-                'Ras Al Khaimah' => ['Al Nakheel', 'Al Hamra', 'Khuzam', 'Al Dhait'],
-                'Fujairah'     => ['Al Faseel', 'Sakamkam', 'Merashid'],
-                'Umm Al Quwain' => ['Al Salama', 'Al Raas', 'Al Maidan'],
-            ],
-            'SA' => [
-                'Riyadh'   => ['Al Olaya', 'Al Malaz', 'Al Naseem', 'Al Murabba', 'King Fahd District', 'Al Wurud', 'Al Sahafa', 'Al Yasmin', 'Al Narjis', 'Al Aqiq'],
-                'Jeddah'   => ['Al Rawdah', 'Al Hamra', 'Al Salamah', 'Al Andalus', 'Al Faisaliyah', 'Al Naeem', 'Al Shati', 'Al Bawadi'],
-                'Mecca'    => ['Al Aziziyah', 'Al Shawqiyah', 'Al Naseem', 'Al Hindawiyah', 'Al Awali'],
-                'Medina'   => ['Quba', 'Al Aqiq', 'Al Aziziyah', 'Al Haram', 'Al Khalidiyah'],
-                'Dammam'   => ['Al Faisaliyah', 'Al Shati', 'Al Aziziyah', 'Al Mazruiyah', 'Al Adamah'],
-                'Khobar'   => ['Al Olaya', 'Al Aqrabiyah', 'Al Rakah', 'Al Thuqbah', 'Al Hizam'],
-                'Tabuk'    => ['Al Wadi', 'Al Faisaliyah', 'Al Rawdah'],
-            ],
-            'QA' => [
-                'Doha'        => ['West Bay', 'Al Sadd', 'Al Dafna', 'Msheireb', 'Najma', 'Al Mansoura', 'Old Airport', 'Bin Mahmoud'],
-                'Al Rayyan'   => ['Al Gharrafa', 'Muaither', 'Al Wajba', 'New Al Rayyan'],
-                'Al Wakrah'   => ['Al Wukair', 'Mesaieed', 'Barwa City'],
-                'Al Khor'     => ['Al Khor City', 'Al Thakhira'],
-                'Lusail'      => ['Marina District', 'Fox Hills', 'Energy City'],
-            ],
-            'BH' => [
-                'Manama'       => ['Juffair', 'Adliya', 'Seef', 'Gudaibiya', 'Hoora', 'Diplomatic Area', 'Salmaniya'],
-                'Muharraq'     => ['Arad', 'Hidd', 'Busaiteen', 'Galali'],
-                'Riffa'        => ['East Riffa', 'West Riffa', 'Riffa Views', 'Hajiyat'],
-                'Isa Town'     => ['Block 801', 'Block 802', 'Block 803'],
-                'Hamad Town'   => ['Roundabout 1', 'Roundabout 9', 'Roundabout 17'],
-                'Sitra'        => ['Wadyan', 'Mahazza', 'Sufala'],
-            ],
-        ];
+        $map = $this->translations();
 
-        $ar = $this->arabicNames();
-
-        foreach ($data as $countryCode => $cities) {
-            $citySort = 0;
-            foreach ($cities as $cityName => $districts) {
-                $city = City::firstOrCreate(
-                    ['country_code' => $countryCode, 'name' => $cityName],
-                    ['name_ar' => $ar[$cityName] ?? null, 'is_active' => true, 'sort_order' => $citySort++]
-                );
-
-                // Ensure Arabic name is set even if the row already existed
-                if (empty($city->name_ar) && isset($ar[$cityName])) {
-                    $city->update(['name_ar' => $ar[$cityName]]);
-                }
-
-                $districtSort = 0;
-                foreach ($districts as $districtName) {
-                    $district = District::firstOrCreate(
-                        ['city_id' => $city->id, 'name' => $districtName],
-                        ['name_ar' => $ar[$districtName] ?? null, 'is_active' => true, 'sort_order' => $districtSort++]
-                    );
-                    if (empty($district->name_ar) && isset($ar[$districtName])) {
-                        $district->update(['name_ar' => $ar[$districtName]]);
-                    }
-                }
+        foreach (City::whereNull('name_ar')->orWhere('name_ar', '')->get() as $city) {
+            if (isset($map[$city->name])) {
+                $city->update(['name_ar' => $map[$city->name]]);
             }
         }
 
-        $this->command->info('Cities & districts seeded for AE, SA, QA, BH (with Arabic names).');
+        foreach (District::whereNull('name_ar')->orWhere('name_ar', '')->get() as $district) {
+            if (isset($map[$district->name])) {
+                $district->update(['name_ar' => $map[$district->name]]);
+            }
+        }
+    }
+
+    public function down(): void
+    {
+        // No-op: leave Arabic names in place on rollback.
     }
 
     /**
-     * English -> Arabic for all seeded cities and districts.
+     * English -> Arabic for every seeded city and district.
      */
-    private function arabicNames(): array
+    private function translations(): array
     {
         return [
+            // ── Cities ──
             'Dubai' => 'دبي', 'Abu Dhabi' => 'أبوظبي', 'Sharjah' => 'الشارقة', 'Ajman' => 'عجمان',
             'Ras Al Khaimah' => 'رأس الخيمة', 'Fujairah' => 'الفجيرة', 'Umm Al Quwain' => 'أم القيوين',
             'Riyadh' => 'الرياض', 'Jeddah' => 'جدة', 'Mecca' => 'مكة المكرمة', 'Medina' => 'المدينة المنورة',
@@ -94,6 +46,8 @@ class CitiesDistrictsSeeder extends Seeder
             'Doha' => 'الدوحة', 'Al Rayyan' => 'الريان', 'Al Wakrah' => 'الوكرة', 'Al Khor' => 'الخور', 'Lusail' => 'لوسيل',
             'Manama' => 'المنامة', 'Muharraq' => 'المحرق', 'Riffa' => 'الرفاع', 'Isa Town' => 'مدينة عيسى',
             'Hamad Town' => 'مدينة حمد', 'Sitra' => 'سترة',
+
+            // ── Districts — UAE ──
             'Deira' => 'ديرة', 'Bur Dubai' => 'بر دبي', 'Jumeirah' => 'جميرا', 'Al Barsha' => 'البرشاء',
             'Business Bay' => 'الخليج التجاري', 'Dubai Marina' => 'دبي مارينا', 'Al Qusais' => 'القصيص',
             'International City' => 'المدينة العالمية', 'Downtown Dubai' => 'وسط مدينة دبي', 'Mirdif' => 'مردف',
@@ -105,22 +59,28 @@ class CitiesDistrictsSeeder extends Seeder
             'Al Nakheel' => 'النخيل', 'Al Hamra' => 'الحمراء', 'Khuzam' => 'خزام', 'Al Dhait' => 'الظيت',
             'Al Faseel' => 'الفصيل', 'Sakamkam' => 'سكمكم', 'Merashid' => 'مراشد',
             'Al Salama' => 'السلامة', 'Al Raas' => 'الراس', 'Al Maidan' => 'الميدان',
+
+            // ── Districts — KSA ──
             'Al Olaya' => 'العليا', 'Al Malaz' => 'الملز', 'Al Naseem' => 'النسيم', 'Al Murabba' => 'المربع',
             'King Fahd District' => 'حي الملك فهد', 'Al Wurud' => 'الورود', 'Al Sahafa' => 'الصحافة',
             'Al Yasmin' => 'الياسمين', 'Al Narjis' => 'النرجس', 'Al Aqiq' => 'العقيق',
             'Al Rawdah' => 'الروضة', 'Al Salamah' => 'السلامة', 'Al Andalus' => 'الأندلس', 'Al Faisaliyah' => 'الفيصلية',
             'Al Naeem' => 'النعيم', 'Al Shati' => 'الشاطئ', 'Al Bawadi' => 'البوادي',
             'Al Aziziyah' => 'العزيزية', 'Al Shawqiyah' => 'الشوقية', 'Al Hindawiyah' => 'الهنداوية', 'Al Awali' => 'العوالي',
-            'Quba' => 'قباء', 'Al Haram' => 'الحرم',
+            'Quba' => 'قباء', 'Al Haram' => 'الحرم', 'Al Khalidiyah' => 'الخالدية',
             'Al Mazruiyah' => 'المزروعية', 'Al Adamah' => 'الأدامة',
             'Al Aqrabiyah' => 'العقربية', 'Al Rakah' => 'الراكة', 'Al Thuqbah' => 'الثقبة', 'Al Hizam' => 'الحزام',
             'Al Wadi' => 'الوادي',
+
+            // ── Districts — Qatar ──
             'West Bay' => 'الخليج الغربي', 'Al Sadd' => 'السد', 'Al Dafna' => 'الدفنة', 'Msheireb' => 'مشيرب',
             'Najma' => 'نجمة', 'Al Mansoura' => 'المنصورة', 'Old Airport' => 'المطار القديم', 'Bin Mahmoud' => 'بن محمود',
             'Al Gharrafa' => 'الغرافة', 'Muaither' => 'معيذر', 'Al Wajba' => 'الوجبة', 'New Al Rayyan' => 'الريان الجديد',
             'Al Wukair' => 'الوكير', 'Mesaieed' => 'مسيعيد', 'Barwa City' => 'مدينة بروة',
             'Al Khor City' => 'مدينة الخور', 'Al Thakhira' => 'الذخيرة',
             'Marina District' => 'حي المارينا', 'Fox Hills' => 'فوكس هيلز', 'Energy City' => 'مدينة الطاقة',
+
+            // ── Districts — Bahrain ──
             'Juffair' => 'الجفير', 'Adliya' => 'العدلية', 'Seef' => 'السيف', 'Gudaibiya' => 'القضيبية',
             'Hoora' => 'الحورة', 'Diplomatic Area' => 'المنطقة الدبلوماسية', 'Salmaniya' => 'السلمانية',
             'Arad' => 'عراد', 'Hidd' => 'الحد', 'Busaiteen' => 'البسيتين', 'Galali' => 'قلالي',
@@ -130,4 +90,4 @@ class CitiesDistrictsSeeder extends Seeder
             'Wadyan' => 'وادان', 'Mahazza' => 'المحزة', 'Sufala' => 'سفالة',
         ];
     }
-}
+};
