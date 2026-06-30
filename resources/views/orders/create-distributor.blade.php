@@ -172,7 +172,8 @@
                                             <option value="+1" {{ old('phone_country') == '+1' ? 'selected' : '' }}>🇺🇸 +1</option>
                                         </select>
                                         <input type="tel" class="form-control @error('customer_phone') is-invalid @enderror"
-                                               id="customer_phone" name="customer_phone" value="{{ old('customer_phone') }}" required
+                                               id="customer_phone" name="customer_phone" value="{{ old('customer_phone') }}" required dir="ltr"
+                                               style="text-align: {{ $ar ? 'right' : 'left' }};"
                                                placeholder="{{ $ar ? 'رقم الهاتف' : 'Phone number' }}">
                                     </div>
                                     @error('phone_country')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
