@@ -165,7 +165,7 @@
                                 <div class="col-md-6">
                                     <label for="customer_phone" class="form-label">{{ $ar ? 'رقم الهاتف' : 'Phone Number' }} *</label>
                                     <div class="input-group phone-group" dir="ltr">
-                                        <select class="form-select @error('phone_country') is-invalid @enderror" id="phone_country" name="phone_country" required style="max-width: 110px; flex: 0 0 auto;">
+                                        <select class="form-select phone-code @error('phone_country') is-invalid @enderror" id="phone_country" name="phone_country" required>
                                             <option value="+971" {{ old('phone_country') == '+971' ? 'selected' : '' }}>🇦🇪 +971</option>
                                             <option value="+966" {{ old('phone_country') == '+966' ? 'selected' : '' }}>🇸🇦 +966</option>
                                             <option value="+20" {{ old('phone_country') == '+20' ? 'selected' : '' }}>🇪🇬 +20</option>
@@ -782,8 +782,18 @@ document.addEventListener('DOMContentLoaded', function() {
 .order-create-page .input-group-text { padding: 0.3rem 0.55rem; font-size: 0.825rem; }
 .order-create-page textarea.form-control { min-height: auto; height: auto; }
 /* Phone group: country code on the left, number filling the rest */
-.order-create-page .phone-group .form-select { border-radius: 8px 0 0 8px; }
-.order-create-page .phone-group .form-control { border-radius: 0 8px 8px 0; }
+.order-create-page .phone-group { flex-wrap: nowrap; }
+.order-create-page .phone-group .phone-code {
+    flex: 0 0 100px;
+    width: 100px;
+    padding-right: 1.5rem;
+    border-radius: 8px 0 0 8px;
+}
+.order-create-page .phone-group .form-control {
+    flex: 1 1 auto;
+    border-radius: 0 8px 8px 0;
+    border-left: 0;
+}
 .order-create-page .btn { border-radius: 8px; }
 .order-create-page .btn-primary { background-color: #561C04 !important; border-color: #561C04 !important; }
 .order-create-page .btn-primary:hover { background-color: #7A3206 !important; border-color: #7A3206 !important; }
