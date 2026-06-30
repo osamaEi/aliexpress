@@ -12,6 +12,7 @@ use App\Models\CouponUsage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DistributorController extends Controller
@@ -34,9 +35,12 @@ class DistributorController extends Controller
             'completed_orders' => Order::whereIn('product_id', $assignedProductIds)->where('status', 'delivered')->count(),
             'total_categories' => Category::where('is_active', true)->count(),
             'wallet_balance' => $user->wallet ? $user->wallet->balance : 0,
-            'total_revenue' => Order::whereIn('product_id', $assignedProductIds)
-                ->where('status', 'delivered')
-                ->sum('total_price'),
+            // Distributor revenue = their own product price × qty + shipping they fulfil,
+            // NOT the full price the seller paid (which includes seller/admin markup).
+            'total_revenue' => Order::whereIn('orders.product_id', $assignedProductIds)
+                ->where('orders.status', 'delivered')
+                ->join('products', 'orders.product_id', '=', 'products.id')
+                ->sum(DB::raw('(products.price * orders.quantity) + COALESCE(orders.freight_amount, 0)')),
         ];
 
         // Get coupon statistics for this distributor

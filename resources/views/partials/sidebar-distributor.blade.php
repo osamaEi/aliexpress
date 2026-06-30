@@ -132,6 +132,26 @@
             </a>
         </li>
 
+        <!-- Subscriptions -->
+        <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ri-vip-crown-line"></i>
+                <div>{{ __('messages.subscriptions') }}</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('subscriptions.index') ? 'active' : '' }}">
+                    <a href="{{ route('subscriptions.index') }}" class="menu-link">
+                        <div>{{ __('messages.subscription_plans') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('subscriptions.history') ? 'active' : '' }}">
+                    <a href="{{ route('subscriptions.history') }}" class="menu-link">
+                        <div>{{ __('messages.subscription_history') }}</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Logout -->
         <li class="menu-item">
             <form method="POST" action="{{ route('logout') }}">

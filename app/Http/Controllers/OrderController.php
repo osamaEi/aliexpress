@@ -280,6 +280,22 @@ class OrderController extends Controller
     {
         $order->load(['user', 'product']);
 
+        // Distributors who own this product get a dedicated order page showing only
+        // their own share (product price + shipping) and fulfilment controls, while
+        // sellers keep the standard page that shows their paid total and profit.
+        $authUser = auth()->user();
+        $isDistributorOwner = $authUser
+            && $authUser->user_type === 'distributor'
+            && $order->product
+            && $order->product->assignedUsers()
+                ->where('users.id', $authUser->id)
+                ->where('user_type', 'distributor')
+                ->exists();
+
+        if ($isDistributorOwner) {
+            return view('orders.show-distributor', compact('order'));
+        }
+
         return view('orders.show', compact('order'));
     }
 

@@ -64,11 +64,23 @@
         </li>
 
         <!-- Subscriptions -->
-        <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'active' : '' }}">
-            <a href="{{ route('subscriptions.index') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('subscriptions.*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ri-vip-crown-line"></i>
                 <div>{{ $ar ? 'الاشتراكات' : 'Subscriptions' }}</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('subscriptions.index') ? 'active' : '' }}">
+                    <a href="{{ route('subscriptions.index') }}" class="menu-link">
+                        <div>{{ $ar ? 'باقات الاشتراك' : 'Subscription Plans' }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('subscriptions.history') ? 'active' : '' }}">
+                    <a href="{{ route('subscriptions.history') }}" class="menu-link">
+                        <div>{{ $ar ? 'سجل الاشتراكات' : 'Subscription History' }}</div>
+                    </a>
+                </li>
+            </ul>
         </li>
 
         <!-- Wallet -->

@@ -175,7 +175,13 @@
                                                 <span class="badge bg-secondary">{{ $order->quantity }}</span>
                                             </td>
                                             <td>
-                                                <strong>{{ $order->currency }} {{ number_format($order->total_price, 2) }}</strong>
+                                                @php
+                                                    // The distributor's share = their own product price × qty + the shipping
+                                                    // they fulfil. The seller/admin markup is NOT part of the distributor payout.
+                                                    $distributorShare = ((float) ($order->product->price ?? 0) * $order->quantity)
+                                                        + (float) ($order->freight_amount ?? 0);
+                                                @endphp
+                                                <strong>{{ $order->currency }} {{ number_format($distributorShare, 2) }}</strong>
                                             </td>
                                             <td>
                                                 <span class="badge bg-{{ $order->getStatusBadgeColor() }}">
