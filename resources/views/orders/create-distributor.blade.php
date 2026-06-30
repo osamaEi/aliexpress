@@ -164,8 +164,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="customer_phone" class="form-label">{{ $ar ? 'رقم الهاتف' : 'Phone Number' }} *</label>
-                                    <div class="input-group phone-group" dir="ltr">
-                                        <select class="form-select phone-code @error('phone_country') is-invalid @enderror" id="phone_country" name="phone_country" required>
+                                    <div class="phone-group">
+                                        <select class="form-select phone-code @error('phone_country') is-invalid @enderror" id="phone_country" name="phone_country" required dir="ltr">
                                             <option value="+971" {{ old('phone_country') == '+971' ? 'selected' : '' }}>🇦🇪 +971</option>
                                             <option value="+966" {{ old('phone_country') == '+966' ? 'selected' : '' }}>🇸🇦 +966</option>
                                             <option value="+20" {{ old('phone_country') == '+20' ? 'selected' : '' }}>🇪🇬 +20</option>
@@ -781,18 +781,22 @@ document.addEventListener('DOMContentLoaded', function() {
 .order-create-page .form-label { font-size: 0.775rem; margin-bottom: 0.2rem; }
 .order-create-page .input-group-text { padding: 0.3rem 0.55rem; font-size: 0.825rem; }
 .order-create-page textarea.form-control { min-height: auto; height: auto; }
-/* Phone group: country code on the left, number filling the rest */
-.order-create-page .phone-group { flex-wrap: nowrap; }
+/* Phone group: country code on the left, number on the right (works in RTL) */
+.order-create-page .phone-group {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
 .order-create-page .phone-group .phone-code {
-    flex: 0 0 100px;
-    width: 100px;
-    padding-right: 1.5rem;
-    border-radius: 8px 0 0 8px;
+    flex: 0 0 96px;
+    width: 96px;
+    text-align: center;
+    padding: 0.3rem 0.4rem;
+    background-position: left 0.5rem center;
 }
 .order-create-page .phone-group .form-control {
     flex: 1 1 auto;
-    border-radius: 0 8px 8px 0;
-    border-left: 0;
+    min-width: 0;
 }
 .order-create-page .btn { border-radius: 8px; }
 .order-create-page .btn-primary { background-color: #561C04 !important; border-color: #561C04 !important; }
