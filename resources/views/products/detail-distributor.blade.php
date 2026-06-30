@@ -100,20 +100,21 @@
                         </p>
                     @endif
 
-                    <!-- Pricing -->
+                    <!-- Pricing — always in AED (product & wallet currency) -->
                     @php
-                        $priceConverted = $currentCurrency->convertFrom($product->price, $product->currency ?? 'AED');
-                        $originalPriceConverted = $product->original_price ? $currentCurrency->convertFrom($product->original_price, $product->currency ?? 'AED') : null;
+                        $aedCurrency = \App\Models\Currency::where('code', 'AED')->first() ?? $currentCurrency;
+                        $priceConverted = $product->price;
+                        $originalPriceConverted = $product->original_price ?: null;
                     @endphp
                     <div class="card text-white mb-4 border-0" style="border-radius: 16px; background: linear-gradient(135deg, #00732f 0%, #00a040 100%);">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-baseline mb-2">
                                 <h2 class="mb-0 me-3 fw-bold" style="font-size: 36px; color:white;">
-                                    {!! $currentCurrency->format($priceConverted) !!}
+                                    {!! $aedCurrency->format($priceConverted) !!}
                                 </h2>
                                 @if($originalPriceConverted && $originalPriceConverted > $priceConverted)
                                     <span class="text-white-50 text-decoration-line-through me-2" style="font-size: 20px;">
-                                        {!! $currentCurrency->format($originalPriceConverted) !!}
+                                        {!! $aedCurrency->format($originalPriceConverted) !!}
                                     </span>
                                     <span class="badge bg-danger" style="font-size: 14px;">
                                         {{ round((($originalPriceConverted - $priceConverted) / $originalPriceConverted) * 100) }}% OFF
@@ -253,10 +254,10 @@
 
                                             <div class="d-flex justify-content-between align-items-center">
                                                 @php
-                                                    $variationPriceConverted = $currentCurrency->convertFrom($variation->price ?? $product->price, $product->currency ?? 'AED');
+                                                    $variationPriceConverted = $variation->price ?? $product->price;
                                                 @endphp
                                                 <div class="text-primary fw-bold fs-5">
-                                                    {!! $currentCurrency->format($variationPriceConverted) !!}
+                                                    {!! $aedCurrency->format($variationPriceConverted) !!}
                                                 </div>
                                                 <span class="badge {{ ($variation->stock ?? 0) > 0 ? 'bg-success' : 'bg-danger' }} px-3 py-2">
                                                     {{ ($variation->stock ?? 0) > 0 ? (($variation->stock ?? 0) . ' ' . (app()->getLocale() == 'ar' ? 'متوفر' : 'in stock')) : (app()->getLocale() == 'ar' ? 'غير متوفر' : 'Out of Stock') }}
