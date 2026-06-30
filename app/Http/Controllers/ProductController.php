@@ -289,7 +289,25 @@ class ProductController extends Controller
             ->where('user_type', 'distributor')
             ->first();
 
-        return view('products.detail-distributor', compact('product', 'distributor'));
+        // Resolve the total selling price the same way the assigned-products list does:
+        // pivot price if set, otherwise product price + seller profit + admin profit.
+        // This keeps the detail page price identical to /my-assigned-products.
+        $sellPrice = $product->price;
+        $sellerAmount = 0;
+        if ($user = auth()->user()) {
+            $pivotRow = $user->assignedProducts()
+                ->withPivot('price', 'seller_amount', 'admin_amount')
+                ->where('products.id', $product->id)
+                ->first();
+            if ($pivotRow) {
+                $pivotPrice   = $pivotRow->pivot->price ?? null;
+                $sellerAmount = (float) ($pivotRow->pivot->seller_amount ?? 0);
+                $adminAmount  = (float) ($pivotRow->pivot->admin_amount ?? 0);
+                $sellPrice    = $pivotPrice ?: ($product->price + $sellerAmount + $adminAmount);
+            }
+        }
+
+        return view('products.detail-distributor', compact('product', 'distributor', 'sellPrice', 'sellerAmount'));
     }
 
     /**

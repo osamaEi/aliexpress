@@ -7,7 +7,8 @@
     // Always use AED (product currency) for pricing — wallet is stored in AED,
     // so displaying/deducting in AED avoids currency mismatch.
     $aedCurrency = \App\Models\Currency::where('code', 'AED')->first() ?? $currentCurrency;
-    $priceConverted = $product->price;   // AED — no conversion needed
+    // Total selling price (product + seller/admin profit), matching the assigned-products list.
+    $priceConverted = $sellPrice ?? $product->price;   // AED — no conversion needed
     $walletBalanceAED = auth()->user()->wallet ? auth()->user()->wallet->balance : 0;
     $walletBalanceConverted = $walletBalanceAED;  // AED
 @endphp

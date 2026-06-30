@@ -988,7 +988,24 @@ class OrderController extends Controller
             $shippingCountries = \App\Models\Country::active()->orderBy('sort_order')->get();
         }
 
-        return view('orders.create-distributor', compact('product', 'queryParams', 'shippingCountries'));
+        // Resolve the total selling price (product + seller/admin profit), matching the
+        // assigned-products list and the distributor-detail page. This is the amount the
+        // seller actually pays per unit.
+        $sellPrice = $product ? $product->price : 0;
+        if ($product && ($user = auth()->user())) {
+            $pivotRow = $user->assignedProducts()
+                ->withPivot('price', 'seller_amount', 'admin_amount')
+                ->where('products.id', $product->id)
+                ->first();
+            if ($pivotRow) {
+                $pivotPrice  = $pivotRow->pivot->price ?? null;
+                $sellPrice   = $pivotPrice ?: ($product->price
+                    + (float) ($pivotRow->pivot->seller_amount ?? 0)
+                    + (float) ($pivotRow->pivot->admin_amount ?? 0));
+            }
+        }
+
+        return view('orders.create-distributor', compact('product', 'queryParams', 'shippingCountries', 'sellPrice'));
     }
 
     /**
@@ -1050,9 +1067,21 @@ class OrderController extends Controller
 
             $user = Auth::user();
 
-            // Calculate pricing
+            // Calculate pricing. The unit price the seller pays is the TOTAL selling price
+            // (product price + seller/admin profit), matching the assigned-products list,
+            // the distributor-detail page and the order form — not the bare product price.
             $quantity = $validated['quantity'];
             $unitPrice = $product->price;
+            $pivotRow = $user->assignedProducts()
+                ->withPivot('price', 'seller_amount', 'admin_amount')
+                ->where('products.id', $product->id)
+                ->first();
+            if ($pivotRow) {
+                $pivotPrice = $pivotRow->pivot->price ?? null;
+                $unitPrice  = $pivotPrice ?: ($product->price
+                    + (float) ($pivotRow->pivot->seller_amount ?? 0)
+                    + (float) ($pivotRow->pivot->admin_amount ?? 0));
+            }
             $subtotal = $unitPrice * $quantity;
 
             // Resolve shipping cost from the owning distributor's rates, based on the

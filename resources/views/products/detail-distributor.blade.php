@@ -103,7 +103,8 @@
                     <!-- Pricing — always in AED (product & wallet currency) -->
                     @php
                         $aedCurrency = \App\Models\Currency::where('code', 'AED')->first() ?? $currentCurrency;
-                        $priceConverted = $product->price;
+                        // Total selling price (product + seller/admin profit), matching /my-assigned-products
+                        $priceConverted = $sellPrice ?? $product->price;
                         $originalPriceConverted = $product->original_price ?: null;
                     @endphp
                     <div class="card text-white mb-4 border-0" style="border-radius: 16px; background: linear-gradient(135deg, #00732f 0%, #00a040 100%);">
