@@ -55,9 +55,9 @@
                 $activation = $myActivations[$coupon->id] ?? null;
                 $status = $activation->status ?? null;
                 $trackingCode = $activation->tracking_code ?? null;
-                $cur = currency_symbol();
-                $discount = $coupon->discount_type === 'percentage' ? $coupon->discount_value.'%' : number_format($coupon->discount_value, 0).' '.$cur;
-                $commission = $coupon->commission_type === 'percentage' ? $coupon->commission_value.'%' : number_format($coupon->commission_value, 0).' '.$cur;
+                $curCode = session('currency_code', 'AED');
+                $discountIsPct = $coupon->discount_type === 'percentage';
+                $commissionIsPct = $coupon->commission_type === 'percentage';
             @endphp
             <div class="col-md-6 col-xl-4">
                 <div class="card coupon-card h-100">
@@ -79,8 +79,12 @@
                         </div>
                         <h6 class="fw-semibold mb-2 text-truncate">{{ $title }}</h6>
                         <div class="d-flex gap-2 mb-3 flex-wrap">
-                            <span class="badge bg-label-primary"><i class="ri-price-tag-3-line me-1"></i>{{ $ar ? 'خصم' : 'Discount' }} {{ $discount }}</span>
-                            <span class="badge bg-label-success"><i class="ri-hand-coin-line me-1"></i>{{ $ar ? 'عمولتك' : 'Commission' }} {{ $commission }}</span>
+                            <span class="badge bg-label-primary"><i class="ri-price-tag-3-line me-1"></i>{{ $ar ? 'خصم' : 'Discount' }}
+                                @if($discountIsPct){{ $coupon->discount_value }}%@else{{ number_format($coupon->discount_value, 0) }} <x-currency-icon :currency="$curCode" :width="13" :height="13" />@endif
+                            </span>
+                            <span class="badge bg-label-success"><i class="ri-hand-coin-line me-1"></i>{{ $ar ? 'عمولتك' : 'Commission' }}
+                                @if($commissionIsPct){{ $coupon->commission_value }}%@else{{ number_format($coupon->commission_value, 0) }} <x-currency-icon :currency="$curCode" :width="13" :height="13" />@endif
+                            </span>
                         </div>
                         <div class="small text-muted mb-3">
                             <i class="ri-calendar-line me-1"></i>{{ $ar ? 'ينتهي' : 'Ends' }} {{ \Carbon\Carbon::parse($coupon->end_date)->format('Y-m-d') }}

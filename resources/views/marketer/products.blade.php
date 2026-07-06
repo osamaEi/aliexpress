@@ -32,9 +32,8 @@
                 $img = $coupon->image
                     ? asset('storage/'.$coupon->image)
                     : (($coupon->promo_images && count((array)$coupon->promo_images)) ? asset('storage/'.((array)$coupon->promo_images)[0]) : null);
-                $cur = currency_symbol();
-                $discount = $coupon->discount_type === 'percentage' ? $coupon->discount_value.'%' : number_format($coupon->discount_value, 0).' '.$cur;
-                $commission = $coupon->commission_type === 'percentage' ? $coupon->commission_value.'%' : number_format($coupon->commission_value, 0).' '.$cur;
+                $curCode = session('currency_code', 'AED');
+                $isPct = fn($t) => $t === 'percentage';
                 $code = $coupon->pivot->tracking_code;
                 $daysLeft = max(0, (int) ceil(now()->diffInDays(\Carbon\Carbon::parse($coupon->end_date), false)));
             @endphp
@@ -58,11 +57,23 @@
                         <div class="coupon-stats">
                             <div class="coupon-stat">
                                 <div class="coupon-stat-label">{{ $ar ? 'الخصم' : 'Discount' }}</div>
-                                <div class="coupon-stat-value text-success">{{ $discount }}</div>
+                                <div class="coupon-stat-value text-success">
+                                    @if($isPct($coupon->discount_type))
+                                        {{ $coupon->discount_value }}%
+                                    @else
+                                        {{ number_format($coupon->discount_value, 0) }} <x-currency-icon :currency="$curCode" :width="14" :height="14" />
+                                    @endif
+                                </div>
                             </div>
                             <div class="coupon-stat">
                                 <div class="coupon-stat-label">{{ $ar ? 'العمولة' : 'Commission' }}</div>
-                                <div class="coupon-stat-value text-success">{{ $commission }}</div>
+                                <div class="coupon-stat-value text-success">
+                                    @if($isPct($coupon->commission_type))
+                                        {{ $coupon->commission_value }}%
+                                    @else
+                                        {{ number_format($coupon->commission_value, 0) }} <x-currency-icon :currency="$curCode" :width="14" :height="14" />
+                                    @endif
+                                </div>
                             </div>
                             <div class="coupon-stat">
                                 <div class="coupon-stat-label">{{ $ar ? 'شحن مجاني' : 'Free Shipping' }}</div>
