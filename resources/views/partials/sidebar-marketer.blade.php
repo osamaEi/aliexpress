@@ -42,7 +42,15 @@
             </a>
         </li>
 
-        <!-- Distributor Products (view only) -->
+        <!-- Activation Requests -->
+        <li class="menu-item {{ request()->routeIs('marketer.activation-requests') ? 'active' : '' }}">
+            <a href="{{ route('marketer.activation-requests') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-user-follow-line"></i>
+                <div>{{ $ar ? 'طلبات التفعيل' : 'Activation Requests' }}</div>
+            </a>
+        </li>
+
+        <!-- My Active Coupons -->
         <li class="menu-item {{ request()->routeIs('marketer.products') ? 'active' : '' }}">
             <a href="{{ route('marketer.products') }}" class="menu-link">
                 <i class="menu-icon tf-icons ri-coupon-3-line"></i>

@@ -429,6 +429,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/coupons', [App\Http\Controllers\MarketerController::class, 'coupons'])->name('coupons.index');
         Route::post('/coupons/{coupon}/request-activation', [App\Http\Controllers\MarketerController::class, 'requestActivation'])->name('coupons.request-activation');
 
+        // Activation requests (the marketer's own requests + statuses)
+        Route::get('/activation-requests', [App\Http\Controllers\MarketerController::class, 'activationRequests'])->name('activation-requests');
+
         // Store products (view only) + reports
         Route::get('/products', [App\Http\Controllers\MarketerController::class, 'products'])->name('products');
         Route::get('/reports', [App\Http\Controllers\MarketerController::class, 'reports'])->name('reports');

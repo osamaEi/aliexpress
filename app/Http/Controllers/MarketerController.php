@@ -77,6 +77,49 @@ class MarketerController extends Controller
     }
 
     /**
+     * The marketer's own activation requests (any status) with stats, so they can
+     * track which coupons they asked to promote and the outcome.
+     */
+    public function activationRequests(Request $request)
+    {
+        $user = Auth::user();
+
+        $base = DB::table('coupon_marketer')
+            ->join('coupons', 'coupons.id', '=', 'coupon_marketer.coupon_id')
+            ->leftJoin('users', 'users.id', '=', 'coupons.store_id')
+            ->where('coupon_marketer.user_id', $user->id);
+
+        $stats = [
+            'pending'  => (clone $base)->where('coupon_marketer.status', 'pending')->count(),
+            'active'   => (clone $base)->where('coupon_marketer.status', 'active')->count(),
+            'rejected' => (clone $base)->where('coupon_marketer.status', 'rejected')->count(),
+        ];
+
+        if ($request->filled('status') && in_array($request->status, ['pending', 'active', 'rejected'], true)) {
+            $base->where('coupon_marketer.status', $request->status);
+        }
+
+        $requests = $base
+            ->orderByRaw("FIELD(coupon_marketer.status, 'pending', 'active', 'rejected')")
+            ->orderBy('coupon_marketer.created_at', 'desc')
+            ->select([
+                'coupon_marketer.coupon_id',
+                'coupon_marketer.status',
+                'coupon_marketer.tracking_code',
+                'coupon_marketer.created_at',
+                'coupons.title_ar',
+                'coupons.title_en',
+                'coupons.is_global',
+                'users.name as store_name',
+                'users.store_name as store_display_name',
+            ])
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('marketer.activation-requests', compact('requests', 'stats'));
+    }
+
+    /**
      * Request activation of a coupon: creates a pending pivot row and a support
      * ticket routed to the coupon owner (admin for global coupons, the distributor
      * otherwise).
