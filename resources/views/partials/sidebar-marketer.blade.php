@@ -45,8 +45,8 @@
         <!-- Distributor Products (view only) -->
         <li class="menu-item {{ request()->routeIs('marketer.products') ? 'active' : '' }}">
             <a href="{{ route('marketer.products') }}" class="menu-link">
-                <i class="menu-icon tf-icons ri-shopping-bag-3-line"></i>
-                <div>{{ $ar ? 'منتجات المتاجر' : 'Store Products' }}</div>
+                <i class="menu-icon tf-icons ri-coupon-3-line"></i>
+                <div>{{ $ar ? 'كوبوناتي الفعّالة' : 'My Active Coupons' }}</div>
             </a>
         </li>
 

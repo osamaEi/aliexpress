@@ -401,4 +401,75 @@ class CouponController extends Controller
         return redirect()->route('distributor.coupons.activation-requests', $coupon)
             ->with('success', $ar ? 'تم رفض طلب التفعيل.' : 'Activation request rejected.');
     }
+
+    /**
+     * Edit the code assigned to an already-active marketer request.
+     */
+    public function updateActivation(Request $request, Coupon $coupon, \App\Models\User $marketer)
+    {
+        $user = auth()->user();
+
+        // Verify ownership
+        if ($coupon->store_id !== $user->id) {
+            abort(403);
+        }
+
+        $ar = app()->getLocale() === 'ar';
+
+        $pivot = \DB::table('coupon_marketer')
+            ->where('coupon_id', $coupon->id)
+            ->where('user_id', $marketer->id)
+            ->first();
+
+        if (!$pivot || $pivot->status !== 'active') {
+            return back()->with('error', $ar ? 'لا يوجد طلب مفعّل لهذا المسوّق.' : 'No active request for this marketer.');
+        }
+
+        $validated = $request->validate([
+            'code' => [
+                'required', 'string', 'max:30',
+                \Illuminate\Validation\Rule::unique('coupon_marketer', 'tracking_code')
+                    ->ignore($pivot->id),
+            ],
+        ], [], [
+            'code' => $ar ? 'الكود' : 'code',
+        ]);
+
+        \DB::table('coupon_marketer')
+            ->where('coupon_id', $coupon->id)
+            ->where('user_id', $marketer->id)
+            ->update([
+                'tracking_code' => $validated['code'],
+                'updated_at' => now(),
+            ]);
+
+        return redirect()->route('distributor.coupons.activation-requests', $coupon)
+            ->with('success', $ar ? 'تم تعديل كود المسوّق.' : 'Marketer code updated.');
+    }
+
+    /**
+     * Delete a marketer's request row entirely (any status). This frees the
+     * marketer to request activation again.
+     */
+    public function deleteActivation(Coupon $coupon, \App\Models\User $marketer)
+    {
+        $user = auth()->user();
+
+        // Verify ownership
+        if ($coupon->store_id !== $user->id) {
+            abort(403);
+        }
+
+        $ar = app()->getLocale() === 'ar';
+
+        $deleted = \DB::table('coupon_marketer')
+            ->where('coupon_id', $coupon->id)
+            ->where('user_id', $marketer->id)
+            ->delete();
+
+        return redirect()->route('distributor.coupons.activation-requests', $coupon)
+            ->with('success', $deleted
+                ? ($ar ? 'تم حذف الطلب.' : 'Request deleted.')
+                : ($ar ? 'الطلب غير موجود.' : 'Request not found.'));
+    }
 }

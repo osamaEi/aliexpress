@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Coupon;
 use App\Models\CouponUsage;
-use App\Models\Product;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -172,25 +171,28 @@ class MarketerController extends Controller
     }
 
     /**
-     * Store products (from distributors) the marketer can promote — view only.
+     * The marketer's own ACTIVE coupons (activation approved). Shows only coupons
+     * whose activation request was approved, with the marketer's tracking code.
      */
     public function products(Request $request)
     {
-        $query = Product::with('category')
-            ->where('is_active', true)
-            ->whereHas('assignedUsers', fn($q) => $q->where('user_type', 'distributor'));
+        $user = Auth::user();
+
+        $query = $user->assignedCoupons()
+            ->wherePivot('status', 'active')
+            ->with('store');
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('name_ar', 'like', "%{$search}%");
+                $q->where('title_ar', 'like', "%{$search}%")
+                  ->orWhere('title_en', 'like', "%{$search}%");
             });
         }
 
-        $products = $query->latest()->paginate(20)->withQueryString();
+        $coupons = $query->orderByPivot('created_at', 'desc')->paginate(12)->withQueryString();
 
-        return view('marketer.products', compact('products'));
+        return view('marketer.products', compact('coupons'));
     }
 
     /**

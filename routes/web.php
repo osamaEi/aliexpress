@@ -395,6 +395,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/{coupon}/activation-requests', [App\Http\Controllers\Distributor\CouponController::class, 'activationRequests'])->name('activation-requests');
             Route::post('/{coupon}/activation-requests/{marketer}/approve', [App\Http\Controllers\Distributor\CouponController::class, 'approveActivation'])->name('activation-requests.approve');
             Route::post('/{coupon}/activation-requests/{marketer}/reject', [App\Http\Controllers\Distributor\CouponController::class, 'rejectActivation'])->name('activation-requests.reject');
+            Route::put('/{coupon}/activation-requests/{marketer}', [App\Http\Controllers\Distributor\CouponController::class, 'updateActivation'])->name('activation-requests.update');
+            Route::delete('/{coupon}/activation-requests/{marketer}', [App\Http\Controllers\Distributor\CouponController::class, 'deleteActivation'])->name('activation-requests.delete');
         });
 
         // Support Tickets

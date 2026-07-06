@@ -63,35 +63,58 @@
                                 @endif
                             </td>
                             <td>
-                                @if($req->tracking_code)
+                                @if($req->status === 'active')
+                                    {{-- Editable code for active requests --}}
+                                    <form action="{{ route('distributor.coupons.activation-requests.update', [$coupon, $req->user_id]) }}"
+                                          method="POST" class="d-inline-flex gap-1 align-items-center">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="text" name="code" class="form-control form-control-sm" style="max-width: 150px; font-family: monospace;"
+                                               value="{{ $req->tracking_code }}" required>
+                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="{{ $ar ? 'تعديل الكود' : 'Edit code' }}">
+                                            <i class="ri-save-line"></i>
+                                        </button>
+                                    </form>
+                                @elseif($req->tracking_code)
                                     <span class="badge bg-light text-dark" style="font-family: monospace; font-weight: bold;">{{ $req->tracking_code }}</span>
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif
                             </td>
                             <td class="text-end">
-                                @if($req->status === 'pending')
-                                    <form action="{{ route('distributor.coupons.activation-requests.approve', [$coupon, $req->user_id]) }}"
-                                          method="POST" class="d-inline-flex gap-2 align-items-center justify-content-end flex-wrap">
-                                        @csrf
-                                        <input type="text" name="code" class="form-control form-control-sm" style="max-width: 160px;"
-                                               value="{{ strtoupper(\Illuminate\Support\Str::random(4)) . $coupon->id . strtoupper(\Illuminate\Support\Str::random(4)) }}"
-                                               placeholder="{{ $ar ? 'كود المسوّق' : 'Marketer code' }}" required>
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                            <i class="ri-check-line"></i> {{ $ar ? 'تفعيل' : 'Approve' }}
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('distributor.coupons.activation-requests.reject', [$coupon, $req->user_id]) }}"
+                                <div class="d-inline-flex gap-2 align-items-center justify-content-end flex-wrap">
+                                    @if($req->status === 'pending')
+                                        <form action="{{ route('distributor.coupons.activation-requests.approve', [$coupon, $req->user_id]) }}"
+                                              method="POST" class="d-inline-flex gap-2 align-items-center">
+                                            @csrf
+                                            <input type="text" name="code" class="form-control form-control-sm" style="max-width: 160px;"
+                                                   value="{{ strtoupper(\Illuminate\Support\Str::random(4)) . $coupon->id . strtoupper(\Illuminate\Support\Str::random(4)) }}"
+                                                   placeholder="{{ $ar ? 'كود المسوّق' : 'Marketer code' }}" required>
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="ri-check-line"></i> {{ $ar ? 'تفعيل' : 'Approve' }}
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('distributor.coupons.activation-requests.reject', [$coupon, $req->user_id]) }}"
+                                              method="POST" class="d-inline"
+                                              onsubmit="return confirm('{{ $ar ? 'تأكيد رفض الطلب؟' : 'Confirm rejecting this request?' }}');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="ri-close-line"></i> {{ $ar ? 'رفض' : 'Reject' }}
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    {{-- Delete (any status): removes the row so the marketer can request again --}}
+                                    <form action="{{ route('distributor.coupons.activation-requests.delete', [$coupon, $req->user_id]) }}"
                                           method="POST" class="d-inline"
-                                          onsubmit="return confirm('{{ $ar ? 'تأكيد رفض الطلب؟' : 'Confirm rejecting this request?' }}');">
+                                          onsubmit="return confirm('{{ $ar ? 'تأكيد حذف الطلب نهائيًا؟ سيتمكن المسوّق من الطلب مجددًا.' : 'Permanently delete this request? The marketer will be able to request again.' }}');">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="ri-close-line"></i> {{ $ar ? 'رفض' : 'Reject' }}
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ $ar ? 'حذف الطلب' : 'Delete request' }}">
+                                            <i class="ri-delete-bin-line"></i>
                                         </button>
                                     </form>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
