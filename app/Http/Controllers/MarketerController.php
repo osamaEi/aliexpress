@@ -49,6 +49,14 @@ class MarketerController extends Controller
             ->where('is_active', true)
             ->where('end_date', '>=', now());
 
+        // Filter by store type: global (admin) coupons vs. distributor store coupons
+        $type = $request->get('type'); // 'global' | 'store' | null (all)
+        if ($type === 'global') {
+            $query->where('is_global', true);
+        } elseif ($type === 'store') {
+            $query->where('is_global', false);
+        }
+
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -77,6 +85,11 @@ class MarketerController extends Controller
     {
         $user = Auth::user();
         $ar = app()->getLocale() === 'ar';
+
+        // Link coupons don't require activation — they're used via the direct link.
+        if ($coupon->coupon_method === 'link') {
+            return back()->with('error', $ar ? 'كوبونات الرابط المباشر لا تتطلب تفعيلاً.' : 'Direct-link coupons do not require activation.');
+        }
 
         // Already requested / active?
         $existing = DB::table('coupon_marketer')

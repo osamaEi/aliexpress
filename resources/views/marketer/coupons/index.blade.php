@@ -10,17 +10,38 @@
         <p class="text-muted mb-0">{{ $ar ? 'اطلب تفعيل أي كوبون لتروّج له وتربح عمولة عند الاستخدام' : 'Request activation of any coupon to promote it and earn commission on use' }}</p>
     </div>
 
+    {{-- Type filter tabs --}}
+    @php $type = request('type'); @endphp
+    <ul class="nav nav-pills mb-3 gap-2">
+        <li class="nav-item">
+            <a class="nav-link {{ !$type ? 'active' : '' }}" href="{{ route('marketer.coupons.index', array_filter(['search' => request('search')])) }}">
+                <i class="ri-apps-2-line me-1"></i>{{ $ar ? 'الكل' : 'All' }}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ $type === 'store' ? 'active' : '' }}" href="{{ route('marketer.coupons.index', array_filter(['type' => 'store', 'search' => request('search')])) }}">
+                <i class="ri-store-2-line me-1"></i>{{ $ar ? 'كوبونات المتاجر' : 'Store Coupons' }}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ $type === 'global' ? 'active' : '' }}" href="{{ route('marketer.coupons.index', array_filter(['type' => 'global', 'search' => request('search')])) }}">
+                <i class="ri-global-line me-1"></i>{{ $ar ? 'المتاجر العالمية' : 'Global Stores' }}
+            </a>
+        </li>
+    </ul>
+
     {{-- Search --}}
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('marketer.coupons.index') }}" class="row g-2 align-items-end">
+                @if($type)<input type="hidden" name="type" value="{{ $type }}">@endif
                 <div class="col-md-5">
                     <input type="text" name="search" value="{{ request('search') }}" class="form-control"
                            placeholder="{{ $ar ? 'ابحث عن كوبون...' : 'Search coupons...' }}">
                 </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button class="btn btn-primary"><i class="ri-search-line me-1"></i>{{ $ar ? 'بحث' : 'Search' }}</button>
-                    <a href="{{ route('marketer.coupons.index') }}" class="btn btn-outline-secondary">{{ $ar ? 'إعادة' : 'Reset' }}</a>
+                    <a href="{{ route('marketer.coupons.index', array_filter(['type' => $type])) }}" class="btn btn-outline-secondary">{{ $ar ? 'إعادة' : 'Reset' }}</a>
                 </div>
             </form>
         </div>
@@ -45,6 +66,16 @@
                         <div class="coupon-img coupon-img-placeholder"><i class="ri-coupon-3-line"></i></div>
                     @endif
                     <div class="card-body">
+                        <div class="d-flex gap-2 mb-2 flex-wrap">
+                            @if($coupon->is_global)
+                                <span class="badge bg-label-info"><i class="ri-global-line me-1"></i>{{ $ar ? 'متجر عالمي' : 'Global Store' }}</span>
+                            @else
+                                <span class="badge bg-label-secondary"><i class="ri-store-2-line me-1"></i>{{ $ar ? 'متجر' : 'Store' }}</span>
+                            @endif
+                            @if($coupon->coupon_method === 'link')
+                                <span class="badge bg-label-primary"><i class="ri-links-line me-1"></i>{{ $ar ? 'كوبون بلينك' : 'Link Coupon' }}</span>
+                            @endif
+                        </div>
                         <h6 class="fw-semibold mb-2 text-truncate">{{ $title }}</h6>
                         <div class="d-flex gap-2 mb-3 flex-wrap">
                             <span class="badge bg-label-primary"><i class="ri-price-tag-3-line me-1"></i>{{ $ar ? 'خصم' : 'Discount' }} {{ $discount }}</span>
@@ -54,7 +85,22 @@
                             <i class="ri-calendar-line me-1"></i>{{ $ar ? 'ينتهي' : 'Ends' }} {{ \Carbon\Carbon::parse($coupon->end_date)->format('Y-m-d') }}
                         </div>
 
-                        @if($status === 'active')
+                        @if($coupon->coupon_method === 'link')
+                            {{-- Link coupons need no activation: the marketer uses the direct link straight away --}}
+                            <div class="tracking-box">
+                                <small class="text-muted d-block mb-1"><i class="ri-links-line me-1"></i>{{ $ar ? 'الرابط المباشر (لا يتطلب تفعيل)' : 'Direct link (no activation needed)' }}</small>
+                                @if($coupon->direct_link)
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a href="{{ $coupon->direct_link }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary flex-grow-1">
+                                            <i class="ri-external-link-line me-1"></i>{{ $ar ? 'فتح الرابط' : 'Open Link' }}
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="copyCode('{{ $coupon->direct_link }}', this)"><i class="ri-file-copy-line"></i></button>
+                                    </div>
+                                @else
+                                    <span class="text-muted small">{{ $ar ? 'الرابط غير متوفر' : 'Link not available' }}</span>
+                                @endif
+                            </div>
+                        @elseif($status === 'active')
                             <div class="tracking-box">
                                 <small class="text-muted d-block mb-1"><i class="ri-links-line me-1"></i>{{ $ar ? 'رمز التتبع الخاص بك' : 'Your tracking code' }}</small>
                                 <div class="d-flex align-items-center gap-2">
