@@ -242,6 +242,7 @@ class AffiliateController extends Controller
             'direct_link' => 'nullable|required_if:coupon_method,link|url|max:2000',
             'category_id' => 'nullable|exists:categories,id',
             'sub_category_id' => 'nullable|exists:categories,id',
+            'image' => 'nullable|image|max:2048',
             'promo_images' => 'nullable|array|max:5',
             'promo_images.*' => 'image|max:2048',
             'promo_video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',
@@ -250,11 +251,17 @@ class AffiliateController extends Controller
         // Note: the coupon code is intentionally NOT generated here.
         // It is created when the coupon is activated for a marketer.
 
+        // Handle main image
+        $image = null;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image')->store('coupons/images', 'public');
+        }
+
         // Handle promo images
         $promoImages = [];
         if ($request->hasFile('promo_images')) {
-            foreach ($request->file('promo_images') as $image) {
-                $path = $image->store('coupons/images', 'public');
+            foreach ($request->file('promo_images') as $img) {
+                $path = $img->store('coupons/images', 'public');
                 $promoImages[] = $path;
             }
         }
@@ -269,6 +276,7 @@ class AffiliateController extends Controller
             ...$validated,
             'created_by' => auth()->id(),
             'is_global' => true, // Admin coupons belong to Global Stores
+            'image' => $image,
             'promo_images' => $promoImages,
             'promo_video' => $promoVideo,
             'free_shipping' => $request->boolean('free_shipping'),

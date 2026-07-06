@@ -457,6 +457,24 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
+                            <!-- Main Image -->
+                            <div class="col-md-12">
+                                <label for="image" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'الصورة الرئيسية للكوبون' : 'Coupon Main Image' }}
+                                </label>
+                                <input
+                                    type="file"
+                                    class="form-control @error('image') is-invalid @enderror"
+                                    id="image"
+                                    name="image"
+                                    accept="image/*"
+                                >
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحد الأقصى 2 ميجابايت' : 'Max 2MB' }}</small>
+                                @error('image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <!-- Promo Images -->
                             <div class="col-md-6">
                                 <label for="promo_images" class="form-label">

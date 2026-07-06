@@ -126,6 +126,34 @@
                                 @enderror
                             </div>
 
+                            <!-- Coupon Method: code or direct link -->
+                            <div class="col-md-6">
+                                <label for="coupon_method" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'نوع الكوبون' : 'Coupon Type' }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select @error('coupon_method') is-invalid @enderror" id="coupon_method" name="coupon_method" required onchange="toggleCouponMethod()">
+                                    <option value="code" {{ old('coupon_method', 'code') === 'code' ? 'selected' : '' }}>
+                                        {{ app()->getLocale() == 'ar' ? 'كوبون برمز' : 'Code Coupon' }}
+                                    </option>
+                                    <option value="link" {{ old('coupon_method') === 'link' ? 'selected' : '' }}>
+                                        {{ app()->getLocale() == 'ar' ? 'كوبون برابط مباشر' : 'Direct Link Coupon' }}
+                                    </option>
+                                </select>
+                                @error('coupon_method')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
+                            <!-- Direct Link (shown when method = link) -->
+                            <div class="col-md-6" id="direct_link_wrap" style="display:none;">
+                                <label for="direct_link" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'الرابط المباشر' : 'Direct Link' }}
+                                </label>
+                                <input type="url" class="form-control @error('direct_link') is-invalid @enderror"
+                                       id="direct_link" name="direct_link" value="{{ old('direct_link') }}"
+                                       placeholder="https://...">
+                                @error('direct_link')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+
                             <!-- Main Category -->
                             <div class="col-md-6">
                                 <label for="category_id" class="form-label">{{ app()->getLocale() == 'ar' ? 'التصنيف الرئيسي' : 'Main Category' }}</label>
@@ -391,6 +419,130 @@
                     </div>
                 </div>
 
+                <!-- Features & Terms -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'المميزات والشروط' : 'Features & Terms' }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Features -->
+                        <div class="mb-4">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'مميزات الخصم' : 'Discount Features' }}</label>
+                            <div id="features-container">
+                                <div class="input-group mb-2 feature-row">
+                                    <input type="text" class="form-control" name="features[]" placeholder="{{ app()->getLocale() == 'ar' ? 'ميزة...' : 'Feature...' }}">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addFeature()">
+                                <i class="ri-add-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'إضافة ميزة' : 'Add Feature' }}
+                            </button>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="mb-4">
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'شروط الاستخدام (للعميل)' : 'Usage Terms (For Customer)' }}</label>
+                            <div id="terms-container">
+                                <div class="input-group mb-2 term-row">
+                                    <input type="text" class="form-control" name="terms[]" placeholder="{{ app()->getLocale() == 'ar' ? 'شرط...' : 'Term...' }}">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addTerm()">
+                                <i class="ri-add-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'إضافة شرط' : 'Add Term' }}
+                            </button>
+                        </div>
+
+                        <!-- Commission Terms -->
+                        <div>
+                            <label class="form-label">{{ app()->getLocale() == 'ar' ? 'شروط العمولة (للموزع)' : 'Commission Terms (For Affiliate)' }}</label>
+                            <div id="commission-terms-container">
+                                <div class="input-group mb-2 commission-term-row">
+                                    <input type="text" class="form-control" name="commission_terms[]" placeholder="{{ app()->getLocale() == 'ar' ? 'شرط عمولة...' : 'Commission term...' }}">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addCommissionTerm()">
+                                <i class="ri-add-line me-1"></i>
+                                {{ app()->getLocale() == 'ar' ? 'إضافة شرط عمولة' : 'Add Commission Term' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ app()->getLocale() == 'ar' ? 'الوسائط الترويجية' : 'Promotional Media' }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Main Image -->
+                            <div class="col-md-12">
+                                <label for="image" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'الصورة الرئيسية للكوبون' : 'Coupon Main Image' }}
+                                </label>
+                                <input
+                                    type="file"
+                                    class="form-control @error('image') is-invalid @enderror"
+                                    id="image"
+                                    name="image"
+                                    accept="image/*"
+                                >
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحد الأقصى 2 ميجابايت' : 'Max 2MB' }}</small>
+                                @error('image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Promo Images -->
+                            <div class="col-md-6">
+                                <label for="promo_images" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'صور ترويجية (حتى 5)' : 'Promo Images (up to 5)' }}
+                                </label>
+                                <input
+                                    type="file"
+                                    class="form-control @error('promo_images') is-invalid @enderror"
+                                    id="promo_images"
+                                    name="promo_images[]"
+                                    accept="image/*"
+                                    multiple
+                                >
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'الحد الأقصى 2 ميجابايت لكل صورة' : 'Max 2MB per image' }}</small>
+                                @error('promo_images')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Promo Video -->
+                            <div class="col-md-6">
+                                <label for="promo_video" class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'فيديو ترويجي' : 'Promo Video' }}
+                                </label>
+                                <input
+                                    type="file"
+                                    class="form-control @error('promo_video') is-invalid @enderror"
+                                    id="promo_video"
+                                    name="promo_video"
+                                    accept="video/mp4,video/mov,video/avi"
+                                >
+                                <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'MP4, MOV, AVI - الحد الأقصى 20 ميجابايت' : 'MP4, MOV, AVI - Max 20MB' }}</small>
+                                @error('promo_video')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Form Actions -->
                 <div class="card">
                     <div class="card-body">
@@ -446,6 +598,55 @@ function generateCode() {
         .catch(error => console.error('Error:', error));
 }
 
+function addFeature() {
+    const container = document.getElementById('features-container');
+    const row = document.createElement('div');
+    row.className = 'input-group mb-2 feature-row';
+    row.innerHTML = `
+        <input type="text" class="form-control" name="features[]" placeholder="{{ app()->getLocale() == 'ar' ? 'ميزة...' : 'Feature...' }}">
+        <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)">
+            <i class="ri-delete-bin-line"></i>
+        </button>
+    `;
+    container.appendChild(row);
+}
+
+function addTerm() {
+    const container = document.getElementById('terms-container');
+    const row = document.createElement('div');
+    row.className = 'input-group mb-2 term-row';
+    row.innerHTML = `
+        <input type="text" class="form-control" name="terms[]" placeholder="{{ app()->getLocale() == 'ar' ? 'شرط...' : 'Term...' }}">
+        <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)">
+            <i class="ri-delete-bin-line"></i>
+        </button>
+    `;
+    container.appendChild(row);
+}
+
+function addCommissionTerm() {
+    const container = document.getElementById('commission-terms-container');
+    const row = document.createElement('div');
+    row.className = 'input-group mb-2 commission-term-row';
+    row.innerHTML = `
+        <input type="text" class="form-control" name="commission_terms[]" placeholder="{{ app()->getLocale() == 'ar' ? 'شرط عمولة...' : 'Commission term...' }}">
+        <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)">
+            <i class="ri-delete-bin-line"></i>
+        </button>
+    `;
+    container.appendChild(row);
+}
+
+function removeRow(button) {
+    button.closest('.input-group').remove();
+}
+
+// Toggle direct-link field based on coupon method
+function toggleCouponMethod() {
+    const method = document.getElementById('coupon_method').value;
+    document.getElementById('direct_link_wrap').style.display = method === 'link' ? 'block' : 'none';
+}
+
 // Cascade: load sub categories for the chosen main category
 function loadSubCategories(categoryId, selectedSub = null) {
     const subSelect = document.getElementById('sub_category_id');
@@ -467,6 +668,7 @@ function loadSubCategories(categoryId, selectedSub = null) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    toggleCouponMethod();
     const cat = document.getElementById('category_id');
     if (cat && cat.value) loadSubCategories(cat.value, '{{ old('sub_category_id') }}');
 });

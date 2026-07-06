@@ -81,14 +81,22 @@ class CouponController extends Controller
             'commission_terms' => 'nullable|array',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
+            'coupon_method' => 'required|in:code,link',
+            'direct_link' => 'nullable|required_if:coupon_method,link|url|max:2000',
             'category_id' => 'nullable|exists:categories,id',
             'sub_category_id' => 'nullable|exists:categories,id',
+            'image' => 'nullable|image|max:2048',
             'promo_images' => 'nullable|array|max:5',
             'promo_images.*' => 'image|max:2048',
             'promo_video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',
         ]);
 
         // Note: code is generated when the coupon is activated for a marketer, not here.
+
+        // Handle main image
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('coupons/images', 'public');
+        }
 
         // Handle promo images
         $promoImages = [];
