@@ -41,7 +41,15 @@ class CouponController extends Controller
 
         $coupons = $query->latest()->paginate(15);
 
-        return view('distributor.coupons.index', compact('coupons'));
+        // Pending activation-request counts per coupon (for the requests button badge)
+        $pendingCounts = \DB::table('coupon_marketer')
+            ->whereIn('coupon_id', $coupons->pluck('id'))
+            ->where('status', 'pending')
+            ->select('coupon_id', \DB::raw('COUNT(*) as cnt'))
+            ->groupBy('coupon_id')
+            ->pluck('cnt', 'coupon_id');
+
+        return view('distributor.coupons.index', compact('coupons', 'pendingCounts'));
     }
 
     /**
@@ -257,9 +265,140 @@ class CouponController extends Controller
     public function generateCode()
     {
         $code = Coupon::generateCode();
-        
+
         return response()->json([
             'code' => $code
         ]);
+    }
+
+    /**
+     * List marketers who requested activation of the given coupon, so the
+     * distributor can approve (with a code) or reject each request.
+     */
+    public function activationRequests(Coupon $coupon)
+    {
+        $user = auth()->user();
+
+        // Verify ownership
+        if ($coupon->store_id !== $user->id) {
+            abort(403);
+        }
+
+        $requests = \DB::table('coupon_marketer')
+            ->join('users', 'users.id', '=', 'coupon_marketer.user_id')
+            ->where('coupon_marketer.coupon_id', $coupon->id)
+            ->orderByRaw("FIELD(coupon_marketer.status, 'pending', 'active', 'rejected')")
+            ->orderBy('coupon_marketer.created_at', 'desc')
+            ->get([
+                'coupon_marketer.user_id',
+                'coupon_marketer.status',
+                'coupon_marketer.tracking_code',
+                'coupon_marketer.earnings',
+                'coupon_marketer.created_at',
+                'users.name as marketer_name',
+                'users.email as marketer_email',
+            ]);
+
+        return view('distributor.coupons.activation-requests', compact('coupon', 'requests'));
+    }
+
+    /**
+     * Approve a marketer's activation request by assigning them a code.
+     * The code is suggested automatically but editable by the distributor.
+     */
+    public function approveActivation(Request $request, Coupon $coupon, \App\Models\User $marketer)
+    {
+        $user = auth()->user();
+
+        // Verify ownership
+        if ($coupon->store_id !== $user->id) {
+            abort(403);
+        }
+
+        $ar = app()->getLocale() === 'ar';
+
+        // The pending request must exist
+        $pivot = \DB::table('coupon_marketer')
+            ->where('coupon_id', $coupon->id)
+            ->where('user_id', $marketer->id)
+            ->first();
+
+        if (!$pivot || $pivot->status !== 'pending') {
+            return back()->with('error', $ar ? 'لا يوجد طلب معلّق لهذا المسوّق.' : 'No pending request for this marketer.');
+        }
+
+        $validated = $request->validate([
+            'code' => [
+                'required', 'string', 'max:30',
+                \Illuminate\Validation\Rule::unique('coupon_marketer', 'tracking_code'),
+            ],
+        ], [], [
+            'code' => $ar ? 'الكود' : 'code',
+        ]);
+
+        // Find the linked activation ticket (if any) so it gets closed and the
+        // marketer is notified inside the thread.
+        $ticket = \App\Models\Ticket::where('coupon_id', $coupon->id)
+            ->where('user_id', $marketer->id)
+            ->latest()
+            ->first();
+
+        if ($ticket) {
+            \App\Http\Controllers\MarketerController::applyCouponDecision($ticket, 'approve', $validated['code']);
+        } else {
+            // No ticket: update the pivot directly.
+            \DB::table('coupon_marketer')
+                ->where('coupon_id', $coupon->id)
+                ->where('user_id', $marketer->id)
+                ->update([
+                    'status' => 'active',
+                    'tracking_code' => $validated['code'],
+                    'updated_at' => now(),
+                ]);
+        }
+
+        return redirect()->route('distributor.coupons.activation-requests', $coupon)
+            ->with('success', $ar ? 'تم تفعيل الكوبون للمسوّق وإرسال الكود.' : 'Coupon activated and code sent to the marketer.');
+    }
+
+    /**
+     * Reject a marketer's activation request.
+     */
+    public function rejectActivation(Coupon $coupon, \App\Models\User $marketer)
+    {
+        $user = auth()->user();
+
+        // Verify ownership
+        if ($coupon->store_id !== $user->id) {
+            abort(403);
+        }
+
+        $ar = app()->getLocale() === 'ar';
+
+        $pivot = \DB::table('coupon_marketer')
+            ->where('coupon_id', $coupon->id)
+            ->where('user_id', $marketer->id)
+            ->first();
+
+        if (!$pivot || $pivot->status !== 'pending') {
+            return back()->with('error', $ar ? 'لا يوجد طلب معلّق لهذا المسوّق.' : 'No pending request for this marketer.');
+        }
+
+        $ticket = \App\Models\Ticket::where('coupon_id', $coupon->id)
+            ->where('user_id', $marketer->id)
+            ->latest()
+            ->first();
+
+        if ($ticket) {
+            \App\Http\Controllers\MarketerController::applyCouponDecision($ticket, 'reject');
+        } else {
+            \DB::table('coupon_marketer')
+                ->where('coupon_id', $coupon->id)
+                ->where('user_id', $marketer->id)
+                ->update(['status' => 'rejected', 'updated_at' => now()]);
+        }
+
+        return redirect()->route('distributor.coupons.activation-requests', $coupon)
+            ->with('success', $ar ? 'تم رفض طلب التفعيل.' : 'Activation request rejected.');
     }
 }

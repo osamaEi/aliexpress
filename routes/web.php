@@ -390,6 +390,11 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{coupon}', [App\Http\Controllers\Distributor\CouponController::class, 'destroy'])->name('destroy');
             Route::post('/{coupon}/toggle-status', [App\Http\Controllers\Distributor\CouponController::class, 'toggleStatus'])->name('toggle-status');
             Route::get('/api/generate-code', [App\Http\Controllers\Distributor\CouponController::class, 'generateCode'])->name('generate-code');
+
+            // Marketer activation requests (per coupon)
+            Route::get('/{coupon}/activation-requests', [App\Http\Controllers\Distributor\CouponController::class, 'activationRequests'])->name('activation-requests');
+            Route::post('/{coupon}/activation-requests/{marketer}/approve', [App\Http\Controllers\Distributor\CouponController::class, 'approveActivation'])->name('activation-requests.approve');
+            Route::post('/{coupon}/activation-requests/{marketer}/reject', [App\Http\Controllers\Distributor\CouponController::class, 'rejectActivation'])->name('activation-requests.reject');
         });
 
         // Support Tickets

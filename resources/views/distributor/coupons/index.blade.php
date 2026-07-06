@@ -110,6 +110,15 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('distributor.coupons.activation-requests', $coupon) }}" class="btn btn-outline-primary position-relative" title="{{ app()->getLocale() == 'ar' ? 'طلبات التفعيل من المسوقين' : 'Marketer Activation Requests' }}">
+                                        <i class="ri-user-follow-line"></i>
+                                        @if(($pendingCounts[$coupon->id] ?? 0) > 0)
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                {{ $pendingCounts[$coupon->id] }}
+                                                <span class="visually-hidden">{{ app()->getLocale() == 'ar' ? 'طلبات معلّقة' : 'pending requests' }}</span>
+                                            </span>
+                                        @endif
+                                    </a>
                                     <a href="{{ route('distributor.coupons.show', $coupon) }}" class="btn btn-outline-info" title="{{ app()->getLocale() == 'ar' ? 'عرض' : 'View' }}">
                                         <i class="ri-eye-line"></i>
                                     </a>

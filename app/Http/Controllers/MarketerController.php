@@ -128,15 +128,15 @@ class MarketerController extends Controller
      * distributor and admin ticket controllers. On approval, the marketer's pivot row
      * becomes active and gets a unique tracking code; on rejection it is marked rejected.
      */
-    public static function applyCouponDecision(Ticket $ticket, string $decision): void
+    public static function applyCouponDecision(Ticket $ticket, string $decision, ?string $customCode = null): void
     {
         $marketerId = $ticket->user_id;
         $couponId = $ticket->coupon_id;
         $ar = app()->getLocale() === 'ar';
 
-        DB::transaction(function () use ($ticket, $decision, $marketerId, $couponId, $ar) {
+        DB::transaction(function () use ($ticket, $decision, $marketerId, $couponId, $ar, $customCode) {
             if ($decision === 'approve') {
-                $trackingCode = strtoupper(Str::random(4)) . $couponId . strtoupper(Str::random(4));
+                $trackingCode = $customCode ?: (strtoupper(Str::random(4)) . $couponId . strtoupper(Str::random(4)));
 
                 DB::table('coupon_marketer')
                     ->where('coupon_id', $couponId)
