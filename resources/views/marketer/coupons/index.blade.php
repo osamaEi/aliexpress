@@ -55,8 +55,9 @@
                 $activation = $myActivations[$coupon->id] ?? null;
                 $status = $activation->status ?? null;
                 $trackingCode = $activation->tracking_code ?? null;
-                $discount = $coupon->discount_type === 'percentage' ? $coupon->discount_value.'%' : number_format($coupon->discount_value, 0);
-                $commission = $coupon->commission_type === 'percentage' ? $coupon->commission_value.'%' : number_format($coupon->commission_value, 0);
+                $cur = currency_symbol();
+                $discount = $coupon->discount_type === 'percentage' ? $coupon->discount_value.'%' : number_format($coupon->discount_value, 0).' '.$cur;
+                $commission = $coupon->commission_type === 'percentage' ? $coupon->commission_value.'%' : number_format($coupon->commission_value, 0).' '.$cur;
             @endphp
             <div class="col-md-6 col-xl-4">
                 <div class="card coupon-card h-100">

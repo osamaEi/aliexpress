@@ -32,8 +32,9 @@
                 $img = $coupon->image
                     ? asset('storage/'.$coupon->image)
                     : (($coupon->promo_images && count((array)$coupon->promo_images)) ? asset('storage/'.((array)$coupon->promo_images)[0]) : null);
-                $discount = $coupon->discount_type === 'percentage' ? $coupon->discount_value.'%' : number_format($coupon->discount_value, 0).' '.($ar ? 'ر.س' : 'SAR');
-                $commission = $coupon->commission_type === 'percentage' ? $coupon->commission_value.'%' : number_format($coupon->commission_value, 0).' '.($ar ? 'ر.س' : 'SAR');
+                $cur = currency_symbol();
+                $discount = $coupon->discount_type === 'percentage' ? $coupon->discount_value.'%' : number_format($coupon->discount_value, 0).' '.$cur;
+                $commission = $coupon->commission_type === 'percentage' ? $coupon->commission_value.'%' : number_format($coupon->commission_value, 0).' '.$cur;
                 $code = $coupon->pivot->tracking_code;
                 $daysLeft = max(0, (int) ceil(now()->diffInDays(\Carbon\Carbon::parse($coupon->end_date), false)));
             @endphp
