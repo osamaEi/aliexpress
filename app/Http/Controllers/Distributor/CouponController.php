@@ -59,7 +59,13 @@ class CouponController extends Controller
     {
         $categories = \App\Models\Category::whereNull('parent_id')->where('is_active', true)->orderBy('name')->get();
 
-        return view('distributor.coupons.create', compact('categories'));
+        // Products assigned to this distributor — the coupon can be scoped to these.
+        $products = auth()->user()->assignedProducts()
+            ->where('products.is_active', true)
+            ->orderBy('products.name')
+            ->get(['products.id', 'products.name', 'products.name_ar']);
+
+        return view('distributor.coupons.create', compact('categories', 'products'));
     }
 
     /**
@@ -97,7 +103,27 @@ class CouponController extends Controller
             'promo_images' => 'nullable|array|max:5',
             'promo_images.*' => 'image|max:2048',
             'promo_video' => 'nullable|file|mimes:mp4,mov,avi|max:20480',
+            'product_ids' => 'required|array|min:1',
+            'product_ids.*' => 'integer|exists:products,id',
+        ], [
+            'product_ids.required' => app()->getLocale() == 'ar' ? 'اختر منتجًا واحدًا على الأقل يطبّق عليه الكوبون.' : 'Select at least one product the coupon applies to.',
+            'product_ids.min' => app()->getLocale() == 'ar' ? 'اختر منتجًا واحدًا على الأقل يطبّق عليه الكوبون.' : 'Select at least one product the coupon applies to.',
         ]);
+
+        // Restrict the chosen products to the ones actually assigned to this distributor.
+        $allowedProductIds = $user->assignedProducts()->pluck('products.id')->all();
+        $productIds = array_values(array_intersect($request->input('product_ids', []), $allowedProductIds));
+
+        if (empty($productIds)) {
+            return back()->withInput()->withErrors([
+                'product_ids' => app()->getLocale() == 'ar'
+                    ? 'يجب اختيار منتجات من متجرك فقط.'
+                    : 'You may only select products from your own store.',
+            ]);
+        }
+
+        // product_ids is a relation, not a column — keep it out of mass assignment.
+        unset($validated['product_ids']);
 
         // Note: code is generated when the coupon is activated for a marketer, not here.
 
@@ -125,7 +151,8 @@ class CouponController extends Controller
         $validated['created_by'] = $user->id;
         $validated['is_active'] = true;
 
-        Coupon::create($validated);
+        $coupon = Coupon::create($validated);
+        $coupon->products()->sync($productIds);
 
         return redirect()->route('distributor.coupons.index')
             ->with('success', app()->getLocale() == 'ar' ? 'تم إنشاء الكوبون بنجاح' : 'Coupon created successfully');

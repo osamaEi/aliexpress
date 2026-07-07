@@ -176,6 +176,56 @@
                                 </select>
                                 @error('sub_category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
+
+                            <!-- Products this coupon applies to (required) -->
+                            <div class="col-12">
+                                <label class="form-label">
+                                    {{ app()->getLocale() == 'ar' ? 'المنتجات التي يطبّق عليها الكوبون' : 'Products this coupon applies to' }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="small text-muted mb-2">
+                                    {{ app()->getLocale() == 'ar' ? 'سيُطبّق الخصم على المنتجات المحددة فقط من متجرك.' : 'The discount applies only to the selected products from your store.' }}
+                                </div>
+
+                                @if($products->isEmpty())
+                                    <div class="alert alert-warning mb-0 py-2 px-3">
+                                        {{ app()->getLocale() == 'ar' ? 'لا توجد منتجات في متجرك بعد. أضف منتجات أولاً.' : 'You have no products yet. Add products first.' }}
+                                    </div>
+                                @else
+                                    <input type="text" class="form-control mb-2" id="product-search"
+                                           placeholder="{{ app()->getLocale() == 'ar' ? 'ابحث عن منتج...' : 'Search products...' }}"
+                                           onkeyup="filterProducts(this.value)">
+
+                                    <div class="d-flex gap-3 mb-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAllProducts(true)">
+                                            {{ app()->getLocale() == 'ar' ? 'تحديد الكل' : 'Select all' }}
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAllProducts(false)">
+                                            {{ app()->getLocale() == 'ar' ? 'إلغاء التحديد' : 'Clear' }}
+                                        </button>
+                                        <span class="ms-auto small text-muted align-self-center">
+                                            <span id="product-count">0</span> {{ app()->getLocale() == 'ar' ? 'محدد' : 'selected' }}
+                                        </span>
+                                    </div>
+
+                                    @php $oldProducts = (array) old('product_ids', []); @endphp
+                                    <div class="border rounded p-2 @error('product_ids') border-danger @enderror"
+                                         id="product-list" style="max-height: 260px; overflow-y: auto;">
+                                        @foreach($products as $product)
+                                            @php $pname = app()->getLocale() == 'ar' && $product->name_ar ? $product->name_ar : $product->name; @endphp
+                                            <div class="form-check product-item" data-name="{{ \Illuminate\Support\Str::lower($pname) }}">
+                                                <input class="form-check-input product-checkbox" type="checkbox"
+                                                       name="product_ids[]" value="{{ $product->id }}"
+                                                       id="product-{{ $product->id }}"
+                                                       {{ in_array($product->id, $oldProducts) ? 'checked' : '' }}
+                                                       onchange="updateProductCount()">
+                                                <label class="form-check-label" for="product-{{ $product->id }}">{{ $pname }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @error('product_ids')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -647,6 +697,30 @@ function toggleCouponMethod() {
     document.getElementById('direct_link_wrap').style.display = method === 'link' ? 'block' : 'none';
 }
 
+// --- Product selector helpers ---
+function updateProductCount() {
+    const n = document.querySelectorAll('.product-checkbox:checked').length;
+    const el = document.getElementById('product-count');
+    if (el) el.textContent = n;
+}
+
+function toggleAllProducts(state) {
+    document.querySelectorAll('#product-list .product-item').forEach(item => {
+        if (item.style.display !== 'none') {
+            const cb = item.querySelector('.product-checkbox');
+            if (cb) cb.checked = state;
+        }
+    });
+    updateProductCount();
+}
+
+function filterProducts(term) {
+    term = term.toLowerCase();
+    document.querySelectorAll('#product-list .product-item').forEach(item => {
+        item.style.display = item.dataset.name.includes(term) ? '' : 'none';
+    });
+}
+
 // Cascade: load sub categories for the chosen main category
 function loadSubCategories(categoryId, selectedSub = null) {
     const subSelect = document.getElementById('sub_category_id');
@@ -669,6 +743,7 @@ function loadSubCategories(categoryId, selectedSub = null) {
 
 document.addEventListener('DOMContentLoaded', function () {
     toggleCouponMethod();
+    updateProductCount();
     const cat = document.getElementById('category_id');
     if (cat && cat.value) loadSubCategories(cat.value, '{{ old('sub_category_id') }}');
 });

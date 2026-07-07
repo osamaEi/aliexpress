@@ -103,6 +103,26 @@ class Coupon extends Model
     }
 
     /**
+     * Specific products this coupon is scoped to. Empty = applies store-wide.
+     */
+    public function products(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'coupon_product')->withTimestamps();
+    }
+
+    /**
+     * Whether this coupon may be applied to the given product.
+     * If the coupon is scoped to specific products, the product must be one of them.
+     */
+    public function appliesToProduct($productId): bool
+    {
+        if ($this->products()->count() === 0) {
+            return true; // not scoped -> store-wide
+        }
+        return $this->products()->where('products.id', $productId)->exists();
+    }
+
+    /**
      * Main category this coupon targets.
      */
     public function category(): BelongsTo

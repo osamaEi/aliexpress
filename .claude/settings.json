@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"^use App\\\\\\\\\\\\\\\\Models\\\\\\\\\\\\\\\\Product\\\\|use App\\\\\\\\\\\\\\\\Models\\\\\\\\\\\\\\\\Category\" ./app/Models/Coupon.php)"
+    ]
+  }
+}

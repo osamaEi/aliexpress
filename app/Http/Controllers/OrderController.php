@@ -1492,6 +1492,14 @@ class OrderController extends Controller
                 ], 400);
             }
 
+            // Check if coupon is scoped to specific products
+            if (!$coupon->appliesToProduct($product->id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar' ? 'كود الخصم غير صالح لهذا المنتج' : 'This coupon is not valid for this product'
+                ], 400);
+            }
+
             // Calculate discount amount
             $discountAmount = $coupon->calculateDiscount($validated['subtotal']);
 
