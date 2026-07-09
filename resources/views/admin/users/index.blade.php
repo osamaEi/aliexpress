@@ -21,6 +21,11 @@
             </a>
         </li>
         <li class="nav-item" role="presentation">
+            <a class="nav-link {{ request('user_type') === 'marketer' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'marketer']) }}">
+                <i class="ri-megaphone-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المسوّقين' : 'Marketers' }}
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
             <a class="nav-link {{ request('user_type') === 'admin' ? 'active' : '' }}" href="{{ route('admin.users.index', ['user_type' => 'admin']) }}">
                 <i class="ri-admin-line me-1"></i>{{ app()->getLocale() == 'ar' ? 'المسؤولين' : 'Admins' }}
             </a>
@@ -48,6 +53,7 @@
                         <select class="form-select" id="user_type" name="user_type">
                             <option value="seller" {{ request('user_type') === 'seller' || !request('user_type') ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'البائعين' : 'Sellers' }}</option>
                             <option value="distributor" {{ request('user_type') === 'distributor' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'متجر' : 'Store' }}</option>
+                            <option value="marketer" {{ request('user_type') === 'marketer' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المسوّقين' : 'Marketers' }}</option>
                             <option value="admin" {{ request('user_type') === 'admin' ? 'selected' : '' }}>{{ app()->getLocale() == 'ar' ? 'المسؤولين' : 'Admins' }}</option>
                         </select>
                     </div>

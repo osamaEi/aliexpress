@@ -21,7 +21,7 @@ class UserManagementController extends Controller
     {
         $query = User::query();
 
-        $allowedTypes = ['seller', 'distributor', 'admin'];
+        $allowedTypes = ['seller', 'distributor', 'marketer', 'admin'];
         $userType = in_array($request->user_type, $allowedTypes) ? $request->user_type : 'seller';
         $query->where('user_type', $userType);
 

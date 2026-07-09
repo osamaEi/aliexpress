@@ -175,20 +175,6 @@
             margin-top: 6px; display: none;
         }
 
-        /* Input group for slug */
-        .slug-wrapper { position: relative; }
-        .slug-suffix {
-            position: absolute;
-            inset-inline-end: 12px;
-            top: 50%; transform: translateY(-50%);
-            background: #f3f4f6; color: #666; font-size: 13px;
-            padding: 5px 10px; border-radius: 6px; pointer-events: none;
-        }
-        .slug-input { padding-inline-end: 120px; }
-        .slug-status { font-size: 12px; margin-top: 5px; }
-        .slug-status.available { color: #10b981; }
-        .slug-status.taken     { color: #ef4444; }
-
         /* Phone input */
         .phone-input-wrapper {
             display: flex; align-items: center;
@@ -635,27 +621,6 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="ri-link"></i>
-                                {{ app()->getLocale() == 'ar' ? 'رابط المتجر (يُنشأ تلقائياً)' : 'Store URL (auto-generated)' }}
-                            </label>
-                            <div class="slug-wrapper">
-                                <input type="text"
-                                       class="form-control slug-input @error('store_slug') is-invalid @enderror"
-                                       id="store_slug"
-                                       name="store_slug"
-                                       value="{{ old('store_slug') }}"
-                                       readonly
-                                       placeholder="{{ app()->getLocale() == 'ar' ? 'يُنشأ تلقائياً من اسم المتجر' : 'Auto-generated from store name' }}">
-                                <span class="slug-suffix">.selaa.ae</span>
-                            </div>
-                            <div id="slugStatus" class="slug-status"></div>
-                            @error('store_slug')<span class="text-danger">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-
                     <div class="col-12">
                         <div class="form-group">
                             <label class="form-label">
@@ -761,23 +726,6 @@
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="ri-phone-line"></i>
-                                {{ app()->getLocale() == 'ar' ? 'رقم هاتف الدعم' : 'Support Phone' }}
-                                <span class="required">*</span>
-                            </label>
-                            <input type="text"
-                                   class="form-control @error('support_phone') is-invalid @enderror"
-                                   name="support_phone"
-                                   value="{{ old('support_phone') }}"
-                                   placeholder="{{ app()->getLocale() == 'ar' ? '+971XXXXXXXXX' : '+971XXXXXXXXX' }}"
-                                   dir="ltr">
-                            @error('support_phone')<span class="text-danger">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label">
@@ -902,41 +850,6 @@
     </div>
 
     <script>
-    // ── Store slug: auto-generate from company name, readonly ──
-    const storeNameInput = document.getElementById('company_name');
-    const storeSlugInput = document.getElementById('store_slug');
-    const slugStatus     = document.getElementById('slugStatus');
-
-    storeNameInput.addEventListener('input', function () {
-        const slug = this.value
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim();
-        storeSlugInput.value = slug;
-        checkSlug(slug);
-    });
-
-    let slugTimer;
-    function checkSlug(slug) {
-        clearTimeout(slugTimer);
-        if (slug.length < 3) { slugStatus.textContent = ''; return; }
-        slugTimer = setTimeout(() => {
-            fetch('{{ route("distributor.register.check-slug") }}?slug=' + encodeURIComponent(slug))
-                .then(r => r.json())
-                .then(data => {
-                    if (data.available) {
-                        slugStatus.className = 'slug-status available';
-                        slugStatus.innerHTML = '<i class="ri-check-line"></i> {{ app()->getLocale() == "ar" ? "متاح" : "Available" }}';
-                    } else {
-                        slugStatus.className = 'slug-status taken';
-                        slugStatus.innerHTML = '<i class="ri-close-line"></i> {{ app()->getLocale() == "ar" ? "غير متاح" : "Not available" }}';
-                    }
-                }).catch(() => { slugStatus.textContent = ''; });
-        }, 500);
-    }
-
     // ── Store type toggle ──
     const physicalFields = document.getElementById('physicalFields');
     document.querySelectorAll('input[name="store_type"]').forEach(radio => {

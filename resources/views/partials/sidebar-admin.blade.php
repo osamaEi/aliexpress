@@ -261,6 +261,14 @@
             </a>
         </li>
 
+        <!-- Marketers -->
+        <li class="menu-item {{ request()->routeIs('admin.users.*') && request('user_type') === 'marketer' ? 'active' : '' }}">
+            <a href="{{ route('admin.users.index', ['user_type' => 'marketer']) }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-megaphone-line"></i>
+                <div>{{ app()->getLocale() == 'ar' ? 'المسوّقين' : 'Marketers' }}</div>
+            </a>
+        </li>
+
         <!-- Training Videos -->
         <li class="menu-item {{ request()->routeIs('admin.training-videos.*') ? 'active' : '' }}">
             <a href="{{ route('admin.training-videos.index') }}" class="menu-link">

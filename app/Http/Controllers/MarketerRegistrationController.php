@@ -43,7 +43,6 @@ class MarketerRegistrationController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             // Marketing details
             'bio' => 'nullable|string|max:1000',
-            'website_url' => 'nullable|url|max:255',
             'experience_years' => 'nullable|integer|min:0|max:80',
             'audience_size' => 'nullable|string|max:50',
             'marketing_channels' => 'nullable|array',
@@ -213,7 +212,6 @@ class MarketerRegistrationController extends Controller
             'password' => Hash::make($data['password']),
             'user_type' => 'marketer',
             'bio' => $data['bio'] ?? null,
-            'website_url' => $data['website_url'] ?? null,
             'social_media_accounts' => $data['social_media'] ?? [],
             'logo' => $data['logo_path'] ?? null,
             'is_verified' => true,

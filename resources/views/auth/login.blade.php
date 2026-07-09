@@ -418,6 +418,19 @@
             box-shadow: 0 6px 20px rgba(86, 28, 4, 0.3);
         }
 
+        .marketer-btn {
+            background: #fef3f2;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .marketer-btn:hover {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(86, 28, 4, 0.3);
+        }
+
         /* Language Switcher */
         .language-switcher {
             display: flex;
@@ -478,6 +491,10 @@
             <a href="{{ route('distributor.register.step1') }}" class="nav-btn distributor-btn">
                 <i class="ri-store-2-line"></i>
                 <span>{{ app()->getLocale() == 'ar' ? 'سجل كمتجر' : 'Register as Distributor' }}</span>
+            </a>
+            <a href="{{ route('marketer.register.step1') }}" class="nav-btn marketer-btn">
+                <i class="ri-megaphone-line"></i>
+                <span>{{ app()->getLocale() == 'ar' ? 'سجل كمسوّق' : 'Register as Marketer' }}</span>
             </a>
         </div>
 
@@ -561,7 +578,7 @@
                 <!-- Remember Me & Forgot Password -->
                 <div class="remember-forgot">
                     <div class="remember-me">
-                        <input id="remember_me" type="checkbox" name="remember" checked>
+                        <input id="remember_me" type="checkbox" name="remember">
                         <label for="remember_me">{{ app()->getLocale() == 'ar' ? 'تذكرني' : 'Remember me' }}</label>
                     </div>
 
@@ -577,7 +594,7 @@
                     <i class="ri-login-box-line"></i>
                 </button>
 
-             
+            
             </form>
         </div>
     </div>

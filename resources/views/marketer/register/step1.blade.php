@@ -136,10 +136,6 @@
                         <input type="text" name="audience_size" value="{{ old('audience_size') }}" class="form-control" placeholder="{{ $ar ? 'مثال: 10K - 50K' : 'e.g. 10K - 50K' }}">
                     </div>
                     <div class="col-12">
-                        <label class="form-label">{{ $ar ? 'الموقع الإلكتروني' : 'Website' }}</label>
-                        <input type="url" name="website_url" value="{{ old('website_url') }}" class="form-control" placeholder="https://...">
-                    </div>
-                    <div class="col-12">
                         <label class="form-label">{{ $ar ? 'قنوات التسويق' : 'Marketing Channels' }}</label>
                         <div class="d-flex flex-wrap gap-3 mt-1">
                             @foreach(['social'=>$ar?'سوشيال ميديا':'Social Media','website'=>$ar?'موقع/مدونة':'Website/Blog','whatsapp'=>$ar?'مجموعات واتساب':'WhatsApp Groups','telegram'=>'Telegram','email'=>$ar?'البريد':'Email','ads'=>$ar?'إعلانات مدفوعة':'Paid Ads'] as $val=>$lbl)
